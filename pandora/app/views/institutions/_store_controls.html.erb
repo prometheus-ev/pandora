@@ -1,0 +1,6 @@
+<div class="store_controls<%= " position-#{pos}" %>">
+  <%= render :partial => 'shared/list/select', :locals => { :what => 'institution', :pos => pos } %>
+<% if pos == 'bottom' -%>
+  <%= submit_button 'Renew licenses' %>
+<% end -%>
+</div>

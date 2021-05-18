@@ -1,0 +1,93 @@
+<h2><%= 'Search help'.t %></h2>
+
+<p>
+  (See also <%= link_to_help section: 'syntax', label: 'Query syntax' %>,
+  <%= link_to_help section: 'results', label: 'Results list' %> and
+  <%= link_to_help section: 'copyright_and_publication', label: 'Copyright and publication' %>)
+</p>
+
+<% with_toc do -%>
+
+<<<<<<< HEAD
+  <%= section_heading 'Search', 'search' %>
+  <p>
+    The simple search offers the possibility for quick and easy search.
+    <%= screenshot 'help/search01.png', 'Search' %>
+  </p>
+
+  <%= section_heading 'Advanced Search', 'advanced_search' %>
+  <p>
+    Multi-criteria search is made possible by combining different search criteria using Boolean
+    operations. The basic setting includes 4 search fields. More search fields can be added by
+    clicking the +-button <%= image_tag('misc/row-adder.gif', :class => 'help_icon') %>.
+  </p>
+
+  <p>
+    The following categories are available:
+  </p>
+
+  <ul>
+    <li>All</li>
+    <li>Artist</li>
+    <li>Title</li>
+    <li>Location</li>
+    <li>Discoveryplace</li>
+    <li>Genre</li>
+    <li>Material</li>
+    <li>Keyword</li>
+    <li>Description</li>
+    <li>Date</li>
+    <li>Credits</li>
+    <li>Rights reproduction</li>
+    <li>Rights work</li>
+    <li>Record</li>
+    <li>Record object</li>
+    <li>Rating average</li>
+    <li>Rating count</li>
+    <li>User comments</li>
+  </ul>
+
+  <p>
+    Boolean operations are:
+  </p>
+
+  <ul>
+    <li>and</li>
+    <li>or</li>
+    <li>and not</li>
+  </ul>
+
+  <%= section_heading 'Linking examples', 'linking_examples' %>
+  <p>
+    <%= screenshot 'help/search04.png', 'Artist: Da Vinci Not title: Mona Lisa' %>
+    Except for the Mona Lisa, all available data records on da Vinci are shown.
+  </p>
+
+  <p>
+    <%= screenshot 'help/search05.png', 'Artist: Michelangelo And location: Rome Not title: Sistine Chapel' %>
+    Except for the Sistine Chapel, all available data records of Michelangelo in Rome are shown.
+  </p>
+
+  <p>
+    You can find further information on search operators in the
+    <%= link_to_help section: 'syntax', label: '"Syntax help"', anchor: 'operators' %>
+  </p>
+
+  <p>
+    Please take into consideration that all searches are performed with exact term matches.
+    Searching for "Sunflower" will not find "Sunflowers". Adding an asterisk (*) will include all
+    extensions of a word in the search query. "Sun*" will result in "Sun", "Sunflower", "Sunset"
+    etc. (See also <%= link_to_help section: 'syntax', label: '"Query syntax"' %>.)
+  </p>
+
+  <%= section_heading 'Database selection', 'database_selection' %>
+  <p>
+    <span class="prometheus">prometheus</span> provides a wide range of databases depending on
+    specific areas of research (e.g. Archaeology or the database of a museum). You can sort the
+    database list by title, location, type or description.
+    <%= screenshot 'help/search02.png', 'Sorting sequence for the type' %>
+  </p>
+
+<% end -%>
+
+<%= render :partial => 'footer' %>

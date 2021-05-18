@@ -1,0 +1,24 @@
+<%= error_messages_for :client_application %>
+
+<%= form_for @client_application do |f| %>
+  <table>
+    <tr>
+      <th><label for="client_application_name"><%= 'Name'.t %></label></th>
+      <td><%= f.text_field :name, options_for_field(:name) %></td>
+    </tr>
+    <tr>
+      <th><label for="client_application_url"><%= 'Homepage'.t %></label></th>
+      <td><%= f.text_field :url, options_for_field(:url) %></td>
+    </tr>
+    <tr>
+      <th><label for="client_application_callback_url"><%= 'Callback URL'.t %></label></th>
+      <td><%= f.text_field :callback_url, options_for_field(:callback_url) %></td>
+    </tr>
+    <tr>
+      <th><label for="client_application_support_url"><%= 'Support URL'.t %></label></th>
+      <td><%= f.text_field :support_url, options_for_field(:support_url) %></td>
+    </tr>
+
+    <%= form_controls %>
+  </table>
+<% end %>

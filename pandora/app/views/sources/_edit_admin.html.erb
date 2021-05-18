@@ -1,0 +1,26 @@
+<tr>
+  <th><label for="source_kind"><%= 'Kind'.t %></label></th>
+  <td><%= f.select :kind, Source.pconfig[:kinds], {}, options_for_field(:kind) %></td>
+</tr>
+<tr>
+  <th><label for="source_type"><%= 'Type'.t %></label></th>
+  <td><%= f.select :type, Source.types.keys, {}, options_for_field(:type) %></td>
+</tr>
+<tr>
+  <th><label for="source_keyword_list" ><%= 'Keywords'.t %></label><br /><small>(<%= 'One per line'.t %>)</small></th>
+  <td>
+    <%= f.text_area(:keyword_list,
+      options_for_field(:keywords, :rows => 5, :value => @source.keyword_list)
+    ) %>
+    <%= suggest_keywords_for 'source', :keyword_list %>
+  </td>
+</tr>
+<tr>
+  <th><label for="source_contact"><%= 'Contact'.t %></label></th>
+  <!-- REWRITE: .map requires a scope now -->
+  <td><%= f.select :contact, Account.not_anonymous.map { |a| [a.login, a.id] }.sort, { :include_blank => true, :selected => @contact && @contact.id }, options_for_field(:contact) %></td>
+</tr>
+<tr>
+  <th><label for="source_admin"><%= 'Admins'.t %></label></th>
+  <td><%= f.select :admins, Role.find_by!(title: 'dbadmin').accounts.map { |a| [a.login, a.id] }.sort, { :include_blank => true, :selected => @admins && @admins.map{ |a| a.id } }, options_for_field(:admins, :multiple => true) %></td>
+</tr>

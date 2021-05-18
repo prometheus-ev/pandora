@@ -1,0 +1,4 @@
+grant {
+  permission java.io.FilePermission "/vagrant/pandora/config/synonyms/-", "read";
+  permission java.io.FilePermission "/vagrant/pandora/test/fixtures/synonyms/-", "read";
+};

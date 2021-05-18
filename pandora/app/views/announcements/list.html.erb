@@ -1,0 +1,28 @@
+<div class="search_query">
+  <label for="value" class="search_heading"><%= "Search announcements".t %>:</label>
+  <!-- REWRITE: the controller is accessible via helper method now -->
+  <%#= form_tag("#{@controller.action_name}", :method => 'get', :class => 'search_form') do -%>
+  <% if false %>
+  <%= form_tag("#{controller.action_name}", :method => 'get', :class => 'search_form') do -%>
+    <%= text_field_tag 'search', @params[:search], :size => 30 %>
+    <%= search_button nil, :float => nil %>
+  <% end -%>
+  <% end %>
+  <%= list_search_for Announcement, :controller => 'announcements', :action => 'list' %>
+  <br />
+</div>
+
+<% unless @announcements.blank? -%>
+  <div class="infobar">
+    <%= "%d announcements" / @announcements.size %>
+    <span class="gap"></span>
+  </div>
+
+  <table class="list announcement-list clear-float clear-padding">
+    <%= render :partial => "row", :collection => @announcements, :locals => { :cycle_name => 'list' } %>
+  </table>
+<% else -%>
+  <div class="infobar">
+    <p><strong><%= "No announcement found.".t %></strong></p>
+  </div>
+<% end -%>

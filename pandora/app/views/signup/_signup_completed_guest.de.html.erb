@@ -1,0 +1,10 @@
+<p>
+  <%= 'Nach Prüfung durch die Geschäftsstelle können Sie Ihren Zugang' %>
+  <% if @user.created_at && @user.expires_at %>
+    <strong><%= "#{distance_of_time_in_days_or_weeks(@user.created_at, @user.expires_at)}" %></strong>
+    <%= ' lang' %><strong><%= ' kostenlos' %></strong><% end %><%= " nutzen. Sie können den Zugang jederzeit verlängern." %>
+</p>
+
+<p>
+  <%= gogif %> <%= link_to 'Möchten Sie direkt eine Lizenz erwerben oder Ihre Institution auswählen?', :action => 'license' %>
+</p>

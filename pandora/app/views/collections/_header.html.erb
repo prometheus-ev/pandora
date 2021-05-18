@@ -1,0 +1,101 @@
+<div class="thumbnail">
+  <div class="image">
+    <% if thumbnail = @collection.visible_thumbnail(current_user) %>
+      <% si = Pandora::SuperImage.new(thumbnail.pid, image: thumbnail) %>
+      <%= image_tag si.image_url('r48') %>
+    <% end %>
+  </div>
+</div>
+
+<div class="header-line">
+  <h2 class="title-line">
+    <%=h @collection.title %>
+  <% unless owner? %>
+    <br />
+    <span class="subtitle">
+      <%= 'by %s' / link_to_profile(@collection.owner, public: @collection.public?) %>
+    </span>
+  <% end %>
+  </h2>
+  <div class="icon-line dim">
+    <%= link_to(
+      image_tag('/images/misc/add_to_sidebar.gif', class: 'icon'),
+      '#',
+      {
+        title: 'Add collection to sidebar'.t,
+        class: 'pm-to-sidebar',
+        data: {
+          'boxable_type' => 'collection',
+          'boxable_id' => @collection.id
+        },
+        rel: 'nofollow'
+      }
+    ) %>
+
+    <!-- REWRITE: we move the title attribute from the img to the a -->
+    <% not_guest = current_user.mode != 'guest' %>
+    <% link_title = "Download collection".t + "#{' ' + 'Not available for guest-account.'.t unless not_guest}" %>
+    <% unless @count > 250 %>
+      <%= icon_for_active_inactive(
+        not_guest,
+        'icon/download%s.gif',
+        {class: 'icon'},
+        {
+          action: 'download',
+          id: @collection.id,
+          format: 'zip'
+        },
+        @count > 100 ? 
+          {
+            data: {
+              confirm: "The download of a large collection like this one might take a long time or not complete at all.".t +
+              ' ' + 'Do you want to continue?'.t
+            }, title: link_title
+          } : 
+          {
+            title: link_title
+          }
+      ) %>
+    <% end %>
+
+
+<% if current_user.allowed?(@collection) -%>
+  <%= link_to(
+    image_tag('presentation/icon_run_presentation.gif', class: 'icon'),
+    {controller: 'power_point', action: 'collection', collection_id: @collection.id},
+    title: 'Download PowerPoint Presentation'.t
+  ) %>
+<% end -%>
+<% if current_user.allowed?(@collection, :read) && @collection.meta_image_reader? -%>
+<% end -%>
+    <% if current_user.allowed?(@collection, :write) -%>
+      <span class="gap"></span>
+      <%= link_to(
+        image_tag('icon/edit.gif'),
+        edit_collection_path(@collection),
+        class: 'icon edit-icon',
+        title: 'Edit'.t
+      ) %>
+    <% end -%>
+    <% if current_user.allowed?(@collection, :delete) -%>
+      <%= link_to(
+        image_tag('icon/delete.gif', class: 'icon delete-icon'),
+        {action: 'destroy', id: @collection.id},
+        {
+          title: 'Delete'.t,
+          data: {
+            confirm: ("Are you sure to delete collection: '%s'" / @collection.title)
+          },
+          method: 'DELETE'
+        }
+      ) %>
+    <% end -%>
+  </div>
+</div>
+
+<div class="section clear-float">
+<% unless @collection.description.blank? -%>
+  <div class="description-line"><%= truncated(@collection.description, 280, :parent => 'header-section', :simple_format => true) %></div>
+<% end -%>
+  <div id="object-summary"><%= render :partial => 'summary' %></div>
+</div>

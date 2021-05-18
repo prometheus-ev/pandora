@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<source>
+  <row>
+    <id>1</id>
+    <object-id>1</object-id>
+    <path>path1</path>
+    <artist>Dürer, Albrecht</artist>
+    <title>Title 1</title>
+    <location>Location 1</location>
+    <rights-work>rights_work_vgbk</rights-work>
+  </row>
+  <row>
+    <id>2</id>
+    <object-id>1</object-id>
+    <path>path2</path>
+    <artist>Raffaello &lt;Sanzio&gt;</artist>
+    <title>Title 2</title>
+    <location>Location 2</location>
+  </row>
+  <row>
+    <id>3</id>
+    <path>path3</path>
+    <artist>Riegel, Ernst</artist>
+    <title>Title 3</title>
+    <location>Location 3</location>
+  </row>
+  <row>
+    <id>3</id>
+    <path>path3</path>
+    <artist>Bolt, Friedrich</artist>
+    <artist>Catel, Franz Ludwig</artist>
+    <title>Title 3</title>
+    <location>Location 3</location>
+  </row>
+  <row>
+    <id>4</id>
+    <path>path4</path>
+    <artist>Michael Angelus</artist>
+    <title>Title 4</title>
+    <location>Location 4</location>
+  </row>
+</source>

@@ -1,0 +1,86 @@
+<h2><%= 'Sidebar help'.t %></h2>
+
+<p>
+  On the left side of your screen next to your working window you can find your personal sidebar.
+  This function is only offered to personal accounts. After having added objects to the sidebar,
+  the sidebar enables quick and direct access to current working objects as images, collections
+ and presentations.
+</p>
+<p>
+  Single objects are displayed as boxes that you can collapse and expand. The sidebar remains constant
+  irrespective of the function you are using at the moment.
+</p>
+
+<% with_toc do -%>
+
+  <%= section_heading 'Store images from search results', 'adding_images' %>
+  <p>
+    When you found an image that you want to open quickly after your next login without starting a new
+    query, add a shortcut of it to your sidebar as follows: Alongside every image in your result list
+    as well as in the full records you find the button <%= image_tag('misc/add_to_sidebar.gif', :class => 'help_icon') %>.
+    By clicking the button <%= image_tag('icon/store.gif', :class => 'help_icon') %> you can add the selected image to your sidebar.
+    <%= screenshot 'help/box01.png', 'Add image to sidebar' %>
+  </p>
+
+  <%= section_heading 'Store collection or presentation', 'adding_coll_pres' %>
+  <p>
+    Having opened the desired collection or presentation from your list, you find the button <%= image_tag('misc/add_to_sidebar.gif', :class => 'help_icon') %>
+    in the header right next to the title.
+    By clicking this button you add a shortcut of the respective collection or presentation to your
+    sidebar for quick access.
+    <%= screenshot 'help/box02.png', 'Add collection or presentation to sidebar' %>
+  </p>
+
+  <%= section_heading 'Working with boxes in your sidebar', 'working_with_boxes' %>
+  <p>
+    Objects in your sidebar are stored as boxes and labeled by single titles. Icons on the start of the
+    header characterize the box's content:
+  </p>
+
+  <p>
+
+    <%= image_tag('sidebar/icon_box_image.gif', :class => 'help_icon') %> Content of the box is a single image.
+  </p>
+
+  <p>
+    <%= image_tag('sidebar/icon_box_collection.gif', :class => 'help_icon') %> Content of the box is a collection.
+  </p>
+
+  <p>
+    <%= image_tag('sidebar/icon_box_presentation.gif', :class => 'help_icon') %> Content of the box is a presentation.
+  </p>
+
+  <p>
+    Beneath the header you can see the content of the respective box. For example you can view all images of
+    the collection in small size and browse in it.
+    <%= screenshot 'help/box03.png', 'Sidebar view' %>
+  </p>
+
+  <p>
+    By clicking <%= image_tag('sidebar/box_collapse.gif', :class => 'help_icon') %> you zoom out and reduce the box to its header.
+    <%= screenshot 'help/box04.png', 'Reduce the box' %>
+  </p>
+
+  <p>
+    With <%= image_tag('sidebar/box_expand.gif', :class => 'help_icon') %> you zoom in again.
+  </p>
+
+  <p>
+    By "drag&drop" you can change the boxes' order in your sidebar.
+  </p>
+
+  <p>
+    You receive quick access via <%= image_tag('sidebar/box_open.gif', :class => 'help_icon') %>.
+    Hereby you open the required collection, presentation or full screen view of the image for working functions.
+    <%= screenshot 'help/box05.png', 'Opened box in main window' %>
+  </p>
+
+  <p>
+    If you want to remove an object from your sidebar, click <%= image_tag('sidebar/box_close.gif', :class => 'help_icon') %>
+    and the respective box will be deleted from your sidebar. Of course collections and presentations are
+    still saved in your personal list.
+  </p>
+
+<% end -%>
+
+<%= render :partial => 'footer' %>

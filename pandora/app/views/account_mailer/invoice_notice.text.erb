@@ -1,0 +1,17 @@
+An invoice has been requested by <%= @user %>.
+
+Amount: <%= @amount %> EUR
+
+Recipient:
+
+  <%= @name %>
+  <%= @addressline %>
+
+  <%= @postalcode %> <%= @city %>
+  <%= @country %>
+
+Research interest: <%= @research_interest %>
+
+<<%= @user_url %>>
+
+<%= render :partial => 'signature' -%>

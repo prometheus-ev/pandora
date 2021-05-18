@@ -1,0 +1,23 @@
+<div class="pm-comments">
+  <% if commentable.comments.roots.count > 0%>
+    <% commentable.comments.roots.each do |comment| %>
+      <%= render partial: 'comments/comment', locals: {comment: comment} %>
+    <% end %>
+  <% else %>
+    <%= 'none'.t %>
+  <% end %>
+
+  <% if current_user.allowed?(commentable, :comment) %>
+    <div class="pm-new-form">
+      <%= render(
+        partial: 'comments/new',
+        locals: {
+          commentable: commentable,
+          comment: Comment.for(commentable)
+        }
+      ) %>
+    </div>
+  <% else %>
+    <%= 'Please %(log in)% to leave a comment.' / lambda { |a| link_to(a, login_path) } %>
+  <% end %>
+</div>

@@ -1,0 +1,31 @@
+<% if partial %>
+  Element.update_selected(
+    <%= update.to_json.html_safe %>,
+    'div.section',
+    <%= render(partial: 'shared/misc/edit_xhr').to_json.html_safe %>
+  );
+<% else %>
+  Element.update(
+    <%= update.to_json.html_safe %>,
+    <%= render(section_partial(object, section)).to_json.html_safe %>
+  );
+
+  // REWRITE: only used for presentations
+  <%#= render_section_update_extra(page) %>
+
+  // REWRITE: This partial is only used by ApplicationController#update_section
+  // which only receives a (empty) block once. Since the block is empty, it would
+  // return nil so that is what we will simulate. In every other case, we will use
+  // the no block case
+  <% if original_block_given %>
+    <% nil # although this should not be used anywhere %>
+  <% else %>
+    <% unless section == 'header' %>
+      Element.update(
+        'object-summary',
+        <%= render(partial: 'summary').to_json.html_safe %>
+      );
+    <% end %>
+  <% end %>
+
+<% end %>

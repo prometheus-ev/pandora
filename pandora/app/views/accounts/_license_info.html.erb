@@ -1,0 +1,33 @@
+<% had_or_have = @user.expired? ? 'had' : 'have' %>
+<% if @user.mode == 'guest' %>
+  <% if !@type || @type == 'guest' %>
+    <%= "You #{had_or_have} a guest account.".t  %>
+  <% end %>
+<% elsif @user.mode %>
+  <% if @user.mode == 'institution' %>
+    <% if institution = @user.institution %>
+      <%= "You #{had_or_have} a free account from your institution %s." / link_to(institution.fulltitle, :controller => 'institutions', :action => 'mine') %>
+      <% unless institution.licensed? %>
+        <%= "Unfortunately, you can't access the image archive anymore because your institution does no longer hold a license for prometheus.".t %>
+      <% end %>
+    <% else %>
+      <%= "Please select your institution.".t %>
+    <% end %>
+  <% elsif @user.mode == 'paypal' %>
+    <%= "You #{had_or_have} a single license from PayPal for 30 EUR per year.".t %>
+  <% elsif @user.mode == 'invoice' %>
+    <%= "You #{had_or_have} a single license via invoice for 45 EUR per year.".t %>
+  <% end %>
+<% end %>
+<% unless @user.expired? %>
+  <% if @user.active? %>
+    <strong><%= 'Your account is valid until %s.' / localize_expiry_date(@user) %></strong>
+  <% elsif !@user.status? || @user.status == 'pending' %>
+    <strong><%= 'Your account is not active yet!'.t %></strong>
+    <% if @user.mode == 'paypal' || @user.mode == 'invoice' %>
+       <strong><%= 'We will notify you via email once everything is done.'.t %></strong>
+    <% end %>
+  <% else %>
+    <strong><%= 'Your account is not active!'.t %></strong>
+  <% end %>
+<% end %>

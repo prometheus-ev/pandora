@@ -1,0 +1,11 @@
+<h2><%= @status %></h2>
+
+<p>
+  <%= 'Sorry, the %(image you requested)% is currently not provided by its source database.' / lambda { |a| link_to(a, :controller => 'images', :action => 'show', :id => @image.id) } %>
+  <br />
+  <%= 'You may try again with the %(direct link)%!' / lambda { |a| link_to(a, @image_uri) } %>
+</p>
+
+<br />
+
+<%= link_to("#{image_tag('icon/prev.png')} #{t = 'Return to the page you were coming from...'.t}".html_safe, :back, :title => t) %>

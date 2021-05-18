@@ -1,0 +1,26 @@
+<%= form_tag({ :controller => 'sessions', :action => 'create', :host => request.base_url }, { :class => 'login_form' }) do -%>
+  <%= hidden_field_tag :return_to, params[:return_to] %>
+
+  <fieldset>
+    <legend>
+      <strong><%= 'Personal account login'.t %></strong>
+      <%= link_to_help label: help_icon, section: 'login' %>
+    </legend>
+
+    <label for="login"><%= 'User name or e-mail address'.t %></label><br />
+    <%= text_field_tag 'login', params[:login], :size => 32, :tabindex => 1 %><br />
+
+    <br class="vspace1" />
+
+    <label for="password"><%= 'Password'.t %></label>
+    <small>(<%= link_to 'Forgotten?'.t, { :controller => 'signup', :action => 'password', :host => request.base_url }, { :id => 'forgot_password', :title => 'Reset password'.t } %></small>)<br />
+    <%= text_field_tag 'password', nil, :type => 'password', :size => 32, :tabindex => 2 %><br />
+
+    <br class="vspace1" />
+
+    <%= submit_button 'Log in'.t, :float => :right %>
+
+    <%= check_box_tag 'remember_me', '1', false %>
+    <label for="remember_me"><%= 'Stay logged in'.t %></label><br />
+  </fieldset>
+<% end -%>

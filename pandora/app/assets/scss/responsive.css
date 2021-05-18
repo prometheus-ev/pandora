@@ -1,0 +1,77 @@
+/* Responsive Design */
+@media screen and (max-width: 572px) {
+  body.account-controller #header {
+    display: none;
+  }
+
+  body.account-controller #submenu {
+    display: none;
+  }
+
+  body.account-controller #sidebar {
+    display: none;
+  }
+
+  body.account-controller {
+    width: 100%;
+  }
+
+  body.account-controller #workspace {
+    width: 100%;
+    min-height: unset;
+  }
+
+  body.account-controller #main {
+    width: 100%;
+    min-height: unset;
+  }
+
+  body.account-controller ul {
+    width: auto;
+  }
+
+  body.account-controller hr {
+    width: auto;
+  }
+
+  body.account-controller.signup-action th {
+    min-width: 120px;
+  }
+
+  body.account-controller table {
+    width: 100%;
+  }
+
+  body.account-controller input[type=text] {
+    width: 98%;
+  }
+
+  body.account-controller input[type=password] {
+    width: 98%;
+  }
+
+  body.account-controller input[type=checkbox] {
+    position: relative;
+    top: 2px;
+  }
+
+  body.account-controller textarea {
+    width: 95.5%;
+  }
+
+  body.account-controller #footer {
+    height: 50px;
+    padding-bottom: 10px;
+  }
+
+  body.account-controller #footer > a {
+    display: block;
+    float: left;
+  }
+
+  body.account-controller #footer > span {
+    display: block;
+    margin-left: 50px;
+    padding-right: 40px;
+  }
+}

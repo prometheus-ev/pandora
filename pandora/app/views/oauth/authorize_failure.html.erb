@@ -1,0 +1,10 @@
+<h2><%= 'Access NOT authorized'.t %></h2>
+
+<p>
+  <%= 'You have either declined the request or authorization failed for some other reason.'.t %>
+</p>
+
+<p>
+  <%= 'You may now close this window or %(try again)%.' / lambda { |a| link_to(a, :back) } %>
+  <%= render :partial => 'link_to_all' %>
+</p>

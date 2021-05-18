@@ -1,0 +1,9 @@
+Liebe(r) <%= [@signup.person_title, @signup.first_name, @signup.last_name].reject{ |item| item.empty? }.join(' ') %>,
+
+vielen Dank für Ihre Anmeldung zur Tagung "Daten^7 – Digitales BilderLeben" 
+am 1./2. Oktober 2019 in Köln.
+
+Wir freuen uns auf Ihr Kommen und verbleiben mit freundlichen Grüßen
+Ihr prometheus-Team
+
+<%= render :partial => 'signature' -%>

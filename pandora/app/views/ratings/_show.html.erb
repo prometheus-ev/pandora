@@ -1,0 +1,57 @@
+<% light = false unless local_assigns.has_key?(:light) %>
+
+<div class="pm-ratings dim <%= 'pm-light' if light %> <%= 'pm-rated' if super_image.voted_by?(current_user) %>">
+  <div class="header">
+    <%= "Rating of this image's reproduction quality".t %>
+    (<strong></strong> – <%= super_image.rating_average %> in <%= super_image.rating_count %>)
+  </div>
+
+  <div class="stars">
+    <% ['unusable'.t, 'poor'.t, 'usable'.t, 'good'.t, 'very good'.t].each_with_index do |quality, i| %>
+      <% title = 
+        if light
+          nil
+        else
+          if super_image.voted_by?(current_user)
+            'You have already rated this image!'.t
+          else
+            'Rate this reproduction as "%s"' / quality
+          end
+        end
+      %>
+
+      <% if super_image.rating_average >= i + 1 %>
+        <%= image_tag(
+          '/images/stars/star_big_full.gif',
+          title: title,
+          data: {
+            pid: super_image.pid,
+            quality: i + 1
+          }
+        ) %>
+      <% elsif super_image.rating_average <= i %>
+        <%= image_tag(
+          '/images/stars/star_big_empty.gif',
+          title: title,
+          data: {
+            pid: super_image.pid,
+            quality: i + 1
+          }
+        ) %>
+      <% else %>
+        <%= image_tag(
+          '/images/stars/star_big_half.gif',
+          title: title,
+          data: {
+            pid: super_image.pid,
+            quality: i + 1
+          }
+        ) %>
+      <% end %>
+    <% end %>
+
+    <% if light %>
+      (<%= super_image.votes %>)
+    <% end %>
+  </div>
+</div>

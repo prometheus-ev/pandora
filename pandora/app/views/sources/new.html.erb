@@ -1,0 +1,18 @@
+<h2 class="page_title">
+  <%= 'Create Source'.t %>
+</h2>
+
+<%= error_messages_for :source %>
+
+<%= form_for @source, as: :source, :html => { :class => 'edit-form' } do |f| -%>
+  <table>
+    <%= render_form_part(f, :name) %>
+    <%= render_form_parts(f, %w[title email description]) %>
+
+    <% restrict_to :superadmin, :admin do -%>
+      <%= render_form_parts(f, %w[institution quota admin open_access]) %>
+    <% end -%>
+
+    <%= form_controls %>
+  </table>
+<% end -%>

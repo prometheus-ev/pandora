@@ -1,0 +1,16 @@
+Siehe
+<%= link_to_help(
+  section: 'syntax',
+  title: 'Search syntax help'.t,
+  class: 'help'
+) %>
+für Details und Beispiele.
+
+<table class="scriptonly">
+  <tr><td><code>"..."</code></td><td>Phrasensuche</td></tr>
+  <tr><td><code>*</code>, <code>?</code></td><td>Wildcards (<code>*</code> = null oder mehrere, <code>?</code> = eins)</td></tr>
+  <tr><td><code>~</code></td><td>Unscharfe Suche</td></tr>
+  <tr><td><code>^<var>n</var></code></td><td>Boosting (<var>n</var> = positive Zahl)</td></tr>
+  <tr><td class="vspace1"><br /></td></tr>
+  <tr><td colspan="2">Operatorenrangfolge: <code>ODER</code> &gt; <code>UND NICHT</code> &gt; <code>UND</code></td></tr>
+</table>

@@ -1,0 +1,37 @@
+<%= access_status(@collection, @public_view) %>
+
+<%= vbar %>
+<span class="nowrap">
+  <%= link_to(
+    pm_labelled_counter(@images.count, '%d image', '%d images'),
+    '#images'
+  )  %>
+</span>
+
+<% unless @collection.links.blank? %>
+  <%= vbar %>
+  <span class="nowrap">
+    <%= link_to(
+      pm_labelled_counter(@collection.links.size, '%d link', '%d links'),
+      '#links'
+    )  %>
+  </span>
+<% end %>
+
+<% unless @collection.references.blank? %>
+  <%= vbar %>
+  <span class="nowrap">
+    <%= link_to(
+      pm_labelled_counter(@collection.references.size, '%d reference', '%d references'),
+      '#references'
+    )  %>
+  </span>
+<% end %>
+
+<%= vbar %>
+<span class="nowrap">
+  <%= link_to(
+    pm_labelled_counter(@collection.comments.count, '%d comment', '%d comments'),
+    '#comments'
+  )  %>
+</span>

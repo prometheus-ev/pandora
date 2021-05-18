@@ -1,0 +1,80 @@
+Liebe(r) <%= @name %>,
+
+<% if @institution -%>
+ihr persönlicher <%= @guest ? 'Gast' : 'prometheus' %>-Zugang über Ihre Institution
+
+    <%= @institution %>
+
+läuft ab und wird deaktiviert am:
+<% else -%>
+<% if @guest -%>
+mit Ihrem Gastzugang hatten Sie die Möglichkeit, das prometheus-
+Bildarchiv kostenlos zu nutzen. Wir hoffen, es hat Ihnen gefallen.
+Ihr persönlicher Zugang läuft in Kürze ab und wird deaktiviert am:
+<% else -%>
+Ihr persönlicher prometheus-Zugang läuft in Kürze ab und wird
+deaktiviert am:
+<% end -%>
+<% end -%>
+
+<%= @expires.to_s.enclose_by('*').center(60).rstrip %>
+
+Danach können Sie das Bildarchiv vorläufig nicht mehr nutzen.
+
+<% if @institution -%>
+Wenn Sie Ihren Zugang verlängern möchten, kontaktieren Sie Ihre
+AdministratorInnen:
+
+  <% for admin in @admins -%>
+    <%= admin.fullname_with_email %>
+  <% end -%>
+
+<% unless @public_info.blank? -%>
+<%= @public_info.word_wrap(72) %>
+
+<% end -%>
+************************ Bitte beachten: ************************
+Bitte denken Sie daran, Ihren Zugehörigkeitsnachweis (Studieren-
+denausweis o.ä.) vorzulegen! Häufig ist eine Zusendung per E-Mail
+möglich und erwünscht.
+*****************************************************************
+
+Auch nachdem Ihr Zugang bereits abgelaufen ist, kann er von Ihrem
+Administrator reaktiviert werden.
+
+Wenn Sie nicht die Möglichkeit haben, das Bildarchiv weiterhin
+kostenlos über eine Institution zu nutzen, dann können Sie Ihren
+Zugang verlängern, indem Sie eine Einzellizenz für 30 EUR im Jahr
+(incl. über den Online-Zahlungsservice PayPal oder für 45 EUR im
+Jahr (inkl. 15 EUR Bearbeitungsgebühr) über Rechnung erwerben.
+
+Klicken Sie dazu auf den folgenden Link:
+<% else -%>
+Sie haben mehrere Möglichkeiten, Ihren Zugang zu verlängern:
+
+- Falls Sie zu einer lizenzierten Institution gehören, können Sie
+Ihren Zugang kostenlos verlängern lassen.
+
+- Andernfalls können Sie für nur 30 EUR im Jahr eine Lizenz über
+den Online-Zahlungsservice PayPal oder für 45 EUR im
+Jahr (inkl. 15 EUR Bearbeitungsgebühr) über Rechnung erwerben.
+
+Klicken Sie auf den folgenden Link und wählen Sie eine der Optionen:
+<% end -%>
+
+<<%= @url %>>
+<% unless @institution -%>
+
+Auch nachdem Ihr Zugang bereits abgelaufen ist, können Sie den Link
+nutzen, um Ihren Zugang zu reaktivieren und zu verlängern.
+
+Wir freuen uns, wenn Sie sich für prometheus entscheiden. Helfen Sie
+mit, das Bildarchiv weiter zu entwickeln und zu optimieren. Ihre
+Ideen sind uns wichtig!
+<% end -%>
+
+Für Ihre Fragen und Anregungen ist unsere prometheus-Geschäftsstelle
+jederzeit für Sie da.
+
+Mit freundlichen Grüßen,
+Ihr prometheus-Team

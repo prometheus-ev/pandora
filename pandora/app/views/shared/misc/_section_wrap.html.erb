@@ -1,0 +1,3 @@
+<div id="<%= section_id(section) %>" class="section_wrap clear-padding<%= ' undim' unless %w[images slides comments].include?(section) %>">
+  <%= render section_partial(object, section, expanded, count, locals) %>
+</div>

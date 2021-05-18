@@ -1,0 +1,23 @@
+<p>
+  <%= 'Before you can enter the image archive, we need to verify that the given e-mail address belongs to your person.'.t %> <%= 'It is therefore required that you confirm your e-mail address by opening the link you are sent by us in an email to this address.'.t %>
+</p>
+
+<p>
+  <strong><%= 'In order to generate a new confirmation email, please check your e-mail address thoroughly and click the button below.'.t %></strong>
+</p>
+
+<%= error_messages_for :user, :header_message => '', :message => '' %>
+
+<%= form_tag action: 'change_email' do %>
+  <table width="100%">
+    <tr>
+      <td><%= text_field :user, :email %></td>
+    </tr>
+    <tr>
+      <td class="vspace1"><br /></td>
+    </tr>
+    <tr>
+      <td colspan="2"><%= submit_button %></td>
+    </tr>
+  </table>
+<% end %>

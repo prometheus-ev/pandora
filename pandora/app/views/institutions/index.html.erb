@@ -1,0 +1,57 @@
+<div class="search_query">
+  <label for="value" class="search_heading">
+    <%= "Search #{'licensed ' if action_name == 'licensed'}institutions".t %>:
+  </label>
+  <%= list_search_for Institution %>
+</div>
+
+<% unless @institutions.empty? %>
+  <div class="infobar">
+    <%= range_summary_for(@institutions, 'Institutions') %>
+    <span class="gap"></span>
+  </div>
+
+  <div class="list_controls">
+    <%= pagination = pagination_for(@institutions, @page, @order) %>
+
+    <% if admin_or_superadmin? %>
+      <%= sorting = render partial: 'shared/list/sort_links', locals: {args: {
+        'Name' => 'name',
+        'Title' => 'title',
+        'City' => 'city',
+        'Country' => 'country',
+        'Licenses license type' => 'licenses.license_type_id'
+      }} %>
+    <% else %>
+      <%= sorting = render partial: 'shared/list/sort_links', locals: {args: {
+        'Title' => 'title',
+        'City' => 'city',
+        'Country' => 'country'
+      }} %>
+    <% end %>
+  </div>
+
+  <%= form_tag({ :action => 'renew_license' }, { :id => 'institution_license_renew_form', :class => 'clear-padding' }) do -%>
+    <% if admin_or_superadmin? %>
+      <%= render :partial => 'store_controls', :locals => { :pos => 'top' } %>
+    <% end %>
+    
+    <table class="list institution-list clear-float clear-padding">
+      <%= render :partial => "row", :collection => @institutions.items, :locals => { :cycle_name => 'list' } %>
+    </table>
+
+    <% if admin_or_superadmin? %>
+      <%= render :partial => 'store_controls', :locals => { :pos => 'bottom' } %>
+    <% end %>
+  <% end %>
+
+  <div class="list_controls">
+    <%= pagination %>
+    <%= sorting %>
+  </div>
+
+<% else %>
+  <div class="infobar">
+    <p><strong><%= "No institutions found.".t %></strong></p>
+  </div>
+<% end %>

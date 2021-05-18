@@ -1,0 +1,97 @@
+<div class="metadata undim">
+  <table>
+    <% for field in Indexing::IndexFields.display do %>
+      <% unless (value = super_image.display_field(field)).blank? %>
+        <tr>
+          <th style="vertical-align: top;">
+            <% if field == 'keyword_artigo' %>
+              <%= ("Keywords from").t %>
+              <%= link_to "Artigo", "http://artigo.org/", :target => "_blank" %>
+            <% else %>
+              <%= field.humanize.titleize.t %>
+            <% end %>
+          </th>
+          <td class="<%= field %>-field">
+            <% if field == 'credits' %>
+              <% if value.is_a? Array %>
+                <%= value.map { |credit|
+                  show_credit(credit)
+                }.join(" | ").html_safe %>
+              <% else %>
+                <%= show_credit(value).html_safe %>
+              <% end %>
+            <% elsif field == 'rights_work' %>
+              <%= render partial: 'rights_work', locals: {rights_work: Array.wrap(value)} %>
+            <% elsif field == 'rights_reproduction' %>
+              <%= render partial: 'rights_reproduction', locals: {rights_reproduction: Array.wrap(value)} %>
+            <% elsif field == 'keywords' %>
+              <% value.each do |keywords| %>
+                <%= list_search_links_for(:keywords, keywords.map { |k| [k.title, k.title.t] }, :controller => 'uploads', :action => 'index') %>
+              <% end %>
+            <% elsif field == 'keyword_artigo' %>
+              <% value.each do |v| %>
+                <% keyword = v.split(",") %>
+                <% grey = 90 * keyword[2].to_i %>
+                <div style="display: inline-block; font-size: <%= 100 + 3 * keyword[2].to_i %>%; color: rgb(<%= grey %>,<%= grey %>,<%= grey %>); padding: 0.2em;"><%= keyword[0] %></div>
+              <% end %>
+            <% elsif field == 'iconclass' %>
+              <%= value.map { |term| iconclass = term.delete('&');
+                link_to iconclass, "http://iconclass.org/rkd/#{iconclass.delete(' ')}", :target => "_blank"
+              }.join(" | ").html_safe %>
+            <% elsif field == 'related_works' %>
+              <%= value.map { |v|
+                related_work = v.split(",")
+                count = related_work.count
+                link_to related_work[0..(count-2)].join(", "), :controller => 'searches', :action => 'advanced', "search_field[0]" => "record_object_id", "search_value[0]" => related_work.last
+              }.join(" | ").html_safe %>
+            <% elsif Image.pconfig[:location_fields].include?(field) %>
+              <%= render partial: 'locations', locals: {locations: Array.wrap(value), source: super_image.source} %>
+            <% else %>
+              <% if value.is_a?(Array) %>
+                <%= truncated(value.map { |v|
+                  if !v.is_a?(String) && v.respond_to?(:to_s)
+                    v = v.to_s
+                  end
+                  if v.include?(",http")
+                    if v.include?("%")
+                      arr = v.split("%")
+                      str = ""
+                      (0..(arr.count-1)).each do|index|
+                        if !index.odd?
+                          str << arr[index]
+                        else
+                          str << link_to_links(arr[index])
+                        end
+                      end
+                      str
+                    else
+                      link_to_links(v)
+                    end
+                  else
+                    sanitize(v)
+                  end
+                }.join(" | ").html_safe, 280, :escape => false) %>
+              <% else %>
+                  <%= truncated(sanitize(value.to_s).html_safe, 280, :escape => false) %>
+                  <br />
+              <% end %>
+            <% end %>
+          </td>
+        </tr>
+      <% end %>
+    <% end %>
+    <%= render :partial => 'shared/elastic/database_table_row', :locals => { :source => super_image.source, :is_upload => super_image.upload? } %>
+
+    <% if super_image.collection_counts_any?(current_user) %>
+      <tr>
+        <td colspan="2" style="padding-left: 10px"><hr style="height: 1px; background-color: #3C3C3C; border: 0px;"></td>
+      </tr>
+      <tr class="dim">
+        <th><%= 'Collections'.t %></th>
+        <td class="collections-field">
+          <%= render partial: 'shared/collection_counts', locals: {super_image: super_image} %>
+        </td>
+      </tr>
+    <% end %>
+  </table>
+</div>

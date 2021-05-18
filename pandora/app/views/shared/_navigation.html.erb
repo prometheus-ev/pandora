@@ -1,0 +1,51 @@
+<%
+  active = case controller_name
+  when 'searches', 'images' then 'searches'
+  when 'collections' then 'collections'
+  when 'institutional_uploads', 'uploads' then 'uploads'
+  else 'administration'
+  end
+%>
+<%= link_to controller: 'searches' do %>
+  <div
+    class="navigation_icon searches_navigation <%= active == 'searches' ? 'active' : 'inactive' %>"
+    title="<%= 'Search'.t %>"
+  >
+    <span><%= 'Search'.t %></span>
+  </div>
+<% end %>
+<%= link_to controller: 'collections' do %>
+  <div 
+    class="navigation_icon collections_navigation <%= active == 'collections' ? 'active' : 'inactive' %>"
+    title="<%= 'Collections'.t %>"
+  >
+    <span><%= 'Collections'.t %></span>
+  </div>
+<% end %>
+<%= link_to controller: 'uploads' do %>
+  <div
+    class="navigation_icon uploads_navigation <%= active == 'uploads' ? 'active' : 'inactive' %>"
+    title="<%= 'My Uploads'.t %>"
+  >
+    <span><%= 'My Uploads'.t %></span>
+  </div>
+<% end %>
+
+<% is_admin = 
+  current_user && (
+    current_user.superadmin? ||
+    current_user.admin? ||
+    current_user.useradmin?
+  )
+%>
+
+<% if is_admin %>
+  <%= link_to controller: 'administration' do %>
+    <div
+      class="navigation_icon administration_navigation <%= active == 'administration' ? 'active' : 'inactive' %>"
+      title="<%= 'Administration'.t %>"
+    >
+      <span><%= 'Administration'.t %></span>
+    </div>
+  <% end %>
+<% end %>

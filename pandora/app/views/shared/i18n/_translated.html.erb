@@ -1,0 +1,12 @@
+<% for lang in ORDERED_LANGUAGES -%>
+  <% langname = I18n.t(lang, locale: :en) %>
+  <% if tag -%>
+    <<%= tag %>><%= label.t %><%= suffix % langname %></<%= tag %>>
+    <%= with_locale(lang, &value_proc) %>
+  <% else -%>
+    <tr>
+      <th><%= label.t %><%= suffix % langname %></th>
+      <td><%=h with_locale(lang, &value_proc) %></td>
+    </tr>
+  <% end -%>
+<% end -%>

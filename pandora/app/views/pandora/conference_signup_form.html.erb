@@ -1,0 +1,79 @@
+<h2 style="line-height:1.3">Anmeldung zur Tagung „Daten^7 – Digitales BilderLeben“ am 1./2. Oktober 2019 in Köln </h2>
+
+<%= error_messages_for :signup, :header_message => '', :message => '' %>
+
+<%= form_for @signup, as: 'signup', url: {action: 'conference_signup'} do |f| -%>
+  <table width="600">
+    <tr style=>
+      <td colspan="2" style="padding:0 0 15px 0;">
+    Da wir keine Tagungsgebühren erheben, aber für die Kaffeepausen und den Empfang Getränke und kleine Snacks
+kostenlos bereitstellen, wären wir dankbar, wenn Sie sich verbindlich anmelden, damit wir besser planen können.
+      </td>
+    </tr>
+    <tr>
+      <th><%= f.label :person_title, 'Title'.t + ' (' + 'optional'.t + ')' %></th>
+      <td><%= f.text_field :person_title, size: 30 %></td>
+    </tr>
+    <tr>
+      <th><%= f.label :first_name, 'First name'.t %></th>
+      <td><%= f.text_field :first_name, size: 30, class: 'mandatory' %></td>
+    </tr>
+    <tr>
+      <th><%= f.label :last_name, 'Last name'.t %></th>
+      <td><%= f.text_field :last_name, size: 30, class: 'mandatory' %></td>
+    </tr>
+    <tr>
+      <th><%= f.label :email, 'E-mail'.t %></th>
+      <td><%= f.text_field :email, size: 30, class: 'mandatory' %></td>
+    </tr>
+    <tr>
+      <th><%= f.label :institution, 'Institution'.t + ' (' + 'optional'.t + ')' %></th>
+      <td><%= f.text_field :institution, size: 30 %></td>
+    </tr>
+    <tr>
+      <th><%= f.label :street, 'Street/Post box'.t %></th>
+      <td><%= f.text_field :street, size: 30, class: 'mandatory' %></td>
+    </tr>
+    <tr>
+      <th><%= f.label :postal_code, 'Postal code'.t %></th>
+      <td><%= f.text_field :postal_code, size: 30, class: 'mandatory' %></td>
+    </tr>
+    <tr>
+      <th><%= f.label :city, 'City'.t %></th>
+      <td><%= f.text_field :city, size: 30, class: 'mandatory' %></td>
+    </tr>
+    <tr>
+      <th><%= f.label :country, 'Country'.t + ' (' + 'optional'.t + ')' %></th>
+      <td><%= f.text_field :country, size: 30 %></td>
+    </tr>
+    <tr>
+      <td colspan="2">
+        <%= f.check_box :brauhaus %>
+        <%= f.label :brauhaus, 'Ich möchte gerne am 30. September am gemeinsamen Abendessen (Selbstzahler) im Brauhaus "Malzmühle" am Heumarkt teilnehmen.' %>
+      </td>
+    </tr>
+    <tr>
+      <td colspan="2">
+        <%= f.check_box :akdk %>
+        <%= f.label :akdk, 'Ich werde am Arbeitskreistreffen des AK Digitale Kunstgeschichte am 30.9. (14-18 Uhr) teilnehmen.' %>
+      </td>
+    </tr>
+    <tr>
+      <td colspan="2" style="padding:10px 0;">
+        <label for="note" class="th"><%= 'Note'.t %>  (<%= 'optional'.t %>)</label>
+        <br /><br class="vspace1" />
+        <%= f.text_area :note, size: '60x4' %>
+        <br /><br class="vspace1" />
+      </td>
+    </tr>
+    <tr>
+      <td colspan="2">
+        <%= render :partial => 'shared/misc/captcha' %>
+    </tr>
+    <tr>
+      <td colspan="2">
+        <%= submit_button 'Submit sign up'.t %>
+      </td>
+    </tr>
+  </table>
+<% end -%>

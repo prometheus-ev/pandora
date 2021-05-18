@@ -1,0 +1,24 @@
+<h2><%= 'Copyright and publication help'.t %></h2>
+
+<p>
+  The <%= link_to 'Copyright link', home_url('copyright'), title: 'General copyright information' %>
+  within the footer provides general information regarding the copyright and publication
+  options within <span class="prometheus">prometheus</span>. Within the metadata of the
+  record information of the relevant image regarding the right of work of art and the
+  right of the photographic work of art is provided if available.
+</p>
+
+<% with_toc do -%>
+
+  <%= section_heading 'Button "Publication"', 'button' %>
+  <p>
+    The following button on the left hand side of the image <%= image_tag('image/publish_prometheus.gif') %>
+    provides individual publishing information concerning the relevant image as far as
+    <span class="prometheus">prometheus</span> has access to that information. In some
+    cases you can obtain the required authorization for publication at this point directly
+    from the copyright holder.
+  </p>
+
+<% end -%>
+
+<%= render :partial => 'footer' %>

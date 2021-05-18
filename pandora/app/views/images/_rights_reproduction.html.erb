@@ -1,0 +1,28 @@
+<%= rights_reproduction.map { |right_reproduction|
+  if right_reproduction.include?("http")
+    if is_url?(right_reproduction)
+      link_to(right_reproduction, right_reproduction, :target => '_blank')
+    else
+      if right_reproduction.include?("%")
+        arr = right_reproduction.split("%")
+        str = ""
+        (0..(arr.count-1)).each do |index|
+          if !index.odd?
+            str << arr[index]
+          else
+            str << link_to_links(arr[index])
+          end
+        end
+        str
+      else
+        link_to_links(right_reproduction)
+      end
+    end
+  else
+    if right_reproduction == 'Unknown'
+      h(right_reproduction.t)
+    else
+      format_content(right_reproduction, :escape => false)
+    end   
+  end
+}.join(" | ").html_safe %>

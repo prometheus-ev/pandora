@@ -1,0 +1,28 @@
+<h1 class="page_title"><% if @type == 'institution' %><%= 'Institution'.t %><% elsif @type == 'paid'%><%= 'Single license'.t %><% end %></h1>
+
+<%= error_messages_for :user %>
+
+<p><%= render :partial => 'accounts/license_info' %></p>
+<br class="vspace1" />
+
+<%= render :partial => 'license_obtain' %>
+
+<% if %w[institution paid].include?(@type) -%>
+  <p>
+  <br class="vspace1" />
+
+  <% if @type == 'institution' -%>
+    <%= "Didn't find your institution?".t %><br />
+    <%= gogif %> <%= link_to 'Obtain a paid license'.t, :type => 'paid' %>
+  <% elsif @type == 'paid' -%>
+    <%= 'Affiliated with a licensed institution?'.t %><br />
+    <%= gogif %> <%= link_to 'Obtain a free license through your institution'.t, :type => 'institution' %>
+  <% end -%>
+
+  </p>
+<% end -%>
+
+<p>
+  <%= 'Interested in a campus or institutional license for your institution?'.t %><br />
+  <%= gogif %> <%= link_to 'Please see our information about license fees'.t, home_url('license/fees') %>
+</p>

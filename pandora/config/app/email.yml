@@ -1,0 +1,11 @@
+---
+:columns_for:
+  :list:
+    - combined_subject
+    - updated_at
+    - sent_at
+    #- recipients  # ???
+  :search:
+    - combined_subject
+    - combined_body
+    - recipients

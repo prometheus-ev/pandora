@@ -1,0 +1,40 @@
+<%# scope = Collection.distinct.order(:title) %>
+
+<div class="popup_wrap scriptonly">
+  <div class="popup_toggle">
+    <%= image_tag('icon/store.gif', :title => 'Store image in...'.t) %>
+  </div>
+  <div class="store_images popup hidden">
+    <div class="popup_header">
+      <%= 'Collections'.t %>
+    </div>
+    <%= autosubmit_button('New Collection'.t, :plus, :name => '2collection') %>
+
+    <% if super_image.upload? && !super_image.upload.approved_record? %>
+      <%= render partial: 'shared/image/not_shared_collections_selector' %>
+    <% else %>
+      <%= render partial: 'shared/image/own_collections_selector' %>
+    <% end %>
+
+    <% if super_image.upload? && !super_image.upload.approved_record? %>
+      <div class="popup_info">
+        <%= image_tag('misc/info_form_field.gif',
+          style: 'vertical-align: top;',
+          class: 'dim',
+          title: ''
+        ) %>
+        <span>
+          <%= 'This image of your database is not available to public collections until approval of the prometheus office.'.t %>
+        </span>
+      </div>
+    <% else %>
+      <%= render partial: 'shared/image/sharing_collections_selector' %>
+      <%= render partial: 'shared/image/shared_collections_selector' %>
+      <%= render partial: 'shared/image/public_collections_selector' %>
+    <% end %>
+
+    <div class="popup_footer nowrap">
+      <%= add_to_sidebar('image', true, :controller => 'images', :action => 'show', :id => super_image.pid) %>
+    </div>
+  </div>
+</div>

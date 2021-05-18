@@ -1,0 +1,3 @@
+<% if (!params[:search_value].blank? || !params[:v].blank?) && !@search.any_results? %>
+  <p><strong><%= 'Your query did not match any documents.'.t %></strong></p>
+<% end %>

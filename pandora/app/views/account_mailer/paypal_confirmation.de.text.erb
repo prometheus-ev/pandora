@@ -1,0 +1,19 @@
+Liebe(r) <%= @name %>,
+
+vielen Dank, dass Sie sich entschieden haben, das prometheus-Bildarchiv auch
+weiterhin zu nutzen.
+<% if @success -%>
+Ihre Zahlung via PayPal war efolgreich und Ihr Zugang zum Bildarchiv ist nun
+gültig bis
+<% else -%>
+Leider war Ihre Zahlung via PayPal nicht erfolgreich. Sollten Sie Hilfe
+benötigen, kontaktieren Sie bitte unsere Geschäftsstelle. Ihr Zugang ist
+weiterhin gültig bis
+<% end -%>
+
+  <%= @expires %>
+
+Wir wünschen Ihnen viel Spaß beim Arbeiten mit prometheus!
+Ihr prometheus-Team
+
+<%= render :partial => 'signature' -%>

@@ -1,0 +1,4 @@
+<tr>
+  <th><%= f.label name, label.t %></th>
+  <td><%= f.text_field name %></td><td>(<%= (v = values_for_settings(f, name)).first.loc %> - <%= v.last.loc %>)</td>
+</tr>

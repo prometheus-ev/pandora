@@ -1,0 +1,9 @@
+<% if @super_image.image -%>
+<%= render :partial => 'image_navigation' %>
+<noscript>
+<%= form_tag({ :action => 'store', :controller => 'collections' }, { :class => 'float-left' }) do -%>
+  <%= hidden_field_tag 'image[]', @super_image.pid %>
+  <%= render :partial => 'shared/image/store_controls' %>
+<% end -%>
+</noscript>
+<% end -%>

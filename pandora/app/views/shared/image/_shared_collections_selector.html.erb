@@ -1,0 +1,17 @@
+<%= @cs_shared ||= capture do %>
+  <% collections =
+    Collection.
+    distinct.
+    order(:title).
+    shared(current_user, :write).
+    pluck(:title, :id)
+  %>
+
+  <% unless collections.empty? %>
+    <%= select(
+      :target_collection, :collection_id, collections,
+      {prompt: 'Shared with you'.t},
+      {class: 'autoselect', id: 'shared_collections_selector'}
+    ) %>
+  <% end %>
+<% end %>

@@ -1,0 +1,30 @@
+<div class="header-line">
+  <h2 class="title-line">
+    <%=h @user %><% unless @user.title.blank? -%>, <%=h @user.title %><% end -%>
+    <br />
+    <% if !@user.institution.nil? %>
+      <span class="subtitle">
+        <%=h @user.institution.fulltitle %>
+        <%= link_to image_tag('misc/info.gif', :class => 'dim'), 
+        institution_path(@user.institution),
+        title: 'Information about the institution'.t %>
+      </span>
+    <% end %>
+  </h2>
+  <div class="icon-line dim">
+  <span class="gap"></span>
+  <%= link_to icon('edit'), {action: 'edit'}, title: 'Edit'.t %>
+  <%= link_to(
+    icon('delete'),
+    {action: 'disable'},
+    method: 'PATCH', title: 'Disable'.t 
+  ) %>
+  </div>
+</div>
+
+<div class="section clear-float">
+<% if @user.about.present? -%>
+  <div class="description-line"><%= truncated(@user.about, 280, :parent => 'header-section', :simple_format => true) %></div>
+<% end -%>
+  <div id="object-summary"><%= render :partial => 'accounts/summary' %></div>
+</div>

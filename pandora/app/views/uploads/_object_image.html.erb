@@ -1,0 +1,45 @@
+<div style="float: right;">
+  <%= upload_image(@upload.image) if @upload.image %><br />
+  <table>
+    <tr>
+      <th><%= 'File size'.t %></th>
+      <td>
+        <!-- REWRITE: method signature has changed -->
+        <%#= number_to_human_size(@upload.file_size, 2) %>
+        <%= number_to_human_size(@upload.file_size, precision: 2) %>
+      </td>
+    </tr>
+    <tr>
+      <th><%= 'File format'.t %></th>
+      <td><%= @upload.filename_extension %></td>
+    </tr>
+    <% if @upload.image and pixel_x_dimension = @upload.image.exif_metadata_value_for('pixel_x_dimension') and pixel_y_dimension = @upload.image.exif_metadata_value_for('pixel_y_dimension') -%>
+      <tr>
+        <th><%= 'Image size in pixels (width x height)'.t %></th>
+        <td><%= pixel_x_dimension %> x <%= pixel_y_dimension %></td>
+      </tr>
+    <% end -%>
+    <% if @upload.image.latitude -%>
+      <tr>
+        <th><%= 'Image latitude'.t %></th>
+        <td>
+          <%= number_with_precision(@upload.image.latitude, precision: 5) %>
+        </td>
+      </tr>
+    <% end -%>
+    <% if @upload.image.longitude -%>
+      <tr>
+        <th><%= 'Image longitude'.t %></th>
+        <td>
+          <%= number_with_precision(@upload.image.longitude, precision: 5) %>
+        </td>
+      </tr>
+    <% end -%>
+    <% if @upload.image.latitude and @upload.image.longitude -%>
+      <tr>
+        <th>Image location</th>
+        <td><%= link_to_google_maps("#{@upload.image.latitude},#{@upload.image.longitude}") %></td>
+      </tr>
+    <% end -%>
+  </table>
+</div>

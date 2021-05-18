@@ -1,0 +1,16 @@
+<div class="store_controls<%= " position-#{pos}" %>">
+  <%= render :partial => 'shared/list/select', :locals => { :what => 'upload', :pos => pos } %>
+
+  <div class="submit_button_wrap pm-edit-selected disable disabled">
+    <div class="scriptonly" _name="commit">
+      <div class="button_wrap edit_button">
+        <div class="button_left"></div>
+        <div class="button_icon"></div>
+        <div class="button_middle"><%= 'Edit selected images...'.t %></div>
+        <div class="button_right"></div>
+      </div>
+    </div>
+  </div>
+
+  <%#= render partial: 'shared/image/images_store' %>
+</div>

@@ -1,0 +1,50 @@
+<h2><%= 'Profile help'.t %></h2>
+
+<% with_toc do -%>
+
+  <p>
+    Every holder of a personal account for the prometheus image archive has the opportunity to define and edit general information and settings for this account via the profile.
+  </p>
+  <p>
+    You can find your personal profile by clicking on your name indicated on the upper row of the screen.
+    <%= screenshot 'help/profile_name.en.png', 'Name login' %>
+  </p>
+  <p>
+    On your profile you will find your name and institution.<br>
+    By clicking <%= image_tag('icon/download.gif', :class => 'help_icon') %> next to your name, you receive your user data sheet with all information about your account that can be downloaded and saved as PDF.<br>
+    By clicking <%= image_tag('icon/edit.gif', :class => 'help_icon') %> you can edit your first and last name, add a title and specify yourself or your research interest in some sentences.
+    <%= screenshot 'help/profile_name_edit.en.png', 'Edit profile' %>
+  </p>
+  <p>
+    Below this paragraph the section 'Details' is directly opened for you.
+    <%= screenshot 'help/profile_details.en.png', 'Profile details' %>
+  </p>
+  <p>
+    Here you can review your personal information as user name, e-mail-address and address.<br>
+    You can edit those information by clicking <%= image_tag('icon/edit.gif', :class => 'help_icon') %>.<br>
+    Furthermore you can see here general infromation about your account as role, status and type of license.<br>
+    In the line 'License' the expiring date of your account is mentioned. A link beneath this infromation offers you the possibility to directly prolong your account by obtaining a single license or to change your institution.
+  </p>
+
+  <%= section_heading 'Einstellungen', 'Settings' %>
+  <p>
+    Below the general profile you find the 'Settings' for your prometheus-account.<br>
+    You can fix your individual settings for the different functions in the archive, such as Account, Search, Image, Collection and Uploads.
+    <%= screenshot 'help/profile_settings.en.png', 'Profil Einstellungen' %>
+  </p>
+  <p>
+    By clicking <%= image_tag('misc/header_expand.gif', :class => 'help_icon') %> next to each header you can open and close the respective paragraph for inspection and editing. Inside each paragraph different pull-down menus then allow you to choose and save e.g. your preferred start page after the login, the number of results per page or the sort order of the images in your collections.
+    <%= screenshot 'help/profile_settings_collection.en.png', 'Einstellungen Bildsammlung' %>
+  </p>
+
+  <%= section_heading 'Inactive users', 'inactive' %>
+  <p>
+    When a user has become inactive (or has been deleted), you will no longer be able to
+    view their profile page. They may have left traces around the image archive, but in
+    order to protect their (your!) privacy there will no longer be any public information
+    available about them.
+  </p>
+
+<% end -%>
+
+<%= render :partial => 'footer' %>

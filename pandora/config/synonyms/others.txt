@@ -1,0 +1,2 @@
+rights_work_vgbk,VGBK,VG Bild Kunst,Verwertungsgesellschaft Bild Kunst
+rights_work_warburg,The Warburg Institute,Warburg Institute

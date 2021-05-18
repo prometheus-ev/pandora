@@ -1,0 +1,13 @@
+<h3><%= 'Technical info'.t %></h3>
+
+<%= render :partial => 'technical_info' %>
+
+<h3><%= 'Current Authors'.t %>*</h3>
+
+<%= render :partial => 'authors', :locals => { authors: AUTHORS, former: false } %>
+
+<h3><%= 'Former Authors'.t %>*</h3>
+
+<%= render :partial => 'authors', :locals => { authors: FORMER_AUTHORS, former: true } %>
+
+<span>*<%= 'in alphabetical order'.t %></span>

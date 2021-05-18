@@ -1,0 +1,18 @@
+<% key = f.object.class.name.underscore
+   label = key.to_s.sub(/_settings\z/, '') unless defined?(label) && label
+   prefix = nil unless defined?(prefix) && prefix
+%>
+<tr>
+  <th><%= f.label :"#{prefix}order", "Sort order for #{label} list".t %></th>
+  <td><%= settings_select f, :"#{prefix}order", :options_for_order_select %></td>
+</tr>
+<tr>
+  <th><%= f.label :"#{prefix}direction", "Sort direction for #{label} list".t %></th>
+  <td><%= settings_select f, :"#{prefix}direction", {
+    'ASC'  => 'Ascending'.t,
+    'DESC' => 'Descending'.t
+  } %></td>
+</tr>
+<% if local_assigns[:pagination] %>
+  <%= render partial: 'edit_shared_range_settings', locals: {f: f, label: "Number of #{label.pluralize} per page", name: :"#{prefix}per_page" } %>
+<% end %>

@@ -1,0 +1,2 @@
+<%= 'pandora'.t %> <%= Pandora::VERSION =~ /\A\d/ ? 'v' : '' %><%= Pandora::VERSION %>
+<% unless Rails.env.production? -%>[<%= Rails.env %>]<% end -%>

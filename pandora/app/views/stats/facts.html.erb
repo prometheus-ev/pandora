@@ -1,0 +1,21 @@
+<h1 class="page_title">
+  <%= 'Newsletter facts'.t %>
+</h1>
+
+<%= form_tag do -%>
+  <tr>
+    <th><label for="top_terms_period"><%= 'Top Terms period'.t %></label></th>
+    <td><%= select_year Date.today.year, :field_name => 'top_terms_year' %> <%= select_month Date.today.month, :field_name => 'top_terms_month' %></td>
+  </tr>
+
+  <tr>
+    <th><label for="newsletter_facts_top_terms_number"><%= 'Top terms number'.t %></label></th>
+    <td><%= text_field_tag :top_terms_numbers %></td>
+  </tr>
+  <%= form_controls 'Generate'.t %>
+</table>
+<% end -%>
+</br></br>
+<% if @top_terms -%>
+  <%= render :partial => 'facts' %>
+<% end -%>

@@ -1,0 +1,9 @@
+<% allowed = current_user.allowed?(@user) -%>
+
+<%= pm_section 'header', expanded: true, header: false do %>
+  <%= render partial: 'header' %>
+<% end %>
+
+<%= pm_section 'details', expanded: true do %>
+  <%= render partial: 'details', locals: {expanded: true} %>
+<% end %>

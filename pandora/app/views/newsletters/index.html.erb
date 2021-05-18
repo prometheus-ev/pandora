@@ -1,0 +1,11 @@
+<div class="search_query">
+  <label for="value" class="search_heading"><%= "Search newsletters".t %>:</label>
+  <%= list_search_for Email %>
+</div>
+
+<div class="infobar">
+  <%= range_summary_for(@emails, 'Newsletters') %>
+  <span class="gap"></span>
+</div>
+
+<%= render partial: 'list' %>

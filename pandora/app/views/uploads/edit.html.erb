@@ -1,0 +1,29 @@
+<% content_for :head do %>
+  <%= javascript_include_tag 'app/geo/map-edit.js' %>
+<% end %>
+
+<%= render_sections %w[header] %>
+
+<%= error_messages_for :upload %>
+<!-- REWRITE: we need to specify the object and the param so that the url can be
+calculated automatically -->
+<%#= form_for @upload, :url => { :action => "edit" }, :html => { :method => :put, :onsubmit => 'return check_input();', :class => 'clear-padding' } do |f| -%>
+<%= form_for(@upload,
+  as: 'upload',
+  builder: Pandora::FormBuilder,
+  html: {
+    method: :put,
+    onsubmit: 'return check_input();',
+    class: 'clear-padding edit-form'
+  }) do |f|
+%>
+  <% if current_user.admin_or_superadmin? %>
+    <%= render_section(Upload, 'object_admin!', f: f) %>
+  <% end %>
+  <%= render_section(Upload, 'object_parent', f: f) %>
+  <%= render_section(Upload, 'object_basic!', f: f) %>
+  <%= render_section(Upload, 'object_geographic!', f: f) %>
+  <%= render_section(Upload, 'object_rights', f: f) %>
+  <%= render_section(Upload, 'object_advanced', f: f) %>
+  <%= render_section(Upload, 'object_children!?', f: f) %>
+<% end -%>

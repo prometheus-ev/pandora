@@ -1,0 +1,78 @@
+<!-- REWRITE: returned by I18n directly, now -->
+<%# lang, nation = Locale.active.code.split('-') -%>
+<% lang = I18n.locale %>
+<div class="payment-method">
+  <div class="float-left">
+    <%= f.radio_button 'mode', 'paypal' %>
+  </div>
+  <div style="margin-left: 3em">
+    <label for="user_mode_paypal"><strong><%= image_tag 'account/paypal.png' %></strong></label><br />
+    <%= "Obtain a license for <strong>30 EUR per year</strong> through the E-payment service %s." / link_to('PayPal', "https://www.paypal.com/#{lang}", :target => '_blank') %>
+  </div>
+</div>
+
+<div class="payment-method">
+  <div class="float-left">
+    <%= f.radio_button 'mode', 'invoice' %>
+  </div>
+  <div style="margin-left: 3em">
+    <label for="user_mode_invoice"><strong><%= 'Invoice'.t %></strong></label><br />
+    <%= "Obtain a license for <strong>45 EUR per year</strong> (30 EUR + 15 EUR administrative fee) by invoice.".t.html_safe %>
+
+    <table id="invoice_address" class="noscript">
+      <tr>
+        <th colspan="2" style="text-align: left"><br /><strong><%= 'Invoice address'.t %>:</strong></th>
+      </tr>
+      <tr>
+        <th><label for="user_fullname"><%= 'Recipient name'.t %></label></th>
+        <td><%= text_field :invoice_address, :fullname, options_for_field(:fullname) %></td>
+      </tr>
+      <tr>
+        <th><label for="invoice_address_addressline"><%= 'Address'.t %></label></th>
+        <td><%= text_area :invoice_address, :addressline, options_for_field(:addressline, :rows => 3, :cols => 27) %></td>
+      </tr>
+      <tr>
+        <th><label for="invoice_address_postalcode"><%= 'Postal code'.t %></label></th>
+        <td><%= text_field :invoice_address, :postalcode, options_for_field(:postalcode) %></td>
+      </tr>
+      <tr>
+        <th><label for="invoice_address_city"><%= 'City'.t %></label></th>
+        <td><%= text_field :invoice_address, :city, options_for_field(:city) %></td>
+      </tr>
+      <tr>
+        <th><label for="invoice_address_country"><%= 'Country'.t %></label></th>
+        <td>
+          <!-- REWRITE: the method has a different signature now -->
+          <%#= country_select(:invoice_address, :country, PRIORITY_COUNTRIES, {}, options_for_field(:country) %>
+          <%= country_select(:invoice_address, :country,
+            {priority_countries: PRIORITY_COUNTRIES},
+            options_for_field(:country)
+          ) %>
+        </td>
+      </tr>
+    </table>
+  </div>
+</div>
+
+
+<%# functionality dropped, removing  %>
+<% if false %>
+<p>
+  <label for="user_discount_code"><%= 'Coupon code'.t %>:</label>
+  <%= text_field_tag :discount_code, @discount_code, options_for_field(:discount_code) %>
+
+  <br />
+  <small><%= 'If you have received a coupon or discount code from us, please enter it here.'.t %></small>
+  <br />
+</p>
+<% end %>
+
+<p>
+  <br />
+  <fieldset>
+    <legend><strong><%= 'Please review your research/education interest and context if necessary'.t %></strong></legend>
+    <table>
+      <%= render partial: 'accounts/edit_research_interest', locals: {f: f} %>
+    </table>
+  </fieldset>
+</p>

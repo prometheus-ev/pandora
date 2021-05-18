@@ -1,0 +1,8 @@
+--use-cache
+--private
+--protected
+--fail-on-warning
+-m markdown
+--main README.md
+-o 'docs'
+{app,lib}/**/*.rb

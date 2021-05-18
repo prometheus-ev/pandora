@@ -1,0 +1,32 @@
+<% counts = super_image.collection_counts(current_user) %>
+ 
+<% if counts['own'] > 0 %>
+  <%= link_to(
+    '%d own' / counts['own'],
+    collections_path(field: 'image_pid', value: super_image.pid)
+  ) %>
+<% else %>
+  <%= '%d own' / counts['own'] %>
+<% end %>
+
+|
+
+<% if counts['shared'] > 0 %>
+  <%= link_to(
+    '%d shared' / counts['shared'],
+    shared_collections_path(field: 'image_pid', value: super_image.pid)
+  ) %>
+<% else %>
+  <%= '%d shared' / counts['shared'] %>
+<% end %>
+
+|
+
+<% if counts['public'] > 0 %>
+  <%= link_to(
+    '%d public' / counts['public'],
+    public_collections_path(field: 'image_pid', value: super_image.pid)
+  ) %>
+<% else %>
+  <%= '%d public' / counts['public'] %>
+<% end %>

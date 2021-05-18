@@ -1,0 +1,35 @@
+Dear <%= @user %>,
+
+the following request for a <%= @type %> publication has just been
+sent to *<%= @institution.fulltitle %>*
+
+Information about the image: <%= @image_info %>
+Information about the publication: <%= @data[:publication] %>
+First name: <%= @data[:firstname] %>
+Last name: <%= @data[:lastname] %>
+E-mail: <%= @data[:email] %>
+Address: <%= @data[:addressline] %>, <%= @data[:postalcode] %> <%= @data[:city] %>, <%= @data[:country] %>
+Annotations: <%= @data[:annotations] %>
+<% if erlangen = @institution.name == 'erlangen_uni' -%>
+Affiliation to the institution: <% if @status == 'intern' -%> yes<% else -%> no<% end -%>
+<% end -%>
+
+<% if @type == 'scientific' && !erlangen -%>
+You may publish the image in a non-profit, scientific print publication
+with a circulation of under 1000 copies or an online publication with
+image sizes less than 600px x 800px.
+
+You further agree to specify the image
+"Copyright: <%= @institution.fulltitle -%>/name of the museum mentioned/name of the photographer mentioned".
+
+Furthermore, you agree to immediately inform the director of the
+museum mentioned of your publication after passing for press.
+As a general rule, this is done in the form of a sample copy.
+<% else -%>
+The rightsexploiter *<%= @institution.fulltitle %>* will contact you shortly.
+<% end -%>
+
+Kind regards,
+Your prometheus-Team
+
+<%= render :partial => 'signature' -%>

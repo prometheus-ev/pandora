@@ -1,0 +1,16 @@
+<ul>
+<% for match in @matches -%>
+  <li>
+    <%#= highlight(h(match), @phrases) %>
+    <%#= match) %>
+    <% if @informal -%>
+      <span class="informal">
+        <br />
+        <small>
+          <%=h match.send(@informal).join(', ') %>
+        </small>
+      </span>
+    <% end -%>
+  </li>
+<% end -%>
+</ul>

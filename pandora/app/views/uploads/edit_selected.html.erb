@@ -1,0 +1,15 @@
+<%= render_sections %w[header header_edit_selected_thumbnails] %>
+
+<%= error_messages_for :upload %>
+<%= form_for(@upload,
+  url: {action: "update_selected", uploads: @uploads.map{ |u| u.id }},
+  html: {method: :post, onsubmit: 'return check_input();', class: 'edit-form'}
+) do |f| -%>
+  <% if current_user.admin_or_superadmin? %>
+    <%= render_section Upload, 'object_admin!', f: f %>
+  <% end %>
+  <%= render_section Upload, 'object_basic!', f: f %>
+  <%= render_section Upload, 'object_geographic!', f: f %>
+  <%= render_section Upload, 'object_rights', f: f %>
+  <%= render_section Upload, 'object_advanced', f: f %>
+<% end -%>

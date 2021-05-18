@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<source>
+  <row>
+    <id>1</id>
+    <path>path1</path>
+    <artist>Albrecht</artist>
+    <artist-2>Efangus</artist-2>
+    <title>Title 1</title>
+    <location>Location 1</location>
+  </row>
+  <row>
+    <id>2</id>
+    <path>path2</path>
+    <artist>Bogus</artist>
+    <artist-2>Dolittle</artist-2>
+    <title>Title 2</title>
+    <location>Location 2</location>
+  </row>
+  <row>
+    <id>3</id>
+    <path>path3</path>
+    <artist>Carry</artist>
+    <artist-2>Curry</artist-2>
+    <title>Title 3</title>
+    <location>Location 3</location>
+  </row>
+  <row>
+    <id>4</id>
+    <path>path4</path>
+    <artist>Dolittle</artist>
+    <artist-2>Bogus</artist-2>
+    <title>Title 4</title>
+    <location>Location 4</location>
+  </row>
+  <row>
+    <id>5</id>
+    <path>path5</path>
+    <artist>Efangus</artist>
+    <artist-2>Albrecht</artist-2>
+    <title>Title 5</title>
+    <location>Location 5</location>
+  </row>
+</source>

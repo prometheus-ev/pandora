@@ -1,0 +1,5 @@
+<%= submenu_link_to 'CSV'.t, action: 'new' %>
+
+<% if admin_or_superadmin? %>
+  <%= submenu_link_to 'Newsletter facts'.t, action: 'facts_form' %>
+<% end %>

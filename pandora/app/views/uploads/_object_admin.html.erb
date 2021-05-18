@@ -1,0 +1,16 @@
+<table id="approve_table">
+  <tr>
+    <th><label for="upload_approved_record"><%= 'Approved?'.t %></label></th>
+    <td>
+      <% if action_name == 'edit' %>
+        <%= f.check_box(:approved_record, options_for_field(:approved_record)) %>
+      <% else %>
+        <%= f.select(:approved_record,
+          [['no'.t, false], ['yes'.t, true]],
+          { :include_blank => '<various values>'.t }
+        ) %>
+      <% end %>
+    </td>
+  </tr>
+  <%= form_controls %>
+</table>

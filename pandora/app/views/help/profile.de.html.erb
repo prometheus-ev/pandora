@@ -1,0 +1,50 @@
+<h2><%= 'Profile help'.t %></h2>
+
+<% with_toc do -%>
+
+  <p>
+    Jede(r) Nutzer*in, der/die einen persönlichen Zugang zum prometheus-Bildarchiv besitzt, kann über sein/ ihr Profil allgemeine Angaben und Einstellungen für diesen Zugang bearbeiten.<br>
+    Ihr persönliches Profil erreichen Sie nach dem Login durch Klick auf die Namensanzeige in der oberen Bildschirmzeile.
+    <%= screenshot 'help/profile_name.de.png', 'Namensanzeige Login' %>
+  </p>
+  <p>
+    Auf Ihrem Profil wird Ihnen zunächst Ihr Name und Ihre institutionelle Zugehörigkeit angezeigt.
+  Wenn Sie auf <%= image_tag('icon/download.gif', :class => 'help_icon') %> neben Ihrem Namen klicken, erhalten Sie alle Angaben zu Ihrem persönlichen Zugang in Form einer PDF-Datei zum Herunterladen und Abspeichern.<br>
+    Durch Klick auf <%= image_tag('icon/edit.gif', :class => 'help_icon') %> können Sie die Angabe Ihres Vor- und Nachnamens ändern, einen Titel sowie eine persönliche Beschreibung zu Ihrer Person, Ihren Forschungsinteressen oder ähnlichem ergänzen.
+    <%= screenshot 'help/profile_name_edit.de.png', 'Profil bearbeiten' %>
+  </p>
+  <p>
+    Unter dieser Titelzeile ist der Abschnitt „Details“ direkt für Sie aufgeklappt.
+    <%= screenshot 'help/profile_details.de.png', 'Profil Details' %>
+  </p>
+
+  <p>
+    Hier können Sie Ihre persönlichen Angaben wie Login-Name, E-Mailadresse und Adresse einsehen.
+    Diese Angaben können Sie durch Klick auf <%= image_tag('icon/edit.gif', :class => 'help_icon') %> bearbeiten.<br>
+    Des Weiteren können Sie den „Details“ allgemeine Informationen zu Ihrem prometheus-Zugang wie Rolle, Status und Lizenzform entnehmen.<br>
+    In der Zeile „Lizenz“ wird Ihnen das Ablaufdatum ihres Zugangs genannt. Darunter haben Sie über einen Link direkt die Möglichkeit, Ihren Zugang durch Erwerb einer neuen Einzellizenz zu verlängern oder die Institution Ihres Zugangs zu ändern, wenn Sie beispielsweise die Hochschule wechseln.
+  </p>
+
+  <%= section_heading 'Einstellungen', 'Settings' %>
+  <p>
+    Unterhalb des allgemeinen Profils befinden sich die „Einstellungen“ Ihres prometheus-Zugangs.<br>
+    In diesem Bereich haben Sie die Möglichkeit, Voreinstellungen zu den Funktionebereichen Zugang, Suche, Bildanzeige in der Trefferliste, Bildsammlungen, Präsentationen und Uploads individuell festzulegen.
+    <%= screenshot 'help/profile_settings.de.png', 'Profil Einstellungen' %>
+  </p>
+  <p>
+    Auf der linken Seite neben jedem Abschnitt haben Sie die Möglichkeit durch Klick auf <%= image_tag('misc/header_expand.gif', :class => 'help_icon') %> die gewünschte Kategorie zur Ansicht und Bearbeitung auf- und zuzuklappen.<br>
+    Innerhalb jeden Bereichs können Sie per Dropdownmenü dann beispielsweise eine gewünschte Startseite nach dem Login, die bevorzugte Anzahl an Bildern in der Trefferliste, oder das Sortierungskriterium der Bilder in Ihren Bildsammlungen auswählen und speichern.
+    <%= screenshot 'help/profile_settings_collection.de.png', 'Einstellungen Bildsammlung' %>
+  </p>
+
+  <%= section_heading 'Inaktive Benutzer', 'inactive' %>
+  <p>
+    Wenn ein(e) Benutzer*in inaktiv ist (oder gelöscht wurde), kann seine Profilseite nicht
+    länger eingesehen werden. Auch wenn die Person Spuren im Bildarchiv hinterlassen
+    hat, werden zum Schutz seiner/ ihrer Privatsphäre keine öffentlichen Informationen
+    mehr verfügbar sein.
+  </p>
+
+<% end -%>
+
+<%= render :partial => 'footer' %>

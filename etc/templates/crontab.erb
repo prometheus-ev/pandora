@@ -1,0 +1,19 @@
+<% if ENV['PM_EXCEPTION_RECIPIENTS'] %>
+MAILTO=<%= ENV['PM_EXCEPTION_RECIPIENTS'].split.first %>
+<% end %>
+<% if ENV['PM_CRON_BIN'] %>
+PATH=<%= ENV['PM_CRON_BIN'] %>:/usr/local/bin:/usr/bin:/usr/local/sbin:/usr/sbin
+<% end %>
+PM_ROOT=<%= ENV['PM_ROOT'] %>
+RAILS_ENV=production
+
+1 23 * * * prometheus cd $PM_ROOT/pandora && bundle exec rake pandora:parse_logs
+1 45 1 * * prometheus cd $PM_ROOT/pandora && bundle exec rake pandora:sum_stats
+1 55 1 * * prometheus cd $PM_ROOT/pandora && bundle exec rake pandora:top_terms
+
+2 33 * * * prometheus cd $PM_ROOT/pandora && bundle exec rake pandora:clear_stale_rate_limits
+2 43 * * * prometheus cd $PM_ROOT/pandora && bundle exec rake pandora:clear_stale_sessions
+2 55 * * * prometheus cd $PM_ROOT/pandora && bundle exec rake pandora:clear_stale_signups
+
+# Inform users about impending expiration of their account (lib/tasks/pandora/notfications.rake)
+# 05 8 * * * prometheus cd $PM_ROOT/pandora && bundle exec rake pandora:expiration_notification

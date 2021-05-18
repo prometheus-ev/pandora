@@ -1,0 +1,71 @@
+<%= form_tag({ :controller => 'searches', :action => 'advanced' }, { :method => 'get', :class => 'search_form search_query', :id => 'query_form' }) do -%>
+  <table style="width: 100%;">
+    <col width="50px" />
+    <col width="140px" />
+    <col width="auto" />
+    <col width="auto" />
+    <col width="40px" />
+    <% @search.field_selected.keys.each_index { |i| %>
+      <tr>
+        <td>
+          <% if i == 0 %>
+            <%= hidden_field_tag "boolean_fields_selected[" + i.to_s + "]", "must" %>
+          <% else %>
+            <%= select_tag("boolean_fields_selected[" + i.to_s + "]",
+                           options_for_select(@search.boolean_fields.map { |field| [field[0].humanize.downcase.t, field[1]] }, @search.boolean_fields_selected[i.to_s])) %>
+          <% end %>
+        </td>
+        <td>
+          <%= select("search_field",
+                     i.to_s,
+                     @search.fields.map { |field| [field.humanize.t, field] },
+                     { :selected => @search.field_selected[i.to_s] }) %>
+        </td>
+        <td colspan="2">
+          <%= text_field_tag "search_value[" + i.to_s + "]", @search.value_text[i.to_s], :placeholder => "", :tabindex => i + 1, :autofocus => true, :style => 'width: 98%;' %>
+        </td>
+        <% if i + 1 == @search.field_selected.keys.size %>
+          <td>
+            <div class="row-adder-athene-search scriptonly" title="<%= row_adder_title = 'Add another query condition'.t %>"></div>
+            <noscript><%= image_submit_tag 'misc/row-adder.gif', :name => 'commit', :value => 'noop', :class => 'row-adder', :title => row_adder_title %></noscript>
+          </td>
+        <% else %>
+          <td></td>
+        <% end %>
+      </tr>
+    <% } %>
+    <tr>
+      <% if admin_or_superadmin? %>
+        <td>
+          <label for="sample"><%= 'Sample?'.t %></label>
+          <%= check_box_tag 'sample', '1', @search.sample %>
+        </td>
+        <td>
+          <%= text_field_tag 'sample_size', @search.sample_size || '1', :size => 2 %>
+        </td>
+      <% else %>
+        <td colspan="2">
+        </td>
+      <% end %>
+      <td>
+        <% help_link = link_to(
+              'syntax help'.t,
+              help_url(section: 'syntax', host: request.host, anchor: nil),
+              {title: 'Syntax help'.t}
+            )
+        %>
+        <%= "See %s for details and examples." / help_link %>
+      </td>
+      <td style="padding-right: 5px;">
+        <%= search_button %>
+      </td>
+      <td>
+      </td>
+    </tr>
+  </table>
+
+  <%= render :partial => 'athene_search_results_none' %>
+  <%= render :partial => 'source_list' %>
+<% end %>
+
+<%= render :partial => 'athene_search_results' %>

@@ -1,0 +1,88 @@
+<tr class="list_row undim <%= cycle('odd', 'even', :name => cycle_name) %>">
+  <% thumbnail = row.visible_thumbnail(current_user) %>
+  <% image_count = row.image_count %>
+  <% visible_images_count = row.visible_images(current_user).size %>
+
+  <td class="thumbnail">
+    <%= link_to image_tag_for(thumbnail, 110, title: "Go to collection".t), collection_path(row) if thumbnail %>
+  </td>
+  <td class="metadata">
+    <div class="title-line">
+      <%= link_to row.title, collection_path(row) %>
+      <% unless row.owned_by?(current_user) %>
+        (<%= 'by'.t %> <%= link_to row.owner.fullname, account_path(row.owner) %>)
+      <% end %>
+      <% if current_user.allowed?(row, :write) %>
+        <%= link_to(
+          image_tag('icon/edit.gif'),
+          edit_collection_path(row),
+          class: 'icon edit-icon',
+          title: 'Edit'.t
+        ) %>
+      <% end %>
+    </div>
+  <% unless row.description.blank? -%>
+    <div class="description-line"><%= truncated(row.description) %></div>
+  <% end -%>
+    <div class="summary-line">
+      <% if row.public_access == 'write' %>
+        <span class="access_status" title="<%= 'Publicly writable'.t %>">
+          <%= image_tag('misc/access_status_writable.gif') %>
+          <%= 'Publicly writable'.t %>
+        </span>
+      <% elsif row.writable?(current_user) %>
+        <span class="access_status" title="<%= 'Writable'.t %>">
+          <%= image_tag('misc/access_status_writable.gif') %>
+          <%= 'Writable'.t %>
+        </span>
+      <% elsif row.public_access == 'read' %>
+        <span class="access_status" title="<%= 'Publicly readable'.t %>">
+          <%= image_tag('misc/access_status_readable.gif') %>
+          <%= 'Publicly readable'.t %>
+        </span>
+      <% elsif row.readable?(current_user) %>
+        <span class="access_status" title="<%= 'Readable'.t %>">
+          <%= image_tag('misc/access_status_readable.gif') %>
+          <%= 'Readable'.t %>
+        </span>
+      <% else %>
+        <span class="access_status" title="<%= 'Private'.t %>">
+          <%= image_tag('misc/access_status_private.gif') %>
+          <%= 'Private'.t %>
+        </span>
+      <% end %>
+      <%= vbar %>
+      <strong>
+        <%= (image_count == 1 ? '%d image' : '%d images') / image_count %>
+      </strong>
+      <% if visible_images_count != image_count %>
+        <%= "(of which #{(visible_images_count == 1 ? '%d image' : '%d images')} are visible to your user)" / visible_images_count %>
+      <% end %>
+    <% unless row.updated_at.blank? -%>
+      <%= vbar %>
+      <%= 'Last changed'.t %> <%= distance_of_time_ago_in_words_tag(row.updated_at) %>
+    <% end -%>
+    </div>
+  <% if row.collaborators.any? %>
+    <div>
+      <strong><%= 'Collaborators'.t %>: </strong>
+      <%= row.collaborators.pluck(:login).join(', ') %>
+    </div>
+  <% end %>
+  <% if row.viewers.any? %>
+    <div>
+      <strong><%= 'Viewers'.t %>: </strong>
+      <%= row.viewers.pluck(:login).join(', ') %>
+    </div>
+  <% end %>
+  <% if row.keywords.any? -%>
+    <div>
+      <%= 'Keywords'.t %>:
+      <% row.keywords.each_with_index do |keyword, i| -%><!--
+     --><%= i > 0 ? ', ' : '' %>
+        <%= link_to keyword.title, field: 'keywords', value: keyword.title %><!--
+   --><% end -%>
+    </div>
+  <% end -%>
+  </td>
+</tr>

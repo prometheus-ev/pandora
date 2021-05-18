@@ -1,0 +1,13 @@
+<% if @user.mode == 'guest' -%>
+  <%= render partial: 'signup_completed_guest' %>
+<% elsif @user.mode == 'institution' -%>
+  <%= render partial: 'signup_completed_institution' %>
+<% elsif @user.mode == 'invoice' %>
+  <%= render partial: 'signup_completed_invoice' %>
+<% elsif @user.mode == 'paypal' %>
+  <%= render partial: 'signup_completed_paypal' %>
+<% end -%>
+
+<br class="vspace1" />
+
+<%= render partial: 'contact' %>

@@ -1,0 +1,12 @@
+<tr>
+  <th><label for="collection_references"><%= 'References'.t %></label><br /><small>(<%= 'One_MASC per line'.t %>)</small></th>
+  <td>
+    <%= f.text_area(
+      :references,
+      options_for_field(:references,
+        rows: 5,
+        value: (@collection.references || []).join("\n")
+      )
+    ) %>
+  </td>
+</tr>

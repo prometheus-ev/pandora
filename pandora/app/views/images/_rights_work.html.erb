@@ -1,0 +1,23 @@
+<%= rights_work.map { |right_work|
+  if right_work.include?("http")
+    if is_url?(right_work)
+      link_to(right_work, right_work, :target => '_blank')
+    elsif right_work.include?(",http")
+      link_to_links(right_work)
+    else
+      format_content(right_work, :escape => false)
+    end
+  else
+    if right_work == "rights_work_warburg"
+      link_to('The Warburg Institute, London', 'http://warburg.sas.ac.uk/archive/', :target => '_blank')
+    elsif right_work == "rights_work_vgbk"
+      link_to('VG Bild-Kunst', 'http://www.bildkunst.de', :target => '_blank')
+    else
+      if right_work == 'In the public domain'
+        h(right_work.t)
+      else
+        format_content(right_work, :escape => false)
+      end
+    end
+  end
+}.join(" | ").html_safe %>

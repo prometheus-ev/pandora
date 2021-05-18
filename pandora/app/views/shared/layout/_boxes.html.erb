@@ -1,0 +1,25 @@
+<%= apply_behaviour true, 'boxes' %>
+
+<div id="boxes" _order_uri="<%= url_for(:controller => 'box', :action => 'order') %>">
+  <% for box in current_boxes; next unless !box.object? || (box.object && current_user.allowed?(box.object, :read)) -%>
+    <div class="sidebar_box" id="<%= id = box.dom_id %>">
+      <span class="box_handle" title="<%= box.category.humanize.t %>: <%=h box.title %>">
+        <%= external_image_tag("sidebar/icon_box_#{box.category}.gif") %>
+        <strong><%=h (box.title || "").truncate(22) %></strong>
+      </span>
+      <%= link_to_close_box({ :controller => 'box', :action => 'delete', :id => box.id }, :data => { confirm: "Are you sure to delete Box: '%s'" / box.title }, :method => 'delete') %>
+      <%= link_to url_for_box(box) do %>
+        <div class="open" title="<%= 'Open'.t %>"></div>
+      <% end %>
+      <%= link_to_toggle_box(box.expanded, :toggle_box, id) %>
+      <div
+        class="box_content undim<%= ' noscript' unless box.expanded %>"
+        id="<%= box_content_id(id) %>"
+        _content_uri="<%= url_for_box(box, box_id: box.dom_id) %>"
+      >
+      <div class="noscript"><em><%=h box.description %></em></div>
+      <div class="scriptonly"><%= 'Loading...'.t %></div>
+      </div>
+    </div>
+  <% end -%>
+</div>

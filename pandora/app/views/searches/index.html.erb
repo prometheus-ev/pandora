@@ -1,0 +1,36 @@
+<%= form_tag({ :controller => 'searches' }, { :method => 'get', :class => 'search_form search_query', :id => 'query_form' }) do -%>
+  <%= hidden_field_tag :view, view %>
+
+  <table>
+    <tr>
+      <td>
+        <%= text_field_tag "search_value[0]", @search.value_text["0"], :placeholder => "", :tabindex => 1, :autofocus => true, :size => 30 %>
+      </td>
+      <td>
+        <%= search_button %>
+      </td>
+    </tr>
+    <tr>
+      <td colspan="2">
+        <% help_link = link_to(
+              'search help'.t,
+              help_url(section: 'search', host: request.host, anchor: nil),
+              {title: 'Search help'.t}
+            )
+        %>
+        <%= "See %s for details and examples." / help_link %>
+      </td>
+    </tr>
+  </table>
+<% end %>
+<% if current_user && current_user.dbuser? %>
+  <p>
+    <strong>
+      <%= "Hint: You are currently only searching in open access database %s." / current_user.open_sources.join(", ") if current_user && current_user.open_sources %>
+      <%= "If you would like to search in all databases, please %s with a full user account." / (link_to 'log in'.t, :controller => 'sessions', :action => 'new', :host =>  request.base_url) %>
+    </strong>
+  </p>
+<% end %>
+
+<%= render :partial => 'athene_search_results_none' %>
+<%= render :partial => 'athene_search_results' %>

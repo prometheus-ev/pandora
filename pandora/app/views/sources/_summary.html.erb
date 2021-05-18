@@ -1,0 +1,22 @@
+<% unless @source.url.blank? -%>
+  <%= gogif %> <%= link_to 'Database homepage'.t, @source.url %>
+<% end -%>
+<% unless @source.url.blank? -%>
+  <%= vbar %>
+<% end -%>
+<strong class="nowrap">
+  <%= link_to_if @source.record_count > 0 && (!current_user || !current_user.dbuser? || current_user.open_sources.include?(@source)), (@source.record_count == 1 ? '%d image' : '%d images') / @source.record_count, :controller => 'searches', :action => 'index', :term => '*', :s => [@source.name] %>
+</strong>
+<% if @source.open_access? && !(current_user && current_user.dbuser? && current_user == @source.dbuser) -%>
+  <%= vbar %>
+  <strong class="nowrap">
+    <%= link_to_open_source @source %>
+  </strong>
+<% end -%>
+<% if current_user && current_user.allowed?(@source) -%>
+  <%= vbar %>
+  <span class="nowrap">
+    <% ratings_count = @source.rated_images.count %>
+    <%= link_to "%d" / ratings_count + " " + (ratings_count == 1 ? "rating".t : "ratings".t), :action => 'ratings', :id => @source %>
+  </span>
+<% end -%>

@@ -1,0 +1,46 @@
+<div class="<%= classes_for_comment(comment) %>">
+  <a name="<%= comment.anchor %>" id="<%= comment.anchor %>"></a>
+  <div class="undim">
+    <div class="comment-heading">
+      <%= link_to_author(comment) %>
+
+      <%= vbar %>
+      <%= distance_of_time_ago_in_words_tag(comment.last_changed) %>
+
+      <span class="dim">
+        <% if current_user.allowed?(comment) && !comment.deleted? %>
+          <%= vbar %>
+          <%= link_to image_tag('misc/pen.gif'), '#edit-comment', class: 'pm-edit-comment', title: 'Edit this comment'.t %>
+        <% end %>
+
+        <% if current_user.allowed?(comment.commentable, :comment) %>
+          <%= vbar %>
+          <%= link_to 'Reply'.t, '#reply-to-comment', class: 'pm-reply-to-comment', title: 'Leave a reply to this comment'.t %>
+        <% end -%>
+
+        <%= vbar %>
+        <%= link_to '#', {anchor: comment.anchor}, {title: 'Link to this comment'.t} %>
+      </span>
+    </div>
+
+    <p>
+      <% if !comment.author_id %>
+        <%= 'This comment has been deleted'.t %>
+      <% else %>
+        <%= truncated(comment.text, 280, :parent => section_id('comments'), :simple_format => true) %>
+      <% end %>
+    </p>
+  </div>
+
+  <div class="pm-edit-form">
+    <%= render partial: 'comments/edit', locals: {comment: comment} %>
+  </div>
+
+  <div class="pm-reply-to-form">
+    <%= render partial: 'comments/reply', locals: {to: comment} %>
+  </div>
+
+  <% comment.replies.each do |reply| %>
+    <%= render partial: 'comments/comment', locals: {comment: reply} %>
+  <% end %>
+</div>

@@ -1,0 +1,12 @@
+<tr>
+  <th><label for="collection_links"><%= 'Links'.t %></label><br /><small>(<%= 'One_MASC per line'.t %>)</small></th>
+  <td>
+    <%= f.text_area(
+      :links,
+      options_for_field(:links,
+        rows: 5,
+        value: (@collection.links || []).join("\n")
+      )
+    ) %>
+  </td>
+</tr>

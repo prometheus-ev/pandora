@@ -1,0 +1,38 @@
+<div class="icons">
+  <div class="image_check_box dim">
+
+    <%= check_box_tag 'image[]', super_image.pid, !list, class: 'image_list_item', disabled: !list, id: nil %>
+
+  </div>
+  <div class="dim">
+
+    <div class="scriptonly icon store_image pseudo-form" _action="<%= url_for(:controller => 'collections', :action => 'store', :image => [super_image.pid], :target_collection => { :collection_id => nil }, :presentation => { :presentation_id => nil }) %>">
+      <% if super_image.has_record? %>
+        <%= render :partial => 'shared/image/image_store', locals: {super_image: super_image} %>
+        <%= image_tag('icon/store_inactive.gif') %>
+      <% end %>
+    </div>
+
+    <%= icon_for_active_inactive(list, 'image/plus%s.gif', { :class => 'icon', :title => 'View full record'.t }, { :controller => 'images', :action => 'show', :id => super_image.pid }) %>
+
+    <%= icon_for_active_inactive(true, 'image/plusplus%s.gif', { :class => 'icon', :title => 'Large size image'.t }) { |img, link_options, html_options| link_to img, controller: 'images', action: 'large', id: super_image.pid } %>
+
+    <%= icon_for_active_inactive(current_user.mode != 'guest', 'icon/download%s.gif', { :class => 'icon', :title => 'Download image and metadata.'.t + "#{' ' + 'Not available for guest-account.'.t if current_user.mode == 'guest'}" }, { :controller => 'images', :action => 'download', :id => super_image.pid, :format => 'zip' }) %>
+
+    <%= icon_for_active_inactive(super_image.elastic_record && !super_image.elastic_record['_source']['source_url'].blank?, 'image/externlink%s.gif', { :class => 'icon', :title => "Link to #{super_image.elastic_record["_index"].gsub(/_\d+/, "") == 'mka' ? 'video' : 'image'} in original database".t }, (super_image.elastic_record['_source']['source_url'] || []).join, { :target => '_blank' }) %>
+
+    <%= icon_for_active_inactive(
+      super_image.has_record?,
+      "image/publish#{'_prometheus' if super_image.source.can_exploit_rights?}%s.gif", 
+      {
+        :class => 'icon',
+        :title => 'Copyright and publishing information'.t
+      },
+      {
+        :controller => 'images',
+        :action => 'publish',
+        :id => super_image.pid           
+      }
+    ) %>
+  </div>
+</div>

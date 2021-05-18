@@ -1,0 +1,19 @@
+<div class="header-line">
+  <h2 class="title-line">
+    <%=h @institutional_upload_database.title %>
+    <span class="subtitle">
+      <%=h @institutional_upload_database.institution.fulltitle %>
+      <%= link_to(
+        image_tag('misc/info.gif', class: 'dim'), 
+        institution_path(@institutional_upload_database.institution),
+        title: 'Information about the institution'.t
+      ) %>
+    </span>
+  </h2>
+  <p class="quota-line"><%= @page_title %></p>
+  <% if action_name == 'index' %>
+      <%= link_to create_button('Create new institutional upload'.t, :plus), new_institutional_upload_path(@institutional_upload_database.id) %>
+  <% end %>
+</div>
+<div class="section clear-float"></div>
+<%= render :partial => 'object_reuse_latest_metadata' %>

@@ -1,0 +1,11 @@
+<tr>
+  <th><label for="collection_collaborator_list"><%= 'Collaborators'.t %></label><br /><small>(<%= "Can modify your collection".t %>; <%= 'One user name per line'.t %>)</small></th>
+  <td>
+    <%= f.text_area :collaborator_list, options_for_field(:collaborators,
+      rows: 5,
+      value: @collection.collaborator_list,
+      disabled: (@collection.has_unapproved_uploads? ? 'disabled' : nil)
+    ) %>
+    <%= suggest_names_for 'collection', :collaborator_list, :only => "collections/store" %>
+  </td>
+</tr>

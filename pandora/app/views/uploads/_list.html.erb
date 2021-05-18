@@ -1,0 +1,16 @@
+<%= list_controls = render :partial => 'searches/results_controls', :locals => { :results => @uploads, sort_columns: ['Title', 'Updated at', 'Created at', 'Artist', 'Location'] } %>
+
+<%= form_tag({ :controller => 'collections', :action => 'store' }, { :id => 'upload_list_form', :class => 'clear-padding' }) do -%>
+  <%= render :partial => 'store_controls', :locals => { :pos => 'top' } %>
+
+  <div class="image_list view-<%= view %>">
+    <% @uploads.each do |upload| %>
+      <% si = Pandora::SuperImage.from(upload) %>
+      <%= render partial: 'images/row', locals: {super_image: si} %>
+    <% end %>
+  </div>
+
+  <%= render :partial => 'store_controls', :locals => { :pos => 'bottom' } %>
+<% end -%>
+
+<%= list_controls %>

@@ -1,0 +1,36 @@
+<div class="search_query">
+  <label for="value" class="search_heading">
+    <%= "Search sources".t %>:
+  </label>
+
+  <%= form_tag '', :method => 'get', :class => 'search_form' do -%>
+    <%= select_tag :field, options_for_select_t(Source.search_columns.map { |search_column| [search_column.humanize, search_column] }, @field) %>
+    <%= text_field_tag :value, @value, :size => 30 %>
+    <%= search_button nil, :float => nil %>
+
+    <% unless @value.blank? -%>
+      <span class="reset-link">[<%= link_to 'Clear/Show all'.t, safe_params.except('field', 'value', 'commit') %>]</span>
+    <% end -%>
+
+    <div class="clearfix"></div>
+  <% end -%>
+</div>
+
+<% if @sources -%>
+  <div class="infobar">
+    <%= range_summary_for(@sources, "Sources") %>
+    <span class="gap"></span>
+  </div>
+
+  <%= list_controls = render :partial => 'list_controls', :locals => { :results => @sources, sort_columns: Source.sort_columns } %>
+
+  <table class="list sources-list clear-float clear-padding">
+    <%= render :partial => "sources/row", :collection => @sources.items, :locals => { :cycle_name => 'list' } %>
+  </table>
+
+  <%= list_controls %>
+<% else -%>
+  <div class="infobar">
+    <p><strong><%= "No sources found.".t %></strong></p>
+  </div>
+<% end -%>

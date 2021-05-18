@@ -1,0 +1,13 @@
+<% content_for :head do %>
+  <%= render :partial => 'mass_mailer/header_html_style' -%>
+<% end %>
+
+<h2 class="page_title"><%= 'Newsletter'.t %> <%= @email.newsletter_subject %></h2>
+
+<!-- REWRITE: made more readable -->
+<%#= !@email.body_html.blank? ? @email.body_html.strip : simple_format(auto_link(h(@email.body))) %>
+<% if !@email.body_html.blank? %>
+  <%= @email.body_html.strip.html_safe %>
+<% else %>
+  <%= simple_format(Rinku.auto_link(h(@email.body))).html_safe %>
+<% end %>

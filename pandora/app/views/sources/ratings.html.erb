@@ -1,0 +1,21 @@
+<%= page_title %>
+
+<%= rating_controls = render :partial => 'rating_controls' %>
+
+<table class="list resourceful-list clear-padding">
+<% for image in @images -%>
+  <tr class="list_row <%= cycle('odd', 'even') %>">
+    <td class="image">
+      <%= link_to_image_record(image) %>
+    </td>
+    <td class="metadata">
+      <%= image.descriptive_title(nil) %>
+      <br />
+      <%= link_to_rating(image) %>
+      (<%= rating_title_for(image, image.rating, true) %>)
+    </td>
+  </tr>
+<% end -%>
+</table>
+
+<%= rating_controls %>

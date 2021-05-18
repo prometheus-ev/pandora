@@ -1,0 +1,10 @@
+<div class="header-line clear-padding"><%= page_title %><br /></div>
+<br class="clear-float" />
+
+<%= error_messages_for :announcement %>
+
+<!-- REWRITE: rails handles all of that automatically -->
+<%# form_for :notification, @notification, :url => {:controller => 'announcement', :action => 'update', :id => @notification.id } do |f| -%>
+<%= form_for @announcement, :html => { :class => 'edit-form' } do |f| -%>
+  <%= render :partial => 'form', :locals => { :f => f, :year => Time.now.year } %>
+<% end -%>

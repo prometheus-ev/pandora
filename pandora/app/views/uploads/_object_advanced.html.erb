@@ -1,0 +1,47 @@
+<table>
+  <tr>
+    <th><label for="upload_addition"><%= 'Addition'.t %></label></th>
+    <td><%= f.text_field :addition, options_for_field(:addition) %></td>
+  </tr>
+  <tr>
+    <th><label for="upload_annotation"><%= 'Annotation'.t %></label></th>
+    <td><%= f.text_area :annotation, options_for_field(:annotation, :rows => 3) %></td>
+  </tr>
+  <tr>
+    <th><label for="upload_iconography"><%= 'Iconography'.t %></label></th>
+    <td><%= f.text_field :iconography, options_for_field(:iconography) %></td>
+  </tr>
+  <tr>
+    <th><label for="upload_institution"><%= 'Institution'.t %></label></th>
+    <td><%= f.text_field :institution, options_for_field(:institution) %></td>
+  </tr>
+  <tr>
+    <th><label for="upload_inventory_no"><%= 'Inventory No.'.t %></label></th>
+    <td><%= f.text_field :inventory_no, options_for_field(:inventory_no) %></td>
+  </tr>
+  <tr>
+    <th><label for="upload_origin"><%= 'Origin'.t %></label></th>
+    <td><%= f.text_field :origin, options_for_field(:origin) %></td>
+  </tr>
+  <tr>
+    <th><label for="upload_other_persons"><%= 'Other Persons'.t %></label></th>
+    <td><%= f.text_field :other_persons, options_for_field(:other_persons) %></td>
+  </tr>
+  <tr>
+    <th><label for="upload_photographer"><%= 'Photographer'.t %></label></th>
+    <td><%= f.text_field :photographer, options_for_field(:photographer) %></td>
+  </tr>
+  <tr>
+    <th><label for="upload_size"><%= 'Size'.t %></label></th>
+    <td><%= f.text_field :size, options_for_field(:size) %></td>
+  </tr>
+  <tr>
+    <th><label for="upload_subtitle"><%= 'Subtitle'.t %></label></th>
+    <td><%= f.text_field :subtitle, options_for_field(:subtitle) %></td>
+  </tr>
+  <tr>
+    <th><label for="upload_text"><%= 'Text'.t %></label></th>
+    <td><%= f.text_area :text, options_for_field(:text, :rows => 3) %></td>
+  </tr>
+  <%= form_controls %>
+</table>

@@ -1,0 +1,8 @@
+<div class="header-line">
+  <h2 class="title-line"><%= @page_title %><%= image_tag('misc/info_form_field.gif', :style => 'vertical-align: top;', :class => 'dim', :title => @page_info) if @page_info %></h2>
+  <% if action_name == 'index' %>
+    <%= link_to create_button('Create new upload'.t, :plus), action: 'new' %>
+  <% end %>
+</div>
+<div class="section clear-float"></div>
+<%= render :partial => 'object_reuse_latest_metadata' %>

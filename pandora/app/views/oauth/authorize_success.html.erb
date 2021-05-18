@@ -1,0 +1,14 @@
+<h2><%= 'Access authorized'.t %></h2>
+
+<p>
+  <%= 'Now you need to return to the application %s and enter the following code (excluding quotes)' / link_to(h(@token.client_application), @token.client_application.url) %>:
+</p>
+
+<p style="text-align: center">
+  <code style="font-size: 150%"><%= @token.verifier %></code>
+</p>
+
+<p>
+  <%= 'Afterwards, you may close this window.'.t %>
+  <%= render :partial => 'link_to_all' %>
+</p>

@@ -1,0 +1,29 @@
+<% if @upload.parent -%>
+  <%= render partial: 'images/row', locals: {
+    super_image: Pandora::SuperImage.from(@upload.parent),
+    secondary_icons: false
+  } %>
+
+  <div class="button-wrap">
+    <%= link_to_button(
+      'Disconnect parent object'.t,
+      {action: 'disconnect', id: @upload.id},
+      data: {confirm: 'Are you sure?'.t}
+    ) %>
+  </div>
+<% else -%>
+  <div class="upload-item">
+    <div class="image_wrap">
+      <div class="image">
+        <img id="parent-image" style="display: none;" src="">
+      </div>
+    </div>
+  </div>
+  <div class="upload_parent">
+    <%= f.label :parent_id, 'Connect the object with a parent object'.t + ':' %>
+    <%= f.upload_parent_selector  %>
+    <%= form_controls("Connect".t) %>
+  </div>
+<% end -%>
+
+<div class="clear-float"></div>

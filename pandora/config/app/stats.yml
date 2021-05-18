@@ -1,0 +1,11 @@
+---
+:columns_for:
+  :list:
+    - datetime
+    - request
+    - runtime
+    - ip
+  :display_exclude:
+    - pid
+    - params
+    - params_hash

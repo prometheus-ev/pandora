@@ -1,0 +1,33 @@
+<%= rewarded_stars(ratings = @user.rated_images.count) %>
+
+<% if ratings == 0 -%>
+  <%= @is_self ? 'You have not rated any images yet'.t : '%s has not rated any images yet' / h(@user) %>
+<% elsif ratings == 1 -%>
+  <%= @is_self ? 'You have rated one image'.t : '%s has rated one image' / h(@user) %>
+<% elsif ratings < 100 -%>
+  <%= (@is_self ? 'You have rated <strong>%d</strong> images' / ratings : ('%s has rated <strong>%d</strong> images' / ratings) % h(@user)).html_safe %>
+<% else -%>
+  <%= (@is_self ? 'You have already rated <strong>%d</strong> images' / ratings : ('%s has already rated <strong>%d</strong> images' / ratings) % h(@user)).html_safe %>
+<% end -%>
+
+<%# REWRITE: we disentangle this to remove presentations and for clarity %>
+<% if @public_collections.present? %>
+  <%= vbar %>
+  <span class="nowrap">
+    <%= link_to(
+      "%d public #{"collection".pluralize(@public_collections.size)}" / @public_collections.size,
+      controller: 'collections', action: 'public', field: 'owner', value: @user.login
+    ) %>
+  </span>
+<% end %>
+
+<% if @shared_collections.present? %>
+  <%= vbar %>
+  <span class="nowrap">
+    <%= link_to(
+      "%d shared collection" / @shared_collections.size,
+      controller: 'collections', action: 'shared', field: 'owner', value: @user.login
+    ) %>
+  </span>
+<% end %>
+

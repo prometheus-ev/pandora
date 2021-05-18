@@ -1,0 +1,23 @@
+<h2 class="page_title">
+  <%= 'Edit Source'.t + ' "' + @source.title + '"' %>
+</h2>
+
+<%= error_messages_for :source %>
+
+<%= form_for @source, as: :source, :html => { :class => 'edit-form' } do |f| -%>
+  <table>
+    <%= render_form_part(f, :name) if action_name == 'new' %>
+    <%= render_form_parts(f, %w[title email description]) %>
+
+    <% restrict_to :superadmin, :admin do -%>
+      <%= render_form_parts(f, %w[institution quota admin open_access]) %>
+    <% end -%>
+
+    <tr>
+      <th><%= f.label :can_exploit_rights, 'Can exploit rights?'.t %></th>
+      <td><%= f.check_box :can_exploit_rights %></td>
+    </tr>
+
+    <%= form_controls %>
+  </table>
+<% end -%>

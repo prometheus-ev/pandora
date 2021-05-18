@@ -1,0 +1,30 @@
+<div class="help_navigation">
+  <% if params[:section].present? %>
+    <% if previous_page %>
+      <%= link_to_help(
+        previous_page.merge(
+          label: image_tag('misc/prev.gif'),
+          title: previous_page[:label]
+        )
+      ) %>
+    <% else %>
+      <%= image_tag 'misc/prev_inactive.gif' %>
+    <% end %>
+
+    <%= link_to_help(
+      label: image_tag('misc/up.gif'),
+      title: 'Back to help index',
+    ) %>
+
+    <% if next_page %>
+      <%= link_to_help(
+        next_page.merge(
+          label: image_tag('misc/next.gif'),
+          title: next_page[:label]
+        )
+      ) %>
+    <% else %>
+      <%= image_tag 'misc/next_inactive.gif' %>
+    <% end %>
+  <% end %>
+</div>

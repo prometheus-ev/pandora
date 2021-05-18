@@ -1,0 +1,16 @@
+<% if @captcha && !captcha_passed? -%>
+<div id="captcha" class="<%= 'captcha_failed' if flash[:failed_captcha] %>">
+  <%= hidden_field_tag :captcha_id, @captcha.id %>
+
+  <span id="captcha_heading"><%= 'Spam protection'.t %>:</span>
+  <br />
+
+  <label for="captcha_answer">
+    <%= @captcha.question %>
+  </label>
+
+  <%= text_field_tag :captcha_answer, params[:captcha_answer], :size => 10, :maxlength => 40, :class => 'mandatory' %>
+</div>
+<% else -%>
+<br />
+<% end -%>

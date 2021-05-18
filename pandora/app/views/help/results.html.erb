@@ -1,0 +1,66 @@
+<h2><%= 'Results help'.t %></h2>
+
+<p>
+  Located above of the list of results is the search interface containing the current search query
+  as well as the list of selected databases. You can easily customize your search by fine-tuning or
+  changing it.
+</p>
+
+<% with_toc do -%>
+
+  <%= section_heading 'Viewing and sorting options of the results', 'viewing_and_sorting' %>
+  <p>
+    Results from the search can be sorted by using the following criteria:
+  </p>
+
+  <ul>
+    <li>Relevance</li>
+    <li>Artist</li>
+    <li>Title</li>
+    <li>Location</li>
+    <li>Credits</li>
+    <li>Database name</li>
+  </ul>
+
+  <p>
+    <%= screenshot 'help/results01.png', 'Selection Sort' %>
+  </p>
+
+  <p>
+    Furthermore, the results can be shown either as a list <%= image_tag('misc/list.gif', :class => 'help_icon') %>
+    with the essential metadata of the image or in the gallery <%= image_tag('misc/gallery.gif', :class => 'help_icon') %> mode.
+    <%= screenshot 'help/results02.png', 'List' %>
+    <%= screenshot 'help/results03.png', 'Gallery' %>
+  </p>
+
+  <p>
+    You can specify the number of data sets to be displayed per page. A drop down menu allows you to
+    move to an arbitrary page of the results list.
+    <%= screenshot 'help/results04.png', 'Results per page' %>
+    <%= screenshot 'help/results05.png' %>
+  </p>
+
+  <p>
+    If you are looking for a particular artist from your search results list, you only need to click
+    the artist's name in the results list and it is automatically searched for.
+  </p>
+
+  <p>The buttons that are located in the field alongside the images specify different functions:</p>
+  <ul>
+    <li><div class="help_icon"><input type="checkbox" /></div> "Tick" selection of collection</li>
+    <li class="clear-float"><%= image_tag('icon/store.gif', :class => 'help_icon') %> Store image in collection, presentation or sidebar</li>
+    <li><%= image_tag('image/plus.gif', :class => 'help_icon') %> View full record (with extensive metadata)</li>
+    <li><%= image_tag('image/plusplus.gif', :class => 'help_icon') %> Large size image for saving the image to your hard disk</li>
+    <li><%= image_tag('icon/download.gif', :class => 'help_icon') %> Download image and metadata</li>
+    <li><%= image_tag('image/externlink.gif', :class => 'help_icon') %> Link to image in database</li>
+    <li><%= image_tag('image/publish_prometheus.gif', :class => 'help_icon') %> Information about copyright and publishing possibilities</li>
+  </ul>
+
+  <p>
+    You have the option to save the selected images to a collection. For detailed instructions on
+    creating a collection refer to <%= link_to_help section: 'collection', label: '"Collection"' %>.
+  </p>
+
+<% end -%>
+
+<%= render :partial => 'footer' %>

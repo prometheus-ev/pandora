@@ -1,0 +1,52 @@
+<h2 class="page_title"><%= 'Signup'.t %></h2>
+
+<%= error_messages_for :user %>
+
+<%= render :partial => 'sign_up_explanation' %>
+
+<%= form_for @user, as: :user, method: 'POST', url: {action: 'signup'}, html: {class: 'edit-form'} do |f| -%>
+  <fieldset class="<%= 'fieldWithErrors' if @user.errors[:mode].any? %>">
+    <legend><strong><%= 'Access mode'.t %></strong></legend>
+    <p>
+      <%= radio_button_tag 'type', 'guest', params[:type] == 'guest' %>
+      <label for="type_guest"><big><strong><%= 'One week free trial'.t %></strong></big></label>
+    </p>
+    <p>
+      <%= radio_button_tag 'type', 'institution', params[:type] == 'institution' %>
+      <label for="type_institution"><big><strong><%= 'Free access via your institution'.t %></strong></big></label>
+    </p>
+    <p>
+      <%= radio_button_tag 'type', 'paid', params[:type] == 'paid' %>
+      <label for="type_paid"><big><strong><%= 'Single license for %d EUR per year' / 30 %></strong></big></label>
+    </p>
+  </fieldset>
+
+  <br />
+
+  <fieldset>
+    <legend><strong><%= 'Account data'.t %></strong></legend>
+    <table>
+      <%= render partial: 'accounts/edit_account', locals: {f: f} %>
+    </table>
+  </fieldset>
+
+  <br />
+
+  <fieldset>
+    <legend><strong><%= 'Personal information'.t %></strong></legend>
+    <table>
+      <%= render partial: 'accounts/edit_name', locals: {f: f} %>
+      <%= render partial: 'accounts/edit_research_interest', locals: {f: f} %>
+      <%= render partial: 'accounts/edit_newsletter', locals: {f: f} %>
+    </table>
+  </fieldset>
+
+  <br />
+  <%= render :partial => 'accounts/inline_terms_of_use' %>
+  <br />
+  <%= render :partial => 'shared/misc/captcha' %>
+
+  <table>
+    <%= form_controls('Sign up'.t) %>
+  </table>
+<% end -%>

@@ -1,0 +1,15 @@
+---
+:columns_for:
+  :list:
+    - title_de
+    - title_en
+    - role
+    - starts_at
+    - ends_at
+    - updated_at
+  :search:
+    - title_de
+    - title_en
+    - body_de
+    - body_en
+    - role

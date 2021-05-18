@@ -1,0 +1,13 @@
+<% if klass.respond_to?(:search_columns) && !(search_columns = klass.search_columns).blank? -%>
+
+  <%= form_tag options, :method => 'get', :class => 'search_form' do -%>
+    <%= select_tag :field, options_for_select_t(search_columns.map { |c| c.respond_to?(:name) ? [c.human_name, c.name] : [c.humanize, c] }, @field) %>
+    <%= text_field_tag :value, @value, :size => 30 %>
+    <%= search_button nil, :float => nil %>
+    <% unless @value.blank? -%>
+      <span class="reset-link">[<%= link_to 'Clear/Show all'.t, safe_params.except('field', 'value', 'commit') %>]</span>
+    <% end -%>
+
+    <div class="clearfix"></div>
+  <% end -%>
+<% end -%>

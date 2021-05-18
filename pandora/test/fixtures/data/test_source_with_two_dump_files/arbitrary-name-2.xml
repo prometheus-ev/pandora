@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<source>
+  <row>
+    <id>2</id>
+    <path>path2</path>
+    <artist>Artist 2</artist>
+    <title>Title 2</title>
+    <location>Location 2</location>
+  </row>
+</source>

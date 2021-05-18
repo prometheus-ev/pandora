@@ -1,0 +1,14 @@
+<?xml version="1.0" ?>
+<source>
+  <row>
+    <id>1</id>
+    <object-id>1</object-id>
+    <path>path1</path>
+    <artist>Raphæel</artist>
+    <title>Tîtle Ø</title>
+    <location>
+      München, Große Straße 6
+    </location>
+    <date>1919</date>
+  </row>
+</source>

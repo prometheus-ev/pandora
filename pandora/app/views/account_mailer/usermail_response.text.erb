@@ -1,0 +1,12 @@
+The prometheus user<%= 's' unless @recipients.size == 1 %>
+
+<% for recipient, link in @recipients -%>
+<%= recipient %>
+<<%= link %>>
+
+<% end -%>
+received this message from you:
+
+<%= @text.quote(true).word_wrap(72) %>
+
+<%= render :partial => 'signature' -%>

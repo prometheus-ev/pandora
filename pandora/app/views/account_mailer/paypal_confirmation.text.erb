@@ -1,0 +1,17 @@
+Dear <%= @name %>,
+
+thank you for your decision to continue using the prometheus image archive.
+<% if @success -%>
+Your payment via PayPal was successful and your account is valid until
+<% else -%>
+Unfortunately, your payment via PayPal failed for some reason. If you need any
+help with the payment process please contact our office. Your account is still
+valid until
+<% end -%>
+
+  <%= @expires %>
+
+Enjoy working with prometheus!
+Your prometheus-Team
+
+<%= render :partial => 'signature' -%>

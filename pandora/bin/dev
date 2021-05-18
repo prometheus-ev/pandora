@@ -1,0 +1,9 @@
+#!/bin/bash -e
+
+CMD="webpack-cli -w"
+
+if [ -d /vagrant ]; then
+  CMD="$CMD --watch-options-poll true"
+fi
+
+$CMD

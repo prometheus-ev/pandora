@@ -1,0 +1,29 @@
+<ul style="padding: 0; margin: 0; list-style-type: none">
+<% for license in @institution.elapsed_licenses -%>
+  <li><%= format_license(license) %></li>
+<% end -%>
+
+<% if license = @institution.license || @institution.campus_license -%>
+  <li>
+    <strong><%= format_license(license) %></strong>
+    <% unless (licensee = license.licensee) == @institution -%>
+      [<%= 'via %s' / link_to_if_allowed(h(licensee), :controller => 'institutions', :action => 'show', :id => licensee) %>]
+    <% end -%>
+  </li>
+<% end -%>
+
+<% for license in @institution.upcoming_licenses -%>
+  <li>
+    <%= format_license(license) %>
+    <%= link_to(
+      image_tag('icon/delete.gif', :class => 'icon delete-icon'),
+      license_path(license),
+      { 
+        :title => 'Delete'.t,
+        :method => :delete,
+        :data => { confirm: "Are you sure to delete this License?".t } 
+      }
+    ) %>
+    </li>
+<% end -%>
+</ul>

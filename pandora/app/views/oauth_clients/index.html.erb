@@ -1,0 +1,71 @@
+<% is_admin = current_user.admin_or_superadmin? -%>
+
+<% if is_admin -%>
+
+<% unless @client_applications.empty? -%>
+<h2><%= 'Applications'.t %></h2>
+<% for client in @client_applications -%>
+  <%= div_for client do -%>
+    <%= link_to h(client), client %>
+    <%= link_to(
+      image_tag('icon/edit.gif', :class => 'icon'),
+      edit_client_application_path(client),
+      title: 'Edit'.t
+    ) %>
+    <%= link_to(
+      image_tag('icon/delete.gif', :class => 'icon delete-icon'),
+      client_application_path(client),
+      title: 'Delete'.t, data: {
+        confirm: "Are you sure to delete client application: '%s'".t / client
+      },
+      method: :delete
+    ) %>
+  <% end -%>
+<% end -%>
+<% end -%>
+
+<% end -%>
+
+<h2><%= 'Authorizations'.t %></h2>
+
+<% unless @tokens.empty? -%>
+
+<% unless is_admin -%>
+  <p><%= 'The following tokens have been issued to applications in your name'.t %>:</p>
+<% end -%>
+
+<table>
+  <tr><th><%= 'Application'.t %></th><th><%= 'Issued'.t %></th></tr>
+  <% for token in @tokens -%>
+    <tr>
+      <td>
+      <% if client = token.client_application -%>
+        <%= link_to h(client), client.url %>
+        <% unless client.support_url.blank? -%>
+          <small><%= link_to 'Support'.t, client.support_url %></small>
+        <% end -%>
+      <% end -%>
+      </td>
+      <td><%= distance_of_time_ago_in_words_tag token.authorized_at %></td>
+      <td></td>
+      <td>
+      <% if (user = token.user) == current_user -%>
+        <%= form_tag :controller => 'oauth', :action => 'revoke' do -%>
+          <%= hidden_field_tag :token, token.token %>
+          <%= image_submit_tag 'icon/delete.gif', :class => 'delete-icon', :title => 'Revoke!'.t %>
+        <% end -%>
+      <% else -%>
+        <%= link_to_profile user %>
+      <% end -%>
+      </td>
+    </tr>
+  <% end %>
+</table>
+
+<% else -%>
+
+<% unless is_admin -%>
+  <p><%= 'There are currently no tokens issued to applications in your name.'.t %></p>
+<% end -%>
+
+<% end -%>

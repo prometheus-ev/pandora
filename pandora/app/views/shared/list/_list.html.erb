@@ -1,0 +1,33 @@
+<% name    = controller_name
+   base    = name
+   key     = name.humanize.downcase.pluralize
+   key     = "#{action_name.humanize.downcase} #{key}" unless %w[index list].include?(action_name)
+   classes = "list #{File.basename(base)}-list clear-float clear-padding" -%>
+<div class="search_query">
+  <label for="value" class="search_heading"><%= "Search #{key}".t %>:</label>
+  <%= list_search_for klass %>
+</div>
+<% unless (objects = objects_for_controller).blank? -%>
+  <div class="infobar">
+    <%= range_summary_for(objects, controller_name.humanize) %>
+    <span class="gap"></span>
+  </div>
+
+  <% if defined?(custom) && custom -%>
+    <%= render :partial => "#{base}/list", :locals => { :klass => klass, :objects => objects, :classes => classes, :cycle_name => 'list' } %>
+  <% else -%>
+    <%= list_controls = render :partial => 'shared/list/controls', :locals => { :klass => klass, :objects => objects } %>
+
+    <table class="<%= classes %>">
+      <% items = (objects.is_a?(Pandora::Collection) ? objects.items : objects) %>
+      <% base = 'emails' if base == 'email' %>
+      <%= render :partial => "#{base}/row", :collection => items, :locals => { :cycle_name => 'list' } %>
+    </table>
+
+    <%= list_controls %>
+  <% end -%>
+<% else -%>
+  <div class="infobar">
+    <p><strong><%= "No #{key} found.".t %></strong></p>
+  </div>
+<% end -%>

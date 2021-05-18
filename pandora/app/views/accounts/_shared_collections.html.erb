@@ -1,0 +1,3 @@
+<table class="list resourceful-list">
+  <%= render :partial => 'shared/resourceful/row', :collection => @shared_collections.sort_by(&:updated_at).reverse, :locals => { :name => 'collection', :public_view => true, :cycle_name => 'shared' } %>
+</table>

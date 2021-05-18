@@ -1,0 +1,17 @@
+<%= @cs_own ||= capture do %>
+  <% collections = 
+    Collection.
+    order(:title).
+    distinct.
+    owned_by(current_user).
+    pluck(:title, :id)
+  %>
+  
+  <% unless collections.empty? %>
+    <%= select(
+      :target_collection, :collection_id, collections,
+      {prompt: 'Own'.t},
+      {class: 'autoselect', id: 'own_collections_selector'}
+    ) %>
+  <% end %>
+<% end %>

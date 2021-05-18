@@ -1,0 +1,111 @@
+<p>
+  <big>
+    The permission to publish this image cannot be obtained directly via prometheus.
+    Please follow the below instructions to clarify its publication rights.
+  </big>
+</p>
+
+<ol>
+  <li>
+    Rights: A distinction is made between the rights of the work and the rights of the photograph/reproduction:
+    <p>
+      <ul>
+        <li>
+          Rights of the work:
+          <% representative = rights_representative(@image, false) -%>
+    <% if (rights_work = @image.rights_work).blank? -%>
+          <span>No information provided</span>
+          <p>
+            This doesn't mean that there are no more utilization rights. But if
+            the artist's death occured more than 70 years ago, you don't have to
+            ask for publication permission, because the work is in the public domain.
+            Otherwise check if the artist is represented by the <%= link_to_vgbk %>
+            or does the respresentation by him- or herself. In both cases you have
+            to send an inquiry to ask for publication permission.
+    </p>
+          <% else -%>
+            <%= render partial: 'shared/rights_work', locals: {rights_work: rights_work} %>
+          <% if representative -%>
+    <p>
+            The artist is represented by <%= representative %> and utilization rights
+            on the work still exist. You have to send an inquiry to <%= representative %>
+            and ask for publication permission.
+          </p>
+    <% else -%>
+          <p>
+      If this line contains "Gemeinfrei" oder "Public Domain" there are no more utilization rights 
+      on the work. You should still check whether this information is reliable and whether there are
+      still utilization rights on the reproduction before publishing the image.
+          </p>
+          <% end -%>
+        <% end -%>
+        </li>
+        <li>
+          <%= "Rights of the #{@image.source_name == 'mka' ? 'video' : 'photograph'}/reproduction:" %>
+        <% if (rights_reproduction = @image.rights_reproduction).blank? -%>
+          <span>No information provided</span>
+          <p>
+            This doesn't mean that there are no more utilization rights on the
+            reproduction. But if the photographer's death occured more than 50
+            years ago, you don't have to get the reproduction's utilization rights,
+            because the reproduction is in the public domain. Otherwise check the
+            credit information (<strong>see 2.</strong>).
+          </p>
+        <% else -%>
+          <%= render partial: 'images/rights_reproduction', locals: {rights_reproduction: rights_reproduction} %>
+          <p>
+            Permission to use the photograph/reproduction requires authorization
+            directly from the copyright-holder, which means the photographer or
+            institution (e.g. image database, publisher), which is shown in this
+            field. On occasion, you have to research how to contact the copyright-holder
+            to ask for publication rights.
+          </p>
+        <% end -%>
+        </li>
+      </ul>
+    </p>
+  </li>
+  <li>
+    Credits:
+  <% if (credits = @image.credits).blank? -%>
+    <span>No information provided</span>
+    <p>
+      Sorry, there is no indication of the source of this image. Please contact
+      the database (<strong>see 3.</strong>).
+    </p>
+  <% else -%>
+    <% credits_output = credits.map { |credit|
+      if is_url?(credit)
+        link_to(credit, credit, :target => '_blank')
+      elsif credit.include?(",http")
+        link_to_links(credit)
+      else
+        credit
+      end
+      }.join(" | ").html_safe %>
+    <%= format_content(credits_output, escape: false) %>
+    <p>
+      This field indicates the source of the image (e.g. book, article, archive).
+      You can use this information to check the rights information right there. If
+      there is no useful information, contact the database (<strong>see 3.</strong>).
+    </p>
+  <% end -%>
+  </li>
+  <li>
+    Database:
+    <span><%= @image.source.fulltitle %></span>
+    <p>
+      If you could not find any information regarding the copyright, please contact the
+    <% if @image.upload_record? -%>
+      user
+      <%= link_to @image.owner, :controller => 'accounts', :action => 'show', :id => @image.owner %>
+      <%= email_icon_for(@image.source, :span) %>
+    <% else -%>
+      database
+      <%= link_to source = @image.source, :controller => 'sources', :action => 'show', :id => source %>
+      <%= email_icon_for(source, :span) %>
+    <% end -%>
+      to get this information and ask <%= @image.upload_record? ? 'him/her' : 'them' -%> to provide it for the whole archive if possible.
+    </p>
+  </li>
+</ol>

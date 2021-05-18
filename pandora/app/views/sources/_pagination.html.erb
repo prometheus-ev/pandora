@@ -1,0 +1,49 @@
+<%# results = args[0] %>
+<%# page = args[1].to_i %>
+<% total = results.count %>
+
+<div class="pagination">
+  <%= page_form do %>
+    <!-- REWRITE: this has side effects which should be checked for security -->
+    <%#= link_to('', params.merge(page: 1), %>
+    <%= link_to('', params.permit!.merge(page: 1), 
+      class: "icon_first #{'inactive' if page == 1}",
+      disabled: page == 1
+    ) %>
+
+    <%= link_to('', params.merge(page: page - 1), 
+      class: "icon_prev #{'inactive' if page == 1}",
+      disabled: page == 1
+    ) %>
+
+    <div class="pagination_text">
+      <%= 'Page'.t %>
+      <%= text_field_tag :page, nil, placeholder: page, size: 2 %>
+      <%= 'of'.t %>
+      <strong><%= results.number_of_pages %></strong>
+    </div>
+
+    <div class="submit_button_wrap float-right">
+      <!-- REWRITE: we change the class so that the default autosubmit mech doesn't
+      kick in anymore, see application.js:93 -->
+      <div class="upgrade-autosubmit scriptonly" _name="commit">
+        <div class="button_wrap submit_button">
+          <div class="button_left"></div>
+          <div class="button_icon"></div>
+          <div class="button_middle"><%= 'Go'.t %></div>
+          <div class="button_right"></div>
+        </div>
+      </div>
+    </div>
+
+    <%= link_to('', params.merge(page: page + 1),
+      class: "icon_next #{'inactive' if page == results.number_of_pages}",
+      disabled: page == results.number_of_pages
+    ) %>
+
+    <%= link_to('', params.merge(page: results.number_of_pages),
+      class: "icon_last #{'inactive' if page == results.number_of_pages}",
+      disabled: page == results.number_of_pages
+    ) %>
+  <% end %>
+</div>

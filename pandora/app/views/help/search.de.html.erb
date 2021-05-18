@@ -1,0 +1,96 @@
+<h2><%= 'Searches help'.t %></h2>
+
+<p>
+  (Siehe auch <%= link_to_help section: 'syntax', label: 'Suchsyntax' %>,
+  <%= link_to_help section: 'results', label: 'Ergebnisliste' %> und
+  <%= link_to_help section: 'copyright_and_publication', label: 'Bildrecht und Publikation' %>.)
+</p>
+
+<% with_toc do -%>
+
+  <%= section_heading 'Einfache Suche', 'search' %>
+  <p>
+    In der einfachen Suche haben Sie die Möglichkeit, schnell und unkompliziert über alle Felder zu suchen.
+    <%= screenshot 'help/search01.de.png', 'Einfache Suche' %>
+  </p>
+
+  <%= section_heading 'Erweiterte Suche', 'advanced_search' %>
+  <p>
+    In Ihrer Suchanfrage haben Sie die Möglichkeit, verschiedene Kategorien durch boolesche
+    Operatoren zu verknüpfen und somit Ihre Suche zu differenzieren. Die Grundeinstellung der Suche
+    umfasst vier Suchfelder, über den +-Button <%= image_tag('misc/row-adder.gif', :class => 'help_icon') %>
+    können Sie weitere Felder hinzuschalten.
+  </p>
+
+  <p>
+    Nach folgenden Kategorien können Sie suchen:
+  </p>
+
+  <ul>
+    <li>Alle</li>
+    <li>Künstler*in</li>
+    <li>Titel</li>
+    <li>Standort</li>
+    <li>Fundort</li>
+    <li>Gattung</li>
+    <li>Material</li>
+    <li>Schlagwort</li>
+    <li>Beschreibung</li>
+    <li>Datierung</li>
+    <li>Bildnachweis</li>
+    <li>Bildrecht Fotografie</li>
+    <li>Bildrecht Werk</li>
+    <li>Datensatz</li>
+    <li>Objekt</li>
+    <li>durchschn. Bewertung</li>
+    <li>Anzahl Bewertungen</li>
+    <li>Kommentare</li>
+  </ul>
+
+  <p>
+    Boolesche Operatoren sind:
+  </p>
+
+  <ul>
+    <li>und</li>
+    <li>oder</li>
+    <li>und nicht</li>
+  </ul>
+
+  <%= section_heading 'Verknüpfungsbeispiele', 'linking_examples' %>
+  <p>
+    <%= screenshot 'help/search04.de.png', 'Künstler Da Vinci und nicht Titel Mona Lisa' %>
+    Es werden alle vorhandenen Datensätze von da Vinci angezeigt mit Ausnahme der Mona Lisa.
+  </p>
+
+  <p>
+    <%= screenshot 'help/search05.de.png', 'Künstler Michelangelo und Standort Rom und nicht Titel Sixtinische Kapelle' %>
+    Es werden alle vorhandenen Datensätze von Michelangelo in Rom angezeigt, außer der Sixtinischen Kapelle.
+  </p>
+
+  <p>
+    Weitere Informationen zu den Verknüpfungsoperatoren finden Sie in der
+    <%= link_to_help section: 'syntax', label: '"Syntaxhilfe"', anchor: 'operators' %>.
+  </p>
+
+  <p>
+    Bitte bedenken Sie, dass immer nach exakt dem Begriff gesucht wird, der eingegeben wurde.
+    Wenn Sie z.B. "Sonnenblume" suchen, wird nicht "Sonnenblumen" gefunden. Es gibt die Möglichkeit,
+    das Wort mit * zu markieren, wodurch alle möglichen Worterweiterungen mit in die Suche einbezogen
+    werden. So finden Sie mit der Eingabe "Sonne*" die Ergebnisse "Sonne", "Sonnenblume", "Sonnenuntergang"
+    etc. (Siehe auch <%= link_to_help section: 'syntax', label: '"Suchsyntax"' %>.)
+  </p>
+
+  <%= section_heading 'Auswahl der Datenbanken', 'database_selection' %>
+  <p>
+    <span class="prometheus">prometheus</span> bietet Ihnen eine Vielzahl unterschiedlicher Datenbanken
+    an. Je nach Suchanfrage haben Sie die Möglichkeit, Datenbanken zu einem speziellen Bereich auszuwählen
+    (z.B. den Fachbereich Archäologie oder nur Museumsdatenbanken) und Ihre Suche auf diese zu beschränken.
+    Um Ihnen die Auswahl der Datenbanken zu erleichtern, können Sie diese im Voraus nach Titel, Standort,
+    Typ oder Beschreibung sortieren.
+    <%= screenshot 'help/search02.de.png', 'Gruppieren nach Typ' %>
+  </p>
+
+<% end -%>
+
+<%= render :partial => 'footer' %>

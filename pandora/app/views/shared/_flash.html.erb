@@ -1,0 +1,17 @@
+<% outflash = flash.to_h.slice('error', 'warning', 'info', 'prompt', 'notice') %>
+
+<% unless outflash.empty? %>
+  <div class="flash clear-padding">
+    <div class="flash-controls scriptonly">
+      <a href="#" onclick="$(this).up('.flash').hide()"><%= 'Hide'.t %></a>
+    </div>
+
+    <% outflash.each do |key, message| %>
+      <% next if message.nil? %>
+
+      <% Array.wrap(message).each do |m| %>
+        <p class="<%= key %>"><%= m %></p>
+      <% end %>
+    <% end %>
+  </div>
+<% end %>

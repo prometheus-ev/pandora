@@ -1,0 +1,241 @@
+<h2><%= 'Administration help'.t %></h2>
+
+<% with_toc do -%>
+
+  <%= section_heading 'Verwaltung für den persönlichen Zugang', 'personal_account' %>
+  <p>
+    Per Klick auf Ihren Namen, oben rechts, können Sie Ihre persönlichen Zugangsdaten
+    ändern. Klicken Sie auf <%= image_tag('icon/edit.gif', :class => 'help_icon') %> neben
+    dem Login-Namen. Hier haben Sie die Möglichkeit, Ihren Login-Namen, Ihr Passwort (mindestens
+    acht Zeichen) und Ihre E-Mail-Adresse zu ändern. Alle orange umrandeten Felder sind Pflichtfelder.
+  </p>
+
+  <p>
+    Außerdem können Sie bei Adressänderung diese gegebenenfalls selbständig nachtragen, ohne
+    dass Sie zusätzlich die Geschäftsstelle informieren müssen. Auch können Sie hier mit einem
+    Klick den Newsletter abbestellen oder einen kurzen Text über sich verfassen, der anderen
+    auf Ihrer Profilseite angezeigt wird.
+    <%= screenshot 'help/administration01.de.png', 'Formular' %>
+  </p>
+
+  <%= section_heading 'Gültigkeit des persönlichen Zugangs', 'personal_expiration' %>
+  <p>
+    Ihr <span class="prometheus">prometheus</span>-Zugang ist auf einen bestimmten Zeitraum begrenzt,
+    den Ihr*e Administrator*in festlegt. Rechtzeitig vier Wochen vor Ablauf der Gültigkeit werden Sie per
+    Mail benachrichtigt und können sich für die Verlängerung Ihres Zugangs an den/die zuständige(n)
+    Administrator*in wenden.
+  </p>
+
+  <%= section_heading 'Rollen', 'roles' %>
+  <p>
+    Im prometheus-Bildarchiv können Zugänge verschiedene Rollen besitzen, die über unterschiedliche
+    Berechtigungen verfügen.
+  </p>
+
+  <dl class="fancy">
+    <dt id="user"><%= 'user'.humanize.t %></dt>
+    <dd>
+      Berechtigt dazu, sich mit einem Login-Namen und Passwort von jedem Computer aus im
+      Bildarchiv anzumelden und in den Datenbanken zu recherchieren. Gegenüber dem Campuszugang
+      verfügen diese Nutzer*innen über erweiterte Funktionalitäten wie z.B. das Anlegen eigener Bildsammlungen
+      und Präsentationen.
+    </dd>
+    <dt id="useradmin"><%= 'useradmin'.humanize.t %></dt>
+    <dd>
+      Der/die Administrator*in ist befähigt, die persönlichen Zugänge an seiner/ihrer Institution zu verwalten.
+      Weitere Informationen finden Sie hier:
+      <%= link_to 'Hinweise zur Administration', home_url('license/instructions-for-administrators') %>.
+    </dd>
+    <dt id="dbadmin"><%= 'dbadmin'.humanize.t %></dt>
+    <dd>
+      Der/die Datenbankadministrator*in kann Angaben und Informationen über die jeweilige Datenbank bearbeiten
+      und Bildbewertungen zu den entsprechenden Datensätzen einsehen. Weitere Informationen finden Sie hier:
+      <%= link_to 'Informationen für Bildgeber', home_url('databases/suppliers') %>.
+    </dd>
+  </dl>
+
+  <% restrict_to :superadmin, :admin, :useradmin do -%>
+
+    <%= section_heading 'Verwaltung der Administration', 'management' %>
+    <p>
+      Als Administrator*in sind Sie berechtigt, persönliche Zugänge für Angehörige Ihrer Institution
+      einzurichten. Dies ist unter dem Menüpunkt "Verwaltung" möglich.
+    </p>
+
+    <%= section_heading 'Einrichten persönlicher Zugänge', 'creating' %>
+    <p>
+      Über den Button "Einen neuen Zugang erstellen" im Untermenü gelangen Sie zu der Eingabemaske für die Erstellung
+      persönlicher Zugänge. Die orange umrandeten Felder sind Pflichtfelder.
+    </p>
+
+    <p>
+      <strong>Beispiel:</strong>
+    </p>
+
+    <table style="width: inherit">
+      <tr><th>Login-Name:</th><td>e.mustermann</td></tr>
+      <tr><th>E-Mail:</th><td>e.mustermann@example.com</td></tr>
+      <tr><th>Passwort:</th><td>(mindestens acht beliebige Zeichen)</td></tr>
+      <tr><th>Passwort bestätigen:</th><td></td></tr>
+      <tr><td><br class="vspace1" /></td></tr>
+      <tr><th>Vorname:</th><td>Erwin</td></tr>
+      <tr><th>Nachname:</th><td>Mustermann</td></tr>
+    </table>
+
+    <p>
+      Nachfolgende Felder (Titel, Adresse, PLZ, Ort) sind optional.
+    </p>
+
+    <p>
+      Soll der Nutzer den Newsletter von <span class="prometheus">prometheus</span> erhalten, muss
+      die entsprechende Checkbox durch ein Häkchen aktiviert sein (Standardeinstellung). Ist dies
+      nicht gewünscht, können Sie den Haken entfernen.
+    </p>
+
+    <p>
+      Die Zuweisung zu Ihrer Institution erfolgt automatisch.
+    </p>
+
+    <p>
+      Matrikelnummer: optional
+    </p>
+
+    <p>
+      Gültigkeit: Der Gültigkeitszeitraum wird auch von Ihnen festgelegt. Standardeinstellung ist
+      1 Jahr. Sie haben die Möglichkeit zwischen 6 Monaten, 1 Jahr, 2 Jahren oder 3 Jahren zu wählen.
+    </p>
+
+    <p>
+      <strong>Beispiel 1:</strong>
+      Eine Austauschstudentin, der für ein Semester am Institut studiert, könnte für 6 Monate
+      eingerichtet werden.
+    </p>
+
+    <p>
+      <strong>Beispiel 2:</strong>
+      Studienanfänger*innen, die voraussichtlich längere Zeit am Institut studieren werden, könnten
+      direkt für 2 oder 3 Jahre eingerichtet werden.
+    </p>
+
+    <p>
+      Die Auswahl der Gültigkeit liegt im Ermessen der Admins und kann auch einheitlich
+      vergeben werden, zum Beispiel immer für 1 Jahr.
+    </p>
+
+    <p>
+      Weitere Informationen finden Sie unter dem Punkt
+      <%= link_to_help section: 'administration', label: 'Gültigkeit der eingerichteten Zugänge', anchor: 'expiration' %>.
+    </p>
+
+    <p>
+      <strong>Für noch kürzere Zeiträume bieten wir den Gast-Zugang an:</strong>
+      Dieser steht dem Nutzer/ der Nutzerin einen Monat lang zur Verfügung und kann anschließend entweder
+      gelöscht oder in einen vollwertigen Zugang umgewandelt werden.
+    </p>
+
+    <p>
+      Notizen: optional
+    </p>
+
+    <p>
+      Nachdem Sie alle Informationen in die Maske eingegeben haben, klicken Sie zur Erstellung
+      des persönlichen Zugangs auf den Button "Speichern".
+    </p>
+
+    <p>
+      <%= screenshot 'help/administration02.de.png', 'Formular' %>
+    </p>
+
+    <%= section_heading 'Gültigkeit der eingerichteten Zugänge', 'expiration' %>
+    <p>
+      Um zu vermeiden, dass ehemalige Angehörige des Institutes ihren persönlichen Zugang über
+      einen längeren Zeitraum weiterhin nutzen, ist eine Befristung der Zugänge eingeführt worden.
+      Somit ist gesichert, dass nur Angehörige der Institution von der Lizenz profitieren.
+    </p>
+
+    <p>
+      Der Nutzer/ die Nutzerin erhält 4 Wochen bevor die Gültigkeit des persönlichen Zugangs abläuft eine
+      Benachrichtigung per E-Mail. Hierin wird er aufgefordert sich an den/die zuständige(n) Administrator*in 
+      zu wenden, um den persönlichen Zugang zu verlängern. Nach Ablauf dieser Frist wird der Zugang automatisch deaktiviert.
+    </p>
+
+    <p>
+      Für Sie als Administrator*in bedeutet dies, dass Sie nur nach Aufforderung persönliche Zugänge
+      verlängern müssen. Wenn ein(e) Nutzer*in seinen Zugang nach Ablauf der Frist verlängern möchte,
+      ist es möglich deaktivierte Zugänge wieder zu aktivieren. Um einen Zugang zu verlängern bzw.
+      zu aktivieren wählen Sie einen neuen Gültigkeitszeitraum aus.
+    </p>
+
+    <%= section_heading 'Übersicht der eingerichteten Zugänge', 'summary' %>
+    <p>Das Untermenü enthält folgende Optionen:</p>
+
+    <ul>
+      <li>Liste: Listet alle eingerichteten Zugänge</li>
+      <li>Aktiv: Listet alle aktiven Zugänge</li>
+      <li>Ausstehend: Listet alle ausstehenden Zugänge</li>
+      <li>Abgelaufen: Listet alle abgelaufenen Zugänge</li>
+      <li>Gast: Listet alle Gastzugänge</li>
+    </ul>
+
+    <p>
+      <%= screenshot 'help/administration06.de.png', 'Untermenü' %>
+    </p>
+
+    <p>
+      Wenn Sie nach einem/r bestimmten Nutzer*in suchen möchten, dann können Sie dies über das Suchfeld
+      oben über der Liste tun. Hier können Sie auswählen, ob Sie die Liste nach Login-Name,
+      E-Mail, Vor- oder Nachname filtern möchten.
+      <%= screenshot 'help/administration05.de.png' %>
+    </p>
+
+    <%= section_heading 'Bearbeiten der eingerichteten Nutzerzugänge', 'editing' %>
+    <p>
+      Durch Anklicken des Login-Namens können Sie die Daten der Person einsehen. Über diese Ansicht
+      können Sie deren Nutzungseinstellungen bearbeiten, den Zugang wieder aktivieren bzw. deaktivieren oder
+      die Daten der Person als PDF-Datei herunterladen.
+    </p>
+
+    <p>
+      <%= screenshot 'help/administration03.de.png', 'Formular' %>
+    </p>
+
+    <p>
+      Oder Sie bearbeiten die Einstellungen des Nutzers/der Nutzerin direkt über die Optionen
+      <%= image_tag('icon/edit.gif', :class => 'help_icon') %> und
+      <%= image_tag('icon/delete.gif', :class => 'help_icon') %>, die in der Auflistung der
+      persönlichen Zugänge rechts am Ende zu sehen sind.
+      <%= screenshot 'help/administration04.de.png', 'Untermenü' %>
+    </p>
+
+    <p>
+      Wenn Sie sich mit Ihrem Login-Namen oder Ihrem Passwort einloggen, können Sie entweder als Nutzer*in
+      im Bildarchiv recherchieren oder als Administrator*in persönliche Zugänge einrichten. Mit Ihrem Login-Namen
+      können Sie somit zwei unterschiedliche Funktionen ausführen.
+    </p>
+
+    <%= section_heading 'Was bedeutet N.N.?', 'N.N.' %>
+    <p>
+      Wann immer Sie »N.N.« anstelle eines Benutzernamens finden, ist dies entweder, weil der
+      Nutzer/ die Nutzerin nicht mehr Mitglied des <span class="prometheus">prometheus</span>-Bildarchivs
+      ist, oder weil Sie aus Gründen der Privatsphäre den Namen nicht sehen dürfen.
+    </p>
+
+    <%= section_heading 'Abmelden eines Administrationszugangs', 'deregistration' %>
+    <p>
+      Wenn Sie die Administrationsfunktion innerhalb Ihrer Institution abgeben möchten, schicken
+      Sie bitte eine kurze E-Mail an die <span class="prometheus">prometheus</span>-Geschäftsstelle
+      (<%= mail_to INFO_ADDRESS %>). Gleichzeitig sollte der/die neue Administrator*in das Formular
+      <%= link_to '"Antrag auf einen Administrationszugang"', home_url('license/instructions-for-administrators') %>
+      ausgefüllt an die <span class="prometheus">prometheus</span>-Geschäftsstelle senden.
+    </p>
+
+    <p>
+      Ihr Zugang bleibt als gewöhnlicher Nutzungszugang bestehen, lediglich die Administrationsfunktion wird
+      gelöscht und dem/r neuen Verantwortlichen zugewiesen.
+    </p>
+
+  <% end -%>
+
+<% end -%>
+
+<%= render :partial => 'footer' %>

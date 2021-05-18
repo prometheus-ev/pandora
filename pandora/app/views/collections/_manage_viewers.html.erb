@@ -1,0 +1,11 @@
+<tr>
+  <th><label for="collection_viewer_list"><%= 'Viewers'.t %></label><br /><small>(<%= "Can view your collection".t %>; <%= 'One user name per line'.t %>)</small></th>
+  <td>
+    <%= f.text_area :viewer_list, options_for_field(:viewers,
+      rows: 5,
+      value: @collection.viewer_list,
+      disabled: (@collection.has_unapproved_uploads? ? 'disabled' : nil)
+    ) %>
+    <%= suggest_names_for 'collection', :viewer_list, :only => "collections/edit" %>
+  </td>
+</tr>

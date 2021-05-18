@@ -1,0 +1,68 @@
+<script>
+// http://leafletjs.com/reference.html
+var lat = <%= @upload.any_latitude default: true %>;
+var lng = <%= @upload.any_longitude default: true %>;
+var lat_default = <%= Location.pconfig[:geographic_coordinates_default][:latitude] %>;
+var lng_default = <%= Location.pconfig[:geographic_coordinates_default][:longitude] %>;
+var zoom_level = 11;
+var tile_server = '<%= Location.pconfig[:map][:tile_server][:mapquest_map] %>';
+var attribution = '<%= Location.pconfig[:map][:attribution][:mapquest_map] %>';
+</script>
+
+<table id="object-geographic-table">
+  <tr>
+    <th><%= 'Map'.t %></th>
+    <td colspan="3">
+      <div id="map"></div>
+    </td>
+  </tr>
+  <tr>
+    <th><label for="upload_latitude"><%= 'Latitude, Longitude'.t %></label></th>
+    <td>
+      <%= f.text_field(:latitude,
+        options_for_field(:latitude,
+          style: "width: 265px;",
+          value: @upload.any_latitude == 0.0 ? UploadsController::VARIOUS_VALUES : @upload.any_latitude
+        )
+      ) %>
+      <span style="margin-left: 1px;"></span>
+      <%= f.text_field(:longitude,
+        options_for_field(:longitude,
+          style: "width: 265px;",
+          value: @upload.any_longitude == 0.0 ? UploadsController::VARIOUS_VALUES : @upload.any_longitude
+        )
+      ) %>
+    </td>
+    <td>
+      <% if (lat = @upload.any_latitude) && (lng = @upload.any_longitude) %>
+        <%= link_to_google_maps("#{lat},#{lng}") %>
+      <% end %>
+    </td>
+    <td>
+      <%= image_tag('misc/info_form_field.gif', :class => 'dim', :title => 'Fill in the geographic coordinates (latitude and longitude) of the location, or use the marker on the map to set them.'.t + ' ' + 'You can drag the marker or move it by a left mouse click.'.t) %>
+    </td>
+  </tr>
+  <tr>
+    <th>
+      <label for="upload_location">
+        <%= 'Location'.t %>
+      </label>
+    </th>
+    <td>
+      <%= f.text_field :location, options_for_field(:location, :autocomplete => 'off', :style => 'width: 544px;') %>
+      <ul id="upload-location-search-result"></ul>
+    </td>
+    <td>
+      <%= link_to_google_maps(@upload.location) unless @upload.location.blank? %>
+    </td>
+    <td>
+      <%= image_tag('misc/info_form_field.gif', :class => 'dim', :title => "State the current location of the object, which consists usually of information about the location, institution and if applicable the inventory number.".t) %>
+    </td>
+  </tr>
+  <tr>
+    <th></th>
+    <td colspan="3">
+    </td>
+  </tr>
+  <%= form_controls %>
+</table>

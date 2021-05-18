@@ -1,0 +1,13 @@
+<% if current_user && current_user.mode == 'paid' %>
+  <p>
+    <strong><%= 'Please confirm your email address, before you can proceed with your payment.'.t %></strong>
+  </p>
+<% end %>
+
+
+<%= render :partial => 'email_confirmation_sent' %>
+
+<br />
+<hr />
+
+<%= render :partial => 'contact' %>

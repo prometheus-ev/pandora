@@ -1,0 +1,12 @@
+<% if params[:upload_latest] -%>
+  <table>
+    <tr>
+      <th></th>
+      <td>
+        <%= check_box_tag(:reuse_latest_metadata, 'resuse_latest_metadata', false, { :onclick => "return checkbox_clicked(#{@upload_latest.id});" }) %>
+        <label for="reuse_latest_metadata" class="pad"><%= 'Reuse latest metadata?'.t %></label>
+      </td>
+    </tr>
+    <tr><td><br /></td></tr>
+  </table>
+<% end -%>

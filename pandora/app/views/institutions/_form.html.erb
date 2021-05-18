@@ -1,0 +1,112 @@
+<%= error_messages_for :institution %>
+
+<%= form_for @institution, :html => { :class => 'edit-form' } do |f| %>
+
+<table>
+  <tr>
+    <th><label for="institution_name"><%= 'Name'.t %></label></th>
+    <td><%= f.text_field :name, options_for_field(:name) %></td>
+  </tr>
+  <tr>
+    <th><label for="institution_title"><%= 'Title'.t %></label></th>
+    <td><%= f.text_field :title, options_for_field(:title) %></td>
+  </tr>
+  <tr>
+    <th><label for="institution_short"><%= 'Short title'.t %></label></th>
+    <td><%= f.text_field :short, options_for_field(:short) %></td>
+  </tr>
+  <tr>
+    <th><label for="institution_description"><%= 'Description'.t %></label></th>
+    <td><%= f.text_field :description, options_for_field(:description) %></td>
+  </tr>
+  <tr>
+    <th><label for="institution_public_info" ><%= 'Public info'.t %></label></th>
+    <td><%= f.text_area :public_info, options_for_field(:public_info, :rows => 5, :cols => 27) %></td>
+  </tr>
+  <tr>
+    <th><label for="institution_contact_id"><%= 'Contact'.t %></label></th>
+    <td><%= f.select :contact_id, @accounts.map { |a| [a.login, a.id] }.sort, { :include_blank => true }, options_for_field(:contact) %></td>
+  </tr>
+  <tr>
+    <th><label for="institution_campus_id"><%= 'Campus'.t %></label></th>
+    <!-- REWRITE: default selection is handled by rails now -->
+    <td><%= f.select :campus_id, @campuses.map { |c| [c.name + (c.license ? " - #{c.license}" : ''), c.id] }.sort, { :include_blank => true } %></td>
+  </tr>
+
+  <%= fields_for 'institution[license_attributes]', @license, builder: Pandora::FormBuilder do |lf| -%>
+    <tr>
+      <th><%= lf.label :license_type, 'License'.t %></th>
+      <td>
+      <% if @institution.licenses.any? -%>
+        <%= render :partial => 'licenses' %>
+        <br class="vspace1" />
+      <% end -%>
+        <%= lf.select :license_type, @license_types.sort_by(&:title).map { |l| [l, l.id] }, { :include_blank => true, :selected => @license_type && @license_type.id }, options_for_field(:license_type) %>
+
+        <% if @institution && @institution.renewable? %>
+          <%= link_to(
+            'Renew license'.t,
+            {action: 'renew_license', id: @institution.id},
+            {data: {method: :post}}
+          ) %>
+        <% end %>
+      </td>
+    </tr>
+    <tr>
+      <th><label for="valid_from" ><%= 'Valid from'.t %></label></th>
+      <td class="date_select"><%= lf.date_select :valid_from, options_for_field(:valid_from, :include_blank => true) %></td>
+    </tr>
+    <tr>
+      <th><%= lf.label :paid_from_quarter, 'Paid from'.t %></th>
+      <td><%= lf.quarter_select :paid_from_quarter, include_blank: true %></td>
+    </tr>
+  <% end -%>
+
+  <tr>
+    <th><label for="institution_issuer"><%= 'Issuer'.t %></label></th>
+    <td><%= f.select :issuer, @issuers.map { |i| [i, i.downcase] }, { :include_blank => true }, options_for_field(:issuer) %></td>
+  </tr>
+    <tr>
+    <th><label for="institution_addressline" ><%= 'Address'.t %></label></th>
+    <td><%= f.text_field :addressline, options_for_field(:addressline) %></td>
+  </tr>
+  <tr>
+    <th><label for="institution_postalcode"><%= 'Postalcode'.t %></label></th>
+    <td><%= f.text_field :postalcode, options_for_field(:postalcode) %></td>
+  </tr>
+  <tr>
+    <th><label for="institution_city" ><%= 'City'.t %></label></th>
+    <td><%= f.text_field :city, options_for_field(:city) %></td>
+  </tr>
+  <tr>
+    <th><label for="institution_country" ><%= 'Country'.t %></label></th>
+    <td><%= f.country_select :country, PRIORITY_COUNTRIES, {}, options_for_field(:country) %></td>
+  </tr>
+  <tr>
+    <th><label for="institution_email" ><%= 'E-mail'.t %></label></th>
+    <td><%= f.text_field :email, options_for_field(:email) %></td>
+  </tr>
+  <tr>
+    <th><label for="institution_homepage" ><%= 'Homepage'.t %></label></th>
+    <td><%= f.text_field :homepage, options_for_field(:homepage) %></td>
+  </tr>
+  <tr>
+    <th><label for="institution_ipranges" ><%= 'IP Ranges'.t %></label><br /><small>(<%= 'One_MASC per line'.t %>)</small></th>
+    <td><%= f.text_area :ipranges, options_for_field(:ipranges, :rows => 5, :cols => 27) %></td>
+  </tr>
+  <tr>
+    <th><label for="institution_hostnames"><%= 'Host names'.t %></label><br /><small>(<%= 'One_MASC per line'.t %>)</small></th>
+    <td><%= f.text_area :hostnames, options_for_field(:hostnames, :rows => 5, :cols => 27, :value => @institution.hostnames.join("\n")) %></td>
+  </tr>
+  <tr>
+    <th><label for="institution_member_since" ><%= 'Member since'.t %></label></th>
+    <td class="date_select"><%= f.date_select :member_since, options_for_field(:member_since, :include_blank => true) %></td>
+  </tr>
+  <tr>
+    <th><label for="institution_notes" ><%= 'Notes'.t %></label></th>
+    <td><%= f.text_area :notes, options_for_field(:notes, :rows => 5, :cols => 27) %></td>
+  </tr>
+</table>
+
+  <%= form_controls %>
+<% end %>

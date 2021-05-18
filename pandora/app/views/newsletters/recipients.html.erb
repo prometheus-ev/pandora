@@ -1,0 +1,25 @@
+<h3><%= "Expanded recipients for #{@email.newsletter? ? 'newsletter' : 'e-mail'}: %s" / link_to(@email, :action => 'show', :id => @email) %></h3>
+
+<dl>
+<% for what, recipients in @recipients -%>
+  <dt>[<%= what.upcase %>]</dt>
+  <dd>
+    <dl>
+    <% for recipient, expansion in recipients -%>
+      <dt><strong><%=h recipient %></strong></dt>
+      <dd>
+      <% if expansion.is_a?(Array) -%>
+        <ul>
+        <% for address in expansion -%>
+          <li><%=h address %></li>
+        <% end -%>
+        </ul>
+      <% else -%>
+        <%=h expansion || "<#{'not found'.t.upcase}>" %>
+      <% end -%>
+      </dd>
+    <% end -%>
+    </dl>
+  </dd>
+<% end -%>
+</dl>

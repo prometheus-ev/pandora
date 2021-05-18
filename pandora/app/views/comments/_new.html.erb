@@ -1,0 +1,21 @@
+<%= form_for comment,
+  url: pm_comments_form_path(comment),
+  html: {class: 'edit-form'} do |f|
+%>
+  <%= f.hidden_field :parent_id %>
+
+  <table>
+    <tr>
+      <th>
+        <%= f.label :text, 'Your comment'.t %>
+      </th>
+      <td>
+        <%= f.text_area :text, rows: 5 %>
+      </td>
+    </tr>
+    <tr>
+      <th></th>
+      <td><%= pm_submit autosubmit: false %></td>
+    </tr>
+  </table>
+<% end %>

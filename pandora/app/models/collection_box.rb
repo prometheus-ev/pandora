@@ -1,0 +1,3 @@
+class CollectionBox < Box
+end
+

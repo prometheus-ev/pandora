@@ -1,0 +1,80 @@
+<h2><%= 'Sign up help'.t %></h2>
+
+<% with_toc do -%>
+
+  <%= section_heading 'Fill in the registration form', 'signup_form' %>
+  <p>
+    <%= screenshot 'help/signup_form.en.png', 'Registrierungsformular' %>
+    You can sign up for prometheus <%= link_to 'via our sign up form', signup_path %>.
+  You will also get to this registration form via our homepage <a href="http://prometheus-bildarchiv.de/" title="www.prometheus-bildarchiv.de">www.prometheus-bildarchiv.de</a> and the link '<%= link_to 'Sign up', signup_path %>' on the upper screen.
+  </p>
+  <p>
+    Access mode: There are three ways to get access to the image archive. Please choose the modus applicable to you.<br>
+  The orange framed fields are mandatory.<br>
+  Enter your name and e-mail address and choose a user name and password. Please note the terms of use and the spam protection and click on the button 'Sign up'.<br>
+  User name and password are freely selectable. The password needs to be at least 8 characters long. If your chosen user name already exists, you will be automatically asked to select another one.
+  </p>
+
+  <%= section_heading 'One week free trial', 'guest_account' %>
+  <p>
+    The week of free trial offers prospects, who don't know the image archive yet and aren't able to use it via an insitution the opportunity to gain first insight into prometheus before obtaining a single license.
+  </p>
+  <p>
+    Since the usage of the image archive is solely permitted for research and education, it is necessary to justify your research/education interest and context. This field is therefore mandatory if you chose the access mode 'one week free trial'.<br>
+  When the registration form is, as described above, duly completed and you clicked on 'Sign up', you will receive an automatic e-mail to verify your e-mail address.
+  </p>
+  <p>
+    <%= screenshot 'help/signup_guest.en.png', 'Einwöchiger Testzugang' %>
+    To confirm your e-mail address, click on the link in this verification e-mail. With this, you will get back to our homepage.
+  </p>
+  <p>
+    Please note that the free trial will be activated by the prometheus-office after reviewing your  research/education interest and context.
+  </p>
+
+  <%= section_heading 'Free access via your institution', 'signup_institution' %>
+  <p>
+    If you have the possibilty to use the image archive via a licensed institution, please choose the access mode 'Free access via your institution'. When the registration form is, as described above, duly completed and you clicked on 'Sign up', you will receive an automatic e-mail to verify your e-mail address. On the next page you can choose your institution from the list of license-holders and click on 'Proceed'.
+  </p>
+  <p>
+    <%= screenshot 'help/signup_institution_1.en.png', 'Über Ihre Institution' %>
+    To confirm your e-mail address, click on the link in this verification e-mail. With this, you will get back to our homepage. When you click on 'Proceed', the registration is completed. You will now be informed about your respective administrator, whom you need to contact with an valid certificate of enrollment to get fully activated.
+  </p>
+  <p>
+    <%= screenshot 'help/signup_institution_2.en.png', 'Über Ihre Institution' %>
+    Your administrator can activate your account for a longer period.
+  </p>
+
+  <%= section_heading 'Single license', 'signup_single_user' %>
+  <p>
+    If you don't have the possibility to use the image archive via a licensed institution, you can obtain a single license for your personal use.<br>
+  The single license is always valid for one year and will not be prolonged automatically. You will be informed in time via e-mail so that your account could be extended again if necessary.
+  </p>
+  <p>
+    Since the usage of the image archive is solely permitted for research and education, it is necessary to justify your research/education interest and context. This field is therefore mandatory if you chose the access mode 'single license'.
+  </p>
+  <p>
+    When the registration form is, as described above, duly completed and you clicked on 'Sign up', you will receive an automatic e-mail to verify your e-mail address. On the next page you will find our payment options listed.
+  </p>
+  <p>
+    <%= screenshot 'help/signup_single_user.en.png', 'Einzellizenz' %>
+    Please choose one of the two payment options.
+  </p>
+  <p>
+    If you wish to obtain a license through paypal, you will be forwarded to the homepage of the E-payment service, where you can pay the respective license-fee. After finishing this process, your account will be automatically activated for one year and you will be infomed via e-mail.
+  </p>
+  <p>
+    If you wish to obtain a license by invoice, you need to enter your billing address.
+  After clicking on the button „Proceed“, the prometheus-office will receive your request for an invoice and process your enquiry as soon as possible. You will be informed by e-mail about your activation together with your issued invoice attached.
+  </p>
+
+  <%= section_heading 'Confirmation of your e-mail address', 'email_verification' %>
+  <p>
+    If you missed the confirmation of your e-mail address and the link of the automatic e-mail is already invalid or you didn't receive any verification e-mail because you might have made a mistake e.g. by mispelling your e-mail address, you can always get a new verification mail. Just log yourself in with your username and password at our homepage www.prometheus-bildarchiv.de. Your registered e-mail address will be displayed again. Here you can, if necessary, correct any spelling mistakes and click on 'Proceed'.
+  </p>
+
+
+  <%= render :partial => 'shared/personal_account_tip' %>
+
+<% end -%>
+
+<%= render :partial => 'footer' %>

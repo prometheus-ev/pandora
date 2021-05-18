@@ -1,0 +1,22 @@
+#!/bin/bash
+
+export REPO="."
+export PORT="22"
+export KEEP=5
+export APPS="pandora rack-images"
+# Ruby maintenance branches information:
+# https://www.ruby-lang.org/en/downloads/branches/
+export RUBY_VERSION="2.5.5"
+export NOTIFY="dev@example.com ops@example.com"
+
+function staging {
+  export HOST="app@staging.example.com"
+  export DEPLOY_TO="/path/to/prometheus"
+  export COMMIT="staging"
+}
+
+function production {
+  export HOST="app@production.example.com"
+  export DEPLOY_TO="/path/to/prometheus"
+  export COMMIT="master"
+}

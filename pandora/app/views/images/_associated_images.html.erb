@@ -1,0 +1,16 @@
+<% unless @associated_images.empty? -%>
+  <div class="images">
+    <table>
+      <tr>
+      <% for associated in @associated_images -%>
+        <td class="image"><%= link_to_image_record(associated) %></td>
+      <% end -%>
+      </tr>
+      <tr>
+      <% for associated in @associated_images -%>
+        <td class="dim"><%= link_to_rating(associated) %> (<%= associated.votes %>)</td>
+      <% end -%>
+      </tr>
+    </table>
+  </div>
+<% end -%>

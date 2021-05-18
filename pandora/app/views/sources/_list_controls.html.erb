@@ -1,0 +1,5 @@
+<div class="list_controls">
+  <% offset = results.first_item_number -%>
+  <%= pagination_for results, page %>
+  <%= render :partial => 'shared/list/sort_links', :locals => { :args => local_assigns[:sort_columns] } %>
+</div>

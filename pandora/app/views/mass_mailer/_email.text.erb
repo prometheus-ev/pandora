@@ -1,0 +1,3 @@
+<%= render(:inline => @email.body.strip.html_safe).word_wrap(72).html_safe -%>
+
+<%= render(:partial => 'newsletter_footer') if @newsletter -%>

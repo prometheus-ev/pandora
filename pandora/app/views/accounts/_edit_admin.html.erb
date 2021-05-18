@@ -1,0 +1,63 @@
+<% restrict_to :superadmin, :admin, :useradmin do %>
+  <tr>
+    <th><label for="user_local_identifier"><%= 'Local Identifier'.t %></label></th>
+    <td><%= f.text_field :local_identifier, options_for_field(:local_identifier) %></td>
+  </tr>
+
+  <% if current_user.admin_privileges_on?(@user) %>
+    <tr>
+      <th><label for="user_role_ids"><%= 'Roles'.t %></label></th>
+      <td>
+        <%= hidden_field_tag role_ids_name = 'user[role_ids][]' %>
+        <%= f.collection_select :role_ids, @roles, :id, :title, {}, options_for_field(:roles, :multiple => true, :name => role_ids_name) %>
+      </td>
+    </tr>
+  <% end %>
+
+  <% if @set_user -%>
+    <tr>
+      <th><label for="user_user"><%= 'User?'.t %></label></th>
+      <td><%= f.check_box :user? %></td>
+    </tr>
+  <% end %>
+
+  <% if @set_expires_in %>
+    <tr>
+      <th><label for="user_expires_in"><%= 'Expiration'.t %></label></th>
+      <td>
+        <%= f.select :expires_in, @expires_in_options, { :selected => @expires_in_selected, :include_blank => !@expires_in_selected }, options_for_field(:expires_in) %>
+      <% if current_user.admin_privileges_on?(@user) %>
+        <div class="date_select"><%= f.date_select :expires_at, options_for_field(:expires_at, :include_blank => !@user.expires_at) %></div>
+      <% end %>
+      </td>
+    </tr>
+  <% end %>
+
+  <% institutions = current_user.user_admin_institutions(@user) %>
+  <tr>
+    <th><label for="user_institution"><%= 'Institution'.t %></label></th>
+    <td><%= f.select(
+      :institution,
+      institutions.map{|i| [i.shorttitle, i.id]}.sort,
+      {
+        selected: @institution && @institution.id
+      },
+      options_for_field(:institution)
+    ) %></td>
+  </tr>
+
+  <% if current_user.admin_privileges_on?(@user) -%>
+    <tr>
+      <th><label for="user_admin_institution_ids"><%= 'Useradmin for'.t %></label></th>
+      <td>
+        <%= hidden_field_tag admin_institution_ids_name = 'user[admin_institution_ids][]' %>
+        <%= f.collection_select :admin_institution_ids, @institutions.sort_by(&:shorttitle), :id, :shorttitle, {}, options_for_field(:admin_institutions, :multiple => true, :name => admin_institution_ids_name, :size => 5) %>
+      </td>
+    </tr>
+  <% end %>
+
+  <tr>
+    <th><label for="user_notes"><%= 'Notes'.t %></label></th>
+    <td><%= f.text_area :notes, options_for_field(:notes, :rows => 5, :cols => 27) %></td>
+  </tr>
+<% end %>

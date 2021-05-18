@@ -1,0 +1,77 @@
+<h2><%= 'Sign up help'.t %></h2>
+
+<% with_toc do -%>
+
+  <%= section_heading 'Ausfüllen des Registrierungsformulars', 'signup_form' %>
+  <p>
+    <%= screenshot 'help/signup_form.de.png', 'Registrierungsformular' %>
+    Sie können sich über das <%= link_to 'Registrierungsformular', signup_path %> registrieren.<br>
+    Zu diesem Registrierungsformular gelangen Sie auch von unserer Webseite <a href="http://prometheus-bildarchiv.de/" title="www.prometheus-bildarchiv.de">www.prometheus-bildarchiv.de</a> über den Link '<%= link_to 'Registrieren', signup_path %>' am oberen Bildschirmrand.
+  </p>
+  <p>
+    <strong>Zugangsmodus</strong>: Es gibt drei Möglichkeiten auf das Bildarchiv zuzugreifen. Bitte wählen Sie den für Sie zutreffenden Modus aus.<br>
+    Die darunter folgenden orange umrandeten Felder sind Pflichtfelder.<br>
+    Tragen Sie Ihren Namen und Ihre E-Mail-Adresse ein, wählen Sie einen Login-Namen und ein Passwort, beachten Sie die Nutzungsbedingungen und den Spamschutz und klicken Sie auf den Button 'Registrieren'.<br>
+    Login-Name und Passwort sind frei wählbar. Das Passwort muss min. 8 Zeichen lang sein. Sollte der gewählte Login-Name im System schon existieren, werden Sie automatisch aufgefordert einen anderen Login-Namen zu wählen.
+  </p>
+
+  <%= section_heading 'Einwöchiger Testzugang', 'guest_account' %>
+  <p>
+    Der einwöchige Testzugang soll Interessierten, die das Bildarchiv noch nicht kennen und nicht über eine Institution darauf zugreifen können, die Möglichkeit geben, sich vor Erwerb einer Einzellizenz einen ersten Eindruck von prometheus zu verschaffen.<br>
+    Hierbei ist es notwendig ein Forschungsinteresse anzugeben, da die Nutzung des Bildarchivs ausschließlich im Rahmen von Forschung und Lehre gestattet ist. Dementsprechend wird Ihnen dieses Feld als Pflichtfeld angezeigt, wenn Sie 'Eine Woche kostenlos testen' als Zugangsmodus ausgewählt haben.<br>
+    Wenn Sie das Formular, wie oben beschrieben, ausgefüllt und auf 'Registrieren' geklickt haben, bekommen Sie eine automatische E-Mail zur Bestätigung Ihrer E-Mail-Adresse zugeschickt.<br>
+  </p>
+  <p>
+    <%= screenshot 'help/signup_guest.de.png', 'Einwöchiger Testzugang' %>
+    Um die E-Mail-Adresse zu bestätigen, klicken Sie auf den Link in dieser E-Mail. Darüber gelangen Sie wieder auf unsere Webseite.
+  </p>
+  <p>
+    Bitte beachten Sie, dass Sie Ihren Testzugang erst dann nutzen können, wenn er von der Geschäftsstelle nach Überprüfung des Forschungsinteresses freigeschaltet worden ist.
+  </p>
+
+  <%= section_heading 'Über Ihre Institution', 'signup_institution' %>
+  <p>
+    Wenn Sie die Möglichkeit haben, das Bildarchiv über eine lizenzierten Institution zu nutzen, wählen Sie 'Kostenlos über Ihre Institution nutzen' aus. Wenn Sie das Formular, wie oben beschrieben, ausgefüllt und auf 'Registrieren' geklickt haben, bekommen Sie eine automatische E-Mail zur Bestätigung Ihrer E-Mail-Adresse zugeschickt und gelangen zur nächsten Seite, auf der Sie aus der Liste der lizenzierten Institutionen Ihre Institution auswählen können und dann auf 'Fortfahren' klicken.
+  </p>
+  <p>
+    <%= screenshot 'help/signup_institution_1.de.png', 'Über Ihre Institution' %>
+    Um die E-Mail-Adresse zu bestätigen, klicken Sie auf den Link in dieser E-Mail. Darüber gelangen Sie wieder auf unsere Webseite. Wenn Sie auf 'Fortfahren' klicken, ist die Registrierung abgeschlossen und Sie bekommen die Information, sich für die Aktivierung mit einem Scan der gültigen Immatrikulationsbescheinigung an den/die Administrator*in zu wenden, der/die Ihnen genannt wird.
+  </p>
+  <p>
+    <%= screenshot 'help/signup_institution_2.de.png', 'Über Ihre Institution' %>
+    Dann kann Ihr Zugang direkt für einen längeren Zeitraum freigeschaltet werden.
+  </p>
+
+  <%= section_heading 'Einzellizenz', 'signup_single_user' %>
+  <p>
+    Wenn Sie nicht die Möglichkeit haben, das Bildarchiv über eine lizenzierte Institution zu nutzen, können Sie persönlich für Ihre eigene Arbeit eine Einzellizenz erwerben.<br>
+    Die Einzellizenz ist immer für ein Zeitjahr gültig und verlängert sich nicht automatisch. Sie werden rechtzeitig per E-Mail darüber informiert und können Ihren Zugang ggf. wieder verlängern.
+  </p>
+  <p>
+    Auch bei der Einzellizenz ist es notwendig ein Forschungsinteresse anzugeben, da die Nutzung des Bildarchivs ausschließlich im Rahmen von Forschung und Lehre gestattet ist. Dementsprechend wird Ihnen dieses Feld als Pflichtfeld angezeigt, wenn Sie diesen Zugangsmodus ausgewählt haben.
+  </p>
+  <p>
+    Wenn Sie das Formular, wie oben beschrieben, ausgefüllt und auf 'Registrieren' geklickt haben, bekommen Sie eine automatische E-Mail zur Bestätigung Ihrer E-Mail-Adresse zugeschickt und gelangen zur nächsten Seite, auf der Ihnen alle Zahlungsoptionen angezeigt werden.
+  </p>
+  <p>
+    <%= screenshot 'help/signup_single_user.de.png', 'Einzellizenz' %>
+    Wählen Sie eine der beiden Zahlungsoptionen aus.
+  </p>
+  <p>
+    Bei Zahlung per paypal werden Sie nach dem Klick auf 'Fortfahren' auf die Seite des Onlinezahlungsdienst weitergeleitet, wo Sie direkt die Lizenzgebühr entrichten können. Sobald dieser Zahlungsprozess abgeschlossen ist, wird Ihr Zugang automatisch für ein Jahr freigeschaltet und Sie werden per E-Mail darüber benachrichtigt.
+  </p>
+  <p>
+    Bei Zahlung per Rechnung ist noch eine Angabe der Rechnungsanschrift notwendig.<br>
+    Nach dem Klick auf den Button 'Fortfahren' erhält die Geschäftsstelle Ihre Rechnungsanfrage, die dort bearbeitet werden muss. Ihnen wird die Benachrichtigung über die Freischaltung Ihres Zugangs zusammen mit der ausgestellten Rechnung per E-Mail zugeschickt.
+  </p>
+
+  <%= section_heading 'Bestätigung der E-Mail-Adresse', 'email_verification' %>
+  <p>
+    Sollten Sie die Bestätigung der E-Mail-Adresse versäumt haben, und der Link in Ihrer automatisch zugesendeten E-Mail nicht mehr aktiv sein, oder sollten Sie die automatische Mail nicht erhalten haben, weil Ihnen bei der Eingabe der E-Mail-Adresse ein Fehler unterlaufen ist, können Sie sich eine neue Bestätigungsmail zuschicken lassen, indem Sie sich mit Ihrer Kennung (Login-Name und Passwort) auf unserer Homepage <a href="http://prometheus-bildarchiv.de/" title="www.prometheus-bildarchiv.de">www.prometheus-bildarchiv.de</a> anmelden. Dann bekommen Sie Ihre eingetragenen E-Mail-Adresse noch einmal angezeigt, können ggf. noch Korrekturen vornehmen und auf 'Absenden' klicken.
+  </p>
+
+  <%= render :partial => 'shared/personal_account_tip' %>
+
+<% end -%>
+
+<%= render :partial => 'footer' %>

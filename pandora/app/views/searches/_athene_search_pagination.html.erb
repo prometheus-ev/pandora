@@ -1,0 +1,30 @@
+<%= form_tag({action: 'advanced'}, {method: 'GET'}) do -%>
+  <div class="pagination_text">
+  <% if page > 1 %>
+    <%= link_to params.permit!.merge(page: 1) do %>
+      <div class='icon_first'></div>
+    <% end %>
+    <%= link_to params.permit!.merge(page: page - 1) do %>
+      <div class='icon_prev'></div>
+    <% end %>
+  <% else %>
+    <div class='icon_first inactive'></div>
+    <div class='icon_prev inactive'></div>
+  <% end %>
+  <%= 'Page'.t %>
+  <%= text_field_tag('page', nil, size: 2, placeholder: page, 'pm-to-param' => 'page', id: nil) %>
+  of <b><%= @search.pages %></b>
+  </div>
+  <%= render partial: 'shared/go_button', locals: {text: 'Go'.t} %>
+  <% if (page * per_page) < @search.total %>
+    <%= link_to params.permit!.merge(page: page + 1) do %>
+      <div class='icon_next'></div>
+    <% end %>
+    <%= link_to params.permit!.merge(page: @search.pages) do %>
+      <div class='icon_last'></div>
+    <% end %>
+  <% else %>
+    <div class='icon_next inactive'></div>
+    <div class='icon_last inactive'></div>
+  <% end %>
+<% end %>

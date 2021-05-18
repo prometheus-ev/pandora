@@ -1,0 +1,4 @@
+<tr>
+  <th><label for="source_title"><%= 'Title'.t %></label></th>
+  <td><%= f.text_field :title, options_for_field(:title, :readonly => !current_user.admin_or_superadmin?) %></td>
+</tr>

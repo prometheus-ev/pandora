@@ -1,0 +1,19 @@
+<%= @cs_public ||= capture do %>
+  <% ids = Collection.public(:read).owned_by(current_user).pluck(:id) %>
+  <% ids += Collection.public(:write).pluck(:id) %>
+  <% collections =
+    Collection.
+    distinct.
+    order(:title).
+    where(id: ids).
+    pluck(:title, :id)
+  %>
+
+  <% unless collections.empty? %>
+    <%= select(
+      :target_collection, :collection_id, collections,
+      {prompt: 'Public'.t},
+      {class: 'autoselect', id: 'public_collections_selector'}
+    ) %>
+  <% end %>
+<% end %>

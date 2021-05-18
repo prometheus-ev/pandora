@@ -1,0 +1,48 @@
+<tr class="list_row undim <%= cycle('odd', 'even', :name => cycle_name) %>">
+  <td class="dummy"></td>
+  <td class="metadata">
+    <div class="title-line">
+      <% if admin_or_superadmin? %>
+        <%= link_to row.newsletter_subject, newsletter_path(row) %>
+
+        <span class="dim">
+          <%= link_to(
+            image_tag('icon/edit.gif', :class => 'icon'),
+            edit_newsletter_path(row),
+            title: 'Edit'.t
+          ) %>
+          <%= link_to(
+            image_tag('icon/delete.gif', :class => 'icon delete-icon'),
+            newsletter_path(row),
+            {
+              data: {
+                confirm: "Are you sure to delete newsletter: %s" / row
+              }, 
+              method: 'delete',
+              title: 'Delete'.t
+            }
+          ) %>
+        </span>
+        <span class="web_preview_link">
+          <%= link_to 'web preview'.t, webview_newsletter_path(row) %>
+        </span>
+      <% else %>
+        <%= link_to row.newsletter_subject, webview_newsletter_path(row) %>
+      <% end %>
+    </div>
+    <div class="description-line"></div>
+    <div class="summary-line">
+      <% if admin_or_superadmin? %>
+        <strong><%= row.sent? ? 'Sent'.t : 'Pending'.t %></strong>
+        <% unless row.sent_at.blank? -%>
+          <%= vbar %>
+          <%= 'Sent'.t %> <%= distance_of_time_ago_in_words_tag(row.sent_at) %>
+        <% end -%>
+        <%= vbar %>
+        <%= 'Last updated'.t %> <%= distance_of_time_ago_in_words_tag(row.updated_at) %>
+      <% else %>
+        <%= 'Sent'.t %> <%= distance_of_time_ago_in_words_tag(row.sent_at) %>
+      <% end %>
+    </div>
+  </td>
+</tr>

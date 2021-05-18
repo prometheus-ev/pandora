@@ -1,0 +1,29 @@
+<%= form_for @user, as: :user, url: {controller: 'signup', action: 'license'}, method: 'post' do |f| -%>
+<%= hidden_field_tag :type, @type %>
+  <fieldset>
+    <% if @type == 'institution' -%>
+      <legend><strong><%= 'Obtain license'.t %> / <%= 'Change institution'.t %></strong></legend>
+      <%= render :partial => 'license_institution', :locals => { :f => f } %>
+    <% elsif @type == 'paid' -%>
+      <legend><strong><%= 'Obtain license'.t %></strong></legend>
+      <%= render :partial => 'license_paid', :locals => { :f => f } %>
+    <% else -%>
+      <legend><strong><%= 'Obtain license'.t %></strong></legend>
+      <% for type in %w[institution paid] -%>
+        <%= render :partial => "license_#{type}", :locals => { :f => f } %>
+      <% end -%>
+    <% end -%>
+
+    <br />
+
+    <% if @user.accepted_terms_of_use_recently? -%>
+      <%= hidden_field_tag :accepted, true %>
+    <% else -%>
+      <%= render :partial => 'accounts/inline_terms_of_use' %>
+      <br />
+      <br />
+    <% end -%>
+
+    <%= submit_button 'Proceed'.t, :cancel => :back %>
+  </fieldset>
+<% end -%>

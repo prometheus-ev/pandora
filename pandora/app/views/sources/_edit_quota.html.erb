@@ -1,0 +1,4 @@
+<tr>
+  <th><%= f.label :quota, 'Quota (in megabytes)'.t %></th>
+  <td><%= f.number_field :quota, in: 0..50000, step: 1 %></td>
+</tr>

@@ -1,0 +1,53 @@
+<span id="loginfo">
+<% if current_user -%>
+  <%= current_user.ipuser? ?
+    link_to_ipuser(current_user, nil, host: request.base_url) :
+    current_user.dbuser? ?
+      link_to_dbuser(current_user, nil, host: request.base_url) :
+      link_to(current_user, profile_url(host: request.base_url), title: 'Your profile')
+  %>
+  <span>(<%= link_to 'Log out'.t, url_for(controller: 'sessions', action: 'destroy', host: request.base_url) %>)</span>
+<% else -%>
+  <%= link_to 'Sign up'.t, signup_url(host: request.base_url) %>
+  <span class="pale">/</span>
+  <%= link_to 'Log in'.t, :controller => 'sessions', :action => 'new', :host =>  request.base_url %>
+<% end -%>
+</span>
+
+<span>
+  <%= render partial: 'help_link' %>
+</span>
+
+<% if action_name == 'pandora' && current_user -%>
+<span>
+  <%= link_to image_tag("#{request.base_url}#{image_path('misc/back.png')}", :title => 'Back to image archive'.t), :controller => 'searches', :format => nil, :host =>  request.base_url %>
+</span>
+<% end -%>
+
+<% alternate_locales = I18n.available_locales - [I18n.locale] %>
+
+<span id="locale_switcher">
+  <strong><%= I18n.t(I18n.locale).capitalize %></strong>
+  <span class="pale">•</span>
+  <% if I18n.locale == :en %>
+    <% Locale.switch_locale :de do %>
+      <%= link_to(
+        I18n.t(:de).capitalize, request.base_url + switch_locale_path(:de),
+        title: (
+          I18n.t('Switch to %s language', globalize: true) %
+          I18n.t(:de)
+        )
+      ) %>
+    <% end %>
+  <% else %>
+    <% Locale.switch_locale :en do %>
+      <%= link_to(
+        I18n.t(:en).capitalize, request.base_url + switch_locale_path(:en),
+        title: (
+          I18n.t('Switch to %s language', globalize: true) %
+          I18n.t(:en)
+        )
+      ) %>
+    <% end %>
+  <% end %>
+</span>

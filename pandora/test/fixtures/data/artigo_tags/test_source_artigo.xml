@@ -1,0 +1,41 @@
+<database dataset="koeln" license="https://creativecommons.org/licenses/by-nc-sa/4.0/">
+  <artwork id="1" title="Bacchus" artist="Michelangelo" date="1496-1497" institution="Florenz, Bargello" location="" path="/srv/images/koeln/B10.jpg">
+    <tag name="akt" language="de" count="2"/>
+    <tag name="alkohol" language="de" count="1"/>
+    <tag name="bacchus" language="de" count="3"/>
+    <tag name="betrunken" language="de" count="1"/>
+    <tag name="bild" language="de" count="1"/>
+    <tag name="die andere skulptur" language="de" count="1"/>
+    <tag name="essen" language="de" count="1"/>
+    <tag name="farbe" language="de" count="1"/>
+    <tag name="faun" language="de" count="2"/>
+    <tag name="figur" language="de" count="1"/>
+    <tag name="foto" language="de" count="1"/>
+    <tag name="gott" language="de" count="3"/>
+    <tag name="kelch" language="de" count="2"/>
+    <tag name="kin" language="de" count="1"/>
+    <tag name="kind" language="de" count="1"/>
+    <tag name="locken" language="de" count="1"/>
+    <tag name="mann" language="de" count="1"/>
+    <tag name="marmor" language="de" count="3"/>
+    <tag name="michelangelo" language="de" count="2"/>
+    <tag name="muskulös" language="de" count="1"/>
+    <tag name="nackt" language="de" count="3"/>
+    <tag name="rebe" language="de" count="1"/>
+    <tag name="reben" language="de" count="1"/>
+    <tag name="satyr" language="de" count="1"/>
+    <tag name="schwanken" language="de" count="1"/>
+    <tag name="schwankend" language="de" count="1"/>
+    <tag name="skulptur" language="de" count="5"/>
+    <tag name="sockel" language="de" count="1"/>
+    <tag name="statue" language="de" count="3"/>
+    <tag name="stein" language="de" count="1"/>
+    <tag name="trauben" language="de" count="5"/>
+    <tag name="trinken" language="de" count="1"/>
+    <tag name="trunken" language="de" count="1"/>
+    <tag name="trunkenheit" language="de" count="1"/>
+    <tag name="vater" language="de" count="1"/>
+    <tag name="wein" language="de" count="3"/>
+    <tag name="weintrauben" language="de" count="2"/>
+  </artwork>
+</database>

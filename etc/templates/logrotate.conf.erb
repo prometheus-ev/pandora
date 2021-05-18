@@ -1,0 +1,24 @@
+<%= ENV['PM_ROOT'] %>/pandora/log/production.log {
+  rotate 3
+  dateext
+  compress
+  copytruncate
+  missingok
+  daily
+  su prometheus prometheus
+  postrotate
+    cp <%= ENV['PM_ROOT'] %>/pandora/log/*.gz <%= ENV['PM_LOG_ARCHIVE_DIR'] %>/
+    # previous command files when there are no *.gz files to copy
+    /bin/true
+  endscript
+}
+
+<%= ENV['PM_ROOT'] %>/rack-images/log/*.log {
+  rotate 7
+  dateext
+  compress
+  copytruncate
+  missingok
+  daily
+  su prometheus prometheus
+}

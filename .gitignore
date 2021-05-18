@@ -1,0 +1,14 @@
+/.env
+/.vagrant
+/.ruby-version
+/data/*
+!/data/test/index_packs/*
+!/data/test/images/robertin/original/B070a.jpg
+!/data/test/images/test_source_with_record_image_without_file_extension/original/lh3.googleusercontent.com/9QpA7TKJ5nFy6MmIel4HRP4dm2JcIqx7jsD9fs91i2xbhmed2w1GvtgKN0ZJfWGBeObeL08dFpIe9dvOxEr8LiJYJro=s0
+/deploy/config.sh
+/tmp
+/etc/crontab
+/etc/logrotate.conf
+
+/pandora/config/database.yml
+/pandora/.yardoc

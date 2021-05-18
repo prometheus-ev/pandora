@@ -1,0 +1,21 @@
+<p>
+  <span>Version:</span>
+  <strong><%= render :partial => 'version' %></strong>
+</p>
+
+<ul>
+  <li>
+    <%= TechnicalInfo::RAILS_VERSION %>
+  </li>
+  <li>
+    <%= TechnicalInfo::APACHE_VERSION %>
+    <%= 'with'.t %>
+    <%= TechnicalInfo::PASSENGER_VERSION %>
+  </li>
+  <li>
+    <%= TechnicalInfo::ELASTICSEARCH_VERSION %>
+  </li>
+  <li>
+    5 VMs, <%= 'each with'.t %> 4-8 Cores, 8-24 GB RAM
+  </li>
+</ul>

@@ -1,0 +1,11 @@
+<tr>
+  <th>
+    <label for="upload_title">
+      <%= 'Title'.t %>
+    </label>
+  </th>
+  <td><%= f.text_field :title, options_for_field(:title) %></td>
+  <td>
+    <%= image_tag('misc/info_form_field.gif', :class => 'dim', :title => "Enter here a descriptive notation that ensures the recognition of the object, e.g. \"Ecce homo\".".t) %>
+  </td>
+</tr>

@@ -1,0 +1,12 @@
+<% if locale -%>
+<%= Locale.switch_locale(locale) { render :partial => partial } -%>
+<% else -%>
+<% ORDERED_LANGUAGES.each_with_index do |lang, index| -%>
+<% unless index.zero? -%>
+
+<%= partial == 'email_html' ? '' : '-' * 68 %>
+
+<% end -%>
+<%= Locale.switch_locale(lang) { render :partial => partial } -%>
+<% end -%>
+<% end -%>

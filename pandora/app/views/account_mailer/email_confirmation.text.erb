@@ -1,0 +1,14 @@
+Dear <%= @name.blank? ? 'prometheus user' : @name %>,
+
+The e-mail address of your prometheus account needs to be verified.
+Please confirm that it belongs to your person by clicking the
+following link:
+
+<%= render :partial => 'magic_link' -%>
+
+If you have any questions, please contact the prometheus office.
+
+Kind regards,
+your prometheus team
+
+<%= render :partial => 'signature' -%>

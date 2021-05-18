@@ -1,0 +1,24 @@
+<h2><%= 'Welcome to the prometheus image archive!'.t %></h2>
+
+<%= render :partial => 'login_slogan' %>
+
+<div id="login_wrap" class="clear-padding"><%= render :partial => 'login' %></div>
+<% if display_campus_login? -%>
+<div id="campus_login_wrap" class="clear-padding"><%= render :partial => 'campus_login' %></div>
+<% end -%>
+
+<p>
+  <%= gogif %> <%= 'No account yet?'.t %> <big><%= link_to 'Sign up!'.t, signup_url %></big>
+  <%= image_tag("misc/sticker_1week#{Locale.ext(true)}.png", :title => 'One week free trial!'.t, :id => 'sticker') %>
+</p>
+
+<p>
+  <%= gogif %>
+  <%= (
+    (
+      'You can also explore our %(freely accessible databases)% (%s).' / 
+      lambda { |a| '<big>' + link_to(a, :controller => 'sources', :action => 'open_access') + '</big>'}
+    ) % 
+    link_to(t = 'Open access'.t, "http://#{I18n.locale}.wikipedia.org/wiki/#{t}")
+  ).html_safe %>
+</p>

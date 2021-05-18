@@ -1,0 +1,106 @@
+Dear <%= @name %>,
+
+<% if @welcome -%>
+Welcome to prometheus, your digital image archive for Art
+and Cultural Sciences!
+<% else -%>
+your account for prometheus has been activated!
+<% end -%>
+
+
+YOUR PERSONALIZED ACCOUNT
+=========================
+
+Your login name is
+
+  <%= @login %>
+
+You can use it (or your e-mail address) to log in to the
+image archive on our homepage:
+<<%= @home_url %>>
+
+If you should ever forget your password, you can create a new
+one by following this link:
+<<%= @password_url %>>
+
+Your account for the image archive is valid until
+
+  <%= @expires %>
+
+<% if @institution -%>
+and belongs to the institution
+
+  <%= @institution %>
+
+You can extend your account free of charge through your
+administrators:
+
+<% for admin in @admins -%>
+  <%= admin.fullname_with_email %>
+<% end -%>
+
+Irrespective of an institution, the personalized account may be
+extended anytime with PayPal or invoice.
+<% else -%>
+The duration-time of your account can be extended with PayPal or invoice, or by
+choosing a licensed institution you are a member of. You will be
+notified in time if your account is about to expire.
+<% end -%>
+
+Please follow this link to extend your personalized account:
+<<%= @license_url %>>
+
+You can change your account data (including your login name,
+e-mail address, and password) here:
+<<%= @account_url %>>
+
+<% if @welcome -%>
+
+YOUR OPTIONS
+============
+
+Currently prometheus offers access to <%= @record_count %> high resolution
+images provided by <%= @source_count %> databases of Art and Cultural Sciences.
+The publication rights of designated images may be acquired
+directly online.
+
+Furthermore, a personalized account enables you to utilize
+advanced functions of prometheus, such as the creation of
+individual image collections and presentations or rating of
+the quality of the images.
+
+Please follow this link to view a summary list of all options available:
+<<%= @sitemap_url %>>
+
+For any help or questions please follow this link:
+<<%= @help_url %>>
+
+
+REPRODUCTION RIGHTS
+===================
+
+Please note that certain copyright-protected images from prometheus
+may not be published freely. Images researched from prometheus may
+be used by universities, schools and for individual or scientific
+purposes only. Any other utilization of the images requires the
+clarification of the copyright regarding the work of art or the
+photograph.
+
+The relevant passages of the copyright are compiled under this link:
+<<%= @rights_url %>>
+<% else -%>
+Please follow this link to view a summary list of all options available:
+<<%= @sitemap_url %>>
+
+For any help or questions please follow this link:
+<<%= @help_url %>>
+<% end -%>
+
+Please contact our office for questions and suggestions. We are
+asking for your help to develop and optimize prometheus further.
+Your ideas are important to us!
+
+Enjoy working with prometheus!
+Your prometheus-Team
+
+<%= render :partial => 'signature' -%>

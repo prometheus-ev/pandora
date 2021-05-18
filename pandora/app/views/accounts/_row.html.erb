@@ -1,0 +1,59 @@
+<tr class="list_row undim <%= cycle('odd', 'even', :name => cycle_name) %>">
+  <td class="dummy"></td>
+  <td class="metadata">
+  <% if current_user.allowed?(row, :read) -%>
+    <div class="title-line">
+      <%= link_to_object(row) %>
+    <% if row == current_user -%>
+      (<strong><%= 'You'.t %></strong>)
+    <% end -%>
+    <% if current_user.admin_or_superadmin? -%>
+      <small>[<%=h row.login %>]</small>
+    <% end -%>
+      <small>&lt;<%=h row.email %>&gt;</small>
+    <% if current_user.allowed?(row) -%>
+      <span class="dim">
+        <%= link_to(
+          image_tag('icon/edit.gif', :class => 'icon', :title => 'Edit'.t),
+          { :action => 'edit', :id => row.login },
+          { :title => 'Edit'.t }
+        ) %>
+        <%= link_to_delete(row) %>
+      </span>
+    <% end -%>
+    </div>
+    <div class="description-line">
+    <% if institution = row.institution -%>
+      <%= current_user.admin_or_superadmin? ? list_search_link_for(:institution, institution) : h(institution.fulltitle) %>
+      <%= link_to(
+        image_tag('misc/info.gif', :class => 'dim'),
+        institution_path(institution),
+        title: 'Information about the institution'.t
+      ) %>
+    <% end -%>
+    </div>
+    <div class="summary-line">
+      <strong>
+        <%= translated_flag_list(
+          active: row.active?,
+          expired: row.expired?,
+          deactivated: row.status == 'deactivated',
+          pending: row.status == 'pending',
+          guest: row.mode == 'guest'
+        ) %>
+      </strong>
+    <% unless row.created_at.blank? -%>
+      <%= vbar %>
+      <%= 'Created'.t %> <%= distance_of_time_ago_in_words_tag(row.created_at) %>
+    <% end -%>
+      <%= vbar %>
+      <%= 'Last updated'.t %> <%= distance_of_time_ago_in_words_tag(row.updated_at) %>
+    </div>
+  <% else -%>
+    <div class="title-line"><%=h row %></div>
+  <% end -%>
+  <% restrict_to :superadmin, :admin do -%>
+    <div><%= 'Roles'.t %>: <%= list_search_links_for :roles, row.roles.distinct %></div>
+  <% end -%>
+  </td>
+</tr>

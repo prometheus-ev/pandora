@@ -1,0 +1,65 @@
+<div class="header-line clear-padding">
+  <%= page_title %>
+
+  <div class="icon-line">
+    <!-- REWRITE: we use the verbose way because we don't have resourceful routing
+    yet -->
+    <%= link_to image_tag('icon/edit.gif', :class => 'icon', :title => 'Edit'.t), { controller: 'oauth_clients', action: 'edit', id: @client_application.id}, { :title => 'Edit'.t } %>
+    <%= link_to image_tag('icon/delete.gif', :class => 'icon delete-icon', :title => 'Delete'.t), {controller: 'oauth_clients', action: 'show', id: @client_application.id}, { :title => 'Delete'.t, :data => { confirm: "Are you sure to delete client application: '%s'".t / @client_application }, :method => :delete } %>
+  </div>
+</div>
+
+<br class="clear-float" />
+
+<table>
+<% unless @client_application.url.blank? -%>
+  <tr>
+    <th><%= 'Homepage'.t %></th>
+    <td><%= link_to nil, @client_application.url %></td>
+  </tr>
+<% end -%>
+<% unless @client_application.callback_url.blank? -%>
+  <tr>
+    <th><%= 'Callback URL'.t %></th>
+    <td><%= @client_application.oob? ? '[OOB]' : link_to(nil, @client_application.callback_url) %></td>
+  </tr>
+<% end -%>
+<% unless @client_application.support_url.blank? -%>
+  <tr>
+    <th><%= 'Support URL'.t %></th>
+    <td><%= link_to nil, @client_application.support_url %></td>
+  </tr>
+<% end -%>
+
+  <tr><td colspan="2"><br /></td></tr>
+
+  <tr>
+    <th><%= 'Consumer Key'.t %></th>
+    <td><code><%=h @client_application.key %></code></td>
+  </tr>
+  <tr>
+    <th><%= 'Consumer Secret'.t %></th>
+    <td><code><%=h @client_application.secret %></code></td>
+  </tr>
+
+  <tr><td colspan="2"><br /></td></tr>
+
+  <tr>
+    <th><%= 'Request Token URL'.t %></th>
+    <!-- REWRITE: we can code this without the dependency on OAuth::Server -->
+    <%#= root_url + @client_application.oauth_server.request_token_path %>
+    <td><code><%= url_for only_path: false, controller: 'oauth', action: 'request_token', locale: nil %></code></td>
+  </tr>
+  <tr>
+    <th><%= 'Access Token URL'.t %></th>
+    <!-- REWRITE: we can code this without the dependency on OAuth::Server -->
+    <%#= root_url + @client_application.oauth_server.access_token_path %>
+    <td><code><%= url_for only_path: false, controller: 'oauth', action: 'access_token', locale: nil %></code></td>
+  </tr>
+  <tr>
+    <th><%= 'Authorize URL'.t %></th>
+    <!-- REWRITE: we can code this without the dependency on OAuth::Server -->
+    <%#= root_url + @client_application.oauth_server.authorize_path %>
+    <td><code><%= url_for only_path: false, controller: 'oauth', action: 'authorize', locale: nil %></code></td>
+  </tr>
+</table>

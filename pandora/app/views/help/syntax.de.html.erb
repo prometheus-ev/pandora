@@ -1,0 +1,208 @@
+<h2><%= 'Syntax help'.t %></h2>
+
+<p>
+  (Siehe auch <%= link_to_help section: 'search', label: 'Suche' %>,
+  <%= link_to_help section: 'results', label: 'Ergebnisliste' %> und
+  <%= link_to_help section: 'copyright_and_publication', label: 'Bildrecht- und Publikation' %>.)
+</p>
+
+<p>
+  Sie können eine spezielle Abfragesyntax verwenden, um Ihre Suchabfrage zu spezifizieren.
+</p>
+
+<% with_toc do -%>
+
+  <%= section_heading 'Phrasensuche: "..."', 'phrase_search' %>
+  <p>
+    Es ist möglich, eine Phrasensuche durchzuführen, indem Sie die Begriffe in "..." einfügen. Auf diese Weise wird die genaue Reihenfolge der Bedingungen berücksichtigt. Eine Abfrage für
+    <%= link_to '"paul baum"', { controller: 'searches', action: 'advanced', 'search_field[0]': 'all', 'search_value[0]': '"paul baum"' }, target: '_blank' %>
+    würde alle Aufzeichnungen über den Künstler Paul Baum zurückgeben. Während einer Abfrage nach
+    <%= link_to 'paul baum', { controller: 'searches', action: 'advanced', 'search_field[0]': 'all', 'search_value[0]': 'paul baum' }, target: '_blank' %>
+    (ohne Anführungszeichen) beide Begriffe unabhängig von der Reihenfolge findet. Zum Beispiel würde auch "Paul Klee, Baum im Garten" gefunden werden.
+  </p>
+
+  <%= section_heading 'Platzhaltersuche: * und ?', 'wildcard_search' %>
+  <p>
+    Es ist möglich, Teile eines Wortes mit den Platzhalterzeichen * oder ? zu maskieren. Das Platzhalterzeichen kann an einer beliebigen Stelle im Wort platziert werden. Während das * für eine beliebige Anzahl von Zeichen (einschließlich Null) stehen kann, ersetzt das ? genau ein Zeichen. Dies ist besonders nützlich, wenn Sie sich über einen der Buchstaben in Ihrem Abfragebegriff nicht sicher sind.
+  </p>
+
+  <p>
+    Sie suchen zum Beispiel nach Aufzeichnungen von van Gogh, sind sich aber nicht sicher, wie sein Vorname geschrieben wird. Geben Sie einfach
+    <%= link_to 'Vin?ent van Gogh', { controller: 'searches', action: 'advanced', 'search_field[0]': 'artist', 'search_value[0]': 'Vin?ent van Gogh' }, target: '_blank' %>
+    ein, das Fragezeichen findet dann das fehlende c.
+  </p>
+
+  <p>
+    Eine Suche nach
+    <%= link_to 'Sun*', { controller: 'searches', action: 'advanced', 'search_field[0]': 'title', 'search_value[0]': 'Sun*' }, target: '_blank' %>
+    findet z.B. Sun, Sunday, Sundown, etc.
+    <%= link_to 'Sun*e', { controller: 'searches', action: 'advanced', 'search_field[0]': 'title', 'search_value[0]': 'Sun*e' }, target: '_blank' %>
+    findet z.B. Sunrise, Sunshine, etc.
+    <%= link_to '*light', { controller: 'searches', action: 'advanced', 'search_field[0]': 'title', 'search_value[0]': '*light' }, target: '_blank' %>
+    findet z.B. flight, redlight, etc.
+  </p>
+
+  <p>
+    Sehen Sie sich für weitere Informationen auch die <a href="https://www.elastic.co/guide/en/elasticsearch/reference/current/query-dsl-query-string-query.html#query-string-wildcard" target="_blank">Elasticsearch Query String Wildcard Dokumentation</a> an.
+  </p>
+
+  <%= section_heading 'Fuzzy-Suche: ~', 'fuzzy_search' %>
+  <p>
+    Es ist möglich, ein Wort in der Abfrage mit ~ zu kennzeichnen, um nach ähnlichen Wörtern zu suchen. Dies ist besonders nützlich, wenn Sie sich über die Schreibweise eines Begriffs oder Namens nicht sicher sind. Das Zeichen ~ wird am Ende des Wortes positioniert, nach dem Sie unscharf suchen möchten. Beachten Sie, dass die ~ Teile des Wortes nicht wie das * ersetzt. Eine Anfrage nach zum Beispiel
+    <%= link_to 'Jaqueometti~', { controller: 'searches', action: 'advanced', 'search_field[0]': 'artist', 'search_value[0]': 'Jaqueometti~' }, target: '_blank' %>
+    würde nicht den Künstler Giacometti finden, aber mit
+    <%= link_to '*ometti', { controller: 'searches', action: 'advanced', 'search_field[0]': 'artist', 'search_value[0]': '*ometti' }, target: '_blank' %>
+    würde es klappen.
+    <%= link_to 'Gaugin~', { controller: 'searches', action: 'advanced', 'search_field[0]': 'artist', 'search_value[0]': 'Gaugin~' }, target: '_blank' %>
+    findet dahingegen auch Einträge für Gauguin, Gaudin, Baudin, etc.
+  </p>
+
+  <p>
+    Sehen Sie sich für weitere Informationen auch die <a href="https://www.elastic.co/guide/en/elasticsearch/reference/current/query-dsl-query-string-query.html#query-string-fuzziness" target="_blank">Elasticsearch Query String Fuzziness Dokumentation</a> an.
+  </p>
+
+  <%= section_heading 'Boosting: ^<var>n</var>', 'boosting' %>
+  <p>
+    Es ist möglich, ^<var>n</var> am Ende eines Wortes anzuhängen, um die Rangfolge zu beeinflussen. <var>n</var> ist eine beliebige positive Zahl und wirkt sich nur auf die Rangfolge der Ergebnisliste aus, nicht auf die Anzahl der zurückgegebenen Ergebnisse. Eine Abfrage für
+    <%= link_to 'gold OR silver^5', { controller: 'searches', action: 'advanced', 'search_field[0]': 'title', 'search_value[0]': 'gold OR silver^5' }, target: '_blank' %>
+    wird alle Datensätze die Silber enthalten bevorzugen (= höher bewerten), aber dennoch diejenigen zurückgeben, die mit Gold oder Gold und Silber übereinstimmen.
+  </p>
+
+  <p>
+    Sehen Sie sich für weitere Informationen auch die <a href="https://www.elastic.co/guide/en/elasticsearch/reference/current/query-dsl-query-string-query.html#_boosting" target="_blank">Elasticsearch Query String Boosting Dokumentation</a> an.
+  </p>
+
+  <%= section_heading 'Booleschen Operatoren', 'operators' %>
+  <p>
+    Es ist möglich, Suchklauseln mit den Booleschen Operatoren UND, ODER und UND NICHT zu kombinieren. Sie haben folgende Bedeutung:
+
+    <dl>
+      <dt>UND</dt>
+      <dd><strong>Beide</strong> Suchklauseln müssen übereinstimmen.</dd>
+
+      <dt>ODER</dt>
+      <dd><strong>Eine</strong> der Suchklauseln müssen übereinstimmen, es ist jedoch auch möglich, dass beide übereinstimmen.</dd>
+
+      <dt>UND NICHT</dt>
+      <dd>Die erste Suchklausel muss übereinstimmen, die zweite <strong>darf jedoch nicht</strong> übereinstimmen.</dd>
+    </dl>
+  </p>
+
+  <p>
+    Zum Beispiel würde eine Suchanfrage nach
+    <%= link_to({ controller: 'searches',
+                  action: 'advanced',
+                  'search_field[0]': 'artist',
+                  'search_value[0]': 'Picasso',
+                  'search_field[1]': 'title',
+                  'search_value[1]': 'Stier' },
+                target: '_blank') do %>
+      artist = Picasso UND title = Stier
+    <% end %>
+    auch alle Stier Bilder von Picasso finden. Wohingegen
+    <%= link_to({ controller: 'searches',
+                  action: 'advanced',
+                  'search_field[0]': 'artist',
+                  'search_value[0]': 'Picasso',
+                  'boolean_fields_selected[1]': 'must_not',
+                  'search_field[1]': 'title',
+                  'search_value[1]': 'Stier' },
+                target: '_blank') do %>
+      artist = Picasso UND NICHT title = Stier
+    <% end %>
+    alle Bilder von Picasso <strong>außer</strong> seine Stierbiler findet. Auf der anderen Seite findet
+    <%= link_to({ controller: 'searches',
+                  action: 'advanced',
+                  'search_field[0]': 'artist',
+                  'search_value[0]': 'Picasso',
+                  'boolean_fields_selected[1]': 'should',
+                  'search_field[1]': 'title',
+                  'search_value[1]': 'Stier' },
+                target: '_blank') do %>
+      artist = Picasso ODER title = Stier
+    <% end %>
+    alle Bilder von Picasso <strong>und</strong> alle Stierbilder egal von welchem Künstler sie sind.
+  </p>
+
+  <p>
+    Wenn Sie jedoch eine komplexere Abfrage formulieren möchten, die mehr als einen Operator verwendet, müssen Sie berücksichtigen, in welcher Reihenfolge sie angewendet werden. Die allgemeine Rangfolge lautet wie folgt:
+
+    ODER &gt; UND NICHT &gt; UND
+  </p>
+
+  <p>
+    Das heißt, wenn Sie eine Kombination davon verwenden, wird ODER vor UND NICHT ausgewertet, was wiederum vor UND ausgewertet wird. Beispiele:
+
+    <dl>
+      <%= link_to({ controller: 'searches',
+                    action: 'advanced',
+                    'search_field[0]': 'artist',
+                    'search_value[0]': 'Picasso',
+                    'search_field[1]': 'title',
+                    'search_value[1]': 'Stier',
+                    'search_field[2]': 'title',
+                    'search_value[2]': 'Pferd' },
+                  target: '_blank') do %>
+        <dt>artist = Picasso UND title = Stier UND title = Pferd</dt>
+      <% end %>
+      <dd>Diese Anfrage findet alle Bilder von Picasso, die sowohl Stiere als auch Pferde zeigen.</dd>
+
+      <%= link_to({ controller: 'searches',
+                    action: 'advanced',
+                    'search_field[0]': 'artist',
+                    'search_value[0]': 'Picasso',
+                    'search_field[1]': 'title',
+                    'search_value[1]': 'Stier',
+                    'boolean_fields_selected[2]': 'should',
+                    'search_field[2]': 'title',
+                    'search_value[2]': 'Pferd' },
+                  target: '_blank') do %>
+        <dt>artist = Picasso UND title = Stier ODER title = Pferd</dt>
+      <% end %>
+      <dd>Diese Anfrage findet alle Bilder von Picasso, die entweder Stiere oder Pferde oder beides zeigen.</dd>
+
+      <%= link_to({ controller: 'searches',
+                    action: 'advanced',
+                    'search_field[0]': 'artist',
+                    'search_value[0]': 'Picasso',
+                    'search_field[1]': 'title',
+                    'search_value[1]': 'Stier',
+                    'boolean_fields_selected[2]': 'must_not',
+                    'search_field[2]': 'title',
+                    'search_value[2]': 'Pferd' },
+                  target: '_blank') do %>
+        <dt>artist = Picasso UND title = Stier UND NICHT title = Pferd</dt>
+      <% end %>
+      <dd>Diese Anfrage findet alle Bilder von Picasso, die Stiere aber keine Pferde zeigen.</dd>
+
+      <%= link_to({ controller: 'searches',
+                    action: 'advanced',
+                    'search_field[0]': 'artist',
+                    'search_value[0]': 'Picasso',
+                    'boolean_fields_selected[1]': 'should',
+                    'search_field[1]': 'artist',
+                    'search_value[1]': 'von Gogh',
+                    'search_field[2]': 'title',
+                    'search_value[2]': 'Stier',
+                    'boolean_fields_selected[3]': 'should',
+                    'search_field[3]': 'title',
+                    'search_value[3]': 'Kuh' },
+                  target: '_blank') do %>
+        <dt>artist = Picasso ODER artist = van Gogh AND title = Stier ODER title = Kuh</dt>
+      <% end %>
+      <dd>Diese Anfrage findet alle Bilder von Picasso oder van Gogh, die entweder Stiere oder Kühe oder beides zeigen.</dd>
+    </dl>
+  </p>
+
+  <p>
+    Sehen Sie sich für weitere Informationen auch die <a href="https://www.elastic.co/guide/en/elasticsearch/reference/current/query-dsl-query-string-query.html#_boolean_operators" target="_blank">Elasticsearch Query String Booleschen Operatoren Dokumentation</a> an.
+  </p>
+
+  <%= section_heading 'Weitere Informationen', 'further_information' %>
+  <p>
+    Wenden Sie sich an die komplette <a href="https://www.elastic.co/guide/en/elasticsearch/reference/current/query-dsl-query-string-query.html#query-string-syntax" target="_blank">Elasticsearch Query String Dokumentation</a> für noch mehr Details. Der Wikipedia Artikel <a href="http://en.wikipedia.org/wiki/Levenshtein_distance">Levenshtein distance</a> enthält weitere Informationen zum Ähnlichkeitsmaß welches in der Fuzzy-Suche verwendet wird.
+  </p>
+
+<% end -%>
+
+<%= render :partial => 'footer' %>

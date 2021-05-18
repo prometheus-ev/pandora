@@ -1,0 +1,25 @@
+<% if @emails.empty? %>
+  <div class="infobar">
+    <p><strong><%= "No newsletters found.".t %></strong></p>
+  </div>
+<% else %>
+  <div class="list_controls">
+    <%= pagination = pagination_for(@emails, @page, @order) %>
+    <%= sorting = render partial: 'shared/list/sort_links', locals: {args: {
+      'Combined subject' => 'combined_subject',
+      'Updated at' => 'updated_at',
+      'Sent at' => 'sent_at'
+    }} %>
+  </div>
+
+  <table class="list email-list clear-float clear-padding">
+    <%= render partial: 'row', collection: @emails.items, locals: {
+      cycle_name: 'list'
+    } %>
+  </table>
+
+  <div class="list_controls">
+    <%= pagination %>
+    <%= sorting %>
+  </div>
+<% end %>

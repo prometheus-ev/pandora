@@ -1,0 +1,22 @@
+<div class="pm-submit submit_button_wrap">
+  <div class="<% 'autosubmit' if autosubmit %> scriptonly" _name="commit">
+    <div class="button_wrap submit_button">
+      <div class="button_left"></div>
+      <div class="button_icon"></div>
+      <div class="button_middle"><%= label %></div>
+      <div class="button_right"></div>
+    </div>
+  </div>
+  <div class="noscript_button noscript">
+    <img src="/images/misc/button_send_left.gif" alt="Button send left">
+    <input type="submit" name="<%= value %>" value="<%= label %>" class="submit" data-disable-with="Save">
+    <img src="/images/misc/button_send_right.gif" alt="Button send right">
+  </div>
+
+  <% if cancel %>
+    <div class="cancel_link">
+      <%= 'or'.t %>
+      <a href="javascript:history.back()"><%= 'Cancel'.t %></a>
+    </div>
+  <% end %>
+</div>

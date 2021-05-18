@@ -1,0 +1,14 @@
+Liebe(r) <%= @name.blank? ? 'prometheus-Nutzer' : @name %>,
+
+die E-Mail-Adresse Ihres prometheus-Zugangs muss verifiziert
+werden. Bitte bestätigen Sie, dass sie zu Ihnen gehört, indem
+Sie auf den nachfolgenden Link klicken:
+
+<%= render :partial => 'magic_link' -%>
+
+Bei Fragen wenden Sie sich bitte an die prometheus-Geschäftsstelle.
+
+Mit freundlichen Grüßen,
+Ihr prometheus-Team
+
+<%= render :partial => 'signature' -%>

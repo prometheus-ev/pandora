@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<source>
+  <row>
+    <id>1</id>
+    <path>path1</path>
+    <artist>Raphael</artist>
+    <title>Title 1</title>
+    <location>Location 1</location>
+    <date>1919</date>
+  </row>
+  <row>
+    <id>2</id>
+    <path>path2</path>
+    <artist>Raphael</artist>
+    <title>Title 2</title>
+    <location>Location 2</location>
+    <date>2019</date>
+  </row>
+  <row>
+    <id>3</id>
+    <path>path3</path>
+    <artist>Raphael</artist>
+    <title>Title 3</title>
+    <location>Location 3</location>
+  </row>
+  <row>
+    <id>4</id>
+    <path>path4</path>
+    <artist>Raphael</artist>
+    <title>Title 4</title>
+    <location>Location 4</location>
+    <date>You cannot parse me as date range.</date>
+  </row>
+</source>

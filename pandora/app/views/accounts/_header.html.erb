@@ -1,0 +1,51 @@
+<div class="header-line">
+  <h2 class="title-line">
+    <%=h @user %><% unless @user.title.blank? -%>, <%=h @user.title %><% end -%>
+    <br />
+    <% if !@user.institution.nil? %>
+      <span class="subtitle">
+        <%=h @user.institution.fulltitle %>
+        <%= link_to(
+          image_tag('misc/info.gif', :class => 'dim'),
+          institution_path(@user.institution),
+          title: 'Information about the institution'.t
+        ) %>
+      </span>
+    <% end %>
+  </h2>
+  <div class="icon-line dim">
+  <% unless @is_self -%>
+    <%=
+      link_to(
+        image_tag('icon/email.gif',
+          :class => 'icon'
+        ), {
+          :controller => 'accounts',
+          :action => 'email',
+          :to => @user
+        }, {
+          :title => 'Send %s a message' / h(@user)
+        }
+      )
+    %>
+  <% end -%>
+  <% if current_user.allowed?(@user) -%>
+    <span class="gap"></span>
+    <%= link_to icon('edit'), edit_account_url(@user), title: 'Edit'.t %>
+    <%= link_to_delete(@user) %>
+  <% end -%>
+  </div>
+</div>
+
+<div class="section clear-float">
+<% unless @user.about.blank? -%>
+  <div class="description-line"><%= truncated(@user.about, 280, :parent => 'header-section', :simple_format => true) %></div>
+<% end -%>
+  <div id="object-summary"><%= render :partial => 'summary' %></div>
+</div>
+
+<% if database = @user.database %>
+  <div class="section clear-float">
+    <%= link_to(I18n.t('has_user_database'), source_path(database)) %>
+  </div>
+<% end %>

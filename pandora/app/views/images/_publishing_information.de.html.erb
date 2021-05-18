@@ -1,0 +1,118 @@
+<p>
+  <big>
+    Die Publikationsgenehmigung für dieses Bild kann nicht direkt über prometheus
+    eingeholt werden. Bitte folgen Sie den unten stehenden Anweisungen, um die
+    Publikationsrechte zu klären.
+  </big>
+</p>
+
+<ol>
+  <li>
+    Bildrecht: Hierbei wird unterschieden zwischen dem Recht am Werk und dem Recht an der Fotografie:
+    <p>
+      <ul>
+        <li>
+          Recht am Werk:
+          <% representative = rights_representative(@image, false) -%>
+          <% if (rights_work = @image.rights_work).blank? -%>
+            <span>Keine Informationen zur Verfügung gestellt</span>
+            <p>
+              Dies bedeutet nicht, dass keine Verwertungsrechte existieren. Aber falls
+              der Künstler bzw. die Künstlerin länger als 70 Jahre verstorben ist,
+              müssen Sie keine Publikationsgenehmigung einholen, da das Urheberrecht
+              erloschen und das Werk gemeinfrei ist. Andernfalls müssen Sie überprüfen,
+              ob der Künstler bzw. die Künstlerin von der <%= link_to_vgbk %> vertreten
+              wird oder dort anfragen, ob die Künstler die Vertretung selbst übernommen
+              haben. In beiden Fällen müssen Sie eine Anfrage senden, um nach der
+              Publikationsgenehmigung zu fragen.
+            </p>
+          <% else -%>
+          	<%= render partial: 'shared/rights_work', locals: {rights_work: rights_work} %>
+          	<% if representative -%>
+            	<p>
+                Der Künstler bzw. die Künstlerin wird vertreten von: <%= representative %>.
+                Senden Sie eine Anfrage an: <%= representative %> und fragen Sie nach
+                einer Publikationsgenehmigung.
+              </p>
+            <% else -%>
+              <p>
+                Ist in dieser Zeile "Gemeinfrei" oder "Public Domain" vermerkt,
+                so existieren keine Rechte mehr am Werk. Sie sollten dennoch überprüfen, 
+                ob diese Angabe verlässlich ist und ob noch Rechte an der Fotografie existieren,
+                bevor Sie die Abbildung publizieren.
+              </p>
+            <% end -%>
+          <% end -%>
+        </li>
+        <li>
+          <%= "Recht #{@image.source_name == 'mka' ? ' am Video' : 'an der Fotografie'}:" %>
+        <% if (rights_reproduction = @image.rights_reproduction).blank? -%>
+          <span>Keine Informationen zur Verfügung gestellt</span>
+          <p>
+            Dies bedeutet nicht, dass keine Verwertungsrechte existieren. Aber falls
+            der Fotograf bzw. die Fotografin länger als 50 Jahre verstorben ist,
+            müssen Sie keine Verwertunsgenehmigung einholen, da das Foto gemeinfrei
+            ist. Andernfalls überprüfen Sie den Bildnachweis (<strong>siehe 2.</strong>).
+          </p>
+        <% else -%>
+    <%= render partial: 'images/rights_reproduction', locals: {rights_reproduction: rights_reproduction} %>
+          <p>
+            Die Genehmigung, das Foto zu nutzen verlangt eine Autorisierung direkt
+            vom Fotografen bzw. der Fotografin oder der jeweiligen Institution, die
+            in diesem Feld genannt wird. Falls diese Informationen nicht ausreichen,
+            müssen Sie eventuell recherchieren, wie Sie die betreffende Person/Institution
+            kontaktieren können.
+          </p>
+        <% end -%>
+        </li>
+      </ul>
+    </p>
+  </li>
+  <li>
+    Bildnachweis:
+  <% if (credits = @image.credits).blank? -%>
+    <span>Keine Informationen zur Verfügung gestellt</span>
+    <p>
+      Leider gibt es keine Informationen zur Bildquelle. Kontaktieren Sie in
+      diesem Fall die Datenbank (<strong>siehe 3.</strong>).
+    </p>
+  <% else -%>
+    <% credits_output = credits.map { |credit|
+      if is_url?(credit)
+        link_to(credit, credit, :target => '_blank')
+      elsif credit.include?(",http")
+        link_to_links(credit)
+      else
+        credit
+      end
+      }.join(" | ").html_safe %>
+    <%= format_content(credits_output, escape: false) %>
+    <p>
+      Dieses Feld zeigt die Bildreferenz an, d.h. woher das Bild stammt (z.B. Buch,
+      Artikel, Archiv). Dort können Sie die Informationen zum Bildrecht selbst
+      nachsehen. Falls Sie keine ausreichenden Informationen finden, kontaktieren
+      Sie die Datenbank (<strong>siehe 3.</strong>).
+    </p>
+  <% end -%>
+  </li>
+  <li>
+    Datenbank:
+    <span><%= @image.source.fulltitle %></span>
+    <p>
+      Falls Sie keine Informationen zum Bildrecht finden konnten, kontaktieren Sie
+    <% if @image.upload_record? -%>
+      den Nutzer/die Nutzerin
+      <%= link_to @image.owner, :controller => 'accounts', :action => 'show', :id => @image.owner %>
+      <%= email_icon_for(@image.source, :span) %>
+      , der/die das Bild zur Verfügung stellt, um diese Informationen zu erhalten und
+      fragen Sie nach, ob der Nutzer/die Nutzerin
+    <% else -%>
+      die Datenbank
+      <%= link_to source = @image.source, :controller => 'sources', :action => 'show', :id => source %>
+      <%= email_icon_for(source, :span) %>, um diese Informationen zu erhalten und fragen Sie nach,
+      ob die Datenbank
+    <% end -%>
+      diese Informationen für das ganze Bildarchiv zur Verfügung stellen kann.
+    </p>
+  </li>
+</ol>

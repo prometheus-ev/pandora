@@ -1,0 +1,49 @@
+<%= form_for comment,
+  url: pm_comments_form_path(comment),
+  html: {class: 'edit-form'} do |f|
+%>
+  <%= f.hidden_field :parent_id %>
+
+  <table>
+    <tr>
+      <th>
+        <%= f.label :text, 'Edit comment'.t %>
+      </th>
+      <td>
+        <%= f.text_area :text, rows: 5 %>
+      </td>
+      <% unless comment.deleted? %>
+        <td>
+          <%= link_to(
+            image_tag('/images/icon/delete.gif'),
+            pm_comment_delete_url(comment),
+            data: {confirm: 'Are you sure?'},
+            method: :delete,
+            title: 'Delete this comment'.t,
+            class: 'icon delete-icon comment-delete-icon'
+          ) %>
+        </td>
+      <% end %>
+    </tr>
+    <tr>
+      <th></th>
+      <td>
+        <div class="submit_button_wrap">
+          <div class="scriptonly pm-submit" _name="commit">
+            <div class="button_wrap submit_button">
+              <div class="button_left"></div>
+              <div class="button_icon"></div>
+              <div class="button_middle"><%= 'Submit'.t %></div>
+              <div class="button_right"></div>
+            </div>
+          </div>
+
+          <div class="cancel_link">
+            or
+            <%= link_to 'Cancel'.t, '#', class: 'pm-edit-comment' %>
+          </div>
+        </div>
+      </td>
+    </tr>
+  </table>
+<% end %>

@@ -1,0 +1,2 @@
+<% compact = defined?(compact) && compact -%>
+<%= check_box_tag 'accepted', '1', params[:accepted] %> <label for="accepted"><%= (compact ? 'I accept the %(terms of use)%' : 'I read the %(terms of use)% carefully and agree') / lambda { |a| link_to(a, { controller: 'terms', action: 'show', host: request.base_url }, { :target => '_blank', :id => !compact && 'toggle_terms_of_use' }) } %></label>

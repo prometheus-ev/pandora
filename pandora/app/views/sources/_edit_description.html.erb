@@ -1,0 +1,20 @@
+<tr>
+  <th><label for="source_url"><%= 'URL'.t %></label></th>
+  <td><%= f.text_field :url, options_for_field(:url) %></td>
+</tr>
+<tr>
+  <th><label for="source_description"><%= 'Description'.t + ' [' + 'English'.t + ']' %></label></th>
+  <td><%= f.text_area :description, options_for_field(:description, :rows => 10, :cols => 50) %></td>
+</tr>
+<tr>
+  <th><label for="source_description_de"><%= 'Description'.t + ' [' + 'German'.t + ']' %></label></th>
+  <td><%= f.text_area :description_de, options_for_field(:description_de, :rows => 10, :cols => 50) %></td>
+</tr>
+<tr>
+  <th><label for="technical_info"><%= 'Technical Information'.t + ' [' + 'English'.t + ']' %></label></th>
+  <td><%= f.text_area :technical_info, options_for_field(:technical_info, :rows => 10, :cols => 50) %></td>
+</tr>
+<tr>
+  <th><label for="technical_info_de"><%= 'Technical Information'.t + ' [' + 'German'.t + ']' %></label></th>
+  <td><%= f.text_area :technical_info_de, options_for_field(:technical_info_de, :rows => 10, :cols => 50) %></td>
+</tr>

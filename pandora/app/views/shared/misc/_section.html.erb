@@ -1,0 +1,93 @@
+<% if request.xhr? -%>
+  <%= render partial: 'shared/flash' %>
+  <%= javascript_tag %q{Pandora.Utils.scroll_to_flash()} %>
+<% end -%>
+
+<%= apply_behaviour true, section_id(section) %>
+
+<% if section =~ /header/ -%>
+  <% locals = renest(locals) if locals.key?(:locals) %>
+  <%= render :partial => section, :locals => locals %>
+<% else -%>
+  <a name="<%= section %>"></a>
+  <div class="scriptonly section_toggle"><div class="<%= expanded ? 'collapse' : 'expand' %>"></div></div>
+  <div class="section_header">
+    <div class="section_heading">
+    <% if section =~ /(.+)_settings\z/ -%>
+      <%= $1.humanize.t %>
+    <% else -%>
+      <% if count && section !~ /_images\z/ %>
+        <% if count == 1 %>
+          <%= "%d #{section.singularize.humanize}" / count %>
+        <% else %>
+          <%= "%d #{section.humanize}" / count %>
+        <% end %>
+      <% else %>
+        <%= section.humanize.t %>
+      <% end %>
+    <% end -%>
+    <% if section == 'comments' -%>
+      <span class="gap"></span>
+      <small><%= link_to 'Leave a comment'.t, :action => show_action, :anchor => 'new_comment', :reply_to => nil %></small>
+    <% end -%>
+    <!-- REWRITE: functionality dropped
+    <%# for feed, object, options in feed_objects(section) -%>
+      <span class="gap"></span>
+      <%#= link_to_feed(object, feed, options, :class => 'ignore-handler') %>
+    <%# end -%> -->
+    </div>
+  <% if editable_section?(section) -%>
+    <span class="<%= 'noscript ' unless expanded %>section float-left dim">
+    <% if section == 'associated_images' -%>
+      <span>
+        <% if @image.upload_record? %>
+          <%= link_to('Show all...'.t, :controller => 'uploads', :action => 'associated', :id => @image.upload.id) %>
+        <% else %>
+          <%= link_to('Show all...'.t, :controller => 'search', :action => 'advanced_search', :f => ['associated'], :v => [@image.oid], :hide_associated_link => true) %>
+        <% end %>
+      </span>
+    <% elsif section == 'related_images' -%>
+      <span><%= link_to_find_more 'related', @image %></span>
+    <% elsif section == 'details' && ((object.is_a?(Source) || object.is_a?(Account) || object.is_a?(Collection))) -%>
+      <% # do nothing %>
+    <% else -%>
+      <%= link_to_edit_section(object, section) %>
+    <% end -%>
+    </span>
+  <% end -%>
+  </div>
+  <div class="<%= 'noscript ' unless expanded %>section">
+  <% if edit_section?(section) -%>
+    <% if section.match(/[a-z]+_settings$/) %>
+      <%= error_messages_for section %>
+
+      <!-- REWRITE: use "form_for ... remote: true" instead -->
+      <% o = @user.send(section) %>
+      <%= form_for o, :url => {action: 'update'}, :html => { :class => 'edit-form' }, remote: true, method: 'PATCH' do |f| -%>
+        <%= hidden_field_tag :section, section %>
+        <%= hidden_field_tag :settings_only, 'true' %>
+
+        <table>
+          <%= render_form_parts(f, section) %>
+          <%= form_controls %>
+        </table>
+      <% end -%>
+    <% else %>
+      <%= error_messages_for section %>
+
+      <!-- REWRITE: use "form_for ... remote: true" instead -->
+      <%= form_for section, :url => {}, :html => { :class => 'edit-form' }, remote: true do |f| -%>
+        <%= hidden_field_tag :section, section %>
+
+        <table>
+          <%= render_form_parts(f, section) %>
+          <%= form_controls %>
+        </table>
+      <% end -%>
+    <% end %>
+  <% else -%>
+    <% locals = renest_locals(locals) if locals.key?(:locals) %>
+    <%= render :partial => section, :locals => locals %>
+  <% end -%>
+  </div>
+<% end -%>

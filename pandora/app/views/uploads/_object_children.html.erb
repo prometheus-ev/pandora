@@ -1,0 +1,7 @@
+<% unless @upload_children.empty? -%>
+  <div class="images">
+    <% for child in @upload_children -%>
+      <%= upload_image(child.image, true, true) %>
+    <% end -%>
+  </div>
+<% end -%>

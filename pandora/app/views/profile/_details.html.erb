@@ -1,0 +1,60 @@
+<table>
+<tr>
+  <th><%= 'User name'.t %></th>
+  <td><%=h @user.login %></td>
+</tr>
+<tr>
+  <th><%= 'E-mail'.t %></th>
+  <td>&lt;<%=h @user.email %>&gt;</td>
+</tr>
+<% if address = format_address_for(@user) -%>
+  <tr>
+    <th><%= 'Address'.t %></th>
+    <td><%= address %></td>
+  </tr>
+<% end -%>
+<tr>
+  <th><%= 'License'.t %></th>
+  <td>
+    <%= render :partial => 'accounts/license_info' %><br />
+    <%= gogif %> <big><%= link_to 'Obtain a new license or change your institution...'.t, controller: 'signup', action: 'license_form' %></big>
+  </td>
+</tr>
+
+<tr>
+  <th><%= 'Roles' / (roles = @user.roles).size %></th>
+  <td>
+    <% @user.roles.distinct.sort.each do |role| %>
+      <%= role.title.humanize.t %>
+      <%= link_to_help(
+        label: help_icon,
+        section: 'administration',
+        anchor: role.title,
+        title: 'help'.t,
+        class: 'help'
+      ) %>
+    <% end %>
+  </td>
+</tr>
+
+<% unless (admin_institutions = @user.admin_institutions).blank? -%>
+  <tr>
+    <th><%= 'User admininistrator for'.t %></th>
+    <td>
+    <% for institution in admin_institutions -%>
+      <%= link_to_if_allowed h(institution.fulltitle), :controller => 'institutions', :action => 'show', :id => institution %>
+      <% unless institution.licensed? -%>(<%= 'Inactive'.t %>)<% end -%>
+      <br />
+    <% end -%>
+    </td>
+  </tr>
+<% end -%>
+
+<% unless (created_at = @user.created_at).blank? -%>
+  <tr>
+    <th><%= 'Member since'.t %></th>
+    <td><%= I18n.l(created_at, format: :coarse) %></td>
+  </tr>
+<% end -%>
+
+</table>

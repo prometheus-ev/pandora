@@ -1,0 +1,23 @@
+<%= page_title %>
+
+<%= form_tag({}, { :class => 'edit-form' }) do -%>
+<table>
+  <tr>
+    <th><label for="from"><%= 'Sender'.t %></label></th>
+    <td><%= text_field_tag :from, current_user.email, :size => 47, :readonly => true %></td>
+  </tr>
+  <tr>
+    <th><label for="to"><%= 'Recipients'.t %></label><br /><small class="nowrap">(<%= 'One user name per line'.t %>)</small></th>
+    <td>
+      <%= text_area_tag :to, @to, :size => '45x5', :class => 'mandatory' %>
+      <%= suggest_names_for :to %>
+    </td>
+  </tr>
+  <tr>
+    <th><label for="text"><%= 'Message'.t %></label></th>
+    <td><%= text_area_tag :text, @text, :size => '45x10', :class => 'mandatory' %></td>
+  </tr>
+
+  <%= form_controls 'Submit'.t %>
+</table>
+<% end -%>

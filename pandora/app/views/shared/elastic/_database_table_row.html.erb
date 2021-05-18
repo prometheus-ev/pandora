@@ -1,0 +1,12 @@
+<tr>
+  <th>
+    <%= 'Database'.t %>
+  </th>
+  <td class="source-field">
+    <%# TODO: Remove title_full completely %>
+    <%#= source["fulltitle"].blank? ? h(source["title_full"]) : h(source["fulltitle"]) %>
+    <%= source.fulltitle %>
+    <%= link_to_google_maps(source["location"]) unless source["location"].blank? %>
+    <%= render :partial => 'shared/elastic/source_icons', :locals => { :source => source, :is_upload => is_upload } %>
+  </td>
+</tr>

@@ -1,0 +1,161 @@
+<%= form_tag({ :controller => 'searches', :action => 'time', :source_name => @search.source_name }, { :method => 'get', :class => 'search_form search_query', :id => 'query_form' }) do -%>
+  <table>
+    <tr style="height: 40px;">
+      <td colspan="4">
+        <b><%= '1. ' + 'Time search'.t %></b>
+      </td>
+    </tr>
+    <tr style="height: 40px;">
+      <td>
+        <%= hidden_field_tag "per_page", @search.per_page %>
+        <%= hidden_field_tag "direction", @search.sort_order %>
+        <%= hidden_field_tag "order", @search.sort_field %>
+        <%= hidden_field_tag "slider_min_year", @search.slider_min_year %>
+        <%= hidden_field_tag "slider_max_year", @search.slider_max_year %>
+        <%= hidden_field_tag "previous_search_value", @search.previous_search_value %>
+        <%= hidden_field_tag "boolean_fields_selected[0]", "must" %>
+        <%= select("search_field",
+                   "0",
+                   @search.fields.map { |field| [field.humanize.t, field] },
+                   { :selected => @search.field_selected["0"] },
+                   { :style => "width: 145px;" }) %>
+      </td>
+      <td colspan="3">
+        <%= text_field_tag "search_value[0]", @search.value_text["0"], :placeholder => "", :tabindex => 1, :autofocus => true, :size => 68 %>
+      </td>
+    </tr>
+    <tr>
+      <td colspan="4">
+        <%= search_button %>
+      </td>
+      <td>
+      </td>
+    </tr>
+    <% if @search.any_results? %>
+    <tr>
+      <td colspan="4">
+        <b><%= '2. Filter by year'.t %></b>
+      </td>
+    </tr>
+    <tr>
+      <td colspan="4">
+        <div class="slider-wrapper">
+          <%# https://refreshless.com/nouislider/ %>
+          <div id="slider"></div>
+        </div>
+        <script>
+          var slider = document.getElementById('slider');
+
+          noUiSlider.create(slider, {
+            start: [
+              <%= !@search.date_range_from.blank? ? @search.date_range_from.to_i : @search.slider_min_year %>,
+              <%= !@search.date_range_to.blank? ? @search.date_range_to.to_i : @search.slider_max_year %>
+            ],
+            range: {
+              'min': <%= @search.slider_min_year %>,
+              'max': <%= @search.slider_max_year %>
+            },
+            step: 1,
+            connect: true,
+            tooltips: true,
+            format: {
+              to: function (value) {
+                return Math.round(value);
+              },
+              from: function (value) {
+                return Number(value);
+              }
+            },
+            pips: {
+              mode: 'positions',
+              values: [0, 25, 50, 75, 100],
+              density: 4,
+            },
+          });
+        </script>
+      </td>
+    </tr>
+    <tr style="">
+      <td>
+      <td>
+      </td>
+      </td>
+      <td style="">
+        <%= 'Adjust slider handles'.t + ' (' + 'press update button or return key to apply'.t + ')' %>
+        <br />
+        <% # https://api.rubyonrails.org/v6.0.2.1/classes/ActionView/Helpers/DateHelper.html %>
+        <% # https://api.rubyonrails.org/classes/ActionView/Helpers/FormTagHelper.html#method-i-number_field_tag %>
+        <%= number_field_tag 'date[from]',
+          @search.date_range_from,
+          min: @search.slider_min_year.to_i,
+          max: @search.slider_max_year.to_i,
+          style: 'padding: 5px; margin-right: 5px; width: 100px;',
+          id: 'from-year' %>
+        <%= number_field_tag 'date[to]',
+          @search.date_range_to,
+          min: @search.slider_min_year.to_i,
+          max: @search.slider_max_year.to_i,
+          style: 'padding: 5px; width: 100px;',
+          id: 'to-year' %>
+        <%= search_button('Update', float: :none) %>
+      </td>
+      <td>
+      </td>
+    </tr>
+    <% end %>
+    <tr style="height: 40px;">
+      <td colspan="4">
+        <b><%= 'Stats'.t %></b>
+      </td>
+    </tr>
+    <tr>
+      <td>
+        <%= number_with_delimiter(@search.selected_total_hits, delimiter: ".").to_s %>
+      </td>
+      <td colspan="3">
+        <%= "DB records".t %>
+      </td>
+    </tr>
+    <tr>
+      <td>
+        <%= number_with_delimiter(@search.total_date_range_count, delimiter: ".").to_s %>
+      </td>
+      <td colspan="3">
+        <%= "DB records with datings".t %>
+      </td>
+    </tr>
+    <tr>
+      <td>
+        <%= number_with_delimiter(@search.date_range_count, delimiter: ".").to_s %>
+      </td>
+      <td colspan="3">
+        <%= "search results".t %>
+      </td>
+    </tr>
+  </table>
+
+  <script>
+    var sliderValueFrom = document.getElementById('from-year');
+    var sliderValueTo = document.getElementById('to-year');
+    var inputs = [sliderValueFrom, sliderValueTo];
+
+    slider.noUiSlider.on('update', function (values, handle) {
+      inputs[handle].value = values[handle];
+    });
+
+    inputs.forEach(function (input, handle) {
+      input.addEventListener('change', function () {
+        slider.noUiSlider.setHandle(handle, this.value);
+      });
+    });
+
+    slider.noUiSlider.on('end', function (tap) {
+      document.getElementById("query_form").submit();
+    });
+  </script>
+
+  <%= render :partial => 'athene_search_results_none' %>
+  <%= render :partial => 'source_list_time' unless @search.source_name %>
+<% end %>
+
+<%= render :partial => 'athene_search_results' %>

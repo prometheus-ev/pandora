@@ -1,0 +1,42 @@
+<h2 class="page_title">
+  <%= 'Create Account'.t %>
+</h2>
+
+<%= error_messages_for :user %>
+
+<%= form_for @user, as: :user, html: {class: 'edit-form'} do |f| -%>
+  <fieldset>
+    <legend><strong><%= 'Account data'.t %></strong></legend>
+    <table>
+      <%= render_form_part(f, :account) %>
+    </table>
+  </fieldset>
+
+  <br />
+
+  <fieldset>
+    <legend><strong><%= 'Personal information'.t %></strong></legend>
+    <table>
+      <%= render_form_part(f, :name) %>
+      <%= render_form_part(f, :address) %>
+      <%= render_form_part(f, :research_interest) %>
+      <%= render_form_part(f, :newsletter) %>
+      <%= render_form_part(f, :about) %>
+    </table>
+  </fieldset>
+
+  <% restrict_to :superadmin, :admin, :useradmin do -%>
+    <br />
+
+    <fieldset>
+      <legend><strong><%= 'Administrative data'.t %></strong></legend>
+      <table>
+        <%= render_form_part(f, :admin) %>
+      </table>
+    </fieldset>
+  <% end -%>
+
+  <table>
+    <%= form_controls %>
+  </table>
+<% end -%>

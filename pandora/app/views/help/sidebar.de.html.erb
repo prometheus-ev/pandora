@@ -1,0 +1,90 @@
+<h2><%= 'Sidebar help'.t %></h2>
+
+<p>
+  Die Favoritenleiste befindet sich am linken Bildschirmrand neben dem Hauptfenster. Ihre
+  Funktionalität steht nur innerhalb des persönlichen Zugangs zur Verfügung. Sie ermöglicht
+  Ihnen nach der Ablage schnellen und direkten Zugriff auf aktuelle Arbeitsobjekte wie einzelne
+  Bilder, ganze Bildsammlungen oder Präsentationen.
+</p>
+<p>
+  Die einzelnen Objekte werden als Boxen dargestellt, die Sie ein- und ausklappen können.
+  Die Favoritenleiste bleibt konstant erhalten, unabhängig davon, welche Funktion des
+  Bildarchivs Sie gerade nutzen.
+</p>
+
+<% with_toc do -%>
+
+  <%= section_heading 'Ablegen von Bildern aus der Trefferliste', 'adding_images' %>
+  <p>
+    Haben Sie ein Bild gefunden, auf das Sie nach dem nächsten Login gerne schnell und ohne
+    erneute Suchanfrage zugreifen können möchten, legen Sie eine Verknüpfung zu diesem in Ihrer
+    Favoritenleiste wie folgt ab: In der Trefferliste finden Sie neben jedem Datensatz, sowie
+    in der ersten Vergrößerungsstufe den Button <%= image_tag('misc/add_to_sidebar.gif', :class => 'help_icon') %>.
+    Über den Button <%= image_tag('icon/store.gif', :class => 'help_icon') %> können Sie das gewünschte
+    Bild in der Favoritenleiste ablegen.
+    <%= screenshot 'help/box01.de.png', 'Ablegen eines Bildes in der Favoritenleiste' %>
+  </p>
+
+  <%= section_heading 'Ablegen von Bildsammlungen und Präsentationen', 'adding_coll_pres' %>
+  <p>
+    Wenn Sie die gewünschte Bildsammlung oder Präsentation aus Ihrer Liste geöffnet haben, finden
+    Sie in der Kopfzeile direkt neben dem Titel den Button <%= image_tag('misc/add_to_sidebar.gif', :class => 'help_icon') %>.
+    Durch Klick auf diesen, speichern Sie eine Verknüpfung zu Ihrer Bildsammlung oder Präsentation
+    für den Schnellzugriff in Ihrer persönlichen Favoritenleiste ab.
+    <%= screenshot 'help/box02.de.png', 'Ablegen einer Bildsammlung oder Präsentation in der Favoritenleiste' %>
+  </p>
+
+  <%= section_heading 'Arbeiten mit den Boxen in der Favoritenleiste', 'working_with_boxes' %>
+  <p>
+    Die Objekte in Ihrer Favoritenleiste werden als Boxen abgelegt und mit einzelnen Überschriften
+    ausgewiesen. Die Icons am Beginn der Überschriftenbalken charakterisieren den Inhalt der Box:
+  </p>
+
+  <p>
+    <%= image_tag('sidebar/icon_box_image.gif', :class => 'help_icon') %> Der Inhalt der Box ein einzelnes Bild.
+  </p>
+
+  <p>
+    <%= image_tag('sidebar/icon_box_collection.gif', :class => 'help_icon') %> Der Inhalt der Box ist eine Bildsammlung.
+  </p>
+
+  <p>
+    <%= image_tag('sidebar/icon_box_presentation.gif', :class => 'help_icon') %> Der Inhalt der Box ist eine Präsentation.
+  </p>
+
+  <p>
+    Unter dem Überschriftenbalken befindet sich der Inhalt der jeweiligen Box. Hier können Sie
+    z.B. alle in der Bildsammlung vorhandenen Bilder in kleinem Format sehen und sich durch die
+    Bildsammlung blättern.
+    <%= screenshot 'help/box03.de.png', 'Ansicht der Favoritenleiste' %>
+  </p>
+
+  <p>
+    Durch Klick auf <%= image_tag('sidebar/box_collapse.gif', :class => 'help_icon') %> minimieren Sie diese Ansicht und reduzieren damit die Box auf den Überschriftenbalken.
+    <%= screenshot 'help/box04.de.png', 'Minimieren der Box' %>
+  </p>
+
+  <p>
+    Mit <%= image_tag('sidebar/box_expand.gif', :class => 'help_icon') %> vergrößern Sie die Ansicht wieder.
+  </p>
+
+  <p>
+    Per „Drag&Drop“ können Sie die Reihenfolge der Boxen in Ihrer Favoritenleiste Ihren Wünschen entsprechend anpassen.
+  </p>
+
+  <p>
+    Der eigentliche Schnellzugriff auf die Objekte erfolgt über <%= image_tag('sidebar/box_open.gif', :class => 'help_icon') %>.
+    Hiermit öffnen Sie die gewünschte Vollansicht des Bildes, die Bildsammlung oder Präsentation
+    in Ihrem Hauptfenster und können damit arbeiten.
+    <%= screenshot 'help/box05.de.png', 'Aufruf der Box im Hauptfenster' %>
+  </p>
+
+  <p>
+    Wenn Sie ein Objekt aus der Favoritenleiste entfernen möchten, klicken Sie auf <%= image_tag('sidebar/box_close.gif', :class => 'help_icon') %> und die
+    entsprechende Box wird aus der Seitenleiste gelöscht. Bildsammlungen und Präsentationen
+    bleiben in Ihrer persönlichen Liste natürlich weiterhin bestehen.
+  </p>
+
+<% end -%>
+
+<%= render :partial => 'footer' %>

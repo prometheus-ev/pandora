@@ -1,0 +1,10 @@
+<% if admin_or_superadmin? %>
+  <%= submenu_link_to 'All'.t, action: 'index' %>
+  <%= submenu_link_to 'Pending'.t, action: 'pending' %>
+<% end %>
+
+<%= submenu_link_to 'Newsletter archive'.t, action: 'archive' %>
+
+<% if admin_or_superadmin? %>
+  <%= link_to(create_button('Create a new newsletter'.t, :plus), action: 'new') %>
+<% end %>

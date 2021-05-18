@@ -1,0 +1,16 @@
+<%= Rails.env %>:
+  attributions:
+    - 'u. Werkst.'
+    - '(u. Werkst.)'
+    - 'Kopie nach'
+    - 'nach'
+    - 'zugeschrieben'
+    - 'alternative Zuschreibung'
+    - 'traditionelle Zuschreibung'
+    - 'Werkstatt'
+    - 'Umkreis'
+    - 'Schüler/in'
+    - 'Nachfolger/in'
+    - 'Schule'
+    - 'im Stil'
+    - 'in der Art'

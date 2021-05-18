@@ -1,0 +1,26 @@
+<% collection = nil unless local_assigns.has_key?(:collection) -%>
+
+<%= form_tag({ :controller => 'collections', :action => 'store' }, { :id => 'image_list_form', :class => 'clear-padding' }) do -%>
+  <%= hidden_field_tag :back_to, request.url %>
+  
+  <%= render :partial => 'shared/image/store_controls', :locals => { :pos => 'top' } %>
+
+  <% if view == 'gallery' -%>
+    <% for image in list -%>
+      <div class="gallery-item undim">
+        <%= image_image(image.record, collection, field) %>
+      </div>
+    <% end -%>
+  <% else -%>
+    <div class="image_list">
+    <% for image in list -%>
+      <div class="list_row <%= cycle('odd', 'even') %> undim">
+        <%= image_image(image.record, collection) %>
+        <%= image_metadata(image.record, 'image_list_form') %>
+      </div>
+    <% end -%>
+    </div>
+  <% end -%>
+  
+  <%= render :partial => 'shared/image/store_controls', :locals => { :pos => 'bottom' } %>
+<% end -%>

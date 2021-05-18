@@ -1,0 +1,184 @@
+<div id="image_wrap" class="clear-padding">
+  <table class="large-image undim">
+    <!-- REWRITE: we use SuperImage everywhere to have a unified image interface -->
+    <tr>
+      <td class="icons">
+        <%= render partial: "shared/image/icons", locals: {
+          super_image: @super_image,
+          list: false
+        } %>
+      </td>
+      <td class="image">
+        <%= link_to(('<img src="' + @super_image.image_url(:medium) + '"' + 'alt="[' + 'Not available'.t + ']">').html_safe, { :controller => 'images', :action => :large, :id => @super_image.pid }) %>
+      </td>
+      <% if @super_image.upload? %>
+        <td class="icons dim">
+          <%= upload_image_manipulation_icons(@super_image.image, true, true) if current_user.allowed?(@super_image.image.upload) %>
+        </td>
+      <% end %>
+    </tr>
+    <tr>
+      <td></td>
+      <td>
+        <%= render partial: 'ratings/show', locals: {super_image: @super_image} %>
+      </td>
+    </tr>
+  </table>
+</div>
+
+<div id="details-section" class="section_wrap clear-padding undim">
+  <a name="details"></a>
+  <div class="scriptonly section_toggle">
+    <div class="collapse"></div>
+  </div>
+  <div class="section_header">
+    <div class="section_heading">
+      <%= "Details".t %>
+    </div>
+  </div>
+  <div class="section">
+    <%= render :partial => 'show_elastic_metadata', :locals => {:super_image => @super_image} %>
+  </div>
+</div>
+
+<% if @lat && @lng %>
+  <div id="geographic-section" class="section_wrap clear-padding undim">
+    <a name="details"></a>
+    <div class="scriptonly section_toggle">
+      <div class="collapse"></div>
+    </div>
+    <div class="section_header">
+      <div class="section_heading">
+        <%= "Geographic".t %>
+      </div>
+    </div>
+    <div class="section">
+      <%= render :partial => 'geographic', :locals => { :super_image => @super_image, :display_fields => @display_fields } %>
+    </div>
+  </div>
+<% end %>
+
+<% unless @super_image.associated(current_user).empty? %>
+  <div id="associated_images-section" class="section_wrap clear-padding undim">
+    <a name="associated_images"></a>
+    <div class="scriptonly section_toggle">
+      <div class="collapse"></div>
+    </div>
+    <div class="section_header">
+      <div class="section_heading">
+        <%= "Aspects".t %>
+      </div>
+      <span class="section float-left dim">
+        <span>
+          <%= link_to(
+            'Show all...'.t,
+            controller: 'uploads',
+            action: 'associated',
+            id: @super_image.image.upload.id
+          ) %>
+        </span>
+      </span>
+    </div>
+    <div class="section">
+      <div class="images">
+        <table>
+          <tr>
+            <% @super_image.associated(current_user).each do |associated| %>
+              <td class="image">
+                <%= link_to_image_record(associated) %>
+              </td>
+            <% end %>
+          </tr>
+          <tr>
+            <% @super_image.associated(current_user).each do |associated| %>
+              <td class="dim">
+                <%= render partial: 'ratings/show', locals: {super_image: associated, light: true} %>
+              </td>
+            <% end %>
+          </tr>
+        </table>
+      </div>
+    </div>
+  </div>
+<% end %>
+
+<% unless @super_image.aspects.empty? %>
+  <div id="associated_images-section" class="section_wrap clear-padding undim">
+    <a name="associated_images"></a>
+    <div class="scriptonly section_toggle">
+      <div class="collapse"></div>
+    </div>
+    <div class="section_header">
+      <div class="section_heading">
+        <%= "Aspects".t %>
+      </div>
+      <span class="section float-left dim">
+        <span>
+          <%= link_to(
+            "Show all...".t,
+            controller: 'searches', action: 'index',
+            "search_field[one]" => 'record_object_id',
+            'search_value[one]' => @super_image.elastic_record_image.pobject_id.first,
+            :hide_associated_link => 'true'
+          ) %>
+        </span>
+      </span>
+    </div>
+    <div class="section">
+      <div class="images">
+        <table>
+          <tr>
+            <% @super_image.aspects.each do |aspect| %>
+              <td class="image">
+                <%= link_to_image_record(aspect) %>
+              </td>
+            <% end %>
+          </tr>
+          <tr>
+            <% @super_image.aspects.each do |aspect| %>
+              <td class="dim">
+                <%= render partial: 'ratings/show', locals: {super_image: aspect, light: true} %>
+              </td>
+            <% end %>
+          </tr>
+        </table>
+      </div>
+    </div>
+  </div>
+<% end %>
+
+<% unless @super_image.related.empty? %>
+  <div id="related_images-section" class="section_wrap clear-padding undim">
+    <a name="related_images"></a>
+    <div class="scriptonly section_toggle">
+      <div class="expand"></div>
+    </div>
+    <div class="section_header">
+      <div class="section_heading">
+        <%= "Related images".t %>
+      </div>
+    </div>
+    <div class="noscript section">
+      <div class="images">
+        <table>
+          <tr>
+            <% @super_image.related.each do |related| %>
+              <td class="image">
+                <%= link_to_image_tag(related) %>
+              </td>
+            <% end %>
+          </tr>
+          <tr>
+            <% @super_image.related.each do |related| %>
+              <td class="dim">
+                <%= render partial: 'ratings/show', locals: {super_image: related, light: true} %>
+              </td>
+            <% end %>
+          </tr>
+        </table>
+      </div>
+    </div>
+  </div>
+<% end %>
+
+<%= render partial: 'comments/section', locals: {commentable: @super_image.image}  %>

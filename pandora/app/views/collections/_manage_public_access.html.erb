@@ -1,0 +1,36 @@
+<tr>
+  <th><%= 'Public access'.t %></th>
+  <td>
+    <%= f.label :public_access, value: '' do %>
+      <%= f.radio_button(
+          :public_access,
+          '',
+          disabled: (@collection.has_unapproved_uploads? ? 'disabled' : nil)
+      ) %>
+      <%= access_status_for :private %>
+      (<%= "Anyone can view your collection".t %>)
+    <% end %>
+
+    <br />
+    <%= f.label :public_access, value: 'read' do %>
+      <%= f.radio_button(
+          :public_access,
+          'read',
+          disabled: (@collection.has_unapproved_uploads? ? 'disabled' : nil)
+      ) %>
+      <%= access_status_for(:readable) %>
+      (<%= "Anyone can view your collection".t %>)
+    <% end %>
+
+    <br />
+    <%= f.label :public_access, value: 'write' do %>
+      <%= f.radio_button(
+          :public_access,
+          'write',
+          disabled: (@collection.has_unapproved_uploads? ? 'disabled' : nil)
+      ) %>
+      <%= access_status_for(:writable) %>
+    <% end %>
+    (<%= "Anyone can modify your collection".t %>)
+  </td>
+</tr>

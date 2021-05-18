@@ -1,0 +1,16 @@
+<tr>
+  <th><label for="user_login"><%= 'User name'.t %></label></th>
+  <td><%= f.text_field :login, options_for_field(:login) %></td>
+</tr>
+<tr>
+  <th><label for="user_email"><%= 'E-mail'.t %></label></th>
+  <td><%= f.text_field :email, options_for_field(:email) %></td>
+</tr>
+<tr>
+  <th><label for="user_password"><%= 'Password'.t %></label></th>
+  <td><%= f.password_field :password, options_for_field(:password).merge(value: f.object.password) %></td>
+</tr>
+<tr>
+  <th><label for="user_password_confirmation"><%= 'Confirm password'.t %></label></th>
+  <td><%= f.password_field :password_confirmation, options_for_field(:password).merge(value: f.object.password_confirmation) %></td>
+</tr>

@@ -1,0 +1,26 @@
+<ul>
+<% for name, email, website, *durations in authors -%>
+  <li>
+  <% if user = Account.find_by(email: email) -%>
+    <%= link_to_profile(user, :public => true) %>
+  <% else -%>
+    <%=h name %>
+  <% end -%>
+  <% if (author_durations = author_durations(durations)) && !author_durations.blank? -%>
+    (<%= author_durations %>)
+  <% end -%>
+  <% if !former %>
+    <br />
+    <span class="contact-key"><%= 'Email'.t %>:</span> <%= mail_to h(email) %>
+  <% end %>
+  <% if website && website.is_a?(String) %>
+    <br />
+    <span class="contact-key"><%= 'Web'.t %>:</span> <%= link_to website.delete_prefix('https://'), website, { target: '_blank'} %>
+  <% end %>
+  <% if !former %>
+    <br />
+    <br />
+  <% end %>
+  </li>
+<% end -%>
+</ul>

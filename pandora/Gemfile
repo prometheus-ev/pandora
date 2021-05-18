@@ -1,0 +1,141 @@
+source 'https://rubygems.org'
+
+git_source(:github) do |repo_name|
+  repo_name = "#{repo_name}/#{repo_name}" unless repo_name.include?("/")
+  "https://github.com/#{repo_name}.git"
+end
+
+
+# Bundle edge Rails instead: gem 'rails', github: 'rails/rails'
+gem 'rails', '~> 5.2.0'
+gem 'bootsnap'
+# Use mysql as the database for Active Record
+gem 'mysql2', '>= 0.3.18', '< 0.5'
+# Use the Elasticsearch Ruby gem.
+# https://rubygems.org/gems/elasticsearch/versions/
+# https://www.rubydoc.info/gems/elasticsearch/
+# https://www.rubydoc.info/gems/elasticsearch-api/
+gem 'elasticsearch', '~> 7.4'
+# Build JSON APIs with ease. Read more: https://github.com/rails/jbuilder
+gem 'jbuilder', '~> 2.5'
+# Use ActiveModel has_secure_password
+# gem 'bcrypt', '~> 3.1.7'
+
+# Use Capistrano for deployment
+# gem 'capistrano-rails', group: :development
+
+# REWRITE: we need to move it to vendor since we have to patch it
+gem 'ruby-nuggets', path: 'vendor/nuggets'
+
+# REWRITE: aparently blackwinter gems (as copied to vendor dir)
+# gem 'blackwinter-ipaddress', git: 'https://github.com/blackwinter/ipaddress', ref: '51f7f947fe614bfab2cf8afeeed9bc56fc754814', require: 'ipaddress'
+# gem 'apache_image_resizer', path: '../rack-images/apache_image_resizer', require: 'apache/image_resizer'
+# gem 'apache_secure_download', path: '../rack-images/apache_secure_download', require: 'apache/secure_download'
+
+# we load rack-images as a gem to be able to add asd_secrets to urls and to
+# have access to image data directly
+gem 'rack-images', path: '../rack-images'
+
+# REWRITE: closest available to vendored 0.10.0
+# gem 'prawn', '= 0.11.1'
+# REWRITE: git pull in
+gem 'pbkdf2', git: 'https://github.com/emerose/pbkdf2-ruby'
+
+# gem 'activeresource'
+gem 'activerecord-session_store'
+
+# REWRITE: newest version, old version not practicable
+# gem 'globalize', git: 'https://github.com/globalize/globalize'
+gem 'i18n-active_record', :require => 'i18n/backend/active_record'
+
+# REWRITE: not part of rails anymore, some dude gemified it
+gem 'country_select'
+
+# REWRITE: included for div_for, we should find another solution
+gem 'record_tag_helper', '~> 1.0'
+
+# REWRITE: probably needed for the email facility. Using a version that sais its
+# compatible with rails 3
+# ... on the other hand, it seem easy to write a new delivery method, so let's
+# see
+# gem 'ar_mailer_rails3', git: 'https://github.com/tgturner/ar_mailer_rails3'
+
+gem 'exifr', '~> 1.3.6'
+
+# REWRITE: for unified configuration of all apps
+gem 'dotenv'
+
+# REWRITE: to replace net/http
+gem 'httpclient'
+
+# REWRITE: or to_xml isn't available
+gem 'activemodel-serializers-xml'
+
+# REWRITE: version used by legacy pandora was 0.4.7, not compatible with rails 5
+gem 'oauth'
+
+# REWRITE: for generating powerpoint presentations
+gem 'powerpoint'
+
+# gem 'libxml-ruby'
+
+# gem 'blackwinter-gnuplot'
+
+# REWRITE: transitioning to StrongParameters is a major effort: E.g, for
+# accounts, the edit action deals with the edit GET and POST/PATCH case, also
+# the show action deals with post parameters (when users edit their profile and
+# change settings)
+gem 'protected_attributes_continued'
+
+gem 'exception_notification'
+
+# Cross-Origin Resource Sharing (CORS) for Rack compatible web applications
+# https://rubygems.org/gems/rack-cors
+gem 'rack-cors', require: 'rack/cors'
+
+gem 'rinku' # auto_link replacement
+
+# Indexing
+#
+# Encode/decode HTML entities
+gem 'htmlentities', '~> 4.3.4'
+gem 'nokogiri', '~> 1.11.0'
+# https://rubygems.org/gems/historical_dating
+gem 'historical_dating', git: 'https://github.com/wendig-ou/historical_dating', branch: 'master'
+
+gem 'yard'
+
+group :development, :test do
+  gem 'byebug', platforms: [:mri, :mingw, :x64_mingw]
+  gem 'pry'
+  # Adds support for Capybara system testing and selenium driver
+  gem 'capybara', '~> 3.29'
+  gem 'selenium-webdriver'
+  gem 'method_profiler'
+end
+
+group :development do
+  # Access an IRB console on exception pages or by using <%= console %> anywhere in the code.
+  # gem 'web-console', '>= 3.3.0'
+  gem 'listen', '>= 3.0.5', '< 3.2'
+end
+
+group :test do
+  # gem 'cucumber-rails', :require => false
+  gem 'database_cleaner'
+  gem 'vcr'
+  gem 'webmock'
+  gem 'simplecov', require: false
+  gem 'rubyzip'
+  gem 'rest-client'
+  gem 'webdrivers', '~> 4.0'
+end
+
+group :tasks do
+  gem 'maruku'
+  gem 'ruby-progressbar'
+end
+
+# Windows does not include zoneinfo files, so bundle the tzinfo-data gem
+# REWRITE: we are not installing on windows
+# gem 'tzinfo-data', platforms: [:mingw, :mswin, :x64_mingw, :jruby]

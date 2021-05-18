@@ -1,0 +1,10 @@
+<br />
+
+<p>
+  <strong>Wussten Sie schon?</strong> Wenn Sie noch keinen persönlichen Zugang haben, können Sie sich
+  <strong>kostenlos</strong> dafür <%= link_to 'registrieren', signup_path %>!
+  Wählen Sie in dem Registrierungsformular einfach Ihre Institution
+  <% if @institution -%><code><%= @institution.shorttitle %></code><% end -%> aus und profitieren Sie
+  von den Vorteilen eines persönlichen Zugangs wie z.B. Bildsammlungen und Präsentationen. Zudem brauchen
+  Sie dann nicht mehr jedes Mal die Nutzungsbedingungen zu akzeptieren, wenn Sie das Bildarchiv betreten.
+</p>

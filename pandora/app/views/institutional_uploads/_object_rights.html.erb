@@ -1,0 +1,116 @@
+<table>
+  <tr>
+    <th><%= 'Reproduction'.t %></th>
+    <td style="border: 1px solid #A96D30;">
+      <% if @upload.errors[:reproduction_rights_or_credits].any? %><div class="fieldWithErrors"><% end %>
+        <table>
+          <tr>
+            <td><%= 'Utilization rights'.t %>
+              <%= image_tag('misc/info_form_field.gif', :class => 'dim', :title => 'Photographs of works of art are protected by ancillary copyright. 50 years after the demise of the photographer the copyrights expire and the work of art enters the public domain.'.t + ' ' + 'Name here the photographer of your uploaded image, if you did not take the photograph yourself. If you do not know who is the author of the photograph, please insert the image credits.'.t) %>
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <%= f.radio_button :rights_reproduction, owner = (@upload.database && @upload.database.owner ? @upload.database.owner : current_user), :checked => @upload.rights_reproduction.blank? || @upload.rights_reproduction == owner.to_s %>
+              <label for="upload_rights_reproduction_<%=h owner.to_s.parameterize.underscore %>" class="pad"><%=h owner %> (<%= 'you'.t %>)</label>
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <%= f.radio_button :rights_reproduction, 'Other photographer', :checked => @upload.rights_reproduction == 'Other photographer' || !@upload.rights_reproduction.blank? && @upload.rights_reproduction != owner.to_s, :onclick => "return $('upload_rights_reproduction').focus();" %>
+              <label for="upload_rights_reproduction_<%= 'Other photographer'.gsub(" ", "_").downcase %>" class="pad"><%= 'Other photographer'.t + ':' %></label>
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <%= f.text_field :rights_reproduction, options_for_field(:rights_reproduction, :value => @upload.rights_reproduction != owner.to_s && @upload.rights_reproduction != 'Unknown' && @upload.rights_reproduction != 'Other photographer' ? @upload.rights_reproduction : '') %>
+            </td>
+            <td></td>
+          </tr>
+          <tr>
+            <td>
+              <%= f.radio_button :rights_reproduction, 'Unknown', :checked => @upload.rights_reproduction == 'Unknown', :onclick => "return $('upload_credits').focus();" %>
+              <label for="upload_rights_reproduction_<%= 'Unknown'.downcase %>" class="pad"><%= 'Unknown'.t + ' (' + 'see credits'.t + ')' %></label>
+            </td>
+          </tr>
+          <tr>
+            <td><%= 'Credits'.t %>
+              <%= image_tag('misc/info_form_field.gif', :class => 'dim', :title => 'Enter here the source of your uploaded image as the credit. If you upload a scan of a book, quote the bibliographical reference, e.g. „Marini, Maurizio: Caravaggio, Rom 1987, p. 257, cat. 72.“.'.t) %>
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <%= f.text_field :credits, options_for_field(:credits, :value => @upload.credits) %>
+            </td>
+          </tr>
+          <tr>
+            <td><br />
+            <%= 'License'.t + ' ' %><%= image_tag('misc/info_form_field.gif', :class => 'dim', :title => 'You can choose a CC license and thus make your uploaded images available to the public for limited kinds of uses. For further information about the specific types of licenses click on the CC-icon on the right.'.t) %><%= ' (' + 'see also'.t + ' ' %><%= link_to image_tag('icon/creative_commons.gif', :class => 'dim', :title => 'Further information on CC-licenses'.t), 'https://creativecommons.org/licenses/#licenses'.t, :target => '_blank' %><%= ')' %></td>
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <%= f.select(:license, (licenses = Upload.pconfig[:licenses]).map{ |license| [license.blank? ? '' : license.t, license] }, {:selected => !(license = @upload.license).blank? ? (licenses.include?(license) ? license : 'Other') : '', :include_blank => true }, :onchange => 'toggle_other_license_text_field();' ) %>
+            </td>
+          </tr>
+          <tr id="license_table_row" <%= "style=\"display: none;\"".html_safe if license.blank? || licenses.include?(license) %>>
+            <td>
+              <%= text_field_tag :upload_license_text_field, !licenses.include?(license) ? license : '' %>
+            </td>
+          </tr>
+        </table>
+        <% if @upload.errors[:reproduction_rights_or_credits].any? %></div><% end %>
+    </td>
+    <td></td>
+  </tr>
+  <tr><td><br /></td></tr>
+  <tr>
+    <th><%= 'Work'.t %></th>
+    <td style="border: 1px solid #A96D30;">
+      <% if @upload.errors[:rights_work_blank].any? %><div class="fieldWithErrors"><% end %>
+        <table>
+          <tr>
+            <td><%= 'Utilization rights'.t %>
+              <%= image_tag('misc/info_form_field.gif', :class => 'dim', :title => "70 years after the demise of the artist the copyrights expires and the work of art enters the public domain. Before that time utilization rights remain the property of the artist, and can be transferred to his/her heirs.".t + "Furthermore the artist can be represented by VG Bild-Kunst. Edit here the respective rightholder.".t) %>
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <%= f.radio_button :rights_work, 'VG Bild-Kunst', :checked => @upload.rights_work.blank? || @upload.rights_work == 'VG Bild-Kunst' %>
+              <label for="upload_rights_work_vg_bild-kunst" class="pad"><%= link_to_vgbk %></label>
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <%= f.radio_button :rights_work, 'In the public domain', :checked => @upload.rights_work == 'In the public domain' %>
+              <label for="upload_rights_work_<%= 'In the public domain'.gsub(" ", "_").downcase %>" class="pad"><%= 'In the public domain'.t %></label>
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <%= f.radio_button :rights_work, 'Unknown', :checked => @upload.rights_work == 'Unknown' %>
+              <label for="upload_rights_work_<%= 'Unknown'.downcase %>" class="pad"><%= 'Unknown'.t %></label>
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <%= f.radio_button :rights_work, 'Other holder of rights', :checked => !@upload.rights_work.blank? && !Upload.pconfig[:rights_work].include?(@upload.rights_work), :onclick => "return $('upload_rights_work').focus();" %>
+              <label for="upload_rights_work_<%= 'Other holder of rights'.gsub(" ", "_").downcase %>" class="pad"><%= 'Other holder of rights'.t + ' (' + 'e.g. artist or heirs'.t + '):' %></label>
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <%= f.text_field :rights_work, options_for_field(:rights_work, :value => Upload.pconfig[:rights_work].include?(@upload.rights_work) ? '' : @upload.rights_work) %>
+            </td>
+          </tr>
+        </table>
+        <% if @upload.errors[:rights_work_blank].any? %></div><% end %>
+    </td>
+  </tr>
+  <tr>
+    <th></th>
+    <td>
+      <%= form_controls %>
+    </td>
+  </tr>
+</table>

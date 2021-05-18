@@ -1,0 +1,5 @@
+<%= submenu_link_to 'Own'.t, action: 'index' %>
+<%= submenu_link_to 'Shared by you'.t, action: 'sharing' %>
+<%= submenu_link_to 'Shared with you'.t, action: 'shared' %>
+<%= submenu_link_to 'Public'.t, action: 'public' %>
+<%= link_to(create_button('Create a new collection'.t, :plus), action: 'new') %>

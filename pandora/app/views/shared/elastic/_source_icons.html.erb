@@ -1,0 +1,20 @@
+<div class="source_icons dim">
+  <%# source = @super_image.source %>
+  <%= link_to_unless(inactive = (url = source["url"]).blank?, %Q{<div class="home#{' inactive' if inactive}"></div>}.html_safe, url, :title  => "Go to the database's homepage".t, :target => '_blank') %>
+  <%# if @super_image && @super_image.upload? %>
+  <% if is_upload %>
+    <%= link_to(
+        '<div class="email"></div>'.html_safe,
+        { :controller => 'accounts', :action => 'email', :to => source.owner }
+      ) %>
+  <% else %>
+    <% unless inactive = (email = source["email"]).blank?  %>
+      <% if email %>
+        <%= mail_to(email, %Q{<div class="email#{' inactive' if inactive}"></div>}.html_safe, :title => 'Send e-mail to the person in charge for the database'.t) %>
+      <% end %>
+    <% else %>
+      <%= email %>
+    <% end %>
+  <% end %>
+  <%= link_to(%Q{<div class="info"></div>}.html_safe, { :controller => 'sources', :action => 'show', :id => source["name"] }, :title  => 'Information about the database'.t, :target => '_blank') %>
+</div>

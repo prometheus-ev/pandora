@@ -1,0 +1,18 @@
+<% if @collection.images.any? %>
+  <tr>
+    <th><%= 'Thumbnail'.t %></th>
+    <td>
+      <div class="thumbnail_select">
+        <table>
+          <tr>
+          <% for image in @collection.images %>
+            <% id = "thumbnail_id_#{image.id}" -%>
+            <td><%= f.radio_button :thumbnail_id, image.id, :id => id, :class => 'noscript' %></td>
+            <td class="thumbnail"><label for="<%= id %>"><%= image_tag_for(image, 'r140x64', :title => image) %></label></td>
+          <% end %>
+          </tr>
+        </table>
+      </div>
+    </td>
+  </tr>
+<% end %>

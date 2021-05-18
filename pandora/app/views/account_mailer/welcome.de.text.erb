@@ -1,0 +1,108 @@
+Liebe(r) <%= @name %>,
+
+<% if @welcome -%>
+herzlich willkommen bei prometheus, Ihrem digitalen Bildarchiv
+für Forschung & Lehre!
+<% else -%>
+Ihr Zugang für prometheus wurde aktiviert!
+<% end -%>
+
+
+IHR PERSÖNLICHER ZUGANG
+=======================
+
+Ihr Nutzername lautet
+
+  <%= @login %>
+
+Sie können sich damit (oder mit Ihrer E-Mail-Adresse) über unsere
+Homepage im Bildarchiv anmelden:
+<<%= @home_url %>>
+
+Sollten Sie jemals Ihr Passwort vergessen, können Sie über folgenden
+Link ein neues erstellen:
+<<%= @password_url %>>
+
+Ihr Zugang zum Bildarchiv ist gültig bis
+
+  <%= @expires %>
+
+<% if @institution -%>
+und gehört zur Institution
+
+  <%= @institution %>
+
+Sie können Ihren Zugang kostenlos von Ihren AdministratorInnen
+verlängern lassen:
+
+<% for admin in @admins -%>
+  <%= admin.fullname_with_email %>
+<% end -%>
+
+Unabhängig von einer Institution können Sie diesen auch jederzeit
+über PayPal oder Rechnung verlängern.
+<% else -%>
+Sie können diesen jederzeit über PayPal, Rechnung oder eine lizenzierte
+Institution, der Sie angehören, verlängern. Sie werden rechtzeitig
+informiert, bevor Ihr Zugang abläuft.
+<% end -%>
+
+Hier können Sie Ihren persönlichen Zugang verlängern:
+<<%= @license_url %>>
+
+Und hier können Sie Ihre Zugangsdaten (einschließlich Benutzername,
+E-Mail-Adresse und Passwort) ändern:
+<<%= @account_url %>>
+
+<% if @welcome -%>
+
+IHRE MÖGLICHKEITEN
+==================
+
+In prometheus können Sie aktuell <%= @record_count %> hochauflösende Bilder
+in <%= @source_count %> Datenbanken der Kunst- und Kulturgeschichte recherchieren.
+Bei ausgewiesenen Bildern können Sie die Publikationsrechte direkt
+online erwerben.
+
+Ihr persönlicher Zugang ermöglicht Ihnen zudem, die erweiterten
+Funktionalitäten von prometheus zu nutzen. Sie können eigene
+Bildsammlungen und Präsentationen erstellen oder die Qualität
+der Bilder bewerten.
+
+Eine Zusammenstellung aller Möglichkeiten finden Sie hier auf einen Blick:
+<<%= @sitemap_url %>>
+
+Bei Fragen oder Problemen bieten unsere Hilfeseiten Orientierung:
+<<%= @help_url %>>
+
+
+DAS BILDRECHT
+=============
+
+Bitte beachten Sie, dass die Bilder in prometheus nicht in jedem
+Fall frei verwendet werden dürfen. Die in prometheus recherchierbaren
+Bilder dürfen Sie nur in der Hochschullehre, im Schulunterricht und
+zum wissenschaftlichen oder privaten Gebrauch nutzen. Bei jeder anderen
+Verwendung müssen Sie das Urheberrecht in Bezug auf das Werk und die
+Fotografie klären.
+
+Die relevanten Passagen des Urheberrechts haben wir hier für Sie noch
+einmal verständlich zusammengefasst:
+<<%= @rights_url %>>
+<% else -%>
+Eine Zusammenstellung aller Möglichkeiten finden Sie hier auf einen Blick:
+<<%= @sitemap_url %>>
+
+Bei Fragen oder Problemen bieten unsere Hilfeseiten Orientierung:
+<<%= @help_url %>>
+<% end -%>
+
+Haben Sie Fragen oder Anregungen?
+Unsere prometheus-Geschäftsstelle ist jederzeit für Sie da. Helfen
+Sie mit, das Bildarchiv weiterzuentwickeln und zu optimieren. Ihre
+Ideen sind uns wichtig!
+
+Wir wünschen Ihnen viel Spaß beim Arbeiten mit prometheus!
+Ihr prometheus-Team
+
+<%= render :partial => 'signature' -%>

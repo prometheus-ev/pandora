@@ -1,0 +1,69 @@
+<h2 class="page_title">
+  <%= 'Csv stats'.t %>
+</h2>
+
+<%= error_messages_for :csv_stats %>
+
+<%= form_for @csv_stats, url: stats_path do |f| %>
+  <table>
+    <% unless @csv_stats.issuers.empty? %>
+      <tr>
+        <th><%= f.label :issuer, 'Issuer'.t %></th>
+        <td>
+          <%= f.select :issuer, @csv_stats.issuers, include_blank: true %>
+        </td>
+      </tr>
+      <tr><td colspan="2" style="text-align: center"><%= 'or'.t %></td></tr>
+    <% end %>
+    <tr>
+      <th><%= f.label :institution, 'Institution'.t %></th>
+      <td><%= f.select(:institution, 
+        @csv_stats.institutions,
+        include_blank: true,
+        selected: @csv_stats.institution
+      ) %></td>
+    </tr>
+    <tr>
+      <th><%= f.label :include_ips, 'Include IPs?'.t %></th>
+      <td><%= f.check_box :include_ips %> (<%= 'CAUTION'.t %>: <%= 'Might be slow!'.t %>)</td>
+    </tr>
+
+    <tr><td colspan="2"><hr /></td></tr>
+
+    <tr>
+      <th><%= f.label :from_year, 'From'.t %></th>
+      <td>
+        <%= select_year(@csv_stats.from_year,
+          prefix: 'csv_stats',
+          field_name: 'from_year'
+        ) %>
+        <%= select_month(@csv_stats.from_month,
+          prefix: 'csv_stats',
+          field_name: 'from_month'
+        ) %>
+      </td>
+    </tr>
+    <tr>
+      <th><%= f.label :to_year, 'To'.t %></th>
+      <td>
+        <%= select_year(@csv_stats.to_year,
+          prefix: 'csv_stats',
+          field_name: 'to_year'
+        ) %>
+        <%= select_month(@csv_stats.to_month,
+          prefix: 'csv_stats',
+          field_name: 'to_month'
+        ) %>
+      </td>
+    </tr>
+
+    <tr><td colspan="2"><hr /></td></tr>
+
+    <tr>
+      <th><%= f.label :compressed, 'Compressed?'.t %></th>
+      <td><%= f.check_box :compressed %></td>
+    </tr>
+
+    <%= form_controls 'Generate'.t %>
+  </table>
+<% end %>

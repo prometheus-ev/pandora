@@ -1,0 +1,10 @@
+<div class="payment-method">
+  <div class="float-left">
+    <%= f.radio_button 'mode', 'institution' %>
+  </div>
+  <div style="margin-left: 3em">
+    <%- @institutions.to_a.delete_if { |i| i.license && i.license.license_type.title == "consortium" && i.license.license_type.amount == 0 } %>
+    <%= f.select :institution, @institutions.map { |i| [i.shorttitle, i.id] }.sort, @institutions.include?(@institution) && @user.mode != 'guest' ? { :selected => @institution.id } : { :selected => nil, :prompt => 'Select your institution...'.t } %><br />
+    <%= 'If you are affiliated with an institution found in the list above you are eligible for a <strong>free</strong> account. Just select your institution and proceed.'.t.html_safe %>
+  </div>
+</div>

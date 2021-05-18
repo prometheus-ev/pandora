@@ -1,0 +1,291 @@
+---
+:base_url:
+  development: "<%= ENV['PM_RACK_IMAGES_BASE_URL'] %>"
+  test: "<%= ENV['PM_RACK_IMAGES_BASE_URL'] %>"
+  production: "<%= ENV['PM_RACK_IMAGES_BASE_URL'] %>"
+
+:index_terms:  '/var/local/prometheus/app/pandora/shared/index_terms.marshal'
+:vgbk_list:    '/var/local/prometheus/app/pandora/shared/vgbk_list.yaml'
+:miro_pids:    '/var/local/prometheus/app/pandora/shared/miro_pids.yaml'
+:warburg_pids: '/var/local/prometheus/app/pandora/shared/warburg_pids.yaml'
+
+:search_fields:
+  - artist
+  - title
+  - location
+  - discoveryplace
+  - genre
+  - material
+  - keyword
+  - description
+  - date
+  - credits
+  - rights_reproduction
+  - unspecified
+
+:sort_fields:
+  - relevance
+  - artist
+  - title
+  - location
+ #- date
+  - credits         # ???
+  - source_title    # ???
+ #- discoveryplace  # ???
+ #- genre           # ???
+ #- material        # ???
+  - rating_average
+  - rating_count
+  - comments
+
+:sort_fields_non_indexed:
+  - rating
+  - comments
+
+:facet_fields:
+  - artist
+  - title
+  - location
+ #- credits         # ???
+  - source_name
+
+:display_fields:
+  - acquisition
+  - addition
+  - adopted_from
+  - annotation
+  - annotation_technical
+  - based_on
+  - beneficiary_of_charter
+  - biographical_data
+  - caption
+  - catalogue
+  - circumference
+  - classification
+  - colour
+  - comment
+  - condition
+  - containerform
+  - corporate_body
+  - costumer
+  - country
+  - culture
+  - date_original
+  - department
+  - depository
+  - depth
+  - description_source
+  - detail
+  - diameter
+  - discoverycontext
+  - edition
+  - editions
+  - engraver
+  - epoch
+  - footnote
+  - format_foto
+  - frame
+  - function
+  - geographic_coordinates
+  - granted_by
+  - group_works
+  - height
+  - height_relief
+  - iconclass
+  - iconclass_description
+  - iconography
+  - identity_artist
+  - image_code
+  - image_information
+  - inscription
+  - institution
+  - inventory_no
+  - isbn
+  - issuer_of_charter
+  - keyword
+  - keyword_artigo
+  - keyword_content
+  - keyword_general
+  - keyword_location
+  - keyword_person
+  - keywords
+  - language
+  - length
+  - library_origin
+  - license
+  - links
+  - literature
+  - location_building
+  - made_by
+  - manufacture_place
+  - manufacture_place_city
+  - manufacture_place_grave
+  - manufacture_place_region
+  - maps
+  - marks
+  - measure
+  - negative_id
+  - notationnote
+  - number_of_preserved_seals
+  - origin
+  - origin_point
+  - original_number_of_seals
+  - pattern
+  - person
+  - photographer
+  - photographed_location
+  - pictured_location
+  - place_of_issue
+  - plan
+  - pool
+  - print
+  - printdetails
+  - printer
+  - printingplace
+  - production
+  - production_place
+  - proprietor
+  - provenance
+  - publicationplace
+  - publisher
+  - published_in
+  - reception
+  - record_id
+  - restriction
+  - rights_reproduction
+  - rights_work
+  - scene
+  - sealing
+  - series
+  - sheetsize
+  - short_explanation
+  - shot
+  - signature
+  - size
+  - sound
+  - source_url
+  - state
+  - structural_element
+  - structural_type
+  - subtitle
+  - technique
+  - text
+  - textform
+  - title_variants
+  - topic
+  - tradition
+  - venue
+  - view
+  - weight
+  - width
+  - work_catalogue
+  - year
+
+# Location fields are augmented with a link to Google Maps.
+# Add new fields to this section if that is desired.
+:location_fields:
+  - country
+  - discoveryplace
+  - geographic_coordinates
+  - location
+  - location_building
+  - manufacture_place
+  - manufacture_place_city
+  - manufacture_place_grave
+  - manufacture_place_region
+  - place
+  - place_of_issue
+  - pictured_location
+  - printing_place
+  - production_place
+  - publicationplace
+  - venue
+
+:source_boost:  # default: 100
+  amsterdam_museum: 100
+  amsterdam_rijksmuseum: 140
+  amtub: 150
+  arachne: 80
+  archgiessen: 100
+  artemis: 110
+  artemis_bk: 110
+  assisi: 120
+  beeskow: 90
+  berlin_spsg: 120
+  berlin_udk: 110
+  berlin_winckelmann: 100
+  bern: 110
+  bochum_kgi: 120
+  bochum_ug: 80
+  bpk: 160
+  caerlangen: 80
+  dadaweb: 120
+  darmstadt_tu: 90
+  daumier: 100
+  ddorf: 80
+  ddorf_ka: 120
+  desanhalt: 120
+  digidia: 110
+  digidianeu: 100
+  dmr: 120
+  dresden: 110
+  dresden_hfbk: 100
+  eichstaett_ub: 110
+  erlangen_drucke: 110
+  erlangen_zeichnungen: 110
+  ethzuerich: 100
+  genf: 120
+  giessen_kup: 120
+  giessen_lri: 90
+  goettingen_arch: 100
+  gregorsmesse: 110
+  halle_kg: 90
+  hamburg: 90
+  heidicon_aa: 120
+  heidicon_ad: 120
+  heidicon_al: 110
+  heidicon_ar: 110
+  heidicon_bp: 150
+  heidicon_fb: 20
+  heidicon_fk: 110
+  heidicon_gs: 110
+  heidicon_ha: 100
+  heidicon_ka: 110
+  heidicon_kb: 110
+  heidicon_kg: 110
+  heidicon_pu: 110
+  heidicon_sh: 110
+  heidicon_si: 110
+  heidicon_ua: 100
+  heidicon_wa: 100
+  heidicon_zo: 110
+  imago: 100
+  kassel: 150
+  kgerlangen: 100
+  kiel_digicult: 100
+  koeln_rba: 120
+  koeln_rba_koer: 130
+  leipzig: 100
+  lueneburg_oppermann: 110
+  mainz: 100
+  mainz_kb: 130
+  marburg_lba: 120
+  mka: 130
+  muenster_theologie: 120
+  oldenburg_afrika: 90
+  paderborn: 110
+  passau_dilps: 80
+  piranesi: 90
+  ppo: 100
+  requiem: 110
+  robertin: 80
+  saarbruecken_ifk: 120
+  salzburg: 100
+  stabi: 120
+  theoleik: 80
+  trier: 110
+  tuberlin: 100
+  uustb: 90
+  virtualart: 90
+  wbarchiv: 90
+  zi_muc: 140

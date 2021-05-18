@@ -1,0 +1,10 @@
+<div class="per_page">
+  <%= 'Per page'.t %>
+  <%= select_tag("per_page",
+    options_for_select(
+      [10, 20, 40, 100] | [per_page], # for example [10, 20, 25, 40, 100]
+      per_page
+    ),
+    'pm-to-param' => 'per_page'
+  ) %>
+</div>

@@ -1,0 +1,242 @@
+<h2 class="page_title"><%= "The prometheus image archive API, #{DEFAULT_API_VERSION}" %></h2>
+
+<p><strong><%= 'Perform searches, retrieve images, and query collections.'.t %></strong></p>
+
+<p>
+  <%= 'Request URLs have the following format'.t %>:
+  <pre><%= @request_root %>/api/<%= DEFAULT_API_VERSION %>/:format/:path</pre>
+</p>
+
+<dl>
+  <dt><code>version</code> (<%= 'optional'.t %>)</dt><dd><%= 'The API version (defaults to %s).'.t % "<code>#{DEFAULT_API_VERSION}</code>" %></dd>
+  <dt><code>format</code> (<%= 'required'.t %>)</dt><dd><%= 'One of the response formats listed with each method.'.t %></dd>
+  <dt><code>path</code> (<%= 'required'.t %>)</dt><dd><%= 'The path of the method as outlined below.'.t %></dd>
+</dl>
+
+<h3 class="api-method"><%= 'Global parameters'.t %></h3>
+<p><%= 'Parameters available to all methods.'.t %></p>
+
+<p>
+  <h5><code>Authorization</code> [HEADER]</h5>
+  <p><%= 'Some API calls require authorization.'.t %> <%= 'Supported schemes are %s and %s.'.t.html_safe % [%w[Basic 2617], %w[OAuth 5849]].map { |n, i| link_to(n, 'http://tools.ietf.org/html/rfc' + i).html_safe } %></p>
+
+  <b>OAuth</b>
+  <ol>
+    <li>
+      <%= 'request an OAuth API consumer key and secret from prometheus'.t %>
+    </li>
+    <li>
+      <p>
+        <%= 'request a request token at'.t %>:
+        <br />
+      </p>
+      <pre>POST <%= @request_root %>/pandora/oauth/request_token</pre><br />
+      <p>
+        <ul>
+          <li>
+            <%= 'request includes your OAuth consumer key, the OAuth consumer secret is included in your OAuth signature'.t %>
+          </li>
+          <li>
+            <%= 'response includes an OAuth token (oauth_token), token secret (oauth_token_secret), and confirms the callback (oauth_callback_confirmed)'.t %>
+          </li>
+          <li>
+            <%= 'oauth_callback_confirmed should be true, store the oauth_token and oauth_token_secret values'.t %>
+          </li>
+        </ul>
+      </p>
+    </li>
+    <li>
+      <p>
+        <%= 'login a user and request an OAuth verifier at'.t %>:
+        <br />
+      </p>
+      <pre>POST <%= @request_root %>/pandora/oauth/authorize?oauth_token=&lt;oauth_token&gt;</pre>
+      <p>
+        <ul>
+          <li>
+            <%= 'response includes an OAauth verifier (oauth_verifier), store the value'.t %>
+          </li>
+        </ul>
+      </p>
+    </li>
+    <li>
+      <p>
+        <%= 'request an access token at'.t %>:
+        <br/>
+      </p>
+      <pre>POST <%= @request_root %>/pandora/oauth/access_token</pre>
+      <p>
+        <ul>
+          <li>
+            <%= 'request includes your OAuth consumer key, token, and verifier, the OAuth consumer secret and token secret is included in your OAuth signature'.t %>
+          </li>
+          <li>
+            <%= 'response includes a final OAuth token (oauth_token) and token secret (oauth_token_secret) to use in future requests'.t %>
+          </li>
+          <li>
+            <%= 'see an example API request below at'.t %>
+            <%= link_to 'Examples'.t, '#examples' %>
+          </li>
+        </ul>
+      </p>
+    </li>
+  </ol>
+
+  <b>Basic</b>
+  <p>
+    <%= 'create a header with Ruby, e.g.'.t %>:
+  </p>
+  <pre>Base64.strict_encode64("#{username}:#{password}")</pre>
+  <p>
+    <%= 'see an example API request below at'.t %>
+    <%= link_to 'Examples'.t, '#examples' %>
+  </p>
+
+  <h5><code>locale</code> [QUERY]</h5>
+  <dl>
+    <dt><%= 'Type'.t %></dt><dd>String</dd>
+    <dt><%= 'Options'.t %></dt><dd><%= ORDERED_LOCALES.join(', ') %></dd>
+    <dt><%= 'Default'.t %></dt><dd><%= DEFAULT_LANGUAGE %></dd>
+  </dl>
+</p>
+
+<p>
+  <%= 'Additional query parameters may be appended as usual.'.t %>
+  <%= 'Header parameters need to be sent with the request headers.'.t %>
+</p>
+
+<h3 id="examples"><%= 'Examples'.t %></h3>
+
+<p>
+<%= 'List records from your database'.t %> (<%= see_also '<code>GET /upload/list</code>', :anchor => 'getUploadList' %>) <%= 'and authorize with HTTP Basic authentication authorization header'.t %>:
+  <pre>curl --request GET -v  <%= link_to nil, @request_root + url_for(@api_options.merge(:format => 'xml', :controller => 'uploads', :action => 'index')) %> --header 'Authorization: Basic YXBpOmV4YW1wbGU='</pre>
+</p>
+
+<p>
+<%= 'List records from your database'.t %> (<%= see_also '<code>GET /upload/list</code>', :anchor => 'getUploadList' %>) <%= 'and authorize with OAuth authorization header'.t %>:
+<pre>curl --request GET -v  <%= link_to nil, @request_root + url_for(@api_options.merge(:format => 'xml', :controller => 'uploads', :action => 'index')) %> --header 'Authorization: OAuth oauth_consumer_key="&lt;oauth_consumer_key&gt;", oauth_nonce="&lt;oauth_nonce&gt;", oauth_signature="&lt;oauth_signature&gt;", oauth_signature_method="HMAC-SHA1", oauth_timestamp="&lt;oauth_timestamp&gt;", oauth_token="&lt;oauth_token&gt;", oauth_version="1.0"'</pre>
+</p>
+
+<p>
+  <%= 'Basic information about pandora as JSON and XML'.t %> (<%= see_also '<code>GET /about</code>', :anchor => 'getPandoraAbout' %>):
+  <pre>
+    <%= link_to nil, @request_root + url_for(@api_options.merge(:format => 'json', :controller => 'pandora', :action => 'about')) %><br />
+    <%= link_to nil, @request_root + url_for(@api_options.merge(:format => 'xml', :controller => 'pandora', :action => 'about')) %>
+  </pre>
+</p>
+
+<p>
+  <%= 'The number of %s images as JSON and XML'.t.html_safe % "<code>#{'tree'.t}</code>".html_safe %> (<%= see_also '<code>GET /search/hits</code>', :anchor => 'getSearchHits' %>):
+  <pre>
+    <%= link_to nil, @request_root + url_for(@api_options.merge(:format => 'json', :controller => 'searches', :action => 'hits', :term => 'tree'.t)) %><br />
+    <%= link_to nil, @request_root + url_for(@api_options.merge(:format => 'xml', :controller => 'searches', :action => 'hits', :term => 'tree'.t)) %>
+  </pre>
+</p>
+
+<p>
+  <%= 'The search results matching the titles %s and %s as XML'.t.html_safe % ['<code>genius</code>'.html_safe, '<code>genius AND bavaria</code>'.html_safe] %> (<%= 'see %s and %s'.t.html_safe % [link_to('<code>GET /search/search</code>'.html_safe, :anchor => 'getSearchSearch').html_safe, link_to('<code>GET /search/advanced_search</code>'.html_safe, :anchor => 'getSearchAdvancedSearch').html_safe] %>):
+  <pre>
+    <%= link_to nil, @request_root + url_for(@api_options.merge(:format => 'xml', :controller => 'searches', 'term' => 'genius', 's[]' => 'giessen_lri')) %><br />
+    <%= link_to nil, @request_root + url_for(@api_options.merge(:format => 'xml', :controller => 'searches', :action => 'advanced', 'f' => ['title', 'title'], 'v' => ['genius', 'bavaria'], 'o[]' => 'and', 's[]' => 'giessen_lri')) %>
+  </pre>
+</p>
+
+<p>
+  <%= 'The image %s in medium size'.t.html_safe % '<code>THE GENIUS OF BAVARIA</code>'.html_safe %> (<%= see_also '<code>GET /image/medium</code>', :anchor => 'getImageMedium' %>) <%= 'and its metadata as XML'.t %> (<%= see_also '<code>GET /image/show</code>', :anchor => 'getImageShow' %>):
+  <pre>
+    <%= link_to nil, @request_root + url_for(@api_options.merge(:format => 'blob', :controller => 'images', :action => 'medium', :id => 'giessen_lri-eb11de4bb8e2a6c50f0440b536d040165927c47f')) %><br />
+    <%= link_to nil, @request_root + url_for(@api_options.merge(:format => 'xml', :controller => 'images', :action => 'show', :id => 'giessen_lri-eb11de4bb8e2a6c50f0440b536d040165927c47f')) %>
+  </pre>
+</p>
+
+<p>
+  <%= 'Create a record for your database'.t %> (<%= see_also '<code>POST /upload/create</code>', :anchor => 'postUploadCreate' %>):
+  <pre>
+    <%= h('curl -v -u <user name>:<password> -F upload[file]=@"<file path>" -F upload[title]="<title>" -F upload[rights_reproduction|credits]="<reproduction rights or credits>" -F upload[rights_work]="<work rights>"') %>
+    <%= link_to nil, @request_root + url_for(@api_options.merge(:format => 'xml', :controller => 'uploads', :action => 'create')) %>
+  </pre>
+</p>
+
+<p>
+  <%= 'Read a record from your database'.t %> (<%= see_also '<code>GET /upload/edit</code>', :anchor => 'getUploadEdit' %>):
+  <pre>
+    <%= link_to nil, @request_root + url_for(@api_options.merge(:format => 'xml', :controller => 'uploads', :action => 'update', :id => "id")) %>
+  </pre>
+</p>
+
+<p>
+  <%= 'Update a record from your database'.t %> (<%= see_also '<code>PUT /upload/edit</code>', :anchor => 'putUploadEdit' %>):
+  <pre>
+    <%= h('curl --request PUT -v -u <user name>:<password> -F id="<id>" -F upload[title]="<title>"') %>
+    <%= link_to nil, @request_root + url_for(@api_options.merge(:format => 'xml', :controller => 'uploads', :action => 'update')) %>
+  </pre>
+</p>
+
+<p>
+  <%= 'Delete a record from your database'.t %> (<%= see_also '<code>DELETE /upload/destroy</code>', :anchor => 'deleteUploadDestroy' %>):
+  <pre><%= link_to nil, @request_root + url_for(@api_options.merge(:format => 'xml', :controller => 'uploads', :action => 'destroy', :id => 'id')) %></pre>
+</p>
+
+<p>
+  <%= 'Delete a favorite'.t %> (<%= see_also '<code>DELETE /box/delete</code>', anchor: 'deleteBoxDelete' %>):
+  <pre>
+    <%= h('curl --request DELETE -v -u <user name>:<password> -F id="<id>"') %> <%= link_to nil, @request_root + url_for(@api_options.merge(:format => 'xml', :controller => 'box', :action => 'delete')) %>
+  </pre>
+</p>
+
+<h3><%= 'Web application description'.t %></h3>
+
+<p>
+  <%= 'A machine-readable description of this API is available in %(WADL)% format' / lambda { |a| link_to(a, "http://#{I18n.locale}.wikipedia.org/wiki/Web_Application_Description_Language") } %>:
+  <pre><%= link_to nil, @request_root + url_for(:action => 'wadl', :format => 'xml') %></pre>
+</p>
+
+<% for controller, actions in @api_methods.sort_by_key(&:to_s) -%>
+  <% controller = controller.to_s.singularize %>
+  <% for action, methods in actions.sort_by_key(&:to_s) -%>
+    <% skip = methods[:skip_controller] -%>
+    <% for method, opts in methods.sort_by_key(&:to_s) -%>
+      <% next if method == :skip_controller -%>
+      <% id = [method, controller, action].compact.join('_').camelcase(:lower) -%>
+
+<h3 id="<%= id %>" class="api-method"><code><%= method.to_s.upcase %> <%= ['', skip ? nil : controller, action].compact.join('/') %></code></h3>
+<% if doc = opts[:doc] %><p><%= doc.t %></p><% end %>
+<div class="api-details noscript">
+<% unless (params = opts[:params]).empty? -%>
+  <h4><%= 'Request parameters'.t %></h4>
+<% for param, popts in params.sort_by_key(&:to_s) -%>
+  <h5><code><%= param %></code> [<%= popts[:style].to_s.upcase %>]<%= " (#{'required'.t})" if popts[:required] %></h5>
+  <% if pdoc = popts[:doc] %><p><%= pdoc.t %></p><% end %>
+  <dl>
+    <dt><%= 'Type'.t %></dt><dd><%= popts[:type].to_s.capitalize %></dd>
+  <% unless (select = popts[:select]).blank? -%>
+    <dt><%= 'Options'.t %></dt><dd><%= select.join(', ') %></dd>
+  <% end -%>
+  <% for opt, value in popts.except(:style, :required, :doc, :type, :select).sort_by_key(&:to_s) -%>
+    <dt><%= opt.to_s.capitalize.t %></dt><dd><%= value %></dd>
+  <% end -%>
+  </dl>
+<% end -%>
+<% end -%>
+<% unless (formats = opts[:formats]).empty? -%>
+  <h4><%= 'Response formats'.t %></h4>
+<% for format, fopts in formats.sort_by_key(&:to_s) -%>
+  <h5><code><%= format %></code></h5>
+  <dl>
+    <dt><%= 'Media type'.t %></dt><dd><%= fopts[:type] %></dd>
+  <% if root = fopts[:root] -%>
+    <dt><%= 'Element'.t %></dt><dd><%= root %></dd>
+  <% for param, repeating in fopts[:hints] || [] -%>
+    <dt><code><%= param %></code><%= " (#{'repeating'.t})" if repeating %></dt><dd><%= "/#{root}/#{param}" %></dd>
+  <% end -%>
+  <% elsif object = fopts[:object] -%>
+    <dt><%= 'Object'.t %></dt><dd><%= object %></dd>
+  <% end -%>
+  </dl>
+<% end -%>
+<% end -%>
+</div>
+
+    <% end -%>
+  <% end -%>
+<% end -%>

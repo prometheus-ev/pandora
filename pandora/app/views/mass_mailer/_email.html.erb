@@ -1,0 +1,9 @@
+<%= render(:partial => 'header') -%>
+
+<%= render(:inline => @email.body_html.strip.html_safe).word_wrap(72).html_safe -%>
+
+<%= render(:partial => 'newsletter_footer') if @newsletter -%>
+
+<%= render :partial => 'account_mailer/signature' -%>
+
+<%= render(:partial => 'footer') -%>

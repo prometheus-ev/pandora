@@ -1,0 +1,57 @@
+<div class="header-line clear-padding">
+  <h2><%= 'Announcement'.t %>: <span id="announcement_title"><span></h2>
+
+  <div class="icon-line">
+    <%= link_to image_tag('icon/edit.gif', :class => 'icon', :title => 'Edit'.t), { :action => 'edit', :id => @announcement.id }, { :title => 'Edit'.t } %>
+    <%= link_to image_tag('icon/delete.gif', :class => 'icon delete-icon', :title => 'Delete'.t), { :action => 'destroy', :id => @announcement }, { :title => 'Delete'.t, :data => { confirm: "Are you sure to delete announcement: %s".t / @announcement }, :method => 'delete' } %>
+  </div>
+</div>
+
+<br class="clear-float" />
+
+<table>
+  <tr>
+    <th><%= 'Title'.t %> (<%= 'German'.t %>):</th>
+    <td id="announcement_title_de"><%= @announcement.title_de %></td>
+  </tr>
+  <tr>
+    <th><%= 'Title'.t %> (<%= 'English'.t %>):</th>
+    <td id="announcement_title_en"><%= @announcement.title_en %></td>
+  </tr>
+  <tr>
+  <th><%= 'Body'.t %> (<%= 'German'.t %>):</th>
+    <td id="announcement_body_de"><%=h @announcement.body_de %></td>
+  </tr>
+  <tr>
+  <th><%= 'Body'.t %> (<%= 'English'.t %>):</th>
+    <td id="announcement_body_en"><%=h @announcement.body_en %></td>
+  </tr>
+  <tr>
+    <th><%= 'Starts at'.t %>:</th>
+    <td id="announcement_starts_at"><%= @announcement.starts_at %></td>
+  </tr>
+  <tr>
+  <th><%='Ends at'.t %>:</th>
+    <td id="announcement_ends_at"><%= @announcement.ends_at %></td>
+  </tr>
+  <tr>
+    <th><%= 'Display for'.t %>:</th>
+    <td id="announcement_role"><%= "#{@announcement.role}".t %></td>
+  </tr>
+</table>
+
+<h3><%= 'Preview'.t %> [<%= 'German'.t %>]</h3>
+<% I18n.locale = :de %>
+<%= render :partial => 'announcements/announcement', :locals => { :announcement => @announcement, :compact => true } %>
+<% I18n.locale = current_user.locale %>
+
+<h3><%= 'Preview'.t %> [<%= 'English'.t %>]</h3>
+<% I18n.locale = :en %>
+<%= render :partial => 'announcements/announcement', :locals => { :announcement => @announcement, :compact => true } %>
+<% I18n.locale = current_user.locale %>
+
+<% if @announcement.current? %>
+  <%= gogif %><big><%= link_to 'Republish now!'.t, :action => 'publish', :id => @announcement %></big>
+  </br>
+  <%= gogif %><big><%= link_to 'Withdraw now!'.t, :action => 'withdraw', :id => @announcement %></big>
+<% end -%>

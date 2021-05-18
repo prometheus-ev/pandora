@@ -1,0 +1,60 @@
+<tr class="list_row undim <%= cycle('odd', 'even', :name => cycle_name) %>">
+  <td class="dummy"></td>
+  <td class="metadata">
+    <div class="title-line">
+      <% if admin_or_superadmin? %>
+        <%= check_box_tag 'id[]', row.id, false, :class => 'institution_list_item' if row.renewable? %>
+      <% end %>
+      
+      <%= link_to institution_path(row) do %>
+        <% if admin_or_superadmin? %>
+          <%= row.city %>, <%= row.short %>
+        <% else %>
+          <%= row.title %>
+        <% end %>
+      <% end %>
+
+      <% if current_user && row == current_user.institution %>
+        (<strong><%= 'Yours'.t %></strong>)
+      <% end %>
+
+      <% if admin_or_superadmin? %>
+        <small><%= license_for(row) %></small>
+        <span class="dim">
+          <%= link_to image_tag('icon/edit.gif', :class => 'icon', :title => 'Edit'.t), { :action => 'edit', :id => row }, { :title => 'Edit'.t } %>
+        </span>
+      <% end %>
+    </div>
+
+    <div class="description-line">
+      <% unless row.description.blank? %>
+        <%= truncated(row.description) %>
+      <% end %>
+      <% if admin_or_superadmin? && !row.notes.blank? %>
+        <br /><br class="vspace1" />
+        <%= truncated(row.notes) %>
+      <% end %>
+    </div>
+
+    <div class="summary-line">
+      <%= list_search_link_for :city, row.city %> (<%= row.country.t %>)
+    
+      <% user_count = row.user_count -%>
+      <% if admin_or_superadmin? || !user_count.zero? -%>
+        <%= vbar %>
+        <%= pm_labelled_counter(user_count, '%d personal account', '%d personal accounts') %>
+      <% end -%>
+
+      <% source_count = row.sources.count -%>
+      <% if admin_or_superadmin? || !source_count.zero? -%>
+        <%= vbar %>
+        <%= pm_labelled_counter(source_count, '%d database', '%d databases') %>
+      <% end -%>
+
+      <% if admin_or_superadmin? -%>
+        <%= vbar %>
+        <%= 'Last updated'.t %> <%= distance_of_time_ago_in_words_tag(row.updated_at) %>
+      <% end -%>
+    </div>
+  </td>
+</tr>

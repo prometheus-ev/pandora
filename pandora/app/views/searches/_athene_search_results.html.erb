@@ -1,0 +1,45 @@
+<% if @search.any_results? %>
+  <div class="infobar">
+    <span class="nowrap">
+      <%= 'Record'.t %>
+      <strong><%= (page - 1) * per_page + 1 %> - <%= [page * per_page, @search.total].min %></strong>
+      <%= 'of'.t %>
+      <strong><%= number_with_delimiter(@search.total, delimiter: ".") %></strong>
+      <%= "records".t %>
+    </span>
+    <span class="gap"></span>
+  </div>
+
+  <%= render :partial => 'athene_search_list_controls', locals: {top: true} %>
+
+  <%= form_tag({ :controller => 'collections', :action => 'store' }, { :id => 'image_list_form', :class => 'clear-padding' }) do -%>
+    <%= hidden_field_tag :back_to, request.url %>
+
+    <%= render :partial => 'shared/image/store_controls', :locals => { :pos => 'top' } %>
+
+    <div class="image_list view-<%= view %>">
+      <% image_cache = Image.
+        includes(:upload, :voters, :comments, source: :institution).
+        where(pid: @search.pids).
+        map{|image| [image.pid, image]}.
+        to_h
+      %>
+      <% collection_counts = Collection.counts_for(@search.pids, current_user) %>
+      <% @search.hits.each do |hit| %>
+        <% if hit['_source']['record_id'] %>
+          <% si = Pandora::SuperImage.new(
+            hit['_source']['record_id'],
+            elastic_record: hit,
+            image: image_cache[hit['_source']['record_id']],
+            collection_counts: collection_counts
+          ) %>
+          <%= render partial: 'images/row', locals: {super_image: si, search: @search} %>
+        <% end %>
+      <% end %>
+    </div>
+
+    <%= render :partial => 'shared/image/store_controls', :locals => { :pos => 'bottom' } %>
+  <% end -%>
+
+  <%= render :partial => 'athene_search_list_controls', locals: {top: false} %>
+<% end -%>

@@ -1,0 +1,17 @@
+<div class="announcement undim">
+  <strong><%= announcement.title %></strong>
+  <span class="heading">
+    <%= distance_of_time_ago_in_words_tag(announcement.starts_at) %>
+  </span>
+  
+  <% if compact %>
+    <% tpl = truncated(announcement.body, :first_line, 
+      escape: false, 
+      simple_format: true, 
+      parent: 'announcements'
+    ) %>
+    <%= render inline: tpl, locals: {announcement: announcement} %>
+  <% else %>
+    <%= render inline: announcement.body, locals: {announcement: announcement} %>
+  <% end %>
+</div>

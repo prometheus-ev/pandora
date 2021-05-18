@@ -1,0 +1,47 @@
+<% page_title = 'Search collections'.t unless defined?(page_title) %>
+
+<div class="search_query">
+  <label for="value" class="search_heading"><%= page_title %>:</label>
+
+  <%= form_tag({page: nil}, {:method => 'get', :class => 'search_form'}) do -%>
+    <%= select_tag :field, options_for_select(
+      [
+        ['Title'.t, 'title'],
+        ['Description'.t, 'description'],
+        ['Keywords'.t, 'keywords'],
+        ['Owner'.t, 'owner'],
+        ['Image ID'.t, 'image_pid']
+      ],
+      @field
+    ) %>
+
+    <%#= select_tag :field, options_for_select_t(Collection.search_columns.map { |c| c.respond_to?(:name) ? [c.human_name, c.name] : [c.humanize, c] }, @field) %>
+    <%= text_field_tag :value, @value, :size => 30 %>
+    <%= search_button nil, :float => nil %>
+    <% unless @value.blank? -%>
+      <span class="reset-link">[<%= link_to 'Clear/Show all'.t, safe_params.except('field', 'value', 'commit') %>]</span>
+    <% end -%>
+
+    <div class="clearfix"></div>
+  <% end -%>
+  <%#= list_search_for Collection %>
+</div>
+
+<% unless @collections.empty? %>
+  <div class="infobar">
+    <%= range_summary_for(@collections, 'Collections') %>
+    <span class="gap"></span>
+  </div>
+
+  <%= list_controls = render :partial => 'controls', :locals => { :klass => Collection, :objects => @collections } %>
+
+  <table class="list resourceful-list clear-float clear-padding">
+    <%= render :partial => "row", :collection => @collections.items, :locals => { :cycle_name => 'list' } %>
+  </table>
+
+  <%= list_controls %>
+<% else %>
+  <div class="infobar">
+    <p><strong><%= "No collections found.".t %></strong></p>
+  </div>
+<% end %>

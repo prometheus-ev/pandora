@@ -1,0 +1,6 @@
+<% pos = nil unless local_assigns.has_key?(:pos) %>
+
+<div class="store_controls<%= " position-#{pos}" if pos %>">
+  <%= render :partial => 'shared/list/select', :locals => { :what => 'image', :pos => pos } if pos %>
+  <%= render partial: 'shared/image/images_store' %>
+</div>

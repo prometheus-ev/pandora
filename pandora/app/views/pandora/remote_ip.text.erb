@@ -1,0 +1,8 @@
+IP address  = <%= @ip %>
+Institution = <%= @institution %>
+<% if params[:verbose] == '1' %>
+----------------------------------------
+REMOTE_ADDR          = #{@env['REMOTE_ADDR']}
+HTTP_CLIENT_IP       = #{@env['HTTP_CLIENT_IP']}
+HTTP_X_FORWARDED_FOR = #{@env['HTTP_X_FORWARDED_FOR']}
+<% end %>

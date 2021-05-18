@@ -1,0 +1,22 @@
+<div
+  id="comments-section"
+  class="pm-section section_wrap clear-padding undim <%= 'pm-expanded' if commentable.comments.any? %>"
+>
+  <a name="comments"></a>
+  <div class="pm-toggle">
+    <div class="collapse"></div>
+    <div class="expand"></div>
+  </div>
+  <div class="section_header">
+    <div class="section_heading">
+      <%= (commentable.comments.count == 1 ? '%d Comment' : '%d Comments') / commentable.comments.count %>
+      <span class="gap"></span>
+      <small>
+        <%= link_to 'Leave a comment'.t, '#', class: 'pm-new-comment' %>
+      </small>
+    </div>
+  </div>
+  <div class="section">
+    <%= render partial: 'comments/tree', locals: {commentable: commentable} %>
+  </div>
+</div>

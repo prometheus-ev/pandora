@@ -1,0 +1,230 @@
+<h2><%= 'Syntax help'.t %></h2>
+
+<p>
+  (See also <%= link_to_help section: 'search', label: 'Search' %>,
+  <%= link_to_help section: 'results', label: 'Resultslist' %> and
+  <%= link_to_help section: 'copyright_and_publication', label: 'Copyright and publication' %>.)
+</p>
+
+<p>
+  You can use special query syntax to modify your search query.
+</p>
+
+<% with_toc do -%>
+
+  <%= section_heading 'Phrase search: "..."', 'phrase_search' %>
+  <p>
+    It is possible to do a phrase search by putting the terms in "...". That way
+    the exact order of the terms will be taken into account. A query for
+    <%= link_to '"paul baum"', { controller: 'searches', action: 'advanced', 'search_field[0]': 'all', 'search_value[0]': '"paul baum"' }, target: '_blank' %>
+    would return all records on the artist Paul Baum. While a query for
+    <%= link_to 'paul baum', { controller: 'searches', action: 'advanced', 'search_field[0]': 'all', 'search_value[0]': 'paul baum' }, target: '_blank' %>
+    (without quotation marks) would find both terms regardless of order. E.g., it would also find Paul Klee,
+    <acronym title="German: Tree in the garden">Baum im Garten</acronym>.
+  </p>
+
+  <%= section_heading 'Wildcard search: * and ?', 'wildcard_search' %>
+  <p>
+    It is possible to mask parts of a word with the wildcard characters * or ?.
+    The wildcard character can be placed at any position in the word.
+    While the * can stand for an arbitrary number of characters (including zero), the
+    ? replaces exactly one character. This is particularly useful if you're uncertain
+    about one of the letters in your query term.
+  </p>
+
+  <p>
+    For instance, you're searching for records of van
+    Gogh, but aren't sure about the spelling of his first name. Just enter
+    <%= link_to 'Vin?ent van Gogh', { controller: 'searches', action: 'advanced', 'search_field[0]': 'artist', 'search_value[0]': 'Vin?ent van Gogh' }, target: '_blank' %>
+    and the question mark will match the missing c.
+  </p>
+
+  <p>
+    A query for
+    <%= link_to 'Sun*', { controller: 'searches', action: 'advanced', 'search_field[0]': 'title', 'search_value[0]': 'Sun*' }, target: '_blank' %>
+    would find, e.g., Sun, Sunday, Sundown, etc.
+    <%= link_to 'Sun*e', { controller: 'searches', action: 'advanced', 'search_field[0]': 'title', 'search_value[0]': 'Sun*e' }, target: '_blank' %>
+    would find, e.g., Sunrise, Sunshine, etc.
+    <%= link_to '*light', { controller: 'searches', action: 'advanced', 'search_field[0]': 'title', 'search_value[0]': '*light' }, target: '_blank' %>
+    would find, e.g., flight, redlight, etc.
+  </p>
+
+  <p>
+    Also refer to the <a href="https://www.elastic.co/guide/en/elasticsearch/reference/current/query-dsl-query-string-query.html#query-string-wildcard" target="_blank">Elasticsearch query string wildcard documentation</a>
+    for more information.
+  </p>
+
+  <%= section_heading 'Fuzzy search: ~', 'fuzzy_search' %>
+  <p>
+    It is possible to flag a word with ~ in the query to search for similar words. This is
+    particularly useful if you're unsure about the spelling of a term or name. The ~
+    character will be positioned at the end of the word you want to search fuzzily. Note that the
+    ~ doesn't replace parts of the word like the * does. E.g., a query for
+    Jaqueometti~
+    <%= link_to 'Jaqueometti~', { controller: 'searches', action: 'advanced', 'search_field[0]': 'artist', 'search_value[0]': 'Jaqueometti~' }, target: '_blank' %>
+    would not find the artist Giacometti, but
+    <%= link_to '*ometti', { controller: 'searches', action: 'advanced', 'search_field[0]': 'artist', 'search_value[0]': '*ometti' }, target: '_blank' %>
+    would do so. But
+    <%= link_to 'Gaugin~', { controller: 'searches', action: 'advanced', 'search_field[0]': 'artist', 'search_value[0]': 'Gaugin~' }, target: '_blank' %>
+    would also return records for Gauguin, Gaudin, Baudin, etc.
+  </p>
+
+  <p>
+    Also refer to the <a href="https://www.elastic.co/guide/en/elasticsearch/reference/current/query-dsl-query-string-query.html#query-string-fuzziness" target="_blank">Elasticsearch query string fuzziness documentation</a>
+    for more information.
+  </p>
+
+  <%= section_heading 'Boosting: ^<var>n</var>', 'boosting' %>
+  <p>
+    It is possible to attach ^<var>n</var> at the end of a word to influence ranking.
+    <var>n</var> is an arbitrary positive number and only affects the ranking of the results list,
+    not the number of the results returned. A query for
+    <%= link_to 'gold OR silver^12', { controller: 'searches', action: 'advanced', 'search_field[0]': 'title', 'search_value[0]': 'gold OR silver^12' }, target: '_blank' %>
+    will prefer (= rank higher) all records which include silver, but nevertheless return those
+    that match gold or gold and silver.
+  </p>
+
+  <p>
+    Also refer to the <a href="https://www.elastic.co/guide/en/elasticsearch/reference/current/query-dsl-query-string-query.html#_boosting" target="_blank">Elasticsearch query string boosting documentation</a>
+    for more information.
+  </p>
+
+  <%= section_heading 'Boolean operators', 'operators' %>
+  <p>
+    It is possible to combine search clauses using the Boolean operators AND, OR,
+    and AND NOT. They have the following meaning:
+
+    <dl>
+      <dt>AND</dt>
+      <dd><strong>Both</strong> search clauses must match.</dd>
+
+      <dt>OR</dt>
+      <dd><strong>One</strong> of the search clauses must match, but it is also possible that both of them match.</dd>
+
+      <dt>AND NOT</dt>
+      <dd>The first search clause must match, but the second <strong>must not</strong> match.</dd>
+    </dl>
+  </p>
+
+  <p>
+    For example, a query for
+    <%= link_to({ controller: 'searches',
+                  action: 'advanced',
+                  'search_field[0]': 'artist',
+                  'search_value[0]': 'Picasso',
+                  'search_field[1]': 'title',
+                  'search_value[1]': 'Stier' },
+                target: '_blank') do %>
+      artist = Picasso AND title = <acronym title="German: Bull">Stier</acronym>
+    <% end %>
+    would find all records of Bull images by Picasso. Whereas
+    <%= link_to({ controller: 'searches',
+                  action: 'advanced',
+                  'search_field[0]': 'artist',
+                  'search_value[0]': 'Picasso',
+                  'boolean_fields_selected[1]': 'must_not',
+                  'search_field[1]': 'title',
+                  'search_value[1]': 'Stier' },
+                target: '_blank') do %>
+      artist = Picasso AND NOT title = <acronym title="German: Bull">Stier</acronym>
+    <% end %>
+    would find all images by Picasso <strong>except</strong> his Bull images. On the other hand,
+    <%= link_to({ controller: 'searches',
+                  action: 'advanced',
+                  'search_field[0]': 'artist',
+                  'search_value[0]': 'Picasso',
+                  'boolean_fields_selected[1]': 'should',
+                  'search_field[1]': 'title',
+                  'search_value[1]': 'Stier' },
+                target: '_blank') do %>
+      artist = Picasso OR title = <acronym title="German: Bull">Stier</acronym>
+    <% end %>
+    would find all images by Picasso <strong>and</strong>
+    all Bull images, regardless of the artist who painted them.
+  </p>
+
+  <p>
+    However, if you want to formulate a more sophisticated query that uses more than one operator you have to
+    consider in what order they will be applied. The general order of precedence is as follows:
+
+    OR &gt; AND NOT &gt; AND
+  </p>
+
+  <p>
+    That means, whenever you use a combination of them, OR will be evaluated before AND NOT
+    which in turn will be evaluated before AND. Examples:
+
+    <dl>
+      <%= link_to({ controller: 'searches',
+                    action: 'advanced',
+                    'search_field[0]': 'artist',
+                    'search_value[0]': 'Picasso',
+                    'search_field[1]': 'title',
+                    'search_value[1]': 'Stier',
+                    'search_field[2]': 'title',
+                    'search_value[2]': 'Pferd' },
+                  target: '_blank') do %>
+        <dt>artist = Picasso AND title = <acronym title="German: Bull">Stier</acronym> AND title = <acronym title="German: Horse">Pferd</acronym></dt>
+      <% end %>
+      <dd>Finds all images by Picasso that show both Bulls and Horses.</dd>
+
+      <%= link_to({ controller: 'searches',
+                    action: 'advanced',
+                    'search_field[0]': 'artist',
+                    'search_value[0]': 'Picasso',
+                    'search_field[1]': 'title',
+                    'search_value[1]': 'Stier',
+                    'boolean_fields_selected[2]': 'should',
+                    'search_field[2]': 'title',
+                    'search_value[2]': 'Pferd' },
+                  target: '_blank') do %>
+        <dt>artist = Picasso AND title = <acronym title="German: Bull">Stier</acronym> OR title = <acronym title="German: Horse">Pferd</acronym></dt>
+      <% end %>
+      <dd>Finds all images by Picasso that show either Bulls or Horses, or both.</dd>
+
+      <%= link_to({ controller: 'searches',
+                    action: 'advanced',
+                    'search_field[0]': 'artist',
+                    'search_value[0]': 'Picasso',
+                    'search_field[1]': 'title',
+                    'search_value[1]': 'Stier',
+                    'boolean_fields_selected[2]': 'must_not',
+                    'search_field[2]': 'title',
+                    'search_value[2]': 'Pferd' },
+                  target: '_blank') do %>
+        <dt>artist = Picasso AND title = <acronym title="German: Bull">Stier</acronym> AND NOT title = <acronym title="German: Horse">Pferd</acronym></dt>
+      <% end %>
+      <dd>Finds all images by Picasso that show Bulls, but no Horses.</dd>
+
+      <%= link_to({ controller: 'searches',
+                    action: 'advanced',
+                    'search_field[0]': 'artist',
+                    'search_value[0]': 'Picasso',
+                    'boolean_fields_selected[1]': 'should',
+                    'search_field[1]': 'artist',
+                    'search_value[1]': 'von Gogh',
+                    'search_field[2]': 'title',
+                    'search_value[2]': 'Stier',
+                    'boolean_fields_selected[3]': 'should',
+                    'search_field[3]': 'title',
+                    'search_value[3]': 'Kuh' },
+                  target: '_blank') do %>
+        <dt>artist = Picasso OR artist = van Gogh AND title = <acronym title="German: Bull">Stier</acronym> OR title = <acronym title="German: Cow">Kuh</acronym></dt>
+      <% end %>
+      <dd>Finds all images by Picasso or by van Gogh that show either Bulls or Cows, or both.</dd>
+    </dl>
+  </p>
+
+  <p>
+    Also refer to the <a href="https://www.elastic.co/guide/en/elasticsearch/reference/current/query-dsl-query-string-query.html#_boolean_operators" target="_blank">Elasticsearch query string boolean operators documentation</a>
+    for more information.
+  </p>
+
+  <%= section_heading 'Further information', 'further_information' %>
+  <p>
+    Refer to the complete <a href="https://www.elastic.co/guide/en/elasticsearch/reference/current/query-dsl-query-string-query.html#query-string-syntax" target="_blank">Elasticsearch query string documentation</a> for even more details. The Wikipedia article <a href="http://en.wikipedia.org/wiki/Levenshtein_distance">Levenshtein distance</a> has more information on the similarity measure used in Fuzzy search.
+  </p>
+
+<% end -%>
+
+<%= render :partial => 'footer' %>

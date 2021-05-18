@@ -1,0 +1,58 @@
+try {
+  try {
+    Prometheus.switch_locale_switcher(false)
+  } catch (e) {}
+
+  $$(".nopandora").each(function(value, index) {
+    Element.remove(value);
+  });
+
+  $$("#facts").each(function(value, index) {
+    Element.update(value, "<%= escape_javascript render :partial => 'shared/layout/facts' %>");
+  });
+
+  $$("#statusbar").each(function(value, index) {
+    Element.update(value, "<%= escape_javascript render :partial => 'shared/layout/statusbar' %>");
+  });
+
+  $$("#announcements_wrap").each(function(value, index) {
+    <% if current_announcements.any? %>
+        Element.update(value, "<%= escape_javascript render :partial => 'shared/layout/announcements' %>");
+    <% else %>
+        Element.remove(value);
+    <% end %>
+  });
+
+  $$("#campus_login_wrap").each(function(value, index) {
+    <% if display_campus_login? %>
+      Element.update(value, "<%= escape_javascript render :partial => 'sessions/campus_login' %>");
+    <% else %>
+      Element.remove(value);
+    <% end %>
+  });
+
+  $$("#login_wrap").each(function(value, index) {
+    <% if display_login? %>
+      Element.update(value, "<%= escape_javascript render :partial => 'sessions/login' %>");
+    <% else %>
+      Element.remove(value);
+    <% end %>
+  });
+
+  $$("#query_form input[type=\"submit\"]").each(function(value, index) {
+    Element.replace(value, "<%= escape_javascript search_button %>");
+  });
+
+
+  $$("#record_count").each(function(value, index) {
+    Element.update(value, '<%= number_with_delimiter(@facts[:images], locale: I18n.locale) %>');
+  });
+
+  $$("#source_count").each(function(value, index) {
+    Element.update(value, <%= @facts[:sources] %>);
+  });
+
+  try {
+    Prometheus.switch_locale_switcher(true)
+  } catch (e) {}
+} catch (e) {}

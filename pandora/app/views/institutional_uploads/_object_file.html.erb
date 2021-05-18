@@ -1,0 +1,7 @@
+<tr>
+  <th><label for="upload_file"><%= 'File'.t %></label></th>
+  <td><%= f.file_field :file, options_for_field(:file) %></td>
+  <td>
+    <%= image_tag('misc/info_form_field.gif', :class => 'dim', :title => "Please select a file with one of the following file formats:".t + " " + Upload::FILE_FORMATS.join(', ')) %>
+  </td>
+</tr>

@@ -1,0 +1,90 @@
+<%= render :partial => 'object_image', :locals => { :f => f } unless action_name == 'edit_selected' %>
+<table>
+  <tr>
+    <th>
+      <label for="upload_artist">
+        <%= 'Artist'.t %>
+      </label>
+    </th>
+    <td><%= f.text_field :artist, options_for_field(:artist) %></td>
+    <td>
+      <%= image_tag('misc/info_form_field.gif', :class => 'dim', :title => "Name the creator of the work, e.g. \"Michelangelo Merisi da Caravaggio\" or \"Peter Meier\".".t) %>
+    </td>
+  </tr>
+  <%= render :partial => 'object_title', :locals => { :f => f } %>
+  <tr>
+    <th>
+      <label for="upload_date">
+        <%= 'Date'.t %>
+      </label>
+    </th>
+    <td><%= f.text_field :date, options_for_field(:date) %></td>
+    <td>
+      <%= image_tag('misc/info_form_field.gif', :class => 'dim', :title => "State here either the known date of origin or a production period of the object, e.g. \"1607\" or \"1600-1610\".".t) %>
+    </td>
+  </tr>
+  <tr>
+    <th>
+      <label for="upload_discoveryplace">
+        <%= 'Discoveryplace'.t %>
+      </label>
+    </th>
+    <td>
+      <%= f.text_field :discoveryplace, options_for_field(:discoveryplace, :style => @upload.discoveryplace.blank? ? '' : 'width: 327px;') %>
+      <%= link_to_google_maps(@upload.discoveryplace) unless @upload.discoveryplace.blank? %>
+    </td>
+    <td>
+      <%= image_tag('misc/info_form_field.gif', :class => 'dim', :title => "State here the original location of the object, which can differ from the current location and consists usually of information about the town, institution and if applicable the inventory number.".t) %>
+    </td>
+  </tr>
+  <tr>
+    <th>
+      <label for="upload_genre">
+        <%= 'Genre'.t %>
+      </label>
+    </th>
+    <td><%= f.text_field :genre, options_for_field(:genre) %></td>
+    <td>
+      <%= image_tag('misc/info_form_field.gif', :class => 'dim', :title => "Assign the object to a genre. The generic name can be specified by one or several terms, e.g.  \"painting\", \"sculpture\", \"architecture\", \"drawing/groundplan\".".t) %>
+    </td>
+  </tr>
+  <tr>
+    <th>
+      <label for="upload_material">
+        <%= 'Material'.t %>
+      </label>
+    </th>
+    <td><%= f.text_field :material, options_for_field(:material) %></td>
+    <td>
+      <%= image_tag('misc/info_form_field.gif', :class => 'dim', :title => "State here the material used for the production of the object. Here may also be stated the technique according to historico-cultural conventions, e.g. \"oil on canvas\".".t) %>
+    </td>
+  </tr>
+  <tr>
+    <th>
+      <label for="upload_keyword_list" >
+        <%= 'Keywords'.t %>
+      </label><br /><small>(<%= 'One per line'.t %>)</small>
+    </th>
+    <td>
+      <%= f.text_area(:keyword_list,
+        options_for_field(:keywords, :rows => 5, :value => @upload.keyword_list)
+      ) %>
+      <%= suggest_keywords_for 'upload', :keyword_list %>
+    </td>
+    <td>
+      <%= image_tag('misc/info_form_field.gif', :class => 'dim', :title => "Allot keywords to the object that define the content, form or context and help to search for it.".t) %>
+    </td>
+  </tr>
+  <tr>
+    <th>
+      <label for="upload_description">
+        <%= 'Description'.t %>
+      </label>
+    </th>
+    <td><%= f.text_area :description, options_for_field(:description, :rows => 3) %></td>
+    <td>
+      <%= image_tag('misc/info_form_field.gif', :class => 'dim', :title => "Here you can briefly describe the object in a continuous text.".t) %>
+    </td>
+  </tr>
+  <%= form_controls %>
+</table>

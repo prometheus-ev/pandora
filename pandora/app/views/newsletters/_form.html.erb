@@ -1,0 +1,29 @@
+<br class="clear-float" />
+
+<%= error_messages_for :email %>
+
+<% form_url = (@email.new_record? ? newsletters_path : newsletter_path(@email)) %>
+<%= form_for @email, url: form_url do |f| %>
+  <%= translated_fieldset f, :email,
+    [
+      [:subject, { :type => :text_field, :size => 47 }],
+      [:body, { :legend => '(Text/ERb)', :rows => 20, :cols => 72 }],
+      [:body_html, { :legend => '(Text/HTML & Markdown)', :rows => 20, :cols => 72 }]
+    ],
+    :suffix => ''
+  %>
+
+  <table>
+    <%= form_controls %>
+
+    <tr>
+      <td class="vspace1"><br /></td>
+    </tr>
+    <tr>
+      <td></td>
+      <td>
+        <%= pm_submit label: 'Save & send!'.t, value: 'deliver' %>
+      </td>
+    </tr>
+  </table>
+<% end -%>

@@ -1,0 +1,45 @@
+<script>
+// http://leafletjs.com/reference.html
+var lat = <%= @lat %>;
+var lng = <%= @lng %>;
+var zoom_level = <%= @zoom_level %>;
+</script>
+
+<% content_for :head do %>
+  <%= javascript_include_tag 'app/geo/map.js' %>
+<% end %>
+
+<% parent = section_id('details') %>
+
+<div class="metadata undim">
+  <table>
+    <tr>
+      <th><%= 'Map'.t %></th>
+      <td>
+        <div id="map"></div>
+      </td>
+    </tr>
+    <tr>
+      <th><%= 'Latitude, Longitude'.t %></th>
+      <td>
+        <span id="lat-lng">
+          <%= number_with_precision(@lat, precision: 5) %>, <%= number_with_precision(@lng, precision: 5) %>
+        </span>
+        <a id="map-link" href="https://maps.google.com/maps?q=<%= "#{@lat}" + ',' + "#{@lng}" %>" target="_blank" title="on Google Maps">
+          <div class="google_maps dim"></div>
+        </a>
+      </td>
+    </tr>
+    <% if !super_image.upload.location.blank? %>
+      <tr>
+        <th><%= 'Location'.t %></th>
+        <td>
+          <% if super_image.upload.respond_to?('location') %>
+            <%= truncated(super_image.upload.location, 280, :parent => parent, :escape => true) %>
+            <%= link_to_google_maps (super_image.upload.location) %>
+          <% end%>
+        </td>
+      </tr>
+    <% end %>
+  </table>
+</div>

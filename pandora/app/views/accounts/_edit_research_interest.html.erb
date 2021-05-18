@@ -1,0 +1,7 @@
+<% research_interest_info = "Since the usage of the image archive is solely permitted for research and education, we would like to ask you to justify your research/education interest and context. If you are associated with a licensed institution this field can be left blank.".t -%>
+<tr>
+  <th>
+    <label for="user_research_interest"><%= 'Research/education interest and context'.t %></label>
+  </th>
+  <td><%= f.text_area :research_interest, options_for_field(:research_interest, :rows => 6, :cols => 27, :placeholder => research_interest_info, :value => f.object.research_interest? ? f.object.research_interest : '') %></td>
+</tr>

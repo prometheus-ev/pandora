@@ -1,0 +1,8 @@
+<div class="sort_links">
+  <%= 'Order'.t %>:
+  <%= link_to(image_tag("misc/sort_#{@opposite_direction.downcase}.png", :title => "Sort #{@opposite_direction.downcase}ending".t, :class => 'sort_icon'), safe_params(:direction => @opposite_direction, :page => nil)) %>
+  <%= page_form do -%>
+    <%= hidden_field_tags_for(safe_params.except(*%w[order direction page])) %>
+    <%= select_tag(:order, options_for_select(options_for_order_select(args)), :class => 'autoselect') %>
+  <% end -%>
+</div>

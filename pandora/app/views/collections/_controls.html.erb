@@ -1,0 +1,33 @@
+<div class="list_controls">
+  <%= pagination_for(objects, page, @order) %>
+
+  <div class="sort_links">
+    <%= 'Order'.t %>:
+    <%= link_to(
+      image_tag(
+        "misc/sort_#{sort_inverse.downcase}.png",
+        :class => 'sort_icon'
+      ),
+      safe_params(
+        :direction => sort_inverse,
+        :page => nil
+      ),
+      :title => "Sort #{sort_inverse.downcase}ending".t
+    ) %>
+    <%= page_form do -%>
+      <%= hidden_field_tags_for(safe_params.except(*%w[order direction page])) %>
+      <%= select_tag(
+        :order,
+        options_for_select(
+          [
+            ['Title'.t, 'title'],
+            ['Updated at'.t, 'updated_at'],
+            ['Owner'.t, 'owner']
+          ],
+          sort_column
+        ),
+        :class => 'autoselect'
+      ) %>
+    <% end -%>
+  </div>
+</div>

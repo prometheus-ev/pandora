@@ -1,0 +1,17 @@
+<div class="popup_wrap scriptonly">
+  <div class="popup_toggle disable disabled">
+    <%= create_button('Store images in...'.t, :store) %>
+  </div>
+  <div class="store_images popup hidden">
+    <div class="popup_header">
+      <%= 'Collections'.t %>
+    </div>
+    <%= autosubmit_button('New Collection'.t, :plus, :name => '2collection') %>
+    <% disabled = [] %>
+
+    <%= render partial: 'shared/image/own_collections_selector' %>
+    <%= render partial: 'shared/image/sharing_collections_selector' %>
+    <%= render partial: 'shared/image/shared_collections_selector' %>
+    <%= render partial: 'shared/image/public_collections_selector' %>
+  </div>
+</div>

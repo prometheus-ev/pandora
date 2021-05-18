@@ -1,0 +1,94 @@
+<%= page_title %>
+
+<div class="list_row odd undim">
+  <%= render partial: 'images/row', locals: {
+    super_image: Pandora::SuperImage.from(@image),
+    icons: false,
+    secondary_icons: false
+  } %>
+</div>
+<% if @super_image.source.can_exploit_rights? -%>
+<p><big><%= 'The permission to publish this image can be obtained directly via prometheus.'.t %></big></p>
+
+<%= form_for :data, :html => { :class => 'noautofocus' } do |f| -%>
+<table class="<%= 'fieldWithErrors' if @type == false %>">
+  <tr><th colspan="2"><%= 'What kind of publication is this image intended for?'.t %></th></tr>
+  <tr>
+    <td><%= radio_button_tag('type', value = 'scientific', @type == value) %></td>
+    <td><label for="type_scientific">
+      <% if erlangen = @institution.name == "erlangen_uni" -%>
+        <%= 'I intend to use the image for <strong>non-profit, scientific publication purposes</strong> and would like to forward a request regarding permission for publication to the copyright holder'.t %>
+      <% else -%>
+        <%= 'I intend to use the image for a <strong>non-profit, scientific publication</strong>. And therefore, I wish to obtain permission for publication free of charge from the copyright holder directly. The publication is a'.t.html_safe %>
+          <br /><%= radio_button_tag('mode', value = 'print', @mode == value) %><%= 'Print publication with a circulation of less than 1000 copies.'.t.html_safe %>
+          <br /><%= radio_button_tag('mode', value = 'online', @mode == value) %><%= 'Online publication with image sizes less than 600px x 800px.'.t.html_safe %>
+      <% end -%>
+    </label></td>
+  </tr>
+  <tr>
+    <td><%= radio_button_tag('type', value = 'commercial', @type == value) %></td>
+    <td><label for="type_commercial"><%= 'I intend to use the image for <strong>commercial purposes</strong> and would like to forward a request regarding permission for publication to the copyright holder.'.t.html_safe %></label></td>
+  </tr>
+</table>
+
+<br />
+
+<table>
+  <tr>
+    <th><label for="data_publication"><%= 'Information about the publication'.t %></label></th>
+    <td><%= f.text_area :publication, options_for_field(:publication, :size => '50x10') %></td>
+  </tr>
+  <% if erlangen -%>
+  <tr>
+    <td><%= radio_button_tag('status', value = 'intern', @status == value) %></td>
+    <td><label for="data_intern"><%= 'I am affiliated to the University Erlangen-Nürnberg.'.t %></label></td>
+  </tr>
+   <tr>
+    <td><%= radio_button_tag('status', value = 'extern', @status == value) %></td>
+    <td><label for="data_extern"><%= 'I am not affiliated to the University Erlangen-Nürnberg.'.t %></label></td>
+  </tr>
+  <% end -%>
+  <tr>
+    <th><label for="data_firstname"><%= 'First name'.t %></label></th>
+    <td><%= f.text_field :firstname, options_for_field(:firstname) %></td>
+  </tr>
+  <tr>
+    <th><label for="data_lastname"><%= 'Last name'.t %></label></th>
+    <td><%= f.text_field :lastname, options_for_field(:lastname) %></td>
+  </tr>
+  <tr>
+    <th><label for="data_email" ><%= 'E-mail'.t %></label></th>
+    <td><%= f.text_field :email, options_for_field(:email) %></td>
+  </tr>
+  <tr>
+    <th><label for="data_addressline" ><%= 'Address'.t %></label></th>
+    <td><%= f.text_field :addressline, options_for_field(:addressline) %></td>
+  </tr>
+  <tr>
+    <th><label for="data_postalcode" ><%= 'Postal code'.t %></label></th>
+    <td><%= f.text_field :postalcode, options_for_field(:postalcode) %></td>
+  </tr>
+  <tr>
+    <th><label for="data_city" ><%= 'City'.t %></label></th>
+    <td><%= f.text_field :city, options_for_field(:city) %></td>
+  </tr>
+  <tr>
+    <th><label for="data_country" ><%= 'Country'.t %></label></th>
+    <td><%= f.text_field :country, options_for_field(:country) %></td>
+  </tr>
+  <tr>
+    <th><label for="data_annotations" ><%= 'Annotations'.t %></label></th>
+    <td><%= f.text_area :annotations, options_for_field(:annotations, :size => '50x10') %></td>
+  </tr>
+
+  <%= form_controls %>
+</table>
+<% end -%>
+<% else -%>
+<%= render :partial => 'publishing_information' %>
+<% end -%>
+
+<p>
+  <br class="vspace2" />
+  <%= gogif %> <big><%= link_to 'Click here for general copyright information'.t, home_url('copyright'), title: 'General copyright information'.t %></big>
+</p>

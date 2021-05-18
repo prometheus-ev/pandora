@@ -1,0 +1,29 @@
+<div
+  id="<%= name %>-section"
+  class="pm-section section_wrap clear-padding undim <%= 'pm-expanded' if expanded %>"
+>
+  <% if header %>
+    <a name="<%= name %>"></a>
+    <div class="pm-toggle">
+      <div class="collapse"></div>
+      <div class="expand"></div>
+    </div>
+    <div class="section_header">
+      <div class="section_heading"><%= title %></div> 
+      <% if icon %>
+        <span class="section float-left dim">
+          <a
+            title="<%= icon[:title] %>"
+            data-remote="true"
+            data-method="get"
+            href="/en/accounts/superadmin/edit?section=details"
+          ><img class="icon" src="<%= icon[:src] %>"></a>
+        </span>
+      <% end %>
+    </div>
+  <% end %>
+
+  <div class="section">
+    <%= content %>
+  </div>
+</div>

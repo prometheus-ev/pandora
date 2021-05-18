@@ -1,0 +1,38 @@
+<tr class="list_row undim <%= cycle('odd', 'even', :name => cycle_name) %>">
+  <td class="dummy"></td>
+  <td class="metadata">
+  <% if @is_admin -%>
+    <div class="title-line">
+      <%= link_to(row.title, { :action => 'show', :id => row }) %>
+      <span class="dim">
+        <%= link_to image_tag('icon/edit.gif', :class => 'icon', :title => 'Edit'.t), { :action => 'edit', :id => row }, { :title => 'Edit'.t } %>
+        <%= link_to image_tag('icon/delete.gif', :class => 'icon delete-icon', :title => 'Delete'.t), { :action => 'destroy', :id => row }, { :title => 'Delete'.t, :data => { confirm: "Are you sure to delete announcement: %s".t / row }, :method => 'delete' } %>
+      </span>
+    </div>
+  <% end -%>
+    <div class="description-line">
+      <%= render :partial => 'announcement', :collection => [row], :locals => { :compact => true } %>
+    </div>
+    <div class="summary-line">
+    <% if @is_admin -%>
+      <strong>
+        <% if row.expired? %>
+          <%= 'Expired'.t %>
+        <% elsif row.current? %>
+          <%= 'Current'.t %>
+        <% else %>
+          <%= 'Upcoming'.t %>
+        <% end %>
+      </strong>
+      <%= vbar %>
+    <% end -%>
+    <%= 'Start'.t %>: <%= row.starts_at %>
+    <%= vbar %>
+    <%= 'End'.t %>: <%= row.ends_at %>
+    <% if @is_admin -%>
+      <%= vbar %>
+      <%= 'Last updated'.t %> <%= distance_of_time_ago_in_words_tag(row.updated_at) %>
+    <% end -%>
+    </div>
+  </td>
+</tr>

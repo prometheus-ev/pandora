@@ -1,0 +1,16 @@
+<h2><%= help_title(nil) %></h2>
+
+<ul>
+<% for page, name, extra in @help_navigation -%>
+  <li><%= link_to_section name.t, nil, page %></li>
+  <% if extra -%>
+    <ul>
+      <% for section, extra_name in extra -%>
+        <li><%= link_to_section extra_name.t, section, page %></li>
+      <% end -%>
+    </ul>
+  <% end -%>
+<% end -%>
+</ul>
+
+<p><%= gogif %> <%= ('See also our %(FAQ)%' / lambda { |a| link_to a, home_url('faq') }).html_safe %></p>

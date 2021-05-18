@@ -1,0 +1,37 @@
+---
+:data_images_directory_name: 'upload'
+# TODO: this has to go somewhere else
+:tmp_upload_path: '<%= ENV['PM_IMAGES_DIR'] %>/upload/original'
+:local: false
+
+:columns_for:
+  :search:
+    - artist
+    - title
+    - location
+    - description
+    - keywords
+    - inventory_no
+
+:sort_fields:
+  - updated_at
+  - created_at
+  - artist
+  - title
+  - location
+
+:licenses:
+  - 'None'
+  - 'In the public domain'
+  - 'CC BY (Attribution)'
+  - 'CC BY-SA (Attribution-ShareAlike)'
+  - 'CC BY-ND (Attribution-NoDerivs)'
+  - 'CC BY-NC (Attribution-NonCommercial)'
+  - 'CC BY-NC-SA (Attribution-NonCommercial-ShareAlike)'
+  - 'CC BY-NC-ND (Attribution-NonCommercial-NoDerivs)'
+  - 'Other'
+
+:rights_work:
+  - 'VG Bild-Kunst'
+  - 'In the public domain'
+  - 'Unknown'

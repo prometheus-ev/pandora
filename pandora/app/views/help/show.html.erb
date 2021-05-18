@@ -1,0 +1,18 @@
+<h2><%= 'Help'.t %></h2>
+
+<ul>
+  <% pages.each do |page| %>
+    <li>
+      <%= link_to_help page %>
+      <% if page[:sub_pages] %>
+        <ul>
+          <% page[:sub_pages].each do |sub_page| %>
+            <li><%= link_to_help sub_page %></li>
+          <% end %>
+        </ul>
+      <% end %>
+    </li>
+  <% end %>
+</ul>
+
+<p><%= gogif %> <%= ('See also our %(FAQ)%' / lambda { |a| link_to a, home_url('faq') }).html_safe %></p>

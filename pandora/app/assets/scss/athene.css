@@ -1,0 +1,18 @@
+.gallery-sort-value {
+  width: 200px;
+  text-overflow: ellipsis;
+}
+
+.athene-search-sample-p {
+  width: 720px;
+  white-space: nowrap;
+  overflow: hidden;
+}
+
+.athene-search-sample-image {
+  height: 60px;
+}
+
+.athene-search-sample-link {
+  padding: 0px !important;
+}

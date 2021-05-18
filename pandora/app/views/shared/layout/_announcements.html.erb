@@ -1,0 +1,28 @@
+<% unless (announcements = current_announcements).empty? %>
+  <% session_key = :news_collapsed %>
+  <% expanded = !session[session_key] %>
+  <% if session[:news_collapsed_time] %>
+    <% expanded = true if announcements.any? { |i| i.date > session[:news_collapsed_time].to_datetime } -%>
+  <% end %>
+
+  <div id="announcements">
+    <div id="announcements_header">
+      <%= external_image_tag('sidebar/icon_news.gif') %>
+      <strong><%= 'News'.t %></strong> (<%= announcements.size %>)
+      <%# overwrite id parameter to avoid url_for filling in id from current request parameters %>
+      <%= link_to_close_box(
+        controller: 'announcements',
+        action: 'hide',
+        host: request.base_url,
+        id: nil
+      ) %>
+      <%= link_to controller: 'announcements', host: request.base_url do %>
+        <%= tag.div class: 'open', title: 'Open'.t %>
+      <% end %>
+      <%= link_to_toggle_box expanded, session_key, 'announcements' %>
+    </div>
+    <div class="box_content<%= ' hidden' unless expanded %>">
+      <%= render :partial => 'announcements/announcement', :collection => announcements, :spacer_template => 'announcements/separator', :locals => { :compact => true } %>
+    </div>
+  </div>
+<% end %>

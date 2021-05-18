@@ -1,0 +1,16 @@
+<% if @transaction %>
+  <% if @transaction.status == 'initialized' -%>
+    <!-- REWRITE: this doesn't work anymore, coding a replacement -->
+    <script type="text/javascript">
+      window.setTimeout(function(){window.location.reload()}, 5000);
+    </script>
+    <%#= update_page_tag { |page| page.delay(5) { page << 'window.location.reload();' } } %>
+    <%= render :partial => 'payment_status_initialized' %>
+  <% elsif @transaction.status == 'succeeded' -%>
+    <%= render :partial => 'payment_status_succeeded' %>
+  <% elsif @transaction.status == 'failed' -%>
+    <%= render :partial => 'payment_status_failed' %>
+  <% else -%>
+    <%= render :partial => 'contact' %>
+  <% end %>
+<% end %>

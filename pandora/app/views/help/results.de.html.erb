@@ -1,0 +1,72 @@
+<h2><%= 'Results help'.t %></h2>
+
+<p>
+  Über der Auflistung der Ergebnisse befindet sich das Suchformular mit der aktuellen Suchanfrage
+  sowie die Anzeige der ausgewählten Datenbanken. Die Suche können Sie nun problemlos von hier aus
+  verfeinern oder ändern.
+</p>
+
+<% with_toc do -%>
+
+  <%= section_heading 'Ansicht und Sortiermöglichkeiten der Ergebnisse', 'viewing_and_sorting' %>
+  <p>
+    Sie können die Ergebnisliste sortieren nach:
+  </p>
+
+  <ul>
+    <li>Relevanz</li>
+    <li>Künstler*in</li>
+    <li>Titel</li>
+    <li>Standort</li>
+    <li>Bildnachweis</li>
+    <li>Datenbank</li>
+  </ul>
+
+  <p>
+    <%= screenshot 'help/results01.de.png', 'Sortieren nach Relevanz' %>
+  </p>
+
+  <p>
+    Zudem können Sie sich die Ergebnisse als Liste <%= image_tag('misc/list.gif', :class => 'help_icon') %>
+    mit grundlegenden Metadaten zum Bild oder in Galerieansicht <%= image_tag('misc/gallery.gif', :class => 'help_icon') %>
+    anzeigen lassen.
+    <%= screenshot 'help/results02.de.png', 'Liste' %>
+    <%= screenshot 'help/results03.de.png', 'Galerieansicht' %>
+  </p>
+
+  <p>
+    Außerdem können Sie festlegen, wie viele Datensätze pro Seite angezeigt werden sollen und
+    über ein Auswahlmenü auf eine beliebige Seite der Ergebnisliste springen.
+    <%= screenshot 'help/results04.de.png', 'Treffer pro Seite: 10' %>
+    <%= screenshot 'help/results05.de.png' %>
+  </p>
+
+  <p>
+    Wenn Sie nach einem bestimmte Künstler oder Künstlerin aus Ihrer Ergebnisliste suchen möchten, brauchen Sie
+    lediglich den Künstlernamen im Feld "Künstler*in" anzuklicken und es wird automatisch nach diesem gesucht.
+  </p>
+
+  <p>
+    Darüber hinaus stehen Ihnen mit den Buttons direkt am Bild verschiedene Funktionen zu den
+    einzelnen Bildern zur Verfügung:
+  </p>
+
+  <ul>
+    <li><div class="help_icon"><input type="checkbox" /></div> "Häkchen" Auswahl für Bildsammlung</li>
+    <li class="clear-float"><%= image_tag('icon/store.gif', :class => 'help_icon') %> Bild in Bildsammlung, Präsentation oder Favoritenleiste ablegen</li>
+    <li><%= image_tag('image/plus.gif', :class => 'help_icon') %> Vollständigen Datensatz anzeigen (mit ausführlichen Metadaten)</li>
+    <li><%= image_tag('image/plusplus.gif', :class => 'help_icon') %> zweite Vergrößerungsstufe zum Abspeichern auf eigener Festplatte geeignet</li>
+    <li><%= image_tag('icon/download.gif', :class => 'help_icon') %> Bild und Metadaten herunterladen</li>
+    <li><%= image_tag('image/externlink.gif', :class => 'help_icon') %> externer Link auf dieses Bild innerhalb der Quelldatenbank</li>
+    <li><%= image_tag('image/publish_prometheus.gif', :class => 'help_icon') %> Informationen zum Bildrecht und den Publikationsmöglichkeiten zum Bild</li>
+  </ul>
+
+  <p>
+    Es gibt die Möglichkeit, die ausgewählten Bilder in Bildsammlungen abzuspeichern. Eine
+    ausführliche Anleitung zur Erstellung einer Bildsammlung finden Sie unter dem Punkt
+    <%= link_to_help section: 'collection', label: '"Bildsammlung"' %>.
+  </p>
+
+<% end -%>
+
+<%= render :partial => 'footer' %>

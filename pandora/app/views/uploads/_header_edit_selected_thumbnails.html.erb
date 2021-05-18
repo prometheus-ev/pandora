@@ -1,0 +1,7 @@
+<% @uploads.each do |upload| -%>
+<div class="thumbnail">
+  <div class="image">
+    <%= image_tag_for(upload.image, 48) %>
+  </div>
+</div>
+<% end -%>

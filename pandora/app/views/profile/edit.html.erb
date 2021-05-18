@@ -1,0 +1,31 @@
+<h2 class="page_title"><%= 'Edit profile'.t %></h2>
+<%= error_messages_for :user %>
+
+<!-- REWRITE: we need to specify the object and the param so that the url can be
+calculated automatically -->
+<%#= form_for :user do |f| -%>
+<%= form_for @user, as: :user, url: profile_path, html: {class: 'edit-form'} do |f| -%>
+  <fieldset>
+    <legend><strong><%= 'Account data'.t %></strong></legend>
+    <table>
+      <%= render partial: "accounts/edit_account", locals: {f: f} %>
+    </table>
+  </fieldset>
+
+  <br />
+
+  <fieldset>
+    <legend><strong><%= 'Personal information'.t %></strong></legend>
+    <table>
+      <%= render partial: "accounts/edit_name", locals: {f: f} %>
+      <%= render partial: "accounts/edit_address", locals: {f: f} %>
+      <%= render partial: "accounts/edit_research_interest", locals: {f: f} %>
+      <%= render partial: "accounts/edit_newsletter", locals: {f: f} %>
+      <%= render partial: "accounts/edit_about", locals: {f: f} %>
+    </table>
+  </fieldset>
+
+  <table>
+    <%= form_controls %>
+  </table>
+<% end -%>

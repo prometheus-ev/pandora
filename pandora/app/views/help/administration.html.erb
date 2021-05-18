@@ -1,0 +1,233 @@
+<h2><%= 'Administration help'.t %></h2>
+
+<% with_toc do -%>
+
+  <%= section_heading 'Managing your personal account', 'personal_account' %>
+  <p>
+    To change your personal account information click your name in the upper right corner. Click
+    <%= image_tag('icon/edit.gif', :class => 'help_icon') %> next to the user
+    name. Here you may change your user name, your password (minimum is eight characters)
+    as well as your e-mail address. Orange represents a mandatory entry field.
+  </p>
+
+  <p>
+    Change of address can be made without notifying the <span class="prometheus">prometheus</span>
+    office. You may cancel the newsletter at any time by clicking the appropriate checkbox and you
+    can enter a short text about yourself that will be shown to others on your profile page.
+    <%= screenshot 'help/administration01.png', 'Form' %>
+  </p>
+
+  <%= section_heading 'Expiration of a personal account', 'personal_expiration' %>
+  <p>
+    The validity period of personal accounts is limited. Four weeks prior to expiration you will
+    be notified by e-mail. If you wish to extend your account please inform the administrator.
+  </p>
+
+  <%= section_heading 'Roles', 'roles' %>
+  <p>
+    Accounts for the prometheus image archive can have different roles and authorizations.
+  </p>
+
+  <dl class="fancy">
+    <dt id="user"><%= 'user'.humanize.t %></dt>
+    <dd>
+      Enables one to log in with user name and password from any computer. Provides access
+      to additional features compared to the campus login, such as creating image collections.
+    </dd>
+    <dt id="useradmin"><%= 'useradmin'.humanize.t %></dt>
+    <dd>
+      Enables one to administer personal accounts for an institution. See
+      <%= link_to 'Instructions for administrators', home_url('license/instructions-for-administrators') %>
+      for more information.
+    </dd>
+    <dt id="dbadmin"><%= 'dbadmin'.humanize.t %></dt>
+    <dd>
+      Enables one to administer databases, such as editing their public description and viewing
+      their image ratings. See
+      <%= link_to 'Information for data suppliers', home_url('databases/suppliers') %>
+      for more information.
+    </dd>
+  </dl>
+
+  <% restrict_to :superadmin, :admin, :useradmin do -%>
+
+    <%= section_heading 'Administrator management', 'management' %>
+    <p>
+      As an administrator you are authorized to create personal accounts for members of your
+      institution. Use the menu item "Administration".
+    </p>
+
+    <%= section_heading 'Creating a personal account', 'creating' %>
+    <p>
+      Click the button "Create a new account" in the submenu. The input mask will open for
+      creating personal accounts. Orange represents a mandatory entry field.
+    </p>
+
+    <p>
+      <strong>Example:</strong>
+    </p>
+
+    <table style="width: inherit">
+      <tr><th>User name:</th><td>j.doe</td></tr>
+      <tr><th>E-mail:</th><td>j.doe@example.com</td></tr>
+      <tr><th>Password:</th><td>(minimum is eight characters)</td></tr>
+      <tr><th>Confirm password:</th><td></td></tr>
+      <tr><td><br class="vspace1" /></td></tr>
+      <tr><th>First name:</th><td>Jane</td></tr>
+      <tr><th>Last name:</th><td>Doe</td></tr>
+    </table>
+
+    <p>
+      The following fields are optional (Title, address, postal code, City).
+    </p>
+
+    <p>
+      If the user chooses to subscribe to the newsletter please tick the appropriate checkbox.
+    </p>
+
+    <p>
+      Allocation to your institution will follow automatically.
+    </p>
+
+    <p>
+      Local identifier: optional
+    </p>
+
+    <p>
+      Expiration: You can also specify the period of validity for the personal accounts which by
+      default is limited to one year, but you have the option to choose a period of 6 months, one
+      year, two years or three years.
+    </p>
+
+    <p>
+      <strong>Example 1:</strong>
+      A personal account limited to 6 months could be created for an exchange student who is
+      studying at the institute for one semester only.
+    </p>
+
+    <p>
+      <strong>Example 2:</strong>
+      First-year students who are expected to study at the institute for a longer period of time may
+      receive a personal account for two to three years directly.
+    </p>
+
+    <p>
+      The specification of the expiration time is left to the administrator's discretion. For example,
+      validity could be set for one year periods.
+    </p>
+
+    <p>
+      Further information can be found under
+      <%= link_to_help section: 'administration', label: 'Expiration of installed accounts', anchor: 'expiration' %>.
+    </p>
+
+    <p>
+      <strong>For shorter periods we offer guest accounts:</strong>
+      These are available for one month only and may afterwards be deleted or turned into a full-fledged account.
+    </p>
+
+    <p>
+      Notes: optional
+    </p>
+
+    <p>
+      After all information has been entered click the "Save" button to create a new personal account.
+      <%= screenshot 'help/administration02.png', 'Form' %>
+    </p>
+
+    <%= section_heading 'Expiration of installed accounts', 'expiration' %>
+    <p>
+      To avoid prolonged utilization of personal accounts by former members of the institution, access
+      limitation has been established. Consequently, only members of the institution can profit from the
+      license.
+    </p>
+
+    <p>
+      Four weeks prior to expiration of their personal accounts users will receive an e-mail asking them
+      to notify their administrator to extend their account. After the expiration of the time limit the
+      access will be deactivated automatically.
+    </p>
+
+    <p>
+      The administrator needs to extend personal accounts by request only. It is possible to activate a
+      personal account after the expiration of the period by selecting a new validity period.
+    </p>
+
+    <%= section_heading 'Summary of installed accounts', 'summary' %>
+    <p>The submenu offers the following options:</p>
+
+    <ul>
+      <li>List: Lists all of the accounts</li>
+      <li>Active: Lists all the active accounts</li>
+      <li>Pending: Lists all the pending accounts</li>
+      <li>Expired: Lists all the expired accounts</li>
+      <li>Guest: Lists all the guest accounts</li>
+    </ul>
+
+    <p>
+      <%= screenshot 'help/administration06.png', 'Submenu' %>
+    </p>
+
+    <p>
+      If you're looking for a particular user, you can use the search box on the top of the list.
+      Here you can choose to filter the list by user name, e-mail, first name or last name.
+      <%= screenshot 'help/administration05.png' %>
+    </p>
+
+    <%= section_heading 'Editing the installed user accounts', 'editing' %>
+    <p>
+      When clicking on a user name the user data will appear. This data can be edited. The user's account
+      can be activated again or deleted or the user data may be downloaded as PDF file.
+    </p>
+
+    <p>
+      <%= screenshot 'help/administration03.png', 'Form' %>
+    </p>
+
+    <p>
+      As an option user data can also be edited by using <%= image_tag('icon/edit.gif', :class => 'help_icon') %>
+      and <%= image_tag('icon/delete.gif', :class => 'help_icon') %> next to the user name in the list.
+      <%= screenshot 'help/administration04.png', 'Submenu' %>
+    </p>
+
+    <p>
+      As an administrator you may use the image archive without installing a personal account by assigning
+      yourself the role "User".
+    </p>
+
+    <p>
+      Activate the funktion "user" in the editing mode of your personal account by
+      clicking the respective checkbox.
+    </p>
+
+    <p>
+      After logging in with your user name or your e-mail address, you now have the option to utilize the
+      image archive as a user or you can create personal accounts as an administrator. With your user name
+      you have the option of carrying out two different tasks.
+    </p>
+
+    <%= section_heading 'What does N.N. mean?', 'N.N.' %>
+    <p>
+      Whenever you find »N.N.« in place of a user's name, it's either because the user is
+      no longer a member of the <span class="prometheus">prometheus</span> image archive
+      or because you are not allowed to see their name due to privacy concerns.
+    </p>
+
+    <%= section_heading 'De-registration of an administrator account', 'deregistration' %>
+    <p>
+      If you want to terminate your administrator status, please notify our office
+      (<%= mail_to INFO_ADDRESS %>) by e-mail. At the same time, the new administrator
+      should send his
+      <%= link_to 'application form', home_url('license/instructions-for-administrators') %>
+      to our office.
+    </p>
+
+    <p>
+      Your account will remain activated except for the administrator status.
+    </p>
+
+  <% end -%>
+
+<% end -%>
+
+<%= render :partial => 'footer' %>

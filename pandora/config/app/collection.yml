@@ -1,0 +1,8 @@
+---
+:columns_for:
+  :search:
+    - title
+    - description
+    - keywords
+    - owner
+    - '[image]'

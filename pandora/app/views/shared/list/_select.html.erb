@@ -1,0 +1,5 @@
+<% title = "Select all #{what}s".t -%>
+<span class="list_select scriptonly">
+  <%= check_box_tag "#{what}_master_#{pos}", '1', false, :class => "pm-select-all", :title => title %>
+  <label for="<%= what %>_master_<%= pos %>"><%= title %></label>
+</span>

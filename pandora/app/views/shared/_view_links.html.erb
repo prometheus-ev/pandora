@@ -1,0 +1,7 @@
+<%= link_to params.merge(view: 'list'), title: 'List view'.t, class: 'pm-view-toggle' do %>
+  <div id="link-to-list" class="view_link list_view <%= "inactive" if view == 'list' %>"></div>
+<% end %>
+
+<%= link_to params.merge(view: 'gallery'), title: 'Gallery view'.t, class: 'pm-view-toggle' do %>
+  <div id="link-to-gallery" class="view_link gallery_view <%= "inactive" if view == 'gallery' %>"></div>
+<% end %>

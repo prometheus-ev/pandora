@@ -1,0 +1,91 @@
+<h2><%= 'Login help'.t %></h2>
+
+<% with_toc do -%>
+
+  <%= section_heading 'Persönlicher Zugang', 'personal' %>
+  <p>
+    Geben Sie Ihren Login-Namen oder Ihre E-Mail-Adresse und Ihr Passwort ein. Drücken
+    Sie die Enter-Taste oder klicken Sie den Anmelden-Button an.
+    <%= screenshot 'help/login01.de.png', 'Persönlicher Zugang' %>
+  </p>
+
+  <%= section_heading 'Passwort vergessen?', 'password' %>
+  <p>
+    Wenn Sie Ihr Passwort vergessen haben sollten, geben Sie nur Ihren Login-Namen oder Ihre
+    E-Mail-Adresse ein und klicken Sie dann auf den Link "Passwort vergessen?". Ihnen wird nun
+    in einer automatisch erstellten E-Mail ein Link zugeschickt, der Sie zu einem Formular führt,
+    in welchem Sie Ihr Passwort neu setzen können.
+  </p>
+
+  <%= section_heading 'Campus-Zugang', 'campus' %>
+  <p>
+    Über den Campus-Zugang können Sie das Bildarchiv nutzen, wenn Sie sich im freigeschalteten
+    <acronym title="Internet Protocol">IP</acronym>-Bereich einer lizenzierten Institution befinden.
+    Klicken Sie auf "Campus-Zugang", lesen und bestätigen Sie danach die Nutzungsbedingungen und drücken
+    Sie die Entertaste oder klicken Sie den Anmelden-Button an.
+    <%= screenshot 'help/login02.de.png', 'Campus-Zugang' %>
+  </p>
+  <p>
+    Nach der erfolgreichen Anmeldung können Sie sich über die Buttons der Menüleiste im Bildarchiv
+    bewegen.
+    <%= screenshot 'help/login03.de.png', 'Menüleiste' %>
+  </p>
+  <p>
+    Ihren Anmeldestatus sehen Sie während der Sitzung stets oben rechts. Hier befindet sich auch
+    der Abmelden-Button, mit dem Sie nach Ihrer Sitzung das Bildarchiv wieder verlassen.
+    <%= screenshot 'help/login04.de.png', 'Anmeldestatus' %>
+  </p>
+
+  <%= section_heading 'Probleme mit dem Campus-Zugang?', 'problems_campus' %>
+  <p>
+    Sollten Sie Probleme haben, das Bildarchiv über den Campus-Zugang zu nutzen, stellen Sie sicher,
+    dass Sie sich innerhalb des Campus-Netzwerks einer <%= link_to 'lizenzierten Institution', :controller => 'institutions', :action => 'licensed' %>
+    befinden. Damit der Campus-Zugang funktioniert, werden eine Reihe von
+    <acronym title="Internet Protocol">IP</acronym>-Adressen bei <span class="prometheus">prometheus</span>
+    registriert, so dass der Zugriff von einer solchen Adresse gewährt wird.
+  </p>
+
+  <p class="icon_box note">
+    Damit wir Ihr Problem mit dem Campus-Zugang untersuchen können, rufen Sie bitte die folgende Seite auf und
+    fügen die Ausgabe in Ihre Support-Anfrage ein:
+    <%= link_to 'Information zur IP-Addresse', :controller => 'pandora', :action => 'remote_ip', :verbose => 1 %>.
+  </p>
+
+  <h4>VPN-Verbindung</h4>
+
+  <p>
+    Wenn Sie über ein <acronym title="Virtual Private Network">VPN</acronym> mit dem Netzwerk Ihrer
+    Institution verbunden sind, müssen Sie beachten, dass es verschiedene Methoden gibt, eine solche
+    Verbindung aufzubauen. Um auf Webseiten außerhalb des Institutionsnetzwerks zugreifen zu können
+    (was auf das <span class="prometheus">prometheus</span>-Bildarchiv höchstwahrscheinlich zutrifft),
+    muss so genanntes "Full-Tunneling" verwendet werden. Mit anderen Worten: "Split-Tunneling" muss
+    deaktiviert sein. Es sollte möglich sein, Ihren <acronym title="Virtual Private Network">VPN</acronym>-Client
+    entsprechend zu konfigurieren. Bitte ziehen Sie die Webseiten und/oder die Dokumentation Ihres
+    Rechenzentrums zu Rate.
+  </p>
+
+  <p>
+    Hier sind einige Quellen, die hilfreich sein könnten:
+    <ul>
+      <li>
+        <a href="http://rrzk.uni-koeln.de/vpn.html?L=0#c4079">Tunneltyp Full- / Split-Tunnel</a> -
+        Eine Erläuterung der verschiedenen Tunnelmethoden (Full- vs. Split-Tunnel) des Regionalen
+        Rechenzentrums (RRZK) der Universität zu Köln.
+      </li>
+      <li>
+        <a href="http://www.lrz-muenchen.de/fragen/faq/vpn/vpn12/index.html">Was ist Split-Tunneling?</a> -
+        Eine Erläuterung von "Split-Tunneling" und Anweisungen wie es für das Münchner Wissenschaftsnetz
+        (MWN) zu deaktivieren ist.
+      </li>
+      <li>
+        <a href="http://en.wikipedia.org/wiki/Split_tunneling">Split tunneling</a> -
+        Technische Details aus Wikipedia, der freien Enzyklopädie. (Englisch)
+      </li>
+    </ul>
+  </p>
+
+  <%= render :partial => 'shared/personal_account_tip' %>
+
+<% end -%>
+
+<%= render :partial => 'footer' %>

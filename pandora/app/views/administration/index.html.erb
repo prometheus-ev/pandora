@@ -1,0 +1,91 @@
+<div class="pm-admin-section">
+  <h3><%= 'Account'.t %></h3>
+  <div class="pm-body">
+    <%= link_to 'Create'.t, controller: 'accounts', action: 'new' %><%= vbar %>
+    <%= link_to 'List'.t, controller: 'accounts', action: 'index' %><%= vbar %>
+    <%= link_to 'Active'.t, controller: 'accounts', action: 'active' %><%= vbar %>
+    <%= link_to 'Pending'.t, controller: 'accounts', action: 'pending' %><%= vbar %>
+    <%= link_to 'Expired'.t, controller: 'accounts', action: 'expired' %><%= vbar %>
+    <%= link_to 'Guest'.t, controller: 'accounts', action: 'guest' %>
+    <div class="pm-search">
+      <%= list_search_for Account, :controller => 'accounts', :action => 'index' %>
+    </div>
+  </div>
+</div>
+
+<div class="pm-admin-section">
+  <h3><%= 'Institution'.t %></h3>
+  <div class="pm-body">
+    <%= link_to 'Create'.t, controller: 'institutions', action: 'new' %><%= vbar %>
+    <%= link_to 'List'.t, controller: 'institutions' %><%= vbar %>
+    <%= link_to 'Licensed'.t, controller: 'institutions', action: 'licensed' %>
+    <div class="pm-search">
+      <%= list_search_for Institution, controller: 'institutions' %>
+    </div>
+  </div>
+</div>
+
+<div class="pm-admin-section">
+  <h3><%= 'Source'.t %></h3>
+  <div class="pm-body">
+    <%= link_to 'Create'.t, controller: 'sources', action: 'new' %><%= vbar %>
+    <%= link_to 'List'.t, controller: 'sources', action: 'index' %><%= vbar %>
+    <%= link_to 'Open access'.t, controller: 'sources', action: 'open_access' %>
+    <div class="pm-search">
+      <%= list_search_for Source, :controller => 'sources', :action => 'index' %>
+    </div>
+  </div>
+</div>
+
+<div class="pm-admin-section">
+  <h3><%= 'Auth client'.t %></h3>
+  <div class="pm-body">
+    <%= link_to 'Create'.t, controller: 'oauth_clients', action: 'new' %><%= vbar %>
+    <%= link_to 'List'.t, controller: 'oauth_clients', action: 'index' %>
+    <div class="pm-search">
+      <%= list_search_for ClientApplication, :controller => 'oauth_clients', :action => 'index' %>
+    </div>
+  </div>
+</div>
+
+<div class="pm-admin-section">
+  <h3><%= 'Announcement'.t %></h3>
+  <div class="pm-body">
+    <%= link_to 'Create'.t, controller: 'announcements', action: 'new' %><%= vbar %>
+    <%= link_to 'List'.t, controller: 'announcements', action: 'list' %><%= vbar %>
+    <%= link_to 'Current'.t, controller: 'announcements', action: 'current' %>
+    <div class="pm-search">
+      <%= list_search_for Announcement, :controller => 'announcements', :action => 'list' %>
+    </div>
+  </div>
+</div>
+
+<div class="pm-admin-section">
+  <h3><%= 'Newsletter'.t %></h3>
+  <div class="pm-body">
+    <%= link_to 'Create'.t, controller: 'newsletters', action: 'new' %><%= vbar %>
+    <%= link_to 'All'.t, controller: 'newsletters' %><%= vbar %>
+    <%= link_to 'Pending'.t, controller: 'newsletters', action: 'pending' %><%= vbar %>
+    <%= link_to 'Newsletter archive'.t, controller: 'newsletters', action: 'archive' %>
+    <div class="pm-search">
+      <%= list_search_for Email, :controller => 'newsletters' %>
+    </div>
+  </div>
+</div>
+
+<div class="pm-admin-section">
+  <h3><%= 'Stats'.t %></h3>
+  <div class="pm-body">
+    <%= link_to 'Institutional stats'.t, controller: 'stats', action: 'new' %><%= vbar %>
+    <%= link_to 'Newsletter facts'.t, controller: 'stats', action: 'facts_form' %>
+  </div>
+</div>
+
+<div class="pm-admin-section">
+  <h3><%= 'Upload'.t %></h3>
+  <div class="pm-body">
+    <%= link_to 'All'.t, controller: 'uploads', action: 'all' %><%= vbar %>
+    <%= link_to 'Unapproved'.t, controller: 'uploads', action: 'unapproved' %><%= vbar %>
+    <%= link_to 'Approved'.t, controller: 'uploads', action: 'approved' %>
+  </div>
+</div>

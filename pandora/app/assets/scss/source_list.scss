@@ -1,0 +1,155 @@
+.pm-source-list {
+  margin-top: 1rem;
+  $padding: 5px;
+  $border: 1px solid #303030;
+
+  background-color: #262626;
+  color: #fff;
+
+  a {
+    display: inline-block;
+  }
+
+  input[type=checkbox] {
+    float: none;
+  }
+
+  ul {
+    width: 100% !important;
+    margin: 0px;
+    padding: 0px !important;
+  }
+
+  li {
+    list-style-type: none;
+  }
+
+  & > .pm-header {
+    padding: $padding;
+  }
+
+  .pm-body {
+    display: none;
+
+    .pm-group-menu {
+      padding: $padding;
+      border-top: $border;
+    }
+
+    & > .pm-check {
+      padding: $padding;
+      padding-left: 33px;
+      border-top: $border;
+      color: #b4b4b4;
+
+      label {
+        position: relative;
+        top: -2px;
+      }
+    }
+
+    .pm-groups > li > .pm-header {
+      display: flex;
+      align-items: center;
+      padding: 0px $padding;
+      padding-left: $padding / 2;
+      background-image: url("/images/misc/source_group_master.gif");
+      font-weight: bold;
+    }
+
+    .pm-databases {
+      display: none;
+
+      & > li {
+        display: flex;
+        flex-wrap: nowrap;
+        justify-content: space-between;
+        align-items: center;
+        border-top: $border;
+        padding: $padding;
+
+        .pm-check {
+          align-self: flex-start;
+          padding-left: 28px;
+          padding-right: 10px;
+        }
+
+        .pm-name {
+          flex-grow: 1;
+
+          small {
+            display: block;
+          }
+        }
+
+        .pm-amount {
+          flex-shrink: 0;
+          flex-grow: 0;
+          width: 150px;
+          margin-left: 30px;
+          margin-right: 30px;
+          text-align: right;
+          white-space: nowrap;
+        }
+
+        .pm-links {
+          padding-right: $padding;
+          text-align: right;
+          white-space: nowrap;
+        }
+      }
+    }
+
+
+    // group collapse / expand
+
+    .pm-groups > li {
+      .pm-hide {
+        display: none;
+      }
+
+      .pm-database {
+        display: none;
+      }
+    }
+
+    .pm-groups > li.pm-expand {
+      .pm-hide {
+        display: inline;
+      }
+
+      .pm-show {
+        display: none;
+      }
+
+      .pm-databases {
+        display: block;
+      }
+    }
+  }
+}
+
+
+// collapse / expand
+
+.pm-source-list > .pm-header {
+  .pm-hide {
+    display: none;
+  }
+}
+
+.pm-source-list.pm-expand {
+  .pm-body {
+    display: block;
+  }
+
+  & > .pm-header {
+    .pm-show {
+      display: none;
+    }
+
+    .pm-hide {
+      display: inline;
+    }
+  }
+}

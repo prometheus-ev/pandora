@@ -1,0 +1,8 @@
+<% if @current_user.status == 'activated' %>
+<%= submenu_link_to 'All'.t, action: 'index' %>
+<%= submenu_link_to 'Active'.t, action: 'active' %>
+<%= submenu_link_to 'Pending'.t, action: 'pending' %>
+<%= submenu_link_to 'Expired'.t, action: 'expired' %>
+<%= submenu_link_to 'Guest'.t, action: 'guest' %>
+<%= link_to(create_button('Create a new account'.t, :plus), action: 'new') %>
+<% end %>

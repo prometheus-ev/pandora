@@ -1,0 +1,14 @@
+---
+:geographic_coordinates_default:
+  latitude: 50.91517
+  longitude: 6.94190
+
+:map:
+  tile_server:
+    openstreetmap: 'http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png'
+    mapquest_map:  'http://otile1.mqcdn.com/tiles/1.0.0/map/{z}/{x}/{y}.jpg'
+    mapquest_sat:  'http://otile1.mqcdn.com/tiles/1.0.0/sat/{z}/{x}/{y}.jpg'
+  attribution:
+    openstreetmap: '&copy; <a href="http://openstreetmap.org/copyright">OpenStreetMap</a>'
+    mapquest_map:  'Map Data &copy; <a href="http://openstreetmap.org/copyright">OpenStreetMap</a> | Tiles Courtesy of <a href="http://www.mapquest.com/" target="_blank">MapQuest</a> <img src="http://developer.mapquest.com/content/osm/mq_logo.png">'
+    mapquest_sat:  'Portions Courtesy NASA/JPL-Caltech and U.S. Depart. of Agriculture, Farm Service Agency'

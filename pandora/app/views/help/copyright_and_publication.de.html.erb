@@ -1,0 +1,23 @@
+<h2><%= 'Copyright and publication help'.t %></h2>
+
+<p>
+  Der Link zum <%= link_to 'Bildrecht', home_url('copyright'), title: 'Allgemeine Informationen zum Bildrecht' %>
+  in der Fußzeile enthält allgemeine Informationen zum Bildrecht und zu Publikationsmöglichkeiten in
+  <span class="prometheus">prometheus</span>. In den Metadaten des Datensatzes erhalten Sie direkt
+  die Informationen zum Recht am Werk und Recht am Foto des entsprechenden Bildes, insofern sie
+  <span class="prometheus">prometheus</span> vorliegen.
+</p>
+
+<% with_toc do -%>
+
+  <%= section_heading 'Publikationsbutton', 'button' %>
+  <p>
+    Mit folgendem Button links neben dem Bild <%= image_tag('image/publish_prometheus.gif') %>
+    erhalten Sie individuelle Informationen zur Publikation des jeweiligen Bildes, sofern sie
+    <span class="prometheus">prometheus</span> vorliegen. In einigen Fällen können Sie die
+    Publikationsgenehmigung direkt an dieser Stelle beim Rechteinhaber*in einholen.
+  </p>
+
+<% end -%>
+
+<%= render :partial => 'footer' %>

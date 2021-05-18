@@ -1,0 +1,12 @@
+<div class="list_controls">
+  <% offset = results.first_item_number -%>
+  <%= pagination_for results, page %>
+  <%= list_sort_links(local_assigns[:sort_columns]) %>
+  <%= render partial: 'shared/per_page_selector' %>
+  <div class="result_view">
+    <%= render partial: 'shared/view_links' %>
+  </div>
+  <div class="toggle_zoom scriptonly">
+    <%= link_to_toggle_zoom "toggle_results_zoom" %>
+  </div>
+</div>

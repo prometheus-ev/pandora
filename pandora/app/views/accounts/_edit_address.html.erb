@@ -1,0 +1,22 @@
+<tr>
+  <th><label for="user_addressline"><%= 'Address'.t %></label></th>
+  <td><%= f.text_area :addressline, options_for_field(:addressline, :rows => 3, :cols => 27) %></td>
+</tr>
+<tr>
+  <th><label for="user_postalcode"><%= 'Postalcode'.t %></label></th>
+  <td><%= f.text_field :postalcode, options_for_field(:postalcode) %></td>
+</tr>
+<tr>
+  <th><label for="user_city"><%= 'City'.t %></label></th>
+  <td><%= f.text_field :city, options_for_field(:city) %></td>
+</tr>
+<tr>
+  <th><label for="user_country"><%= 'Country'.t %></label></th>
+  <td><%= f.country_select :country, PRIORITY_COUNTRIES, {}, options_for_field(:country) %></td>
+</tr>
+<% restrict_to :superadmin, :admin do -%>
+<tr>
+  <th><label for="user_locale"><%= 'Language'.t %></label></th>
+  <td><%= f.select :locale, AccountSettings.values_for(:locale) %></td>
+</tr>
+<% end -%>

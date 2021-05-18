@@ -1,0 +1,26 @@
+<tr>
+  <th><%= f.label :locale, 'Preferred language'.t %></th>
+  <td><%= settings_select f, :locale, {
+    'en' => 'English',
+    'de' => 'Deutsch'
+  } %></td>
+</tr>
+<% if @user -%>
+<% unless @user.anonymous? -%>
+<tr>
+  <th><%= f.label :start_page, 'Start page'.t %></th>
+  <td><%= settings_select f, :start_page, [
+    ['search',             'Simple search'.t],
+    ['advanced_search',    'Advanced search'.t],
+    ['collections',        'Your collections'.t],
+    ['public_collections', 'Public collections'.t],
+    ['administration',     @user.admin_or_superadmin? && 'Administration dashboard'.t],
+    ['accounts',           @user.useradmin_like? && 'Account list'.t]
+  ] %></td>
+</tr>
+<% end -%>
+<% if @user.useradmin_like? -%>
+<tr><td colspan="2"><br class="vspace2" /></td></tr>
+<%= render partial: 'edit_shared_list_settings', locals: {f: f} %>
+<% end -%>
+<% end -%>

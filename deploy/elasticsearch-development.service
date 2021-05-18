@@ -1,0 +1,13 @@
+[Unit]
+Description="elasticsearch development instance"
+
+[Service]
+Type=simple
+User=elasticsearch
+Group=elasticsearch
+ExecStartPre=/bin/sleep 10
+ExecStart=/opt/elastic/development/bin/elasticsearch
+Restart=on-failure
+
+[Install]
+WantedBy=multi-user.target

@@ -1,0 +1,110 @@
+<div class="header-line">
+  <h2 class="title-line">
+    <%=h @institution.fulltitle %>
+  <% if campus = @institution.campus -%>
+    <br />
+    <span class="subtitle"><%= link_to_if_allowed h(campus.fulltitle), :controller => 'institutions', :action => 'show', :id => campus %></span>
+  <% end -%>
+  </h2>
+  <div class="icon-line dim">
+    <% if admin_or_superadmin? %>
+      <span class="gap"></span>
+      <%= link_to icon('edit'), edit_institution_path(@institution), title: 'Edit institution'.t %>
+    <% end %>
+  </div>
+</div>
+
+<div class="section clear-float">
+<% unless @institution.description.blank? -%>
+  <div class="description-line"><%= truncated(@institution.description, 280, :parent => 'header-section', :simple_format => true) %></div>
+<% end -%>
+
+<% if address = format_address_for(@institution) -%>
+  <table>
+    <tr>
+      <th><%= 'Address'.t %></th>
+      <td><%= address %></td>
+    </tr>
+  </table>
+<% end -%>
+
+<% unless @institution.public_info.blank? -%>
+  <div class="description-line"><%= truncated(@institution.public_info, 280, :parent => 'header-section', :simple_format => true) %></div>
+<% end -%>
+  <div id="object-summary"><%= render :partial => 'summary' %></div>
+</div>
+
+<div style="height: 10px;"></div>
+
+<%= pm_section 'details', expanded: true do %>
+  <table>
+    <tr>
+      <th><%= 'Member since'.t %></th>
+      <td><%= pm_l @institution.created_at, format: :coarse %></td>
+    </tr>
+
+    <% restrict_to :superadmin, :admin, :useradmin do -%>
+
+      <% for column in current_user.admin_or_superadmin? ? Institution.display_columns : Institution.display_columns_for_user -%>
+        <tr>
+          <th><%= column.human_name.tn(controller_name) %></th>
+          <td><%=h @institution.send(column.name) %></td>
+        </tr>
+      <% end -%>
+
+      <% if current_user.allowed?(@institution) -%>
+        <tr>
+          <th><%= 'Contact'.t %></th>
+          <td>
+          <% if contact = @institution.contact -%>
+            <%= link_to_if_allowed h(contact), :controller => 'accounts', :action => 'show', :id => contact %>
+            &lt;<%= mail_to h(contact.email) %>&gt;
+          <% end -%>
+          </td>
+        </tr>
+      <% end -%>
+
+      <tr>
+        <th><%= 'Stats'.t %></th>
+        <td><%= link_to_if_allowed h(name = @institution.name.downcase), :controller => 'stats', :action => 'csv', :institution => name %></td>
+      </tr>
+
+      <tr>
+        <th><%= 'License'.t %></th>
+        <td><%= render :partial => 'licenses' %></td>
+      </tr>
+
+      <tr>
+        <th><%= 'IP Nets'.t %></th>
+        <td><%= (@institution.ipranges || '').split("\n").join(', ') %></td>
+      </tr>
+    <% end -%>
+  </table>
+<% end %>
+
+<% if @user_administrators.size > 0 %>
+  <%= pm_section('user_administrators', title: pm_labelled_counter(@user_administrators.size, '%d user administrator', '%d user administrators')) do %>
+    <% show_email = current_user.institution.same_campus?(@institution) || current_user.admin_or_superadmin? -%>
+    <ul>
+    <% for admin in @user_administrators -%>
+      <li><%= link_to_admin_profile_with_email(admin, show_email ? admin.email : nil) %></li>
+    <% end -%>
+    </ul>
+  <% end %>
+<% end %>
+
+<% if @databases.size > 0 %>
+  <%= pm_section('databases', title: pm_labelled_counter(@databases.size, '%d database', '%d databases')) do %>
+    <table class="list">
+      <%= render :partial => 'sources/row', :collection => @databases, :locals => { :cycle_name => 'sources' } %>
+    </table>
+  <% end %>
+<% end %>
+
+<% if @departments.size > 0 %>
+  <%= pm_section('departments', title: pm_labelled_counter(@departments.size, '%d department', '%d departments')) do %>
+    <table class="list">
+      <%= render :partial => 'row', :collection => @departments, :locals => { :cycle_name => 'departments' } %>
+    </table>
+  <% end %>
+<% end %>

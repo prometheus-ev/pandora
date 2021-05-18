@@ -1,0 +1,15 @@
+<h2 class="page_title">
+  <%= 'Edit Source'.t + ' "' + @source.title + '"' %>
+</h2>
+
+<%= error_messages_for :source %>
+
+<%= form_for @source, as: :source do |f| -%>
+  <table>
+    <% restrict_to :superadmin, :admin do -%>
+      <%= render_form_parts(f, %w[institution admin open_access]) %>
+    <% end -%>
+
+    <%= form_controls %>
+  </table>
+<% end -%>

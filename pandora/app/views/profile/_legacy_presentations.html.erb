@@ -1,0 +1,31 @@
+<table class="list resourceful-list">
+<% owner_dirname = File.join(ENV['PM_PRESENTATIONS_DIR'], @user.id.to_s) %>
+<% Dir.glob("#{owner_dirname}/*").map do |presentation_dirname| %>
+    
+      <% presentation_id = File.basename(presentation_dirname) %>
+      <% presentation_path_pdf = Dir[File.join(presentation_dirname, "*.pdf")]
+        .select{ |f| File.file? f }.first %>
+      <% presentation_filename_pdf = File.basename(presentation_path_pdf) if presentation_path_pdf %>
+      <% presentation_path_zip = Dir[File.join(presentation_dirname, "*.zip")]
+        .select{ |f| File.file? f }.first %>
+      <% presentation_filename_zip = File.basename(presentation_path_zip) if presentation_path_zip %>
+    <% if presentation_filename_pdf || presentation_filename_zip %>
+    <tr class="list_row undim <%= cycle('odd', 'even', :name => 'legacy') %>">
+    <td>
+      <span class="nowrap">
+        <%= link_to presentation_filename_pdf, download_legacy_presentation_path(@user.id, presentation_id, 
+          presentation_filename_pdf) if presentation_filename_pdf %>
+      </span>
+      <% if presentation_filename_zip && presentation_filename_pdf %>
+        <span class="pale"> | </span>
+      <% end %>
+      <span class="nowrap">
+        <%= link_to presentation_filename_zip, download_legacy_presentation_path(@user.id, presentation_id, 
+          presentation_filename_zip) if presentation_filename_zip %>
+      </span>
+
+    </td>
+  </tr>
+  <%end%>
+<% end %> 
+</table>

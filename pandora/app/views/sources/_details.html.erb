@@ -1,0 +1,41 @@
+<table>
+  <tr>
+    <th><%= 'Kind'.t %></th>
+    <td><%= list_search_link_for :kind, [@source.kind, @source.kind.t], :action => 'index' %></td>
+  </tr>
+  <tr>
+    <th><%= 'City'.t %></th>
+    <td><%= list_search_link_for :city, @source.city, :action => 'index' %></td>
+  </tr>
+  <tr>
+    <th><%= 'Keywords'.t %></th>
+    <!-- TODO: these should probably not be translated -->
+    <td><%= list_search_links_for :keywords, @source.keywords.map { |k| [k.title, k.title.t] }, :action => 'index' %></td>
+  </tr>
+  <tr>
+    <th><%= 'Contact'.t %></th>
+    <td><%= link_to_profile_with_email(@source.contact, @source.email, {}, {}, :title => 'Send e-mail to the person in charge for the database'.t) %></td>
+  </tr>
+  <tr>
+    <th><%= 'Integrated since'.t %></th>
+    <td><%= @source.created_at.to_s(:coarse) %></td>
+  </tr>
+<% restrict_to :superadmin, :admin do -%>
+<% for column in Source.display_columns -%>
+  <tr>
+    <th><%= column.human_name.tn(controller_name) %></th>
+    <td><%=h @source.send(column.name) %></td>
+  </tr>
+<% end -%>
+  <tr>
+    <th><%= 'Admins'.t %></th>
+    <td>
+    <% if admins = @source.source_admins -%>
+      <% admins.each do |admin| %>
+        <%= link_to admin, { :controller => 'accounts', :action => 'show', :id => admin } %></br>
+        <% end %>
+    <% end -%>
+    </td>
+  </tr>
+<% end -%>
+</table>

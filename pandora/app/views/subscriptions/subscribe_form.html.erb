@@ -1,0 +1,9 @@
+<h3><%= 'prometheus newsletter'.t %> - <%= 'Subscribe!'.t %></h3>
+
+<p><%= 'You want to be informed about news and changes around the image archive? Then fill in your e-mail address and subscribe to the prometheus newsletter.'.t %></p>
+
+<%= render :partial => 'form', :locals => { :subscribe => true } %>
+
+<p><%= 'In case you change your mind, you can %(unsubscribe here)%.' / lambda { |a| link_to(a, :action => 'unsubscribe') } %></p>
+
+<p><%= gogif %> <%= link_to 'Read our previous newsletters'.t, newsletters_path %></p>

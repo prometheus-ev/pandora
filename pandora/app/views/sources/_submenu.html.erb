@@ -1,0 +1,6 @@
+<%= submenu_link_to('List'.t, action: 'index') unless is_dbuser_profile? %>
+<%= submenu_link_to('Open access'.t, action: 'open_access') unless is_dbuser_profile? %>
+
+<% restrict_to :superadmin, :admin do -%>
+  <%= link_to create_button('Create a new Source'.t, :plus), action: 'new' %>
+<% end -%>

@@ -1,0 +1,23 @@
+<%= error_messages_for(object_name_for_controller) %>
+<%= apply_behaviour(true, section_id(section = params[:section])) %>
+
+<!-- REWRITE: we can use the ujs version here -->
+<% obj = instance_variable_get("@#{object_name_for_controller}") %>
+<%= form_for obj, as: object_name_for_controller, :url => { :action => edit_action, :id => object_for_controller }, :html => { :class => 'edit-form' }, remote: true, method: 'PATCH' do |f| -%>
+  <table>
+    <%= hidden_field_tag :section, section %>
+
+    <% if section == 'header' -%>
+      <br class="vspace2" />
+      <div id="object-summary" class="hidden"><!-- dummy --></div>
+    <% end -%>
+
+    <%= render_form_parts(f, section) %>
+
+    <%= form_controls(nil, :cancel => {
+      # REWRITE: remote_function is not available anymore, hardcoding
+      :onclick => "new Ajax.Request('#{url_for(safe_params(:action => show_action))}'); return false"
+      # :onclick => "#{remote_function(:url => safe_params(:action => show_action))}; return false"
+    }) %>
+  </table>
+<% end -%>

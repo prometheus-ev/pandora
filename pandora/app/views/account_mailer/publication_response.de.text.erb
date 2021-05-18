@@ -1,0 +1,40 @@
+Sehr geehrte(r) <%= @user %>,
+
+folgende Publikationsanfrage wurde soeben an
+*<%= @institution.fulltitle -%>*
+gesendet:
+
+Bildinformation: <%= @image_info %>
+Informationen zur Publikation: <%= @data[:publication] %>
+Vorname: <%= @data[:firstname] %>
+Nachname: <%= @data[:lastname] %>
+E-Mail: <%= @data[:email] %>
+Adresse: <%= @data[:addressline] %>, <%= @data[:postalcode] %> <%= @data[:city] %>, <%= @data[:country] %>
+Bemerkungen: <%= @data[:annotations] %>
+<% if erlangen = @institution.name == 'erlangen_uni' -%>
+Angehörige(r) der Institution: <% if @status == 'intern' -%>ja<% else -%>nein<% end -%>
+<% end -%>
+
+<% if @type == 'scientific' && !erlangen -%>
+Sie dürfen das Bild nun kostenlos publizieren, sofern es sich um eine
+wissenschaftliche, nicht kommerzielle Publikation mit einer Auflage
+von unter 1000 Exemplaren oder eine Online-Publikation (Bildgröße kleiner
+als 600px x 800px) handelt.
+
+Gleichzeitig verpflichten Sie sich, das Bild deutlich durch den Vermerk
+"Bildrecht: <%= @institution.fulltitle -%>/Name des genannten Museums/Name des genannten Fotografen"
+auszuzeichnen.
+
+Außerdem verpflichten Sie sich, die Direktorinnen/Direktoren der genannten
+Museen, sofort nach Drucklegung unaufgefordert von der Publikation in
+Kenntnis zu setzen. Das geschieht in der Regel durch die Zusendung eines
+Belegexemplars.
+<% else -%>
+Der Rechteverwerter *<%= @institution.fulltitle %>* wird sich in Kürze
+mit Ihnen in Verbindung setzen.
+<% end -%>
+
+Mit freundlichen Grüßen
+Ihr prometheus-Team
+
+<%= render :partial => 'signature' -%>

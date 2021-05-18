@@ -1,0 +1,25 @@
+<% open_access = action_name == 'open_access' -%>
+<tr class="list_row undim <%= cycle('odd', 'even', :name => cycle_name) %>">
+  <td class="dummy"></td>
+  <td class="metadata">
+    <div class="title-line">
+      <%= link_to row.title, row %>
+      <span class="dim">
+      <% if current_user && current_user.allowed?(row) -%>
+        <%= link_to image_tag('icon/edit.gif', :class => 'icon', :title => 'Edit'.t), { :action => 'edit', :id => row }, { :title => 'Edit'.t } %>
+      <% elsif row.open_access? -%>
+        <%= gogif %> <strong><%= link_to_open_source row %></strong>
+      <% end -%>
+      </span>
+    </div>
+    <div class="description-line">
+    <% unless row.description.blank? -%>
+      <%= truncated(row.description, open_access ? :first_line : 140, :simple_format => true) %>
+    <% end -%>
+    </div>
+    <div class="summary-line">
+      <%= render(:partial => 'sources/row_details', :locals => { :row => row, :open_access => open_access }) %>
+    </div>
+    <%= render(:partial => "shared/source/sample", :locals => { :images => row.sample }) if (row.open_access? || current_user && (!current_user.dbuser? || current_user == row.dbuser)) %>
+  </td>
+</tr>

@@ -1,0 +1,7 @@
+<p><%=h @institution.fulltitle %></p>
+
+<p><%= format_address_for(@institution) %></p>
+
+<% unless @institution.public_info.blank? -%>
+<p><%= @institution.public_info %></p>
+<% end -%>

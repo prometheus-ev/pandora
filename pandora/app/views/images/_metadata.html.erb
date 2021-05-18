@@ -1,0 +1,175 @@
+<% aspects = nil unless local_assigns.has_key?(:aspects) -%>
+<% is_upload = false unless local_assigns.has_key?(:is_upload) %>
+
+<div class="metadata" style="<%= "height: 0px; width: 0px; display: none;" if view == "gallery" %>">
+<table>
+  <tr>
+    <th><%= 'Artist'.t %></th>
+    <td class="artist-field" colspan="2">
+      <% if super_image.no_longer_available? %>
+        <%= 'This record is no longer available'.t %>
+      <% else %>
+        <%= artists.map { |artist|
+          if artist.include?(",http")
+  	  if artist.include?("%")
+              arr = artist.split("%")
+              str = ""
+              (0..(arr.count-1)).each do|index|
+                if !index.odd?
+                  str << arr[index]
+                else
+                  str << link_to_links(arr[index])
+                end
+              end
+              str
+  	  else
+              link_to_links(artist)
+  	  end
+          else
+            format_content(artist, :escape => false)
+          end
+        }.join(" | ").html_safe %>
+      <% end %>
+    </td>
+  </tr>
+  <tr>
+    <th><%= 'Title'.t %></th>
+    <td class="title-field" colspan="2">
+      <%= titles.map { |title|
+        if title.include?(",http")
+          if title.include?("%")
+            arr = title.split("%")
+            str = ""
+            (0..(arr.count-1)).each do|index|
+              if !index.odd?
+                str << arr[index]
+              else
+                str << link_to_links(arr[index])
+              end
+            end
+            str
+          else
+            link_to_links(title)
+	  end
+        else
+          format_content(title, :escape => false)
+        end
+      }.join(" | ").html_safe %>
+    </td>
+  </tr>
+  <tr>
+    <th><%= 'Location'.t %></th>
+    <td class="location-field" colspan="2">
+      <%= render partial: 'images/locations', locals: {locations: locations, source: source} %>
+    </td>
+  </tr>
+  <tr>
+    <th><%= 'Date'.t %></th>
+    <td class="date-field" colspan="2">
+      <%= format_content(date, :escape => false).html_safe %>
+    </td>
+  </tr>
+  <tr>
+    <th><%= 'Credits'.t %></th>
+    <td class="credits-field" colspan="2">
+      <% credits_output = credits.map { |credit|
+        if is_url?(credit)
+          link_to(credit, credit, :target => '_blank')
+        elsif credit.include?(",http")
+          link_to_links(credit)
+        else
+          credit
+        end
+      }.join(" | ").html_safe %>
+      <%= format_content(credits_output, escape: false) %>
+    </td>
+  </tr>
+  <tr>
+    <th><%= 'Rights'.t %></th>
+    <td class="rights-field" colspan="2">
+      <span class="th"><%= 'Work'.t %>: </span>
+      <%= render partial: 'images/rights_work', locals: {rights_work: Array.wrap(rights_work)} %>
+      <span class="th">| <%= "Reproduction".t %>: </span>
+      <%= render partial: 'images/rights_reproduction', locals: {rights_reproduction: Array.wrap(rights_reproduction)} %>
+    </td>
+  </tr>
+
+  <tr>
+    <th><%= 'Database'.t %></th>
+    <td class="source-field">
+      <%= source.fulltitle %>
+
+      <% if source.institution && source.institution.location %>
+        <%= link_to_google_maps(source.institution.location) %>
+      <% end %>
+
+      <span class="source_icons"><%= source_icons_for(source) %></span>
+    </td>
+  </tr>
+  
+  <% if associated.size > 0 %>
+    <tr>
+      <th></th>
+      <td colspan="3">
+        <%= link_to controller: 'uploads', action: 'associated', id: super_image.upload.id do %>
+          <%= pm_labelled_counter associated.size, '%d associated image', '%d associated images' %><!--
+     --><% end %>
+
+        <% if parent.present? %>
+          <%= vbar %>
+          <%= link_to 'Parent object'.t, controller: 'images', action: 'show', id: record_id %>
+        <% end %>
+      </td>
+    </tr>
+  <% end %>
+
+  <% if super_image.collection_counts_any?(current_user) %>
+    <tr>
+      <td colspan="2" style="padding-left: 10px"><hr style="height: 1px; background-color: #3C3C3C; border: 0px;"></td>
+    </tr>
+    <tr class="dim">
+      <th><%= 'Collections'.t %></th>
+      <td class="collections-field">
+        <%= render partial: 'shared/collection_counts', locals: {super_image: super_image} %>
+      </td>
+    </tr>
+  <% end %>
+
+  <% if aspects.present? %>
+    <tr>
+      <td colspan="2" style="padding-left: 10px"><hr style="height: 1px; background-color: #3C3C3C; border: 0px;"></td>
+    </tr>
+    <tr>
+      <th>
+        <span><%= "Aspects".t %></span><br>
+      </th>
+      <td>
+        <a
+          href="<%= url_for(
+            only_path: true,
+            controller: 'searches',
+            action: 'advanced',
+            search_field: {'0': 'record_object_id'},
+            search_value: {'0': record_object_id.first},
+            hide_associated_link: true
+          ) %>"><%= 'Show all...'.t %></a>
+      </td>
+    </tr>
+    <tr>
+      <td class="object-field" colspan="2">
+        <div style="max-height: 80px; overflow: hidden; margin-left: 10px;">
+          <% aspects.each do |r| %>
+            <% si = Pandora::SuperImage.new(r['_id'], elastic_record: r) %>
+            <a href="<%= url_for only_path: true, controller: 'images', action: 'show', id: si.pid %>" style="display: inline-block">
+              <img
+                src="<%= si.image_url(:small) %>"
+                style="height: 80px; max-width: 200px; padding: 1px;"
+              />
+            </a>
+          <% end %>
+        </div>
+      </td>
+    </tr>
+  <% end %>
+</table>
+</div>

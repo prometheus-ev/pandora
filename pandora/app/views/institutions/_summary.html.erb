@@ -1,0 +1,40 @@
+<% unless @institution.homepage.blank? -%>
+  <%= gogif %> <%= link_to 'Institution homepage'.t, @institution.homepage %>
+<% end -%>
+
+<% unless @institution.homepage.blank? -%><%= vbar %><% end -%>
+
+<span class="nowrap">
+  <%= link_to_if_allowed(
+    pm_labelled_counter(@institution.user_count, '%d personal account', '%d personal accounts'),
+    controller: 'accounts', action: 'active', field: 'institution', value: @institution
+  ) %>
+</span>
+
+<% if (count = @institution.admin_count) > 0 -%>
+  <%= vbar %>
+  <span class="nowrap">
+    <%= link_to_section pm_labelled_counter(@user_administrators.size, '%d user administrator', '%d user administrators'), 'user_administrators' %>
+  </span>
+<% end -%>
+
+<% unless @databases.blank? -%>
+  <%= vbar %>
+  <span class="nowrap"><%= link_to_section pm_labelled_counter(@databases.size, '%d database', '%d databases'), 'databases' %></span>
+<% end -%>
+
+<% unless @departments.blank? -%>
+  <%= vbar %>
+  <span class="nowrap"><%= link_to_section pm_labelled_counter(@departments.size, '%d department', '%d departments'), 'departments' %></span>
+<% end -%>
+
+<% if current_user && current_user.admin_privileges_on?(@institution) %>
+  <%= vbar %>
+  <%= link_to('Statistics'.t,
+    controller: 'stats',
+    action: 'new',
+    csv_stats: {
+      institution: @institution.name
+    }
+  ) %>
+<% end %>

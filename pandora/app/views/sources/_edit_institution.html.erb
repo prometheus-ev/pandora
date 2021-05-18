@@ -1,0 +1,5 @@
+<tr>
+  <th><label for="source_institution"><%= 'Institution'.t %></label></th>
+  <!-- REWRITE: .map requires a scope now -->
+  <td><%= f.select :institution, Institution.all.map { |i| [i.shorttitle, i.id] }.sort, { :include_blank => true, :selected => @institution && @institution.id }, options_for_field(:institution) %></td>
+</tr>

@@ -1,0 +1,13 @@
+<p>
+  <%= gogif %>
+  <%= link_to 'Subscribe'.t, :controller => 'subscriptions', :action => 'subscribe_form' %>
+  <%= 'or'.t %>
+  <%= link_to 'Unsubscribe'.t, :controller => 'subscriptions', :action => 'unsubscribe_form' %>
+</p>
+
+<p>
+  <%= gogif %>
+  <%= link_to 'View our old newsletter archive'.t, home_url('prometheus/newsletter') %>
+</p>
+
+<%= render partial: 'list' %>

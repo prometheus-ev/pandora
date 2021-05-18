@@ -1,0 +1,73 @@
+Return-path: <>
+Envelope-to: schepp@wendig.io
+Delivery-date: Thu, 22 Nov 2018 22:56:49 +0100
+Received: from localhost ([127.0.0.1] helo=www434.your-server.de)
+  by www434.your-server.de with esmtps (TLSv1.2:DHE-RSA-AES256-GCM-SHA384:256)
+  (Exim 4.89_1)
+  id 1gPwxs-0003m5-VM
+  for schepp@wendig.io; Thu, 22 Nov 2018 22:56:48 +0100
+X-Failed-Recipients: jdupont@example.com
+Auto-Submitted: auto-replied
+From: Mail Delivery System <Mailer-Daemon@www434.your-server.de>
+To: schepp@wendig.io
+Content-Type: multipart/report; report-type=delivery-status; boundary=1542923808-eximdsn-1667901717
+MIME-Version: 1.0
+Subject: Mail delivery failed: returning message to sender
+Message-Id: <E1gPwxs-0003m0-Q8@www434.your-server.de>
+Date: Thu, 22 Nov 2018 22:56:48 +0100
+Delivered-To: wendig-schepp@wendig.io
+
+--1542923808-eximdsn-1667901717
+Content-type: text/plain; charset=us-ascii
+
+This message was created automatically by mail delivery software.
+
+A message that you sent could not be delivered to one or more of its
+recipients. This is a permanent error. The following address(es) failed:
+
+  jdupont@example.com
+    Unrouteable address
+
+--1542923808-eximdsn-1667901717
+Content-type: message/delivery-status
+
+Reporting-MTA: dns; www434.your-server.de
+
+Action: failed
+Final-Recipient: rfc822;jdupont@example.com
+Status: 5.0.0
+
+--1542923808-eximdsn-1667901717
+Content-type: message/rfc822
+
+Return-path: <schepp@wendig.io>
+Received: from [78.46.172.3] (helo=sslproxy06.your-server.de)
+  by www434.your-server.de with esmtpsa (TLSv1.2:DHE-RSA-AES256-GCM-SHA384:256)
+  (Exim 4.89_1)
+  (envelope-from <schepp@wendig.io>)
+  id 1gPwxs-0003lv-LZ
+  for jdupont@example.com; Thu, 22 Nov 2018 22:56:48 +0100
+Received: from [45.76.82.49] (helo=webmail.wendig.io)
+  by sslproxy06.your-server.de with esmtpsa (TLSv1.2:DHE-RSA-AES256-GCM-SHA384:256)
+  (Exim 4.89)
+  (envelope-from <schepp@wendig.io>)
+  id 1gPwxs-000R2E-HE
+  for jdupont@example.com; Thu, 22 Nov 2018 22:56:48 +0100
+MIME-Version: 1.0
+Content-Type: text/plain; charset=US-ASCII;
+ format=flowed
+Content-Transfer-Encoding: 7bit
+Date: Thu, 22 Nov 2018 13:56:48 -0800
+From: Moritz Schepp <schepp@wendig.io>
+To: jdupont@example.com
+Subject: test
+Organization: =?UTF-8?Q?Wendig_O=C3=9C?=
+Message-ID: <2f1c87426a9d27e01efe91ed507ef882@wendig.io>
+X-Sender: schepp@wendig.io
+User-Agent: Roundcube Webmail/1.3.8
+X-Authenticated-Sender: schepp@wendig.io
+X-Virus-Scanned: Clear (ClamAV 0.100.2/25143/Thu Nov 22 15:14:45 2018)
+
+test
+
+--1542923808-eximdsn-1667901717--

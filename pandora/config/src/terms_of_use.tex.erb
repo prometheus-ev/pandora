@@ -1,0 +1,49 @@
+\documentclass[a4paper,<%= lang %>]{article}
+
+\usepackage{babel,ucs,hyperref,xspace,multicol,graphicx}
+\usepackage[utf8x]{inputenc}
+\usepackage[hscale=0.85,vscale=0.9]{geometry}
+\usepackage[usenames,dvipsnames]{color}
+\hypersetup{colorlinks=true,urlcolor=black}
+
+\makeatletter
+
+\renewcommand\familydefault{cmss}
+\renewcommand\seriesdefault{sbc}
+
+\renewcommand\section{\@startsection
+  {section}{1}{0pt}%
+  {.8\baselineskip}%
+  {.4\baselineskip}%
+  {\normalfont\bfseries\centering}
+}
+
+\renewcommand\subsection{\@startsection
+  {subsection}{2}{0pt}%
+  {.8\baselineskip}%
+  {.4\baselineskip}%
+  {\normalfont\fontsize{9}{9.5}\bfseries}
+}
+
+\makeatother
+
+\begin{document}
+
+\includegraphics{<%= logo %>}
+\hfill \parbox{.24\linewidth}{
+  \href{http://www.prometheus-bildarchiv.de}{www.prometheus-bildarchiv.de} \newline
+  \href{mailto:info@prometheus-bildarchiv.de}{info@prometheus-bildarchiv.de}
+}
+
+<%= heading %>
+
+\begin{multicols}{2}
+\fontsize{9}{9.5}\selectfont
+\thispagestyle{empty}
+
+<%= body %>
+
+\hfill <%= footer %>
+
+\end{multicols}
+\end{document}

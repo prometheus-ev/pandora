@@ -1,0 +1,26 @@
+<p>
+  <strong>
+    Bitte senden Sie dazu einen aktuellen Zugehörigkeitsnachweis (Ihre Immatrikulationsbescheinigung oder einen Link zu Ihrem Auftritt auf der Institutswebseite) per E-Mail an eine*n der folgenden lokalen Administrator*innen.
+  </strong>
+</p>
+
+<br class="vspace1" />
+
+
+<fieldset>
+  <% admins = @institution.active_admins -%>
+  <legend><strong>Lokale Administrator*innen:</strong></legend>
+  <% if admins.blank? -%>
+  <% unless @user.useradmin_like? -%>
+    Ihre Institution hat keinen Administrator.<br />
+  <% end -%>
+    Die <span class="prometheus">prometheus</span>-Geschäftsstelle schaltet Ihren Zugang frei.<br />
+    Schicken Sie bitte einen Scan des Zugehörigkeitsnachweises (Immatrikulationsbescheinigung o.ä.) per E-Mail an die <%= link_to 'prometheus-Geschäftsstelle', home_url('contact') %>.
+  <% else -%>
+    <ul>
+    <% for admin in admins -%>
+      <li><%= link_to_admin_profile_with_email(admin) %></li>
+    <% end -%>
+    </ul>
+  <% end -%>
+</fieldset>

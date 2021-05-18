@@ -1,0 +1,10 @@
+[_zoom_src] {
+  transition: max-height 300ms, max-width 300ms;
+}
+
+.pm-zoomed {
+  position: absolute;
+  max-width: 280px !important;
+  max-height: 280px !important;
+  -webkit-transform: translate(-50%, -50%);
+}

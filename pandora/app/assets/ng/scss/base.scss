@@ -1,0 +1,19 @@
+body {
+  color: $black;
+
+  .pm-headline {
+    margin-top: 10%;
+    text-align: center;
+
+    h1 {
+      p.lead {
+        opacity: 0;
+        transition: opacity 0.4s cubic-bezier(0.42, 0.0, 0.58, 1.0);
+      }
+
+      p.lead.pm-active {
+        opacity: 1;
+      }
+    }
+  }
+}

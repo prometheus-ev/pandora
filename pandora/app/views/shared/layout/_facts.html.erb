@@ -1,0 +1,21 @@
+<% facts = Pandora::Facts.data -%>
+
+<%= link_to(
+  '%s Images' / number_with_delimiter(facts[:images], locale: I18n.locale),
+  controller: 'searches', host: request.base_url
+) %>
+<%= vbar %>
+<%= link_to(
+  '%d Databases' / facts[:sources],
+  controller: 'sources', host: request.base_url
+) %>
+<%= vbar %>
+<%= link_to(
+  '%d Licensed institutions' / facts[:licenses],
+  controller: 'institutions', action: 'licensed', host: request.base_url
+) %>
+<%= vbar %>
+<%= link_to_if_allowed(
+  '%s Personal accounts' / number_with_delimiter(facts[:accounts], locals: I18n.locale),
+  controller: 'accounts', action: 'list', host: request.base_url
+) %>

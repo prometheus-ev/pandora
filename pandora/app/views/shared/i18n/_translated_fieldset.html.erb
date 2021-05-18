@@ -1,0 +1,11 @@
+<% for lang in ORDERED_LANGUAGES -%>
+<br />
+<fieldset>
+  <legend><strong>[<%= I18n.t(lang, locale: :en) %>]</strong></legend>
+  <table>
+  <% for field, options in fields -%>
+    <%= translated_field f, name, field, options.merge(:lang => lang) %>
+  <% end -%>
+  </table>
+</fieldset>
+<% end -%>

@@ -1,0 +1,41 @@
+<meta http-equiv="content-type" content="text/html; charset=utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+<title>
+  <%= h(@controller_title || raw(controller_title)) %> |
+  <%= 'The prometheus Image Archive'.t %>:
+  <%= 'High-quality images from the fields of arts, culture and history'.t %>
+</title>
+
+<link rel="shortcut icon" type="image/x-icon" href="<%= url_for '/favicon.ico' %>" />
+<link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+
+<%= stylesheet_link_tag '/styles' %>
+
+<noscript>
+  <%= stylesheet_link_tag 'noscript', media: 'all' %>
+</noscript>
+
+<% if Rails.env.development? %>
+  <% Dir["#{Rails.root}/public/javascripts/combine/*.js"].sort.each do |f| %>
+    <%= javascript_include_tag "combine/#{File.basename(f)}" %>
+  <% end %>
+<% else %>
+  <% file = "#{Rails.root}/public/javascripts/combined.js" %>
+  <% cs = Digest::SHA1.hexdigest(File.read file) %>
+  <%= javascript_include_tag "/javascripts/combined.js?#{cs}" %>
+<% end %>
+
+<script>
+  Pandora.update_url = '<%= url_for(controller: 'pandora', action: 'toggle_box') %>'
+  Pandora.root_url = '<%= root_url locale: nil %>'
+</script>
+
+<% if controller_name == 'institutional_uploads' %>
+  <%= javascript_include_tag 'app/uploads' %>
+<% end %>
+
+<% file = "#{Rails.root}/public/javascripts/app/#{controller_name}.js" %>
+<% if File.exists?(file) %>
+  <%= javascript_include_tag "app/#{controller_name}" %>
+<% end %>

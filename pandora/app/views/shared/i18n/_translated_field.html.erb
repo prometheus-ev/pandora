@@ -1,0 +1,5 @@
+<tr>
+  <% id = "#{name}[#{TRANSLATIONS_KEY}][#{lang}][#{field}]" -%>
+  <th><label for="<%= id %>"><%= label.t %><%= suffix % I18n.t(lang) %></label><% if legend -%><br /><%= legend %><% end -%></th>
+  <td><%= f.send type, field, options_for_field(field, options.reverse_merge(:rows => 5, :name => id, :id => id, :value => with_locale(lang, &value_proc))) %></td>
+</tr>

@@ -1,0 +1,7 @@
+<hr />
+<h3><%= 'Preview'.t %><% if personalized -%> (<%= 'personalized'.t %>)<% end -%></h3>
+<% to, user = personalized && @email.individual? ? current_user.email : @email.recipients, personalized ? current_user : nil -%>
+
+<!-- REWRITE: we have to do this slightly differently now -->
+<!--pre><%#=h MassMailer.create_email(@email, to, user, @email.sender(current_user)) %></pre -->
+<pre><%=h MassMailer.email(@email, to, user, @email.sender(current_user)) %></pre>

@@ -1,0 +1,8 @@
+<div id="terms_of_use" class="hidden">
+  <div class="scroll">
+    <%= render :partial => 'terms/terms_of_use' %>
+    <%= mail_to INFO_ADDRESS %>
+  </div>
+  <br />
+</div>
+<%= render :partial => 'accounts/accept_terms_of_use' %>

@@ -1,0 +1,121 @@
+<table>
+<% if @is_self -%>
+  <tr>
+    <th><%= 'User name'.t %></th>
+    <td><%=h @user.login %></td>
+  </tr>
+  <tr>
+    <th><%= 'E-mail'.t %></th>
+    <td>&lt;<%=h @user.email %>&gt;</td>
+  </tr>
+  <% if address = format_address_for(@user) -%>
+    <tr>
+      <th><%= 'Address'.t %></th>
+      <td><%= address %></td>
+    </tr>
+  <% end -%>
+  <tr>
+    <th><%= 'License'.t %></th>
+    <td>
+      <%= render :partial => 'license_info' %><br />
+      <%= gogif %> <big><%= link_to 'Obtain a new license or change your institution...'.t, controller: 'signup', action: 'license_form' %></big>
+    </td>
+  </tr>
+<% end -%>
+
+<% if @is_self || current_user.allowed?(@user, :write) -%>
+  <tr>
+    <th><%= 'Roles' / (roles = @user.roles).size %></th>
+    <td>
+      <% @user.roles.distinct.sort.each do |role| %>
+        <%= role.title.humanize.t %>
+        <%= link_to_help(
+          label: help_icon,
+          section: 'administration',
+          anchor: role.title,
+          title: 'help'.t,
+          class: 'help'
+        ) %>
+      <% end %>
+    </td>
+  </tr>
+<% end -%>
+
+<% unless (admin_institutions = @user.admin_institutions).blank? -%>
+  <tr>
+    <th><%= 'User admininistrator for'.t %></th>
+    <td>
+    <% for institution in admin_institutions -%>
+      <%= link_to_if_allowed h(institution.fulltitle), :controller => 'institutions', :action => 'show', :id => institution %>
+      <% unless institution.licensed? -%>(<%= 'Inactive'.t %>)<% end -%>
+      <br />
+    <% end -%>
+    </td>
+  </tr>
+<% end -%>
+
+<% unless (created_at = @user.created_at).blank? -%>
+  <tr>
+    <th><%= 'Member since'.t %></th>
+    <td><%= I18n.l(created_at, format: :coarse) %></td>
+  </tr>
+<% end -%>
+
+<% if current_user.allowed?(@user, :write) %>
+  <tr>
+    <th><%= 'Language'.t %></th>
+    <td>
+    <% if locale = @user.settings.locale %>
+      <%= I18n.t(locale) %>
+    <% end %>
+    </td>
+  </tr>
+  <tr>
+    <th><%= 'Status'.t %></th>
+    <td><%=h @user.status.blank? ? "" : @user.status.t %></td>
+  </tr>
+  <tr>
+    <th><%= 'Mode'.t %></th>
+    <td><%=h @user.mode %></td>
+  </tr>
+  <% for column in Account.display_columns -%>
+    <% case column.name %>
+    <% when 'country' %>
+      <tr>
+        <th><%= column.human_name.tn(controller_name) %></th>
+        <td><%= @user.country_name %></td>
+      </tr>
+    <% when 'announcement_hide_time', 'registered_at', 'created_at', 'updated_at', 'expires_at', 'notified_at', 'email_verified_at', 'accepted_terms_of_use_at', 'login_failed_at' %>
+      <tr>
+        <th><%= column.human_name.tn(controller_name) %></th>
+        <td>
+          <% if v = @user.send(column.name) %>
+            <%= l(v) %>
+          <% end %>
+        </td>
+      </tr>
+    <% else %>
+      <tr>
+        <th><%= column.human_name.tn(controller_name) %></th>
+        <td><%=h @user.send(column.name) %></td>
+      </tr>
+    <% end %>
+  <% end -%>
+<% end %>
+
+<% restrict_to :superadmin, :admin do -%>
+  <tr>
+    <th><%= 'Payment transactions'.t %></th>
+    <td>
+      <ul style="padding: 0; margin: 0; list-style-type: none">
+      <% for pt in @user.payment_transactions -%>
+        <li>
+          <strong><%= pt.service %></strong> (<%= l pt.updated_at %>):
+          <strong><%= pt.status %></strong> (<%= (pt.price / 100).to_f.loc(2) %>)
+        </li>
+      <% end -%>
+      </ul>
+    </td>
+  </tr>
+<% end -%>
+</table>

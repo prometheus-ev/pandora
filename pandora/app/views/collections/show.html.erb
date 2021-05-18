@@ -1,0 +1,36 @@
+<div id="header-section" class="section_wrap clear-padding undim">
+  <%= render partial: 'header' %>
+</div>
+
+<%= pm_section 'details' do %>
+  <%= render partial: 'details' %>
+<% end %>
+
+<div id="images-section" class="section_wrap clear-padding">
+  <a name="images"></a>
+  <div class="scriptonly section_toggle">
+    <div class="collapse"></div>
+  </div>
+  <div class="section_header">
+    <div class="section_heading">
+      <%= (@images.count == 1 ? '%d Image' : '%d Images') / @images.count %>
+    </div>
+  </div>
+  <div class="section">
+    <%= render partial: 'images' %>
+  </div>
+</div>
+
+<%= pm_section('links',
+  title: (@links.count == 1 ? '%d Link' : '%d Links') / @links.count,
+) do %>
+  <%= render partial: 'links' %>
+<% end %>
+
+<%= pm_section('references',
+  title: (@references.count == 1 ? '%d Reference' : '%d References') / @references.count
+) do %>
+  <%= render partial: 'references' %>
+<% end %>
+
+<%= render partial: 'comments/section', locals: {commentable: @collection} %>

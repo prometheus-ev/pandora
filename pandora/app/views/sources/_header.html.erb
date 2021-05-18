@@ -1,0 +1,29 @@
+<div class="header-line">
+  <h2 class="title-line">
+    <%=h @source.title %>
+    <span class="subtitle">
+      <%=h @source.institution.fulltitle %>
+      <%= link_to(
+        image_tag('misc/info.gif', class: 'dim'), 
+        institution_path(@source.institution),
+        title: 'Information about the institution'.t
+      ) %>
+    </span>
+  </h2>
+  <div class="icon-line dim">
+    <% if current_user && current_user.allowed?(@source) -%>
+      <span class="gap"></span>
+      <%= link_to image_tag('icon/edit.gif', :class => 'icon', :title => 'Edit'.t), { :action => 'edit', :id => @source }, { :title => 'Edit'.t } %>
+    <% end -%>
+  </div>
+</div>
+
+<div class="section clear-float">
+  <% unless (description_translated = @source.description_translated).blank? %>
+    <div class="description-line"><%= truncated(description_translated, 280, :parent => 'header-section', :escape => false) %></div>
+  <% end %>
+  <% unless (technical_info_translated = @source.technical_info_translated).blank? %>
+    <div class="description-line"><%= truncated(technical_info_translated, 280, :parent => 'header-section', :escape => false) %></div>
+  <% end %>
+  <div id="object-summary"><%= render :partial => 'summary' %></div>
+</div>

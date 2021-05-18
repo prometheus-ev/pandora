@@ -1,0 +1,18 @@
+<br />
+
+<%= error_messages_for :user, :header_message => '', :message => '' %>
+
+<%= form_for :user, url: {action: "#{ subscribe ? "subscribe" : "unsubscribe" }" } do |f| -%>
+  <fieldset>
+    <legend>
+      <strong><%= subscribe ? 'Subscribe to our newsletter'.t : 'Unsubscribe from our newsletter'.t %></strong>
+      (<%= link_to_help section: 'administration', label: 'Subscribe help'.t %>)
+    </legend>
+    <label for="user_email"><%= 'Your e-mail address'.t %></label><br />
+    <%= f.text_field :email, options_for_field(:email) %><br />
+    <%= render :partial => 'shared/misc/captcha' %>
+    <%= submit_button subscribe ? 'Subscribe'.t : 'Unsubscribe'.t %>
+  </fieldset>
+<% end -%>
+
+<br />

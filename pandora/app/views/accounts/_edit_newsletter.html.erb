@@ -1,0 +1,4 @@
+<tr>
+  <th><label for="user_newsletter"><%= 'Subscribe to our %(newsletter)%?' / lambda { |a| link_to(a, { :controller => 'newsletters' }, :target => '_blank') } %></label></th>
+  <td><%= f.check_box :newsletter, options_for_field(:newsletter) %></td>
+</tr>

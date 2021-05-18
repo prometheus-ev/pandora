@@ -1,0 +1,106 @@
+<h2><%= 'Uploads help'.t %></h2>
+
+<p>
+  Das Hochladen eigener Bilder ist nur mit einem persönlichen Zugang möglich.
+</p>
+
+<% with_toc do -%>
+
+  <%= section_heading 'Neuer Upload', 'upload' %>
+  <p>
+    Um eigene Bilder in Ihre eigene Datenbank hochzuladen, klicken Sie im Untermenü auf „Neuer Upload“.
+    <%= screenshot 'help/upload01.de.png' %>
+  </p>
+
+  <p>
+    Mit dem „Durchsuchen“-Button können Sie eine Bilddatei von Ihrer lokalen Festplatte, der angeschlossenen Kamera oder dem USB-Stick auswählen und obligatorische Felder hier direkt ausfüllen.
+    <%= screenshot 'help/upload02.de.png', 'Upload-Formular' %>
+  </p>
+
+  <p>
+    Zum einen zählt hierzu die Vergabe eines Titels. Tragen Sie im vorgesehenen Feld eine vom Urheber vorgegebene, allgemein anerkannte oder eindeutige Bezeichnung des abgebildeten Werks ein, die zu dessen Identifizierung dient. Zum anderen ist der Vermerk der Rechte am Objekt obligatorisch.
+  </p>
+
+  <p>
+    Der <%= image_tag('misc/info_form_field.gif', :class => 'help_icon') %>-Button neben jedem Eingabefeld gibt Ihnen weitere Auskunft über die auszufüllenden Informationen.
+  </p>
+
+  <p>
+  Wenn Sie bereits einige Uploads getätigt haben, können Sie durch Aktivieren der Checkbox automatisch die „Metadaten des letzten Objektes eintragen“.
+   <%= screenshot 'help/upload03.de.png', 'Metadaten übernehmen' %>
+  </p>
+
+  <p>
+  Wenn Sie die ersten obligatorischen Felder zu Ihrem Upload ausgefüllt haben und auf Speichern klicken, können Sie in einem weiteren Schritt zusätzliche Metadaten ergänzen.
+     <%= screenshot 'help/upload04.de.png', 'Upload editieren' %>
+  </p>
+
+  <p>
+  Diese werden in „Standardfelder“ (wie „Künstler*in“, „Standort“ etc.), „Bildrechte“ (bereits im ersten Schritt ausgefüllt) und „Erweiterte Felder“ (z.B. „Ikonographie“, „Herkunft“) unterteilt. Haben Sie Ihrem Upload einen Standort zugewiesen, können Sie sich diesen nach dem Abspeichern über den <%= image_tag('icon/google_maps.png', :class => 'help_icon') %>-Button bei Google-Maps anzeigen lassen.
+  </p>
+
+
+  <%= section_heading 'Bildrechte', 'rights' %>
+
+  <p>
+    Die Bildrechte werden in das Recht am Kunstwerk und das Recht an der Fotografie getrennt. Zum einen ist hier der/die Urheber*in des Werks zu nennen, zum anderen der/die Urheber*in der Reproduktion.
+  <p>
+    Reproduktion: Wenn Sie nicht selbst der/die Fotograf*in sind, haben Sie die Möglichkeit, einen anderen Fotografen oder Fotografin zu nennen. Sollten Sie nicht wissen, wer der/die Fotograf*in Ihres Uploads ist, geben Sie bitte den Bildnachweis an. In der Regel handelt es sich hierbei um das Buch, aus dem Sie die Abbildung eingescannt haben. Die Information zum Bildanachweis können Sie auch zusätzlich zur Nennung des/der Fotografen/in zur Verfügung stellen. Mindestens eine Angabe zum Verwertungsrecht an der Reproduktion muss jedoch von Ihnen gemacht werden.
+  </p>
+
+  <p>
+    Mit Hilfe einer CC-Lizenz kann die Weiterverwendung einer Reproduktion durch Dritte geregelt werden. Existiert für Ihren Upload bereits eine CC-Lizenz, können Sie diese als Information hier nennen. Existiert noch keine CC-Lizenz für Ihren Upload, können Sie selbst eine CC-Lizenz vergeben. Über den Button <%= image_tag('icon/creative_commons.gif', :class => 'help_icon') %> erhalten Sie weitere Informationen zu den verschiedenen Lizenztypen.
+  </p>
+
+  <p>
+  Werk: Der/die Urheber*in des Kunstwerks ist der Künstler bzw. die Künstlerin. Die Verwertungsrechte liegen bei ihm/ihr und können bis 70 Jahre nach seinem/ihrem Tod auf seine/ihre Erben übertragen werden oder er/sie kann rechtlich von der VG Bild-Kunst vertreten werden. Danach gelten Kunstwerke als gemeinfrei. Wenn Sie nicht selbst der/die Urheber*in des Werks sind, können Sie hier eine(n) andere(n) Rechteinhaber*in nennen. Sollten Sie nicht wissen, wem die Verwertungsrechte am Werk zufallen, wählten Sie die Option „nicht bekannt“.
+  </p>
+
+  <%= section_heading 'Übergeordnetes Objekt', 'object_parent' %>
+  <p>
+  Daneben haben Sie die Möglichkeit, Ihr hochgeladenes Bild mit einem „übergeordneten Objekt“ zu verknüpfen.
+  <%= screenshot 'help/upload05.de.png', 'Übergeordnetes Objekt' %>
+  </p>
+
+  <p>
+  Wenn Sie beispielsweise eine Fotoreihe des Kölner Doms in Ihre eigene Datenbank hochladen möchten, können Sie einer Aufnahme des Gesamtbaus als übergeordnetes Objekt festlegen, dem Sie die Fotografien des Langhauses,der Westfassade und den Grundriss, etc. über das Auswahlmenü zuordnen.
+  </p>
+
+  <%= section_heading 'Anzeige der hochgeladenen Bilder', 'upload_collection' %>
+  <p>
+  Wenn Sie im Bildarchiv auf den Menüpunkt „Meine Datenbank“ klicken, werden all Ihre Uploads aufgelistet. Die jeweilige Liste können Sie entsprechend den Optionen der Ergebnisliste nach Ihren Vorlieben konfigurieren. So können Sie auf Galerie-Ansicht wechseln, die Anzahl der pro Seite aufgeführten Datensätze per Ausklappmenü festlegen und ebenfalls mit einem Auswahlmenü die Sortierung der Liste nach unterschiedlichen Kriterien festlegen:
+  <%= screenshot 'help/upload06.de.png' %>
+  </p>
+
+  <p>
+  Innerhalb Ihrer eigenen Datenbank können Sie einzelne Uploads nach festgelegten Suchkriterien suchen. Mithilfe eines Auswahlmenüs können Sie das Suchkriterium festlegen.
+  <%= screenshot 'help/upload07.de.png', 'Suche in eigener Datenbank' %>
+  </p>
+
+  <p>
+  Durch Aktivierung der Checkbox neben jedem Bild können Sie das ausgewählte Bild oder mit der Checkbox oberhalb der Liste alle aufgeführten Bilder auswählen und zum Bearbeiten öffnen. Bitte beachten Sie, dass bei einer Auswahl von mehreren Bildern gleichzeitig, vorgenommene Änderungen der Metadaten für alle ausgewählten Bilder einheitlich übernommen werden. Ausgewählte Bilder können Sie auch gleichzeitig in eine eigene Bildsammlung oder Präsentation ablegen.
+  </p>
+
+  <p>
+  Rechts neben jedem Bild in ihrer eigenen Datenbank finden Sie mehrere Buttons. Mit <%= image_tag('icon/delete.gif', :class => 'help_icon') %> löschen Sie das Bild und den Datensatz aus Ihrer eigenen Datenbank. Mit Klick auf den Bleistift-Button <%= image_tag('icon/edit.gif', :class => 'help_icon') %> können Sie den Datensatz bearbeiten, Metadaten verbessern oder ergänzen und das ausgewählte Bild einem übergeordneten Objekt zuordnen. Die Ampel zeigt Ihnen mit <%= image_tag('misc/access_status_private.gif', :class => 'help_icon') %> oder <%= image_tag('misc/access_status_readable.gif', :class => 'help_icon') %> an, ob das jeweilige Bild bereits von der prometheus-Geschäftsstelle freigegeben wurde. Erst nach Freigabe durch die prometheus-Geschäftsstelle können Bilder aus Ihrer Datenbank auch in öffentlichen oder freigegebenen Bildsammlungen und Präsentation abgespeichert werden.
+  <%= screenshot 'help/upload08.de.png', 'Thumbnail-Anzeige eines Uploads in der Datenbank' %>
+  </p>
+
+  <p>
+    Darüber hinaus stehen Ihnen mit den Buttons direkt am Bild die gewohnten Funktionen zu den
+    einzelnen Bildern zur Verfügung:
+  </p>
+
+  <ul>
+    <li><div class="help_icon"><input type="checkbox" /></div> "Häkchen" Auswahl für die Bearbeitung des Bildes</li>
+    <li class="clear-float"><%= image_tag('icon/store.gif', :class => 'help_icon') %> Bild in Bildsammlung, Präsentation oder Favoritenleiste ablegen</li>
+    <li><%= image_tag('image/plus.gif', :class => 'help_icon') %> Vollständigen Datensatz anzeigen (mit ausführlichen Metadaten)</li>
+    <li><%= image_tag('image/plusplus.gif', :class => 'help_icon') %> zweite Vergrößerungsstufe zum Abspeichern auf eigener Festplatte geeignet</li>
+    <li><%= image_tag('icon/download.gif', :class => 'help_icon') %> Bild und Metadaten herunterladen</li>
+    <li><%= image_tag('image/externlink.gif', :class => 'help_icon') %> Bild  in Ursprungsdatenbank anzeigen – diese Funktion ist hier inaktiv, da Sie sich in Ihrer eigenen Datenbank befinden</li>
+    <li><%= image_tag('image/publish_prometheus.gif', :class => 'help_icon') %> Informationen zum Bildrecht und den Publikationsmöglichkeiten zum Bild</li>
+  </ul>
+
+<% end -%>
+
+<%= render :partial => 'footer' %>

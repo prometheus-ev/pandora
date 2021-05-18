@@ -1,0 +1,18 @@
+
+Aktuelle Informationen erhalten Sie immer über:
+http://facebook.com/prometheus.bildarchiv
+http://twitter.com/prometheus_eV
+http://plus.google.com/103268334729481987839
+http://prometheus-bildarchiv.de/blog
+
+<%= '*' * 68 %>
+
+<% if @user && @user.subscriber? -%>
+<%= 'Sign up for a full account'.t %>:
+<%= @signup_url %>
+
+<% end -%>
+<%= 'Unsubscribe from this newsletter'.t %>:
+<%= @unsubscribe_url %>
+
+<%= '*' * 68 %>

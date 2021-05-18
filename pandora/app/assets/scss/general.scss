@@ -1,0 +1,53 @@
+a[disabled] {
+  pointer-events: none;
+  cursor: default;
+}
+
+.clearfix {
+  clear: both;
+}
+
+.pm-admin-section {
+  .pm-body {
+    background-color: #303030;
+    margin-left: -10px;
+    margin-right: -10px;
+    margin-bottom: 40px;
+    padding: 10px;
+  }
+
+  .pm-search {
+    margin-top: 10px;
+  }
+}
+
+.pm-section {
+  .section {
+    padding: 10px;
+  }
+}
+
+#submenu {
+  text-align: left;
+
+  a, img {
+    display: block;
+    float: left;
+    text-align: center;
+
+    .button_wrap {
+      position: relative;
+    }
+  }
+}
+
+.result_view {
+  & > * {
+    display: block;
+    float: left;
+  }
+}
+
+.image_check_box input {
+  margin: 1px;
+}

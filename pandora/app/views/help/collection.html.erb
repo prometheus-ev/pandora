@@ -1,0 +1,210 @@
+<h2><%= 'Collection help'.t %></h2>
+
+<p>
+  A personal account is required for creating an image collection.
+</p>
+
+<% with_toc do -%>
+
+  <p>
+    The following video was produced by Jacqueline Klusik-Eckert to support
+    teachers preparing their online classes. In this video she shows how to
+    create and share prometheus collections. And we want to share her video:
+  </p>
+  <iframe width="560" height="315" src="https://www.youtube.com/embed/YRUUT8e7PQU" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+
+  <%= section_heading 'Selecting images', 'selecting' %>
+  <p>
+    If you want to select a certain image or images for the collection, tick
+    <input type="checkbox" checked="checked" /> the checkbox besides the image <input type="checkbox" />.
+    Alternatively, the button "Select all images" allows you to select all search results
+    of one page directly.
+  </p>
+
+  <p>
+    Now all selected images can be saved to the collection or a new collection can be created.
+  </p>
+
+  <%= section_heading 'Creating a new collection', 'creating' %>
+  <p>
+    To create a new collection click the button "Store images in ..." and press
+    the button "New collection".
+    <%= screenshot 'help/collection06.png' %>
+    Now you can give your collection a title including a description and add keywords.
+  </p>
+
+  <%= section_heading 'Example', 'example_renaissance_sculpture_italy' %>
+  <p>
+    You are attending a class on Renaissance Sculpture in Italy. You have several options to create collections for individual classes:
+  </p>
+
+  <table style="width: inherit">
+    <tr><th>Title:</th><td>Donatello</td></tr>
+    <tr><th>Description:</th><td>Class - Renaissance Sculpture</td></tr>
+    <tr><th>Keywords:</th><td>Florence, David, Bronze, 1386-1466</td></tr>
+  </table>
+
+  <table style="width: inherit">
+    <tr><th>Title:</th><td>Michelangelo</td></tr>
+    <tr><th>Description:</th><td>Class - Renaissance Sculpture</td></tr>
+    <tr><th>Keywords:</th><td>Florence, David, Marble, 1475-1564, St. Peter's Basilica, Pieta.</td></tr>
+  </table>
+
+  <p>
+    <%= screenshot 'help/collection01.png' %>
+  </p>
+
+  <p>
+    In doing so, collections of various artists can be allocated to a particular class and linked by
+    using keywords.
+  </p>
+
+  <p>
+    <strong>Example:</strong> You are using the keyword "David". The search results show the collections
+    of Donatello and Michelangelo.
+  </p>
+
+  <%= section_heading 'Saving images', 'saving' %>
+  <p>
+    After selecting images by ticking the checkbox and pressing the button "Store images in", select
+    the image collection you wish to use in the drop down menu.
+    <%= screenshot 'help/collection07.png' %>
+    The images are copied automatically to the selected collection.
+  </p>
+
+  <p>
+    Please note that selecting images is only possible for the actual screen. Save the selected images
+    first before switching to another screen.
+  </p>
+
+  <%= section_heading 'Working with collections', 'working' %>
+  <p>
+    The content of the collection can be sorted by using the following criteria:
+  </p>
+
+  <ul>
+    <li>Artist</li>
+    <li>Title</li>
+    <li>Location</li>
+    <li>Credits</li>
+    <li>Database name</li>
+  </ul>
+
+  <p>
+    You have the option to view the images as a list <%= image_tag('misc/list.gif', :class => 'help_icon') %>
+    with essential metadata or in the Gallery <%= image_tag('misc/gallery.gif', :class => 'icon') %> mode.
+    <%= screenshot 'help/collection02.png', 'Gallery' %>
+    <%= screenshot 'help/collection03.png', 'List' %>
+  </p>
+
+  <!-- REWRITE: functionality was removed -->
+  <!--p>
+    A presentation can be created by using the selected images from a collection. For detailed
+    instructions on how to create a presentation refer to <%#= link_to_help_section 'Presentation', 'presentation' %>.
+  </p-->
+
+  <p>
+    <%= image_tag('icon/delete.gif', :class => 'help_icon') %> Deletes an image from the collection.
+  </p>
+
+  <%= section_heading 'Management of the image collection', 'management' %>
+  <p>
+    The submenu offers the following options:
+  </p>
+
+  <ul>
+    <li>Own: Lists all own collections</li>
+    <li>Shared: Lists all shared collections</li>
+    <li>Public: Lists all public collections</li>
+    <li>Create new collection</li>
+  </ul>
+
+  <p>
+    <%= screenshot 'help/collection04.png', 'Submenu' %>
+  </p>
+
+  <%= section_heading 'Working with shared collections', 'shared' %>
+  <p>
+    Under "Shared" you can see a list of all collections that have been shared with you.
+    There are both "shared for viewing" and "shared for editing" ones.
+  </p>
+
+  <p>
+    Collections shared for editing may be edited freely by you and other collaborators.
+    But only the owner may change the title or modify the access rights.
+  </p>
+
+  <p>
+    Collections shared for viewing may be viewed, forked and downloaded. Only the owner
+    or collaborators may edit the collection. If you would like to work on such a
+    collection you can fork it or contact the collection's owner to add you as a collaborator.
+  </p>
+
+  <p>
+    Forks of shared collections will be marked private initially and added to your list of
+    collections. Access rights are not inherited from the parent collection.
+  </p>
+
+  <%= section_heading 'Working with public collections', 'public' %>
+  <p>
+    Under "Public" you can see a list of all publicly accessible collections.
+    There are both "publicly readable" and "publicly writable" ones.
+  </p>
+
+  <p>
+    Publicly readable collections may be viewed, forked and downloaded by any user. Only
+    the owner or collaborators may edit the collection. If you would like to work on such
+    a collection you can fork it or contact the collection's owner to add you as a collaborator.
+  </p>
+
+  <p>
+    Publicly writable collections may be edited by anyone. But only the owner may change the
+    title or modify the access rights.
+  </p>
+
+  <p>
+    Forks of public collections will be marked private initially and added to your list of collections.
+    Access rights are not inherited from the parent collection.
+  </p>
+
+  <%= section_heading 'Functions for working with collections', 'functions' %>
+  <p>
+    The icons next to the heading of the open collection lead to different functions for
+    working with the collection.
+  </p>
+
+  <p>
+    <%= screenshot 'help/collection05.png', 'Header' %>
+  </p>
+
+  <p>
+    <%= image_tag('misc/add_to_sidebar.gif', :class => 'help_icon') %> Stores the collection in the sidebar.
+  </p>
+
+  <p>
+    <%= image_tag('icon/download.gif', :class => 'help_icon') %> A ZIP archive of all images
+    in the current collection will be created and offered as download. Please be aware that
+    large collections can take a long time to create or may fail completely.
+  </p>
+
+  <p>
+    <%= image_tag('icon/fork.gif', :class => 'help_icon') %> A copy of the current collection
+    will be added to your list of owned collections and opened directly.
+  </p>
+
+  <p>
+    <%= image_tag('icon/edit.gif', :class => 'help_icon') %> Edits the header of the
+    collection (title, description, thumbnail, public access).
+  </p>
+
+  <p>
+    <%= image_tag('icon/delete.gif', :class => 'help_icon') %> Deletes the entire collection.
+  </p>
+
+  <p>
+    <%= image_tag('misc/feed.png', :class => 'feed_icon') %> Adds a feed of this collection.
+  </p>
+
+<% end -%>
+
+<%= render :partial => 'footer' %>

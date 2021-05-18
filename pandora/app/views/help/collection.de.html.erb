@@ -1,0 +1,217 @@
+<h2><%= 'Collection help'.t %></h2>
+
+<p>
+  Das Anlegen von Bildsammlungen ist nur mit einem persönlichen Zugang möglich.
+</p>
+
+<% with_toc do -%>
+
+  <p>
+    Das folgende Video wurde von Jacqueline Klusik-Eckert zur Unterstützung der Online-Lehre produziert. In diesem Video zeigt sie, wie man prometheus-Bildsammlungen erstellt und teilt. Wir möchten an dieser Stelle ihr Video teilen:
+  </p>
+  <iframe width="560" height="315" src="https://www.youtube.com/embed/YRUUT8e7PQU" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+
+  <%= section_heading 'Auswahl von Bildern', 'selecting' %>
+  <p>
+    Wenn Sie ein bestimmtes Bild oder bestimmte Bilder für eine Bildsammlung auswählen möchten,
+    klicken Sie die Checkbox <input type="checkbox" /> direkt neben dem Bild an. Ist das Bild
+    ausgewählt, erscheint ein Häkchen <input type="checkbox" checked="checked" />. Alternativ
+    können Sie über den Button "Alle Bilder auswählen" auch direkt alle aufgelisteten Ergebnisse
+    einer Seite auswählen.
+  </p>
+
+  <p>
+    Nun können Sie die ausgewählten Bilder entweder in einer vorhandenen Bildsammlung abspeichern
+    oder eine neue Bildsammlung anlegen.
+  </p>
+
+  <%= section_heading 'Erstellen einer neuen Bildsammlung', 'creating' %>
+  <p>
+    Um eine neue Bildsammlung zu erstellen, klicken Sie den Button "Bilder ablegen in..."
+    und anschließend den Button "Neue Bildsammlung".
+    <%= screenshot 'help/collection06.de.png' %>
+  </p>
+
+  <p>
+    Nun haben Sie die Möglichkeit, Ihrer Bildsammlung einen Titel zu geben, eine Beschreibung
+    und Schlagworte hinzuzufügen. Desweiteren können Sie auch direkt die Zugriffsrechte der
+    Bildsammlung festlegen.
+  </p>
+
+  <%= section_heading 'Beispiel', 'example_renaissance_sculpture_italy' %>
+  <p>
+    Sie besuchen ein Seminar zur Renaissanceskulptur in Italien. Sie könnten folgende
+    Bildsammlungen zu einzelnen Seminarsitzungen anlegen:
+  </p>
+
+  <table style="width: inherit">
+    <tr><th>Titel:</th><td>Donatello</td></tr>
+    <tr><th>Beschreibung:</th><td>Seminar zur Renaissanceskulptur</td></tr>
+    <tr><th>Schlagworte:</th><td>Florenz, David, Bronze, 1386-1466</td></tr>
+  </table>
+
+  <br />
+
+  <table style="width: inherit">
+    <tr><th>Titel:</th><td>Michelangelo</td></tr>
+    <tr><th>Beschreibung:</th><td>Seminar zur Renaissanceskulptur</td></tr>
+    <tr><th>Schlagworte:</th><td>Florenz, David, Marmor, 1475-1564, Petersdom, Pietà</td></tr>
+  </table>
+
+  <p>
+    <%= screenshot 'help/collection01.de.png', 'Formular zur Erstellung einer neuen Bildsammlung' %>
+  </p>
+
+  <p>
+    Somit können Sie Bildsammlungen zu verschiedenen Künstlern und Künstlerinnen einem bestimmten Seminar zuordnen
+    und durch die Verschlagwortung miteinander verknüpfen.
+  </p>
+
+  <p>
+    <strong>Beispiel:</strong> Sie geben bei der Schlagwortsuche "David" ein und erhalten in der
+    Ergebnisliste die Bildsammlungen zu Donatello und Michelangelo.
+  </p>
+
+  <%= section_heading 'Abspeichern von Bildern', 'saving' %>
+  <p>
+    Nach der Auswahl der Bilder durch Anklicken der Checkbox und nach dem Klicken des Buttons
+    "Bilder ablegen in...", wählen Sie im Auswahlmenü die gewünschte Bildsammlung aus.
+    <%= screenshot 'help/collection07.de.png' %>
+    Ihre Bilder werden dann automatisch in die Mappe übertragen.
+  </p>
+
+  <p>
+    Bitte beachten Sie, dass die Auswahl der Bilder immer nur für die aktuell aufgerufene Seite möglich
+    ist. Speichern Sie daher bitte Ihre ausgewählten Bilder ab, bevor Sie eine neue Seite aufrufen.
+  </p>
+
+  <%= section_heading 'Arbeiten in der Bildsammlung', 'working' %>
+  <p>
+    Den Inhalt der Bildsammlung können Sie nach folgenden Kriterien sortieren:
+  </p>
+
+  <ul>
+    <li>Künstler*in</li>
+    <li>Titel</li>
+    <li>Standort</li>
+    <li>Bildnachweis</li>
+    <li>Datenbank</li>
+  </ul>
+
+  <p>
+    Zudem können Sie sich die Bilder in Galerieansicht <%= image_tag('misc/gallery.gif', :class => 'help_icon') %>
+    oder als Liste <%= image_tag('misc/list.gif', :class => 'help_icon') %> mit grundlegenden Metadaten zur
+    Abbildung anzeigen lassen.
+    <%= screenshot 'help/collection02.de.png', 'Galerieansicht' %>
+    <%= screenshot 'help/collection03.de.png', 'Liste' %>
+  </p>
+
+  <p>
+    <%= image_tag('icon/delete.gif', :class => 'help_icon') %> Löscht ein Bild aus der Bildsammlung.
+  </p>
+
+  <%= section_heading 'Verwaltung der Bildsammlung', 'management' %>
+  <p>
+    Haben Sie eine Bildsammlung geöffnet, erscheinen im Untermenü folgende Arbeitsmöglichkeiten:
+  </p>
+
+  <ul>
+    <li>Eigene: Auflistung der eigenen Bildsammlungen</li>
+    <li>Freigegebene: Auflistung aller Ihnen zum Betrachten oder zur Mitarbeit freigegebenen Bildsammlungen</li>
+    <li>Öffentliche: Auflistung aller öffentlich freigegebenen Bildsammlungen</li>
+    <li>Erstellen einer neuen Bildsammlung</li>
+  </ul>
+
+  <p>
+    <%= screenshot 'help/collection04.de.png', 'Untermenü' %>
+  </p>
+
+  <%= section_heading 'Arbeiten mit freigegeben Bildsammlungen', 'shared' %>
+  <p>
+    Unter dem Punkt "Freigegebene" werden sämtliche Ihnen freigegebenen Bildsammlungen aufgeführt.
+    Unterschieden wird nach zum Betrachten freigegebenen und zur Mitarbeit freigegebenen Bildsammlungen.
+  </p>
+
+  <p>
+    Bildsammlungen, in denen Sie als Mitarbeiter*in eingetragen wurden, können von Ihnen frei bearbeitet werden.
+    Sie können allerdings weder den Titel der Bildsammlung ändern, noch die Zugriffsrechte modifizieren.
+  </p>
+
+  <p>
+    Zum Betrachten freigegebene Bildsammlungen können eingesehen, kopiert und heruntergeladen, jedoch
+    nur von Mitarbeitern/innen und dem/ der Besitzer*in verändert werden. Wenn Sie mit dieser Bildsammlung arbeiten
+    wollen, können Sie eine Kopie der Bildsammlung anlegen oder mit dem/ der Besitzer*in Kontakt aufnehmen, um
+    als Mitarbeiter*in eingetragen zu werden.
+  </p>
+
+  <p>
+    Kopien von freigegebenen Bildsammlungen werden privat markiert und unter den eigenen Bildsammlungen
+    abgelegt. Die Freigaben für Betrachter*innen und Mitarbeiter*innen der Quell-Bildsammlung werden nicht übernommen.
+  </p>
+
+  <%= section_heading 'Arbeiten mit öffentlichen Bildsammlungen', 'public' %>
+  <p>
+    Unter dem Punkt "Öffentliche" werden sämtliche öffentlich freigegebenen Bildsammlungen aufgeführt.
+    Unterschieden wird nach "öffentlich lesbaren" und "öffentlich schreibbaren" Bildsammlungen.
+  </p>
+
+  <p>
+    Öffentlich lesbare Bildsammlungen können sofort von jedem/ jeder Nutzer*in eingesehen, kopiert und
+    heruntergeladen, jedoch nur von Mitarbeitern/innen und dem/der Besitzer*in verändert werden. Wenn Sie
+    mit dieser Bildsammlung arbeiten wollen, können Sie eine Kopie der Bildsammlung anlegen
+    oder mit dem/ der Besitzer*in Kontakt aufnehmen, um als Mitarbeiter*in eingetragen zu werden.
+  </p>
+
+  <p>
+    Bildsammlungen, die als öffentlich schreibbar freigegeben wurden, können von allen Nutzern/innen
+    bearbeitet werden, wobei jedoch das Ändern des Titels und der Freigaben weiterhin nur dem/der
+    Besitzer*in gestattet ist.
+  </p>
+
+  <p>
+    Kopien von öffentlichen Bildsammlungen werden privat markiert und unter den eigenen Bildsammlungen
+    abgelegt. Die Freigaben für Betrachter*innen und Mitarbeiter*innen der Quell-Bildsammlung werden nicht übernommen.
+  </p>
+
+  <%= section_heading 'Funktionen zum Arbeiten mit der Bildsammlung', 'functions' %>
+  <p>
+    Neben dem Titel der geöffneten Bildsammlung finden Sie Icons, die zu verschiedenen Funktionen
+    zum Arbeiten mit der Bildsammlung führen.
+  </p>
+
+  <p>
+    <%= screenshot 'help/collection05.de.png', 'Header' %>
+  </p>
+
+  <p>
+    <%= image_tag('misc/add_to_sidebar.gif', :class => 'help_icon') %> Legt die Bildsammlung in der Favoritenleiste ab.
+  </p>
+
+  <p>
+    <%= image_tag('icon/download.gif', :class => 'help_icon') %> Erstellt ein Zip-Archiv aller
+    Bilder und Metadaten in der Bildsammlung und bietet es zum Download an. Bitte beachten Sie,
+    dass bei sehr großen Bildsammlungen das Erstellen des Archivs viel Zeit in Anspruch nehmen
+    oder sogar fehlschlagen kann.
+  </p>
+
+  <p>
+    <%= image_tag('icon/fork.gif', :class => 'help_icon') %> Fügt eine Kopie der aktuellen
+    Bildsammlung zu der Liste Ihrer eigenen Bildsammlungen hinzu und öffnet sie direkt.
+  </p>
+
+  <p>
+    <%= image_tag('icon/edit.gif', :class => 'help_icon') %> Bearbeitet den Header der
+    Bildsammlung (Titel, Beschreibung, Thumbnail, Öffentlicher Zugriff).
+  </p>
+
+  <p>
+    <%= image_tag('icon/delete.gif', :class => 'help_icon') %> Löscht die gesamte Bildsammlung.
+  </p>
+
+  <p>
+    <%= image_tag('misc/feed.png', :class => 'feed_icon') %> Abonniert ein Feed der Bildsammlung.
+  </p>
+
+<% end -%>
+
+<%= render :partial => 'footer' %>

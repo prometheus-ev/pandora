@@ -1,0 +1,12 @@
+<tr>
+  <th><label for="user_firstname"><%= 'First name'.t %></label></th>
+  <td><%= f.text_field :firstname, options_for_field(:firstname, :value => f.object.fullname? ? f.object.firstname : '') %></td>
+</tr>
+<tr>
+  <th><label for="user_lastname"><%= 'Last name'.t %></label></th>
+  <td><%= f.text_field :lastname, options_for_field(:lastname, :value => f.object.fullname? ? f.object.lastname : '') %></td>
+</tr>
+<tr>
+  <th><label for="user_title"><%= 'Title'.t %></label></th>
+  <td><%= f.text_field :title, options_for_field(:title) %></td>
+</tr>

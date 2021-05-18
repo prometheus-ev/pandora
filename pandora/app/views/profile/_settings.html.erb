@@ -1,0 +1,62 @@
+<div class="subheader"><%= 'Settings'.t %></div>
+
+<%= render partial: 'anonymous_settings_warning' if @user.anonymous? %>
+
+<%= form_for @user, as: 'user', url: {action: 'update'}, html: {class: 'edit-form', style: 'padding: 0px'} do |f| %>
+  <%= hidden_field_tag :settings_only, 'true' %>
+
+  <%= pm_section 'account_settings', title: 'Account'.t, expanded: @user.account_settings.errors.any? do %>
+    <%= error_messages_for 'account_settings', object: @user.account_settings %>
+    <%= f.fields_for :account_settings_attributes, @user.account_settings do |sf| %>
+      <table>
+        <%= render_form_parts(sf, 'account_settings') %>
+        <tr>
+          <td></td>
+          <td><%= pm_submit label: 'Save'.t %></td>
+        </tr>
+      </table>
+    <% end %>
+  <% end %>
+
+  <%= pm_section 'search_settings', title: 'Search'.t, expanded: @user.search_settings.errors.any? do %>
+    <%= error_messages_for 'search_settings', object: @user.search_settings %>
+    <%= f.fields_for :search_settings_attributes, @user.search_settings do |sf| %>
+      <table>
+        <%= render_form_parts(sf, 'search_settings') %>
+        <tr>
+          <td></td>
+          <td><%= pm_submit label: 'Save'.t %></td>
+        </tr>
+      </table>
+    <% end %>
+  <% end %>
+
+  <% unless @user.anonymous? %>
+    <%= pm_section 'collection_settings', title: 'Collections'.t, expanded: @user.collection_settings.errors.any? do %>
+      <%= error_messages_for 'collection_settings', object: @user.collection_settings %>
+      <%= f.fields_for :collection_settings_attributes, @user.collection_settings do |sf| %>
+        <table>
+          <%= render_form_parts(sf, 'collection_settings') %>
+          <tr>
+            <td></td>
+            <td><%= pm_submit label: 'Save'.t %></td>
+          </tr>
+        </table>
+      <% end %>
+    <% end %>
+    
+    <%= pm_section 'upload_settings', title: 'Uploads'.t, expanded: @user.upload_settings.errors.any? do %>
+      <%= error_messages_for 'upload_settings', object: @user.upload_settings %>
+      <%= f.fields_for :upload_settings_attributes, @user.upload_settings do |sf| %>
+        <table>
+          <%= render_form_parts(sf, 'upload_settings') %>
+          <tr>
+            <td></td>
+            <td><%= pm_submit label: 'Save'.t %></td>
+          </tr>
+        </table>
+      <% end %>
+    <% end %>
+  <% end %>
+
+<% end %>

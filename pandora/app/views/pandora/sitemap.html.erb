@@ -1,0 +1,163 @@
+<% is_admin, is_useradmin = current_user.admin_or_superadmin?, current_user.useradmin? if current_user -%>
+<%= page_title %>
+
+<ul>
+  <li>
+    <%= link_to 'Homepage'.t, home_url %>
+    - <%= 'Return to the prometheus homepage.'.t %>
+  </li>
+
+  <br />
+
+  <li>
+    <%= 'Searching and finding'.t %>
+    <ul>
+      <li>
+        <%= link_to 'Search'.t, controller: 'searches' %>
+        - <%= 'Search and find high-quality images and videos from the fields of arts, culture and history.'.t %>
+      </li>
+      <li>
+        <%= link_to 'Advanced search'.t, controller: 'searches', action: 'advanced' %>
+        - <%= 'Use the advanced search to specify detailed search criteria.'.t %>
+      </li>
+      <li>
+        <%= link_to 'Open Access'.t, :controller => 'sources', :action => 'open_access' %>
+        - <%= 'Search our Open Access databases with no login required.'.t %>
+      </li>
+      <li>
+        <%= link_to 'Databases'.t, :controller => 'sources', :public => is_admin && '1' %>
+        - <%= 'See what databases are included for you to search.'.t %>
+      </li>
+      <li>
+        <%= link_to 'Public collections'.t, controller: 'collections', action: 'public' %>
+        - <%= 'Have a look at the public image collections others have created.'.t %>
+      </li>
+    </ul>
+  </li>
+
+  <br />
+
+  <li>
+    <%= 'Get help and get in touch'.t %>
+    <ul>
+      <li>
+        <%= link_to_help %>
+        - <%= 'Find help on using the image archive.'.t %>
+      </li>
+      <li>
+        <%= link_to 'Announcements'.t, controller: 'announcements', action: is_admin && 'list', public: is_admin && '1' %>
+        - <%= 'See what has happened over the time.'.t %>
+      </li>
+      <li>
+        <%= link_to 'Newsletters'.t, controller: 'newsletters', action: 'archive' %>
+        - <%= 'View our newsletter archive.'.t %>
+      </li>
+      <li>
+        <%= link_to 'Terms of use'.t, controller: 'terms', action: 'show' %>
+        - <%= 'Read our terms of use.'.t %>
+      </li>
+      <li>
+        <%= link_to 'Feedback'.t, controller: 'pandora', action: 'feedback' %>
+        - <%= 'Leave us some feedback.'.t %>
+      </li>
+      <li>
+        <%= link_to 'About pandora'.t, controller: 'pandora', action: 'about' %>
+        - <%= 'Learn more about pandora.'.t %>
+      </li>
+      <li>
+        <%= link_to 'API'.t, controller: 'pandora', action: 'api' %>
+        - <%= 'Learn how to make use of our API.'.t %>
+      </li>
+    </ul>
+  </li>
+
+  <br />
+
+  <li>
+    <%= 'Getting in and out'.t %>
+    <ul>
+      <li>
+        <%= link_to 'Log in'.t, controller: 'sessions', action: 'new' %>
+        - <%= 'Come in and explore our image archive.'.t %>
+      </li>
+      <li>
+        <%= link_to 'Log out'.t, controller: 'sessions', action: 'destroy' %>
+        - <%= "Seen enough? Well, use this link to get out.".t %>
+      </li>
+      <li>
+        <%= link_to 'Reset password'.t, controller: 'signup', action: 'password_form' %>
+        - <%= 'Forgotten your password? Just reset it.'.t %>
+      </li>
+    </ul>
+  </li>
+
+  <br />
+
+  <li>
+    <%= 'Just for you'.t %>
+    <ul>
+      <% if current_user %>
+        <li>
+          <%= link_to 'Your account'.t, controller: 'accounts', action: 'show', id: current_user.login %>
+          - <%= 'View your account profile.'.t %>
+        </li>
+      <% end %>
+      <li>
+        <%= link_to 'Edit your account'.t, profile_path %>
+        - <%= 'Change your e-mail, password, and other profile data.'.t %>
+      </li>
+      <li>
+        <%= link_to 'Licensing'.t, controller: 'signup', action: 'license_form' %>
+        - <%= 'Obtain a new license or change your institution.'.t %>
+      </li>
+      <li>
+        <%= link_to 'Your institution'.t, controller: 'institutions', action: 'mine' %>
+        - <%= "View your institution's profile.".t %>
+      </li>
+      <li>
+        <%= link_to 'Your collections'.t, controller: 'collections', action: 'index' %>
+        - <%= 'View and edit your personal image collections.'.t %>
+      </li>
+      <li>
+        <%= link_to 'Your shared collections'.t, controller: 'collections', action: 'shared' %>
+        - <%= 'View and edit the image collections that have been shared with you.'.t %>
+      </li>
+      <!-- REWRITE: functionality removed -->
+      <!-- <li>
+        <%#= link_to 'Your presentations'.t, controller: 'presentation' %>
+        - <%#= 'View and edit your presentations.'.t %>
+      </li> -->
+    </ul>
+  </li>
+
+<% if is_admin || is_useradmin -%>
+  <br />
+
+  <li>
+    <%= 'As an administrator, you have additional options'.t %>
+    <ul>
+      <li>
+        <%= link_to 'Your accounts'.t, controller: 'accounts' %>
+        - <%= "View and edit the accounts you're managing.".t %>
+      </li>
+      <li>
+        <%= link_to 'New account'.t, controller: 'accounts', action: 'new' %>
+        - <%= 'Create a new account.'.t %>
+      </li>
+      <li>
+        <%= link_to 'Pending accounts'.t, controller: 'accounts', action: 'pending' %>
+        - <%= 'See a list of users awaiting their activation.'.t %>
+      </li>
+      <li>
+        <%= link_to 'Your stats'.t, controller: 'stats', action: 'new' %>
+        - <%= 'View and download the usage figures for your institution.'.t %>
+      </li>
+    </ul>
+  </li>
+<% end -%>
+</ul>
+
+<p>
+  <br />
+  <em><%= 'Please note that some of the links might require you to log in first.'.t %></em>
+</p>

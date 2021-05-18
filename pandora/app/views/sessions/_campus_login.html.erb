@@ -1,0 +1,17 @@
+<%= form_tag({controller: 'sessions', action: 'campus', host: request.base_url}, {method: :get, :class => 'login_form'}) do -%>
+  <%= hidden_field_tag :return_to, params[:return_to] %>
+
+  <fieldset>
+    <legend><strong><%= 'Campus login'.t %></strong></legend>
+
+    <div class="campus_title">
+      <strong><%= @campus.title %><%= " (<em>#{'Not licensed!'.t}</em>)".html_safe unless licensed = @campus.licensed? %></strong>
+    </div>
+
+    <%= submit_button 'Log in'.t, :float => :right, :disabled => !licensed %>
+
+  <% if licensed -%>
+    <%= render :partial => 'accounts/accept_terms_of_use', :locals => { :compact => true } %><br />
+  <% end -%>
+  </fieldset>
+<% end -%>

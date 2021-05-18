@@ -1,0 +1,58 @@
+<table>
+  <tr>
+    <th><%= f.label :title_de, 'Title'.t + ' [' +'German'.t + ']' %></th>
+    <td><%= f.text_field :title_de, :class => 'mandatory' %></td>
+  </tr>
+  <tr>
+    <th><%= f.label :title_en, 'Title'.t + ' [' +'English'.t + ']' %></th>
+    <td><%= f.text_field :title_en, :class => 'mandatory' %></td>
+  </tr>
+  <tr>
+    <th><%= f.label :body_de, 'Body'.t + ' [' +'German'.t + ']' %></th>
+    <td><%= f.text_area :body_de, :size => '46x12', :class => 'mandatory' %></td>
+  </tr>
+  <tr>
+    <th><%= f.label :body_en, 'Body'.t + ' [' +'English'.t + ']' %></th>
+    <td><%= f.text_area :body_en, :size => '46x12', :class => 'mandatory' %></td>
+  </tr>
+  <tr>
+    <th><%= f.label :starts_at, 'Starts at'.t + " (#{'GMT'.t})" %></th>
+    <td class="date_select">
+      <!-- REWRITE: options_for_field is not required anymore -->
+      <%#= f.datetime_select :starts_at, options_for_field(:starts_at, :start_year => year, :default => 1.week.from_now) %>
+        <%= f.datetime_select :starts_at, :start_year => (@announcement && @announcement.starts_at ? @announcement.starts_at.year : year) %>
+    </td>
+  </tr>
+  <tr>
+    <th><%= f.label :ends_at, 'Ends at'.t + " (#{'GMT'.t})" %></th>
+    <td class="date_select">
+      <!-- REWRITE: options_for_field is not required anymore -->
+      <%#= f.datetime_select :ends_at, options_for_field(:ends_at, :start_year => year, :default => 1.week.from_now) %>
+      <%= f.datetime_select :ends_at, :start_year => ((@announcement && @announcement.ends_at) ? @announcement.ends_at.year : year) %>
+    </td>
+  </tr>
+  <tr>
+    <th><%= f.label :role, 'Display for'.t %></th>
+    <td>
+      <%= f.radio_button :role, 'anyone', :checked => true %>
+      <label for="announcement_role_anyone" class="pad"><%= 'anyone'.t  %></label>
+    </td>
+  </tr>
+  <tr>
+    <th></th>
+    <td>
+      <%= f.radio_button :role, 'users' %>
+      <label for="announcement_role_users" class="pad"><%= 'users'.t  %></label>
+    </td>
+  </tr>
+  <tr>
+    <th></th>
+    <td>
+      <%= f.radio_button :role, 'admins' %>
+      <label for="announcement_role_admins" class="pad"><%= 'admins'.t  %></label>
+    </td>
+  </tr>
+  <tr><td colspan="2"><hr /></td></tr>
+
+  <%= form_controls %>
+</table>

@@ -1,0 +1,10 @@
+<p>
+  <%= 'After a check by our office you\'ll be able to use the image archive' %>
+  <% if @user.created_at && @user.expires_at %>
+    <%= ' for the next ' %><strong><%= "#{distance_of_time_in_days_or_weeks(@user.created_at, @user.expires_at)}" %></strong>
+    <strong><%= ' for free' %></strong><% end %><%= '.' %><%= ' You can extend your account at any time.' %>
+</p>
+
+<p>
+  <%= gogif %> <%= link_to 'Would you like to obtain a license or choose your institution immediately?', :action => 'license' %>
+</p>

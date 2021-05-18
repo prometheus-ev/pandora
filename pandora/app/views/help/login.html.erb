@@ -1,0 +1,88 @@
+<h2><%= 'Login help'.t %></h2>
+
+<% with_toc do -%>
+
+  <%= section_heading 'Personal account login', 'personal' %>
+  <p>
+    Enter your user name or your e-mail address and your password. Press the Enter key or click the submit button.
+    <%= screenshot 'help/login01.png', 'Personal account login' %>
+  </p>
+
+  <%= section_heading 'Forgot your password?', 'password' %>
+  <p>
+    If you have forgotten your password please enter your user name or your e-mail address and click
+    on the "Forgot Password?" link. A link will be e-mailed to you automatically. Clicking this link
+    will take you to a screen where you can renew your password.
+  </p>
+
+  <%= section_heading 'Campus login', 'campus' %>
+  <p>
+    The image archive can be used with the Campus login, provided you have access to the
+    <acronym title="Internet Protocol">IP</acronym> address of a licensed campus network.
+    Click the "campus-login" link, read and agree to the terms of use and press the Enter
+    key or click the submit button.
+    <%= screenshot 'help/login02.png', 'Campus login' %>
+
+  </p>
+
+  <p>
+    After successful login you can use the image archive by clicking the buttons on the menu bar.
+    <%= screenshot 'help/login03.png', 'Menu bar' %>
+  </p>
+
+  <p>
+    Your login status will be shown on the upper right hand corner of the screen, along with the
+    logout button to leave the image archive at the end of your session.
+    <%= screenshot 'help/login04.png', 'Login status' %>
+  </p>
+
+  <%= section_heading 'Problems with the campus login?', 'problems_campus' %>
+  <p>
+    If you have problems entering the image archive through the campus login, make sure that you are inside
+    the campus network of a <%= link_to 'licensed institution', :controller => 'institutions', :action => 'licensed' %>.
+    For the campus login to work, a set of <acronym title="Internet Protocol">IP</acronym> addresses are registered
+    with <span class="prometheus">prometheus</span> so that access from any of those addresses is granted.
+  </p>
+
+  <p class="icon_box note">
+    In order for us to diagnose your problem with the campus login, please visit the following page and include
+    its output in your support request:
+    <%= link_to 'IP address information', :controller => 'pandora', :action => 'remote_ip', :verbose => 1 %>.
+  </p>
+
+  <h4>VPN connection</h4>
+
+  <p>
+    If you are connected to your institution's network through a <acronym title="Virtual Private Network">VPN</acronym>,
+    you need to take into account that there are different methods of how such a connection can be set up.
+    In order to access web sites outside of the institutional network (which the <span class="prometheus">prometheus</span>
+    image archive most probably is), a method called "Full tunneling" has to be used. In other words, "Split
+    tunneling" has to be disabled. It should be configurable from your <acronym title="Virtual Private Network">VPN</acronym>
+    client. Please refer to your IT department's web site and/or documentation for details.
+  </p>
+
+  <p>
+    Here are a few resources that could be of help:
+    <ul>
+      <li>
+        <a href="http://rrzk.uni-koeln.de/vpn.html?L=1#c4079">Tunneltyp Full- / Split-Tunnel</a> -
+        An explanation of the different tunneling methods (full vs. split tunneling) by the Regional
+        Computing Centre (RRZK) of the University of Cologne. (German)
+      </li>
+      <li>
+        <a href="http://www.lrz-muenchen.de/fragen/faq/vpn/vpn12/index.html">Was ist Split-Tunneling?</a> -
+        An explanation of "Split tunneling" and instructions on how to disable it for the Munich Scientific
+        Network (MWN). (German)
+      </li>
+      <li>
+        <a href="http://en.wikipedia.org/wiki/Split_tunneling">Split tunneling</a> -
+        Technical details from Wikipedia, the free encyclopedia.
+      </li>
+    </ul>
+  </p>
+
+  <%= render :partial => 'shared/personal_account_tip' %>
+
+<% end -%>
+
+<%= render :partial => 'footer' %>

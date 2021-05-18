@@ -1,0 +1,79 @@
+Dear <%= @name %>,
+
+<% if @institution -%>
+your personal <%= @guest ? 'guest' : 'prometheus' %> account at your institution
+
+    <%= @institution %>
+
+expires and will be deactivated at:
+<% else -%>
+<% if @guest -%>
+With your guest account you were able to test the prometheus image
+archive for free. We hope you liked it. Your personal account is
+about to expire and will be deactivated at:
+<% else -%>
+your personal prometheus account is about to expire and will be
+deactivated at:
+<% end -%>
+<% end -%>
+
+<%= @expires.to_s.enclose_by('*').center(60).rstrip %>
+
+Afterwards the use of the image archive is temporarily rendered
+impossible.
+
+<% if @institution -%>
+If you like to extend your account, please contact your local
+administrators:
+
+  <% for admin in @admins -%>
+    <%= admin.fullname_with_email %>
+  <% end -%>
+
+<% unless @public_info.blank? -%>
+<%= @public_info.word_wrap(72) %>
+
+<% end -%>
+************************* Please note: **************************
+Please remember to present your verification (student ID or similar)
+in order to prove your affiliation to your institution! It's usually
+possible to send it by e-mail.
+*****************************************************************
+
+Even after expiration, your account can be re-activated and extended
+by the administrator of your institution.
+
+If you don't you have the opportunity to use the image archive for
+free anymore, extend your account by obtaining a personal license for
+15 EUR per year via the E-payment service PayPal or for 45 EUR per
+year (containing 15 EUR administrative fee) via invoice.
+
+Please click the following link:
+<% else -%>
+You have presently several options in order to extend your account:
+
+- If you are affiliated with an institution you are eligible to
+extend your account for free.
+
+- Otherwise you can obtain a license for 30 EUR per year through
+the E-payment service PayPal or for 45 EUR per year (containing 15 EUR
+administrative fee) via invoice.
+
+Please click the following link and choose one of the options:
+<% end -%>
+
+<<%= @url %>>
+<% unless @institution -%>
+
+Even after expiration you can use the link to have your account
+re-activated and extended.
+
+We will be delighted to have you with us. Please support us in
+improving the image archive for you. Your ideas are always welcome!
+<% end -%>
+
+If you have any questions, don't hesitate to contact the prometheus
+office. We are glad to be at your service.
+
+Kind regards,
+your prometheus team

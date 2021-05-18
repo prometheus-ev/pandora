@@ -1,0 +1,3 @@
+<%= render_sections %w[header details], @source %>
+
+<%= render(:partial => "shared/source/sample", :locals => { :images => @source.sample }) if (@source.open_access? || current_user && (!current_user.dbuser? || current_user == @source.dbuser)) %>

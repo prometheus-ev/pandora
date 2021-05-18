@@ -1,0 +1,48 @@
+<%= truncated(locations.map { |location|
+  if location.include?(",http")
+    if location.include?("%")
+      arr = location.split("%")
+      str = ""
+
+      (0..(arr.count-1)).each do|index|
+        if !index.odd?
+          str << arr[index]
+        else
+          str << link_to_links(arr[index])
+        end
+      end
+
+      google_maps_location = sanitize(arr[0].split("(")[0])
+
+      if !google_maps_location.blank?
+        str << ' ' if !str.blank?
+        str << link_to_google_maps(google_maps_location) 
+      end
+
+      str
+    else
+      google_maps_location = sanitize(location.split(",http")[0])
+      str = link_to_links(location)
+
+      if !google_maps_location.blank?
+        str << ' ' if !str.blank?
+        str << " " + link_to_google_maps(google_maps_location)
+      end
+
+      str
+    end
+  else
+    str = sanitize(location)
+
+    if source.name == "bonn_maya"
+      str
+    else
+      if !location.blank?
+        str << ' ' if !str.blank?
+        str << link_to_google_maps(location)
+      end
+
+      str
+    end
+  end
+}.join(" | ").html_safe, 500, :escape => false) %>

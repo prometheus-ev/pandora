@@ -1,0 +1,74 @@
+<% source = Source.find_by_name(@image.source_name)
+   parent = section_id('details') -%>
+<% super_image = Pandora::SuperImage.from(@image) %>
+
+<div class="metadata undim">
+  <table>
+    <% for field in @display_fields -%>
+      <% content = (h(@image.send(field)).blank? ? (@image.upload.respond_to?(field) ? h(@image.upload.send(field)) : '') : h(@image.send(field))); next if content.blank? -%>
+      <tr>
+        <th><%= field.humanize_all.tn(controller_name) %></th>
+        <td class="<%= field %>-field">
+        <% if field == 'artist' -%>
+          <%= link_to_field_search(field, content) %>
+        <% elsif field == 'credits' && is_url?(content) %>
+          <%= link_to content, URI.parse(content).to_s, :target => '_blank' %>
+        <% elsif field == 'rights_work' && @image.upload_record? && Upload.pconfig[:rights_work].include?(content) %>
+          <%= content.t %>
+        <% elsif field == 'rights_reproduction' && @image.upload_record? && content == 'Unknown' %>
+          <%= content.t %>
+        <% elsif field == 'rights_reproduction' && is_url?(content) %>
+          <%= link_to content, URI.parse(content).to_s, :target => '_blank' %>
+        <% elsif field == 'license' && @image.upload_record? && Upload.pconfig[:licenses].include?(content) %>
+          <%= content.t %>
+        <% elsif field == 'links' %>
+          <%= link_to_links(content) %>
+        <% elsif field == 'keywords' && @image.upload_record? %>
+          <%= list_search_links_for(:keywords, @image.upload.keywords.map { |k| [k.title, k.title.t] }, :controller => 'uploads', :action => 'index') %>
+        <% else -%>
+          <%= truncated(content, 280, :parent => parent, :escape => false) %>
+        <% end -%>
+        <% if Image.pconfig[:location_fields].include?(field) -%>
+          <%= link_to_google_maps(content) %>
+        <% end -%>
+        </td>
+      </tr>
+    <% end -%>
+    <% if representative = rights_representative(@image, false) -%>
+      <tr>
+        <th><%= 'Rights (Work)'.t %></th>
+        <td class="rights-field"><%= representative.html_safe %></td>
+      </tr>
+    <% end -%>
+    <% if cloud = tag_cloud_from(@image.keyword_artigo) -%>
+      <tr>
+        <th><%= 'Keywords from %s' / link_to('Artigo', 'http://artigo.org/', :target => '_blank') %></th>
+        <td><%= cloud %></td>
+      </tr>
+    <% end -%>
+    <tr>
+      <th><%= 'Database'.t %></th>
+      <td class="source-field">
+        <% if source -%>
+          <%=h source.fulltitle %>
+          <%= link_to_google_maps(source.institution.location) unless source.institution.location.blank? %>
+          <span class="source_icons">
+            <%= source_icons_for(source) %>
+          </span>
+        <% end -%>
+      </td>
+    </tr>
+
+    <% if Collection.count_any?(super_image.pid, current_user) %>
+      <tr>
+        <td colspan="2" style="padding-left: 10px"><hr style="height: 1px; background-color: #3C3C3C; border: 0px;"></td>
+      </tr>
+      <tr class="dim">
+        <th><%= 'Collections'.t %></th>
+        <td class="collections-field">
+          <%= render partial: 'shared/collection_counts', locals: {super_image: super_image} %>
+        </td>
+      </tr>
+    <% end %>
+  </table>
+</div>

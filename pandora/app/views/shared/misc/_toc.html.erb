@@ -1,0 +1,11 @@
+<div class="toc">
+
+  <h3><a id="toc" href="#toc"><%= 'Table of contents'.t %></a></h3>
+
+  <ul>
+  <% for id, name in toc -%>
+    <li><%= link_to name.html_safe, section: params[:section], anchor: id %></li>
+  <% end -%>
+  </ul>
+
+</div>

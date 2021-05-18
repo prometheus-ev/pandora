@@ -1,0 +1,46 @@
+<%= error_messages_for :collection %>
+
+<%= form_for @collection, html: {class: 'edit-form clear-padding'} do |f| -%>
+  <%= f.hidden_field :image_list %>
+
+  <% if params[:back_to] %>
+    <%= hidden_field_tag :back_to, params[:back_to] %>
+  <% end %>
+
+  <div class="default-padding">
+    <table>
+      <% if owner? %>
+        <%= render partial: 'manage_title', locals: {f: f} %>
+      <% end %>
+      <%= render partial: 'manage_description', locals: {f: f} %>
+      <% if owner? %>
+        <%= render partial: 'manage_thumbnails', locals: {f: f} %>
+      <% end %>
+      <%= render partial: 'manage_keywords', locals: {f: f} %>
+      <%= render partial: 'manage_links', locals: {f: f} %>
+      <%= render partial: 'manage_references', locals: {f: f} %>
+      <% if owner? %>
+        <tr>
+          <td colspan="2">
+            <br><hr><br>
+          </td>
+        </tr>
+
+        <% if @collection.has_unapproved_uploads? %>
+          <tr>
+            <td></td>
+            <td>
+              <p style="width: 340px; color: orange"><%= 'Change public access or share as soon as all your database images included in your %s are approved!'.t / 'collection'.t %></p>
+            </td>
+          </tr>
+        <% end %>
+
+        <%= render partial: 'manage_public_access', locals: {f: f} %>
+        <%= render partial: 'manage_viewers', locals: {f: f} %>
+        <%= render partial: 'manage_collaborators', locals: {f: f} %>
+      <% end %>
+
+      <%= form_controls %>
+    </table>
+  </div>
+<% end -%>

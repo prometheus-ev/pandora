@@ -1,0 +1,8 @@
+<tr>
+  <th><%= f.label :order, 'Sort order for result list'.t %></th>
+  <td><%= settings_select f, :order, :options_for_order_select %></td>
+</tr>
+<%= render partial: 'edit_shared_range_settings', locals: {f: f, label: 'Number of results per page', name: :per_page } %>
+<tr><td colspan="2"><br class="vspace2" /></td></tr>
+<%= render partial: 'edit_shared_search_settings', locals: {f: f} %>
+<tr><td colspan="2"><br class="vspace2" /></td></tr>
