@@ -156,24 +156,23 @@ class AccountsController < ApplicationController
   end
 
   def suggest_names
-    return permission_denied unless request.xhr?
+    @accounts = current_user.
+      allowed_accounts(:read).
+      exclude(current_user).
+      email_verified.
+      non_subscribers.
+      where('login NOT IN (?)', ['campus', 'source']). # TODO: do we still need that?
+      search('label', params[:q]).
+      sorted(sort_column, sort_direction).
+      limit(20).
+      to_a
 
-    only, limit = params[:only], 10
-
-    options = {
-      :clause => '(login LIKE ? OR firstname LIKE ? OR lastname LIKE ?)',
-      :limit  => 2 * limit,  # fetch some more...
-      :order  => 'login'
-    }.merge_conditions(Account.conditions_for_not_anonymous).
-      merge_conditions(Account.conditions_for_email_verified)
-
-    get_suggestions(Account, options) { |matches|
-      matches.reject! { |user| !current_user.allowed?(user, :read) }
-      matches.reject! { |user| !user.action_allowed?(*only.split('/', 2)) } if only
-
-      matches.slice!(limit..-1)  # ...cut off surplus
-      matches.compact!
-    }
+    # filter by the action allowed
+    if only = params[:only]
+      c, a = only.split('/', 2)
+      @accounts.select{|e| e.action_allowed?(c, a)}
+    end
+    @accounts = @accounts.first(10)
 
     render :partial => 'suggest_names'
   end

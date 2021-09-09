@@ -64,7 +64,7 @@ class InstitutionsTest < ApplicationSystemTestCase
 
     assert_equal 'jdoe', Institution.last.contact.login
     assert_equal 'campus', Institution.last.license.license_type.title
-    assert_equal Date.new(2020, 4, 30), Institution.last.member_since
+    assert_equal Date.new(2020, 4, 30), Institution.last.member_since.to_date
     assert_equal "10.2.33.0/24\r\n10.2.34.0/24", Institution.last.ipranges
     assert_equal ['server.example.com', 'gateway.example.com'], Institution.last.hostnames
 

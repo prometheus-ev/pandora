@@ -216,8 +216,25 @@ body.js div.sidebar_box .box_handle {
   background-color:  #262626;
 }
 
-#content .submit_button_wrap {
-  /*line-height:       1.2em;*/
+#submenu .button_wrap {
+  padding: 5px 10px;
+  line-height: 2em;
+}
+
+#header-section .button_wrap {
+  padding: 5px 10px;
+}
+
+.store_controls .button_wrap {
+  padding: 5px 1px;
+}
+
+.store_controls .submit_button_wrap {
+  line-height:       2em;
+}
+
+.store_controls .popup_wrap {
+  line-height:       2em;
 }
 
 #content .header-line {
@@ -1004,13 +1021,13 @@ dl.fancy dd {
   padding-right:     10px;
 }
 
+#statusbar > span:first-child {
+  border: none;
+}
+
 #statusbar img {
   vertical-align:    text-top;
   padding-top:       1px;
-}
-
-span#loginfo {
-  border:            none;
 }
 
 #statusbar a {

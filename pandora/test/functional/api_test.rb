@@ -44,17 +44,17 @@ class ApiTest < ActionDispatch::IntegrationTest
     assert_match /\d+ Databases/, xml['pandora']['facts'][1]
   end
 
-  test 'counts' do
-    get '/api/v1/json/search/hits', params: {term: 'tree'}
-    assert response.successful?
-    assert json['count'] > 0
-
-    get '/api/v1/xml/search/hits', params: {term: 'tree'}
-    assert response.successful?
-    assert xml['hits']['count'] > 0
-  end
-
   if production_sources_available?
+    test 'counts' do
+      get '/api/v1/json/search/hits', params: {term: 'tree'}
+      assert response.successful?
+      assert json['count'] > 0
+
+      get '/api/v1/xml/search/hits', params: {term: 'tree'}
+      assert response.successful?
+      assert xml['hits']['count'] > 0
+    end
+
     test 'search' do
       get '/api/json/search/search', params: {s: ['robertin'], term: 'baum'}
       assert_equal 401, response.status
@@ -143,6 +143,13 @@ class ApiTest < ActionDispatch::IntegrationTest
       dim = dimensions_for(response.body)
       assert_equal({width: 402, height: 599}, dim)
     end
+  end
+
+  test "blob format doesn't bomb ApplicationController on errors" do
+    id = 'artemis_bk-03e10816731d37704ce69269ef641d85a19bf92e'
+    get "/api/blob/image/r448/#{id}", headers: api_auth('jdoe')
+    assert_equal 404, response.status
+    assert_equal 'not found', response.body
   end
 
   test 'image data and metadata (xml, upload)' do
@@ -417,16 +424,16 @@ class ApiTest < ActionDispatch::IntegrationTest
     jdoe.boxes.destroy_all
     post '/api/xml/box/create', params: params, headers: api_auth('jdoe')
     assert response.successful?
-    assert xml['image_box']['id'] > 0
+    assert xml['box']['id'] > 0
     assert_equal id, jdoe.reload.boxes.first.image_id
   end
 
   test 'DELETE /box/delete' do
-    box = Box.create!({
-      type: 'ImageBox',
+    box = Box.create!(
+      ref_type: 'image',
       image: Upload.first.image,
       owner: Account.find_by(login: 'jdoe')
-    }, without_protection: true)
+    )
 
     delete '/api/xml/box/delete', params: {id: box.id}
     assert_equal 401, response.status
@@ -437,27 +444,27 @@ class ApiTest < ActionDispatch::IntegrationTest
     delete '/api/xml/box/delete', params: {id: box.id}, headers: api_auth('jdoe')
     assert_equal 0, Box.count
 
-    box = Box.create!({
-      type: 'ImageBox',
+    box = Box.create!(
+      ref_type: 'image',
       image: Upload.first.image,
       owner: Account.find_by(login: 'jdoe')
-    }, without_protection: true)
+    )
     delete '/api/json/box/delete', params: {id: box.id}, headers: api_auth('jdoe')
     assert_equal 0, Box.count
   end
 
   test 'GET /box/list' do
-    box = Box.create!({
-      type: 'ImageBox',
+    box = Box.create!(
+      ref_type: 'image',
       image: Upload.first.image,
       owner: Account.find_by(login: 'jdoe')
-    }, without_protection: true)
+    )
 
     get '/api/json/box/list'
-    assert_equal 401, response.status
+    assert_equal 200, response.status
 
     get '/api/xml/box/list'
-    assert_equal 401, response.status
+    assert_equal 200, response.status
 
     get '/api/json/box/list', headers: api_auth('jdoe')
     assert response.successful?
@@ -465,7 +472,7 @@ class ApiTest < ActionDispatch::IntegrationTest
 
     get '/api/xml/box/list', headers: api_auth('jdoe')
     assert response.successful?
-    assert_equal Upload.first.image_id, xml['image_boxes'].last['image_id']
+    assert_equal Upload.first.image_id, xml['boxes'].last['image_id']
   end
 
   test 'GET /facts' do
@@ -812,40 +819,42 @@ class ApiTest < ActionDispatch::IntegrationTest
     assert_equal 3, xml['hash']['images'].size
   end
 
-  test 'GET /image/list' do
-    # see #399
+  if production_sources_available?
+    test 'GET /image/list' do
+      # see #399
 
-    get '/api/json/image/list'
-    assert_equal 422, response.status
-    assert_equal 'source has to be specified', json['message']
+      get '/api/json/image/list'
+      assert_equal 422, response.status
+      assert_equal 'source has to be specified', json['message']
 
-    get '/api/json/image/list', params: {source: 'xxx'}
-    assert_equal 404, response.status
-    assert_equal 'source not found', json['message']
+      get '/api/json/image/list', params: {source: 'xxx'}
+      assert_equal 404, response.status
+      assert_equal 'source not found', json['message']
 
-    get '/api/json/image/list', params: {source: 'daumier'}
-    assert_equal 403, response.status
-    assert_equal 'permission denied to read non-open access source', json['message']
+      get '/api/json/image/list', params: {source: 'daumier'}
+      assert_equal 403, response.status
+      assert_equal 'permission denied to read non-open access source', json['message']
 
-    get '/api/json/image/list', params: {source: 'daumier'}, headers: api_auth('jdoe')
-    assert response.successful?
-    assert_equal 10, json.size
+      get '/api/json/image/list', params: {source: 'daumier'}, headers: api_auth('jdoe')
+      assert response.successful?
+      assert_equal 10, json.size
 
-    get '/api/json/image/list', params: {source: 'daumier', per_page: 20}, headers: api_auth('jdoe')
-    assert response.successful?
-    assert_equal 20, json.size
+      get '/api/json/image/list', params: {source: 'daumier', per_page: 20}, headers: api_auth('jdoe')
+      assert response.successful?
+      assert_equal 20, json.size
 
-    get '/api/xml/image/list', params: {source: 'daumier'}, headers: api_auth('jdoe')
-    assert response.successful?
-    assert_equal 10, xml['strings'].size
-  end
+      get '/api/xml/image/list', params: {source: 'daumier'}, headers: api_auth('jdoe')
+      assert response.successful?
+      assert_equal 10, xml['strings'].size
+    end
 
-  test 'the api is also available under /pandora' do
-    # we just test one call since the mechanism applies to all api routes
+    test 'the api is also available under /pandora' do
+      # we just test one call since the mechanism applies to all api routes
 
-    get '/pandora/api/json/image/list', params: {source: 'daumier'}, headers: api_auth('jdoe')
-    assert response.successful?
-    assert_equal 10, json.size
+      get '/pandora/api/json/image/list', params: {source: 'daumier'}, headers: api_auth('jdoe')
+      assert response.successful?
+      assert_equal 10, json.size
+    end
   end
 
   test 'rate limiting' do

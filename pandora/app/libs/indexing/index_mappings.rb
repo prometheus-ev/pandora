@@ -1,16 +1,19 @@
 # A module representing the index mappings.
+#
+# Elasticsearch Reference
+# https://www.elastic.co/guide/en/elasticsearch/reference/current/mapping.html
 module Indexing::IndexMappings
   # https://www.elastic.co/guide/en/elasticsearch/reference/current/mapping.html
   def self.read
-    # Remove some fields from the search field array, since they are treated specially below.
-    search_fields = Rails.configuration.x.athene_search_fields['search'] - ['all', 'artist', 'artist_normalized', 'title', 'date', 'rating_average', 'record_id', 'record_object_id', 'description']
-
     properties = {
+      # The artist field as type text for searching and type keyword for sorting.
       artist: {
         # https://www.elastic.co/guide/en/elasticsearch/reference/current/text.html
         type: "text",
-        analyzer: "indexing_artist_analyzer",
+        analyzer: "indexing_analyzer",
         search_analyzer: "search_analyzer",
+        # https://www.elastic.co/guide/en/elasticsearch/reference/current/term-vector.html
+        term_vector: "yes",
         # https://www.elastic.co/guide/en/elasticsearch/guide/current/multi-fields.html
         # https://www.elastic.co/guide/en/elasticsearch/reference/current/multi-fields.html
         fields: {
@@ -22,9 +25,23 @@ module Indexing::IndexMappings
           }
         }
       },
+      # The artist_normalized field is filled with a normalized version of artist name from field artist
+      # and also enhanced with its synonyms from the PKND file:
+      #
+      # config/synonyms/pknd.txt
+      #
+      # For implementation, see:
+      #
+      # app/libs/indexing/source_super.rb
+      #
+      # and all sources implementing artist_normalized at:
+      #
+      # app/libs/indexing/sources
       artist_normalized: {
         type: "text",
-        analyzer: "indexing_pknd_analyzer",
+        analyzer: "artist_normalized_indexing_analyzer",
+        search_analyzer: "artist_normalized_search_analyzer",
+        term_vector: "yes",
         fields: {
           raw: {
             type: "keyword",
@@ -36,6 +53,7 @@ module Indexing::IndexMappings
         type: "text",
         analyzer: "indexing_analyzer",
         search_analyzer: "search_analyzer",
+        term_vector: "yes",
         fields: {
           raw: {
             type: "keyword",
@@ -47,6 +65,7 @@ module Indexing::IndexMappings
         type: "text",
         analyzer: "indexing_analyzer",
         search_analyzer: "search_analyzer",
+        term_vector: "yes",
         fields: {
           raw: {
             type: "keyword",
@@ -77,34 +96,41 @@ module Indexing::IndexMappings
       },
       rating_average: {
         type: "text",
+        term_vector: "yes",
         fields: {
           raw: {
             # https://www.elastic.co/guide/en/elasticsearch/reference/current/number.html
             # TODO also add keyword field? See
             # https://www.elastic.co/guide/en/elasticsearch/reference/5.0/breaking_50_mapping_changes.html
             type: "float"
+            # Index the float field since we use it in search. true is the default for float fields.
+            # index: true
           }
         }
       },
       record_id: {
+        # TODO Type text should not be needed here, we might be able to remove it.
         type: "text",
         analyzer: "indexing_analyzer",
         search_analyzer: "search_analyzer",
-        term_vector: "yes",
         fields: {
           raw: {
             type: "keyword"
+            # Index the keyword field since we need to search for exact matches. true is the default for keyword fields.
+            # index: true
           }
         }
       },
       record_object_id: {
+        # TODO Type text should not be needed here, we might be able to remove it.
         type: "text",
         analyzer: "indexing_analyzer",
         search_analyzer: "search_analyzer",
-        term_vector: "yes",
         fields: {
           raw: {
             type: "keyword"
+            # Index the keyword field since we need to search for exact matches. true is the default for keyword fields.
+            # index: true
           }
         }
       },
@@ -113,12 +139,18 @@ module Indexing::IndexMappings
         analyzer: "indexing_analyzer",
         search_analyzer: "search_analyzer",
         term_vector: "yes"
+      },
+      # Field required for image search. See #1271 and #1289.
+      image_vector: {
+        type: "dense_vector",
+        dims: 80
       }
     }
 
-    for search_field in search_fields do
+    # Mapping fields that are handled the same.
+    Indexing::IndexFields.index_mapping.each do |index_mapping_field|
       properties.merge!({
-        search_field.to_sym => {
+        index_mapping_field.to_sym => {
           type: "text",
           analyzer: "indexing_analyzer",
           # https://www.elastic.co/guide/en/elasticsearch/reference/current/search-analyzer.html
@@ -141,9 +173,5 @@ module Indexing::IndexMappings
       # https://www.elastic.co/guide/en/elasticsearch/reference/6.0/breaking_60_mappings_changes.html#_the_literal__all_literal_meta_field_is_now_disabled_by_default
       properties: properties
     }
-  end
-
-  def self.search_fields
-    read[:properties].keys - [:date_range, :date_range_from, :date_range_to, :artist_normalized]
   end
 end

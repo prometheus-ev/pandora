@@ -27,7 +27,7 @@
   <p>
     <strong>
       <%= "Hint: You are currently only searching in open access database %s." / current_user.open_sources.join(", ") if current_user && current_user.open_sources %>
-      <%= "If you would like to search in all databases, please %s with a full user account." / (link_to 'log in'.t, :controller => 'sessions', :action => 'new', :host =>  request.base_url) %>
+      <%= "If you would like to search in all databases, please %s or %s." / [(link_to 'log in'.t, :controller => 'sessions', :action => 'new', :host =>  request.base_url), (link_to 'sign up'.t, :controller => 'signup', :action => 'signup', :host =>  request.base_url)] %>
     </strong>
   </p>
 <% end %>

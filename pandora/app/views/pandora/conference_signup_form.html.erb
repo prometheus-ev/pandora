@@ -1,13 +1,22 @@
-<h2 style="line-height:1.3">Anmeldung zur Tagung „Daten^7 – Digitales BilderLeben“ am 1./2. Oktober 2019 in Köln </h2>
+<h2 style="line-height:1.3">Anmeldung zur Tagung:</h2>
+<h2 style="line-height:1.3">„<%= Pandora::ConferenceSignup::TITLE %>“</h2>
+<h2 style="line-height:1.3">vom <%= Pandora::ConferenceSignup::DATE %> <s>in Köln</s> - virtuell</h2>
 
 <%= error_messages_for :signup, :header_message => '', :message => '' %>
 
 <%= form_for @signup, as: 'signup', url: {action: 'conference_signup'} do |f| -%>
   <table width="600">
-    <tr style=>
+    <tr>
       <td colspan="2" style="padding:0 0 15px 0;">
-    Da wir keine Tagungsgebühren erheben, aber für die Kaffeepausen und den Empfang Getränke und kleine Snacks
-kostenlos bereitstellen, wären wir dankbar, wenn Sie sich verbindlich anmelden, damit wir besser planen können.
+        <s>
+          Da wir keine Tagungsgebühren erheben, aber für die Kaffeepausen und den Empfang Getränke und kleine Snacks
+          kostenlos bereitstellen, wären wir dankbar, wenn Sie sich verbindlich anmelden, damit wir besser planen können.
+        </s>
+      </td>
+    </tr>
+    <tr>
+      <td colspan="2" style="padding:0 0 15px 0;">
+        Aufgrund der aktuellen Situation haben wir schweren Herzens entschieden die Tagung nur virtuell stattfinden zu lassen. Damit wir Ihnen die Links zur Onlinekonferenz rechtzeitig zur Verfügung stellen können, möchten wir Sie bitten, sich verbindlich bis zum 27.09. anzumelden.
       </td>
     </tr>
     <tr>
@@ -43,19 +52,37 @@ kostenlos bereitstellen, wären wir dankbar, wenn Sie sich verbindlich anmelden,
       <td><%= f.text_field :city, size: 30, class: 'mandatory' %></td>
     </tr>
     <tr>
-      <th><%= f.label :country, 'Country'.t + ' (' + 'optional'.t + ')' %></th>
-      <td><%= f.text_field :country, size: 30 %></td>
+      <th><%= f.label :country, 'Country'.t %></th>
+      <td><%= f.text_field :country, size: 30, class: 'mandatory' %></td>
     </tr>
     <tr>
       <td colspan="2">
-        <%= f.check_box :brauhaus %>
-        <%= f.label :brauhaus, 'Ich möchte gerne am 30. September am gemeinsamen Abendessen (Selbstzahler) im Brauhaus "Malzmühle" am Heumarkt teilnehmen.' %>
+        <%= f.radio_button :presence, :physical, :disabled => true, :onclick => "$$('.scb').each(function(checkbox) { checkbox.disabled = false; });" %>
+        <label for="signup_presence_physical"><s>Ich werde vor Ort in Köln sein.</s></label>
+      </td>
+    </tr>
+    <tr>
+      <td colspan="2" style="padding-left: 10px;">
+        <%= f.check_box :empfang, :disabled => true, :class => 'scb' %>
+        <s><%= f.label :empfang, 'Ich möchte gerne am Empfang am 30.9. nach der Keynote teilnehmen.' %></s>
+      </td>
+    </tr>
+    <tr>
+      <td colspan="2" style="padding-left: 10px;">
+        <%= f.check_box :feier, :disabled => true, :class => 'scb' %>
+        <s><%= f.label :feier, 'Ich möchte gerne an der Jubiläumsfeier am 1.10. teilnehmen.' %></s>
+      </td>
+    </tr>
+    <tr>
+      <td colspan="2" style="padding-left: 10px;">
+        <%= f.check_box :abendessen, :disabled => true, :class => 'scb' %>
+        <s><%= f.label :abendessen, 'Ich möchte gerne am 2.10. am gemeinsamen Abendessen (Selbstzahler) im Brauhaus teilnehmen.' %></s>
       </td>
     </tr>
     <tr>
       <td colspan="2">
-        <%= f.check_box :akdk %>
-        <%= f.label :akdk, 'Ich werde am Arbeitskreistreffen des AK Digitale Kunstgeschichte am 30.9. (14-18 Uhr) teilnehmen.' %>
+        <%= f.radio_button :presence, 'virtual', :checked => true, :onclick => "$$('.scb').each(function(checkbox) { checkbox.disabled = true; checkbox.checked = false; });" %>
+        <label for="signup_presence_virtual">Ich werde virtuell teilnehmen.</label>
       </td>
     </tr>
     <tr>

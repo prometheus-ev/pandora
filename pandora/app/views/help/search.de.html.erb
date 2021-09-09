@@ -27,24 +27,9 @@
   </p>
 
   <ul>
-    <li>Alle</li>
-    <li>Künstler*in</li>
-    <li>Titel</li>
-    <li>Standort</li>
-    <li>Fundort</li>
-    <li>Gattung</li>
-    <li>Material</li>
-    <li>Schlagwort</li>
-    <li>Beschreibung</li>
-    <li>Datierung</li>
-    <li>Bildnachweis</li>
-    <li>Bildrecht Fotografie</li>
-    <li>Bildrecht Werk</li>
-    <li>Datensatz</li>
-    <li>Objekt</li>
-    <li>durchschn. Bewertung</li>
-    <li>Anzahl Bewertungen</li>
-    <li>Kommentare</li>
+    <% Indexing::IndexFields.search.each do |field| %>
+      <li><%= field.humanize.t %></li>
+    <% end %>
   </ul>
 
   <p>

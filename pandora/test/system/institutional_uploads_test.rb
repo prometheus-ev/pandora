@@ -218,7 +218,8 @@ class InstitutionalUploadsTest < ApplicationSystemTestCase
       assert_text 'Galette'
       assert_text 'Prometheus, prometheus - Das verteilte digitale Bildarchiv für Forschung & Lehre'
 
-      puts "end"
+      find('div.image a img[title="Galette"]').click
+      assert_text 'One, Two'
     end
   end
 
@@ -308,9 +309,9 @@ class InstitutionalUploadsTest < ApplicationSystemTestCase
     click_on 'John\'s institutional uploads collection'
     click_on 'Add collection to sidebar'
 
-    within(all("div#boxes")[0]) do # why are there 2 div#boxes? couldn't find out how 2nd div is generated
-      within("div#boxes div.sidebar_box:nth-child(2)") do
-        assert_text "John's institutiona..."
+    within('div#boxes') do # why are there 2 div#boxes? couldn't find out how 2nd div is generated
+      within("div.sidebar_box:nth-child(2)") do
+        assert_text "John's institutio..."
         assert_css '.thumbnail', count: 1
       end
     end
@@ -341,9 +342,11 @@ class InstitutionalUploadsTest < ApplicationSystemTestCase
 
     login_as 'jdoe'
 
-    assert has_xpath?("//div[contains(@id, 'sidebar_box-')]")
+    # NOTE: this simply checks for a div with id containing 'sidebar_box-' which
+    # seems obsolete
+    # assert has_xpath?("//div[contains(@id, 'sidebar_box-')]")
     within("div#boxes div.sidebar_box:nth-child(2)") do
-      assert_text "John's institutiona..."
+      assert_text "John's institutio..."
       assert has_css?(".thumbnail")
     end
 
@@ -481,6 +484,7 @@ class InstitutionalUploadsTest < ApplicationSystemTestCase
       title: filename.humanize.capitalize,
       rights_reproduction: 'None, do not use!',
       rights_work: 'None, do not use!',
+      keywords: [Keyword.new(title: 'One'), Keyword.new(title: 'Two')],
       file: Rack::Test::UploadedFile.new(
         "#{Rails.root}/test/fixtures/files/#{filename}.jpg",
         'image/jpeg'

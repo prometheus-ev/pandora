@@ -75,10 +75,10 @@ class PandoraTest < ApplicationSystemTestCase
     fill_in 'First name', with: 'Hans'
     fill_in 'Last name', with: 'Mustermann'
     fill_in 'E-mail', with: 'hmustermann@example.com'
-    fill_in 'Street/Post box', with: 'Rosengasse 12'
-    fill_in 'Postal code', with: '60439'
     fill_in 'City', with: 'Frankfurt am Main'
-    find_field('Brauhaus').check
+    fill_in 'Street', with: 'Am Dreiklang 8'
+    fill_in 'Postal code', with: '44532'
+    fill_in 'Country', with: 'Germany'
     submit # try omitting the brain buster
 
     assert_text 'Your captcha answer failed'

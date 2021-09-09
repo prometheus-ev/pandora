@@ -1,15 +1,20 @@
-Titel: <%= @signup.person_title %>
-Name: <%= @signup.last_name %>
-Vorname: <%= @signup.first_name %>
-Institution: <%= @signup.institution %>
-Straße/Postfach: <%= @signup.street %>
-Postleitzahl: <%= @signup.postal_code %>
-Stadt: <%= @signup.city %>
-Land: <%= @signup.country %>
-E-Mail-Adresse: <%= @signup.email %>
-Brauhaus: <%= @signup.brauhaus ? 'yes'.t : 'no'.t %> 
-AK-Treffen: <%= @signup.akdk ? 'yes'.t : 'no'.t %>
+<%= 'Title'.t %>: <%= @signup.person_title %>
+<%= 'First name'.t %>: <%= @signup.first_name %>
+<%= 'Last name'.t %>: <%= @signup.last_name %>
+<%= 'E-mail'.t %>: <%= @signup.email %>
+<%= 'Institution'.t %>: <%= @signup.institution %>
+<%= 'Street/Post box'.t %>: <%= @signup.street %>
+<%= 'Postal code'.t %>: <%= @signup.postal_code %>
+<%= 'City'.t %>: <%= @signup.city %>
+<%= 'Country'.t %>: <%= @signup.country %>
 
-Anmerkungen: <%= @signup.note.word_wrap(72) %>
+Anwesenheit: <%= @signup.presence == 'physical' ? 'vor Ort in Köln' : 'virtuell' %>
+
+Empfang: <%= @signup.empfang == '1' ? 'yes'.t : 'no'.t %>
+Feier: <%= @signup.feier == '1' ? 'yes'.t : 'no'.t %>
+Abendessen: <%= @signup.abendessen == '1' ? 'yes'.t : 'no'.t %>
+
+Anmerkungen:
+<%= @signup.note.word_wrap(72) %>
 
 <%= render :partial => 'signature' -%>

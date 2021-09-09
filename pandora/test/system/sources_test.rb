@@ -112,7 +112,7 @@ class SourcesTest < ApplicationSystemTestCase
     end
 
     within '.list_row:first-child' do
-      assert_text '1 image'
+      assert_text '0 image'
     end
 
     fill_in 'value', with: 'daumier'
@@ -209,80 +209,83 @@ class SourcesTest < ApplicationSystemTestCase
     assert_css '.description-line', count: 0
   end
 
-  test 'source ratings' do
-    si = Pandora::SuperImage.new('daumier-cf03d626ef05e83c0b610b864a95f256dea8de2a')
-    si.image.update({votes: 3}, without_protection: true)
+  if production_sources_available?
+    test 'source ratings' do
+      si = Pandora::SuperImage.new('daumier-cf03d626ef05e83c0b610b864a95f256dea8de2a')
+      si.image.update({votes: 3}, without_protection: true)
 
-    login_as 'superadmin'
-    click_on 'Administration'
-    within_admin_section 'Source' do
-      click_on 'List'
+      login_as 'superadmin'
+      click_on 'Administration'
+      within_admin_section 'Source' do
+        click_on 'List'
+      end
+      within '.list_row:first-child .title-line' do
+        click_on 'Daumier Register'
+      end
+      click_on '1 rating'
+      assert_text 'Ratings for Source'
+      assert_text 'Femme sous un arbre'
     end
-    within '.list_row:first-child .title-line' do
-      click_on 'Daumier Register'
+
+    test 'show source info with contact having white space in login' do
+      jdoe = Account.find_by(login: 'jdoe')
+      robertin = Source.find_by(name: 'robertin')
+      jdoe.update login: 'John Doe'
+      robertin.update contact: jdoe
+
+      login_as 'superadmin'
+      click_on 'Administration'
+      within_admin_section 'Source' do
+        click_on 'List'
+      end
+      click_on 'ROBERTIN-database'
+
+      assert_text 'Martin-Luther-Universität, Institut für Klassische Altertumswissenschaften'
     end
-    click_on '1 rating'
-    assert_text 'Ratings for Source'
-    assert_text 'Femme sous un arbre'
+    
+    test "set 'can_exploit_rights' flag and request rights" do
+      login_as 'superadmin'
+
+      login_as 'jdoe'
+      fill_in 'search_value_0', with: 'baum'
+      submit
+      within '.list_row:nth-child(1)' do
+        find("img[title='Copyright and publishing information']").find(:xpath, '..').click
+      end
+      assert_text 'cannot be obtained directly via prometheus'
+
+      source = Source.find_by!(name: 'daumier')
+      source.update_attributes!(
+        can_exploit_rights: true,
+        email: 'usage@example.com'
+      )
+      reload_page
+
+      assert_text 'can be obtained directly via prometheus'
+
+      choose 'type_scientific'
+      choose 'mode_print'
+      fill_in 'Information about the publication', with: 'I am writing a book'
+      fill_in 'First name', with: 'John'
+      fill_in 'Last name', with: 'Doe'
+      fill_in 'E-mail', with: 'jdoe@example.com'
+      fill_in 'Address', with: 'Am heißen Stein 12'
+      fill_in 'Postal code', with: '43345'
+      fill_in 'City', with: 'Freiburg'
+      fill_in 'Country', with: 'Germany'
+      submit
+      assert_text 'Your inquiry has been delivered'
+
+      request = ActionMailer::Base.deliveries[0]
+      copy = ActionMailer::Base.deliveries[1]
+
+      assert_match /Publikationsanfrage/, request.subject
+      assert_includes request.to, 'usage@example.com'
+      assert_match /Your publication inquiry/, copy.subject
+      assert_includes copy.to, 'jdoe@example.com'
+    end
   end
 
-  test 'show source info with contact having white space in login' do
-    jdoe = Account.find_by(login: 'jdoe')
-    robertin = Source.find_by(name: 'robertin')
-    jdoe.update login: 'John Doe'
-    robertin.update contact: jdoe
-
-    login_as 'superadmin'
-    click_on 'Administration'
-    within_admin_section 'Source' do
-      click_on 'List'
-    end
-    click_on 'ROBERTIN-database'
-
-    assert_text 'Martin-Luther-Universität, Institut für Klassische Altertumswissenschaften'
-  end
-
-  test "set 'can_exploit_rights' flag and request rights" do
-    login_as 'superadmin'
-
-    login_as 'jdoe'
-    fill_in 'search_value_0', with: 'baum'
-    submit
-    within '.list_row:nth-child(1)' do
-      find("img[title='Copyright and publishing information']").find(:xpath, '..').click
-    end
-    assert_text 'cannot be obtained directly via prometheus'
-
-    source = Source.find_by!(name: 'daumier')
-    source.update_attributes!(
-      can_exploit_rights: true,
-      email: 'usage@example.com'
-    )
-    reload_page
-
-    assert_text 'can be obtained directly via prometheus'
-
-    choose 'type_scientific'
-    choose 'mode_print'
-    fill_in 'Information about the publication', with: 'I am writing a book'
-    fill_in 'First name', with: 'John'
-    fill_in 'Last name', with: 'Doe'
-    fill_in 'E-mail', with: 'jdoe@example.com'
-    fill_in 'Address', with: 'Am heißen Stein 12'
-    fill_in 'Postal code', with: '43345'
-    fill_in 'City', with: 'Freiburg'
-    fill_in 'Country', with: 'Germany'
-    submit
-    assert_text 'Your inquiry has been delivered'
-
-    request = ActionMailer::Base.deliveries[0]
-    copy = ActionMailer::Base.deliveries[1]
-
-    assert_match /Publikationsanfrage/, request.subject
-    assert_includes request.to, 'usage@example.com'
-    assert_match /Your publication inquiry/, copy.subject
-    assert_includes copy.to, 'jdoe@example.com'
-  end
 
   # see #417, dropped
   # test 'validate a source'

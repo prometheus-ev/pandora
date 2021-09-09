@@ -2,11 +2,12 @@
   "scripts": {
     "dev": "bin/dev",
     "build": "npm run build.legacy && npm run build.ng",
-    "build.legacy": "uglifyjs public/javascripts/combine/*.js -o public/javascripts/combined.js",
+    "build.legacy": "babel public/javascripts/combine/*.js -o public/javascripts/combined.js",
     "build.ng": "webpack --mode=production"
   },
   "devDependencies": {
-    "@babel/core": "^7.12.10",
+    "@babel/cli": "^7.14.3",
+    "@babel/core": "^7.14.3",
     "@babel/preset-react": "^7.12.10",
     "babel-loader": "^8.2.2",
     "bootstrap": "^4.5.3",

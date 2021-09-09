@@ -315,6 +315,14 @@ class SearchesController < ApplicationController
         end
       end
 
+      further_params = {
+        page: {size: per_page, number: page},
+        sort: {field: sort_column, order: sort_direction},
+        db_sort: db_sort_column,
+        db_group: db_group_column,
+        sample_size: sample_size
+      }
+
       params.permit(
         :slider_min_year,
         :slider_max_year,
@@ -328,13 +336,7 @@ class SearchesController < ApplicationController
         date: {},
         start_date: {},
         end_date: {}
-      ).to_h.merge(
-        page: {size: per_page, number: page},
-        sort: {field: sort_column, order: sort_direction},
-        db_sort: db_sort_column,
-        db_group: db_group_column,
-        sample_size: sample_size
-      )
+      ).to_h.merge(further_params)
     end
 
     def per_page_default
@@ -342,19 +344,9 @@ class SearchesController < ApplicationController
     end
 
     def sort_column_default
-      if action_name == 'time'
-        'date'
-      else
-        try_setting(:search, :order) || 'relevance'
-      end
     end
 
     def sort_direction_default
-      if sort_column == 'relevance' || sort_column == 'rating_average' || sort_column == 'rating_count'
-        'desc'
-      else
-        'asc'
-      end
     end
 
     def view_default

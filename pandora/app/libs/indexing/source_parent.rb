@@ -56,13 +56,14 @@ class Indexing::SourceParent
   # Index a Source subclass.
   #
   # @param log [Boolean] Enable the log.
-  def self.index(log = false)
-    source = new(log)
+  def self.index(create_institutional_uploads: false, log: false)
+    source = new(create_institutional_uploads: create_institutional_uploads, log: log)
     superclass = source.class.superclass
     superclass_name = "Indexing::SourceSuper"
+
     if (superclass.name == superclass_name ||
         (superclass.superclass && superclass.superclass.name == superclass_name))
-      self.index_array(sources: [source.name.underscore], log: log)
+      self.index_array(sources: [source.name.underscore], create_institutional_uploads: create_institutional_uploads, log: log)
     else
       logger.error "Only sources available in directory app/libs/indexing/sources can be indexed."
     end
@@ -85,10 +86,10 @@ class Indexing::SourceParent
   #
   # @param source_names [Array] An Array of source names.
   # @param log [Boolean] Enable the log.
-  def self.index_array(sources: [], time: false, log: false)
+  def self.index_array(sources: [], time: false, create_institutional_uploads: false, log: false)
     if time
       sources = sources.delete_if { |source|
-        source = source.camelize.constantize.new(log)
+        source = source.camelize.constantize.new(create_institutional_uploads: create_institutional_uploads, log: log)
         !source.respond_to?('date_range')
       }
     end
@@ -102,28 +103,34 @@ class Indexing::SourceParent
     records_indexed_total = 0
 
     sources.sort.each { |source|
-      source = source.camelize.constantize.new(log)
+      source = source.camelize.constantize.new(create_institutional_uploads: create_institutional_uploads, log: log)
       number_of_current_source += 1
       logger.info "Indexing source #{number_of_current_source}/#{number_of_sources}, #{source.name}..."
 
-      if Indexing::Index.client(log).indices.exists_alias(name: source.name)
-        current_index_name = Indexing::Index.client(log).indices.get_alias(name: source.name).keys[0].dup
-        current_index_count = current_index_name.split("_")[-1].to_i
+      s = Source.find_by_name(source.name)
+
+      if s && s.type == 'upload'
+        records_indexed = s.index
       else
-        current_index_count = 0
+        if Indexing::Index.client(log).indices.exists_alias(name: source.name)
+          current_index_name = Indexing::Index.client(log).indices.get_alias(name: source.name).keys[0].dup
+          current_index_count = current_index_name.split("_")[-1].to_i
+        else
+          current_index_count = 0
+        end
+
+        new_index_name = source.name + "_" + (current_index_count + 1).to_s
+
+        Indexing::Index.delete(new_index_name, log)
+        Indexing::Index.create(new_index_name, log)
+
+        # Ensure cluster health so that the new index is actually ready to
+        # be used (set 10s timeout though).
+        path = "_cluster/health/#{new_index_name}?wait_for_status=green&timeout=10s"
+        Indexing::Index.client(log).perform_request('GET', path)
+
+        records_indexed = source.index(current_index_count, log)
       end
-
-      new_index_name = source.name + "_" + (current_index_count + 1).to_s
-
-      Indexing::Index.delete(new_index_name, log)
-      Indexing::Index.create(new_index_name, log)
-
-      # Ensure cluster health so that the new index is actually ready to
-      # be used (set 10s timeout though).
-      path = "_cluster/health/#{new_index_name}?wait_for_status=green&timeout=10s"
-      Indexing::Index.client(log).perform_request('GET', path)
-
-      records_indexed = source.index(current_index_count, log)
 
       remaining_sources = remaining_sources - [source.name]
 
@@ -164,8 +171,9 @@ class Indexing::SourceParent
   # Instance methods
   #############################################################################
 
-  def initialize(log = false)
+  def initialize(create_institutional_uploads: false, log: false)
     self.name = self.class.name.split('::').last.underscore
+    @create_institutional_uploads = create_institutional_uploads
     @index = Indexing::Index.new(log)
   end
 
@@ -274,17 +282,85 @@ class Indexing::SourceParent
                                         is_time_searchable: respond_to?('date_range'),
                                         record_count: @records_created)
 
+    logger.info "-" * 100
     index_ratings(name)
+    logger.info "-" * 100
     index_comments(name)
+    logger.info "-" * 100
+    index_image_vectors(name)
+    logger.info "-" * 100
 
-    # Remove original and resized images in development and staging.
-    if Rails.env.development? || `hostname`.delete("\n") == 'prometheus2.uni-koeln.de'
+    if @create_institutional_uploads
+      Pandora::DilpsImporter.new(name).import
+      logger.info "-" * 100
+    end
+
+    # Remove original and resized images on staging in order to see
+    # if the can still be requested successfully.
+    #
+    # Surrounding a system command with backticks executes the command
+    # and returns the output as string.
+    if `hostname`.delete("\n") == 'prometheus2.uni-koeln.de'
       logger.info "-" * 100
       Pandora::ImagesDir.new.delete_upstream_images(name)
       logger.info "-" * 100
     end
 
     @records_created
+  end
+
+  # Index image vectors.
+  #
+  # @param index_name [String] The name of the index.
+  # @param log [Boolean] Enable the log.
+  def index_image_vectors(index_name = "_all", log = false)
+    if File.exists?(vectors_file = File.join(ENV['PM_VECTORS_DIR'], '/', "#{name}.json"))
+      logger.info "Parsing image vectors file..."
+      image_vectors = JSON.parse(File.read(vectors_file))
+    else
+      logger.info "No image vectors file available..."
+      return
+    end
+
+    image_vectors_indexed = 0
+    image_vectors_count = image_vectors.size.to_s
+    elastic = Pandora::Elastic.new
+    bulk = []
+
+    benchmark = Benchmark.realtime {
+      logger.info "Image vectors counted: " + image_vectors_count
+
+      if @index.client.indices.exists? index: index_name
+        image_vectors.each do |image_vector|
+          field_validator = Indexing::FieldValidator.new
+          field_validator.validate('image_vector', image_vector['vector'])
+
+          begin
+            bulk += [
+              {'update' => {'_index' => index_name, '_id' => image_vector['img_id']}},
+              {'doc' => field_validator.validated_fields}
+            ] if !field_validator.validated_fields.nil?
+
+            image_vectors_indexed += 1
+
+            if bulk.size >= 1000
+              elastic.bulk bulk
+              bulk = []
+              printf "\rImage vectors indexed: #{image_vectors_indexed}" unless Rails.env.test?
+            end
+          rescue Exception => e
+            logger.error "\n" + e.message
+            logger.error " Image vectors update failed..."
+            logger.error image_vector.inspect
+          end
+        end
+
+        elastic.bulk bulk, query_parameters: {'refresh': true}
+        printf "\rImage vectors indexed: #{image_vectors_indexed}" unless Rails.env.test?
+      end
+    }
+    logger.info "\nFinished in #{benchmark} s."
+    image_vectors_indexed
   end
 
   # Index all rating records available at Rating model.
@@ -312,7 +388,7 @@ class Indexing::SourceParent
           begin
             @index.client.update index: rating_index,
                                  id: rating.pid,
-                                 body: { doc: field_validator.fields },
+                                 body: { doc: field_validator.validated_fields },
                                  refresh: true
 
             ratings_indexed += 1
@@ -361,7 +437,7 @@ class Indexing::SourceParent
           begin
             @index.client.update index: comment_index,
                                  id: comment.image_id,
-                                 body: { doc: field_validator.fields },
+                                 body: { doc: field_validator.validated_fields },
                                  refresh: true
 
             comments_indexed += 1
@@ -470,44 +546,9 @@ class Indexing::SourceParent
 
     Indexing::JsonSource.new(json_file)
   end
-  
+
   def process_record_id(record_id)
-    if !record_id.is_a?(Array)
-      if record_id.is_a?(String)
-        record_id = [record_id]
-      elsif record_id.is_a?(Nokogiri::XML::Text)
-        record_id = [record_id.content]
-      elsif record_id.is_a?(Nokogiri::XML::NodeSet)
-        record_id = record_id.to_a
-      else
-        raise Pandora::Exception, "a record ID should be a String, Nokogiri::XML::Text, or Nokogiri::XML::NodeSet, not a #{record_id.class}"
-      end
-    end
-    [name, Digest::SHA1.hexdigest(Array(record_id).join('|'))].join('-')
-  end
-
-  def process_path(path)
-    path = path.to_s.strip
-    URI.escape(path, Regexp.union(URI::UNSAFE, /[\[\]]/))
-  end
-
-  def process_node_set(node_set)
-    if node_set.is_a?(String)
-      node_set_array = [node_set]
-    elsif node_set.is_a?(Nokogiri::XML::Text) || node_set.is_a?(Date)
-      node_set_array = [node_set.to_s]
-    else
-      node_set_array = node_set.to_a
-    end
-    node_set_array.map! { |node|
-      node = node.to_s
-      node = node.strip
-      # Always remove empty brackets with any leading whitespace character
-      node = node.gsub(/\s*\(\)/, "")
-    }
-    node_set_array.delete_if { |node|
-      node.blank?
-    }
+    Indexing::FieldProcessor.new.process_record_id(record_id, name)
   end
 
   private
@@ -560,10 +601,11 @@ class Indexing::SourceParent
       elsif self.respond_to?("records_to_exclude") && records_to_exclude.include?(record_id.to_s)
         @records_excluded += 1
       else
-        body = Indexing::FieldValidator.new(self, Rails.configuration.x.athene_search_fields['display'] + ['rating_count', 'rating_average', 'comment_count', 'user_comments']).run
+        processed_fields = Indexing::FieldProcessor.new(source: self, field_keys: Indexing::IndexFields.index).run
+        validated_fields = Indexing::FieldValidator.new(processed_fields: processed_fields).run
 
         # Does the processed record ID already exist? If so, then update.
-        if @index.client.exists? index: new_index_name, id: body['record_id']
+        if @index.client.exists? index: new_index_name, id: validated_fields['record_id']
           @records_updated += 1
         else
           @records_created += 1
@@ -575,11 +617,12 @@ class Indexing::SourceParent
         # @TODO: check if we also need partial updates, e.g.:
         # https://www.elastic.co/guide/en/elasticsearch/guide/current/partial-updates.html
         @index.client.index index: new_index_name,
-                            id: body['record_id'],
-                            body: body,
+                            id: validated_fields['record_id'],
+                            body: validated_fields,
                             refresh: false
         @records_indexed += 1
       end
+
       printf "\rRecords created: #{@records_created} | updated: #{@records_updated} (indexed in total: #{@records_indexed}) | excluded: #{@records_excluded}" unless Rails.env.test?
     end
 

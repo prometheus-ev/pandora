@@ -217,124 +217,126 @@ class SearchTest < ApplicationSystemTestCase
     end
   end
 
-  test "honor user's search settings" do
-    login_as 'jdoe'
+  if production_sources_available?
+    test "honor user's search settings" do
+      login_as 'jdoe'
 
-    # check without specific settings
-    fill_in 'search_value_0', with: 'baum'
-    find('.search_query .submit_button').click
-    assert_text 'Record 1 - 10'
-    assert has_select?('order', selected: 'Relevance')
-    assert has_link?('Sort ascending') # the default should be descending for order by relevance
-    assert_css('.pm-top [id=link-to-list].inactive') # so the current view is the list
-    assert has_css?('.toggle_results_zoom[_zoom_enabled=true]')
+      # check without specific settings
+      fill_in 'search_value_0', with: 'baum'
+      find('.search_query .submit_button').click
+      assert_text 'Record 1 - 10'
+      assert has_select?('order', selected: 'Relevance')
+      assert has_link?('Sort ascending') # the default should be descending for order by relevance
+      assert_css('.pm-top [id=link-to-list].inactive') # so the current view is the list
+      assert has_css?('.toggle_results_zoom[_zoom_enabled=true]')
 
-    within '.list_controls:last-child' do
-      select 'Rating average', from: 'order'
-      assert has_link?('Sort ascending')
-      select 'Rating count', from: 'order'
-      assert has_link?('Sort ascending')
-      select 'Artist', from: 'order'
-      assert has_link?('Sort descending')
-      select 'Title', from: 'order'
-      assert has_link?('Sort descending')
-      select 'Location', from: 'order'
-      assert has_link?('Sort descending')
-      select 'Date', from: 'order'
-      assert has_link?('Sort descending')
-      select 'Credits', from: 'order'
-      assert has_link?('Sort descending')
-      select 'Rights work', from: 'order'
-      assert has_link?('Sort descending')
-      select 'Rights reproduction', from: 'order'
-      assert has_link?('Sort descending')
+      within '.list_controls:last-child' do
+        select 'Rating average', from: 'order'
+        assert has_link?('Sort ascending')
+        select 'Rating count', from: 'order'
+        assert has_link?('Sort ascending')
+        select 'Artist', from: 'order'
+        assert has_link?('Sort descending')
+        select 'Title', from: 'order'
+        assert has_link?('Sort descending')
+        select 'Location', from: 'order'
+        assert has_link?('Sort descending')
+        select 'Date', from: 'order'
+        assert has_link?('Sort descending')
+        select 'Credits', from: 'order'
+        assert has_link?('Sort descending')
+        select 'Rights work', from: 'order'
+        assert has_link?('Sort descending')
+        select 'Rights reproduction', from: 'order'
+        assert has_link?('Sort descending')
+      end
+
+      # change the settings
+      click_on 'Your profile'
+      open_section 'search_settings'
+      within '#search_settings-section' do
+        select 'Rating average', from: 'Sort order for result list'
+        fill_in 'Number of results per page', with: 5
+        select 'Gallery', from: 'Preferred view'
+        uncheck 'Zoom thumbnails?'
+        submit
+      end
+      assert_text 'successfully updated'
+
+      # verify settings' effect
+      click_on 'Search'
+      fill_in 'search_value_0', with: 'baum'
+      find('.search_query .submit_button').click
+      assert_text 'Record 1 - 5'
+      assert has_select?('order', selected: 'Rating average')
+      assert has_link?('Sort ascending') # so the current direction is descending
+      assert_css('.pm-top [id=link-to-gallery].inactive') # so the current view is the gallery
+      assert has_css?('.toggle_results_zoom[_zoom_enabled=false]')
     end
 
-    # change the settings
-    click_on 'Your profile'
-    open_section 'search_settings'
-    within '#search_settings-section' do
-      select 'Rating average', from: 'Sort order for result list'
-      fill_in 'Number of results per page', with: 5
-      select 'Gallery', from: 'Preferred view'
-      uncheck 'Zoom thumbnails?'
+    test "search page one if sort order direction is changed" do
+      login_as 'jdoe'
+      fill_in 'search_value_0', with: '*'
+      find('.search_query .submit_button').click
+      all('.icon_next').first.click
+      all('.sort_icon').first.click
+
+      assert_equal '1', all("input[name='page']").first['placeholder']
+    end
+
+    test 'credits teaser display' do
+      pid = 'daumier-8df60ef14b6d3bc59245b53ae247f3783bb60abb'
+
+      elastic = Pandora::Elastic.new
+      record = elastic.record(pid)
+      record['_source']['credits'] = 30.times.map{|i| "lorem #{i} ipsum is a long sentence with little message!"}
+      record['_source']['credits'] += [
+        'https://wendig.io',
+        'Wendig OÜ,https://wendig.io',
+        "Musée Carnavalet, Paris Musées,http://parismuseescollections.paris.fr/"
+      ]
+      elastic.update('daumier', pid, record['_source'])
+      elastic.refresh
+
+      login_as 'jdoe'
+      fill_in 'search_value_0', with: 'ipsum'
       submit
+      
+      credits = find('td.credits-field')
+      assert credits.text.size <= 500
+      assert_match /more/, credits.text
+      
+      find('td.credits-field').find('span.a.dim').click
+      assert_link 'https://wendig.io'
+      assert_link 'Wendig OÜ', href: 'https://wendig.io'
+      assert_link 'Musée Carnavalet, Paris Musées', href: 'http://parismuseescollections.paris.fr/'
+      
+      # check proper link rendering when truncation doesn't kick in
+      record['_source']['credits'] = [
+        'ipsum',
+        "Musée Carnavalet, Paris Musées,http://parismuseescollections.paris.fr/"
+      ]
+      elastic.update('daumier', pid, record['_source'])
+      elastic.refresh
+      reload_page
+      assert_link 'Musée Carnavalet, Paris Musées', href: 'http://parismuseescollections.paris.fr/'
     end
-    assert_text 'successfully updated'
 
-    # verify settings' effect
-    click_on 'Search'
-    fill_in 'search_value_0', with: 'baum'
-    find('.search_query .submit_button').click
-    assert_text 'Record 1 - 5'
-    assert has_select?('order', selected: 'Rating average')
-    assert has_link?('Sort ascending') # so the current direction is descending
-    assert_css('.pm-top [id=link-to-gallery].inactive') # so the current view is the gallery
-    assert has_css?('.toggle_results_zoom[_zoom_enabled=false]')
-  end
+    test 'missing image source' do
+      login_as 'jdoe'
 
-  test "search page one if sort order direction is changed" do
-    login_as 'jdoe'
-    fill_in 'search_value_0', with: '*'
-    find('.search_query .submit_button').click
-    all('.icon_next').first.click
-    all('.sort_icon').first.click
+      fill_in 'search_value_0', with: 'baum'
+      find('.search_query .submit_button').click
 
-    assert_equal '1', all("input[name='page']").first['placeholder']
-  end
+      # now we delete the source from a specific image and reload the page
+      image = Image.find_by! pid: 'daumier-cf03d626ef05e83c0b610b864a95f256dea8de2a'
+      image.update_column :source_id, nil
+      reload_page
 
-  test 'credits teaser display' do
-    pid = 'daumier-8df60ef14b6d3bc59245b53ae247f3783bb60abb'
-
-    elastic = Pandora::Elastic.new
-    record = elastic.record(pid)
-    record['_source']['credits'] = 30.times.map{|i| "lorem #{i} ipsum is a long sentence with little message!"}
-    record['_source']['credits'] += [
-      'https://wendig.io',
-      'Wendig OÜ,https://wendig.io',
-      "Musée Carnavalet, Paris Musées,http://parismuseescollections.paris.fr/"
-    ]
-    elastic.update('daumier', pid, record['_source'])
-    elastic.refresh
-
-    login_as 'jdoe'
-    fill_in 'search_value_0', with: 'ipsum'
-    submit
-    
-    credits = find('td.credits-field')
-    assert credits.text.size <= 200
-    assert_match /more/, credits.text
-    
-    find('td.credits-field').find('span.a.dim').click
-    assert_link 'https://wendig.io'
-    assert_link 'Wendig OÜ', href: 'https://wendig.io'
-    assert_link 'Musée Carnavalet, Paris Musées', href: 'http://parismuseescollections.paris.fr/'
-    
-    # check proper link rendering when truncation doesn't kick in
-    record['_source']['credits'] = [
-      'ipsum',
-      "Musée Carnavalet, Paris Musées,http://parismuseescollections.paris.fr/"
-    ]
-    elastic.update('daumier', pid, record['_source'])
-    elastic.refresh
-    reload_page
-    assert_link 'Musée Carnavalet, Paris Musées', href: 'http://parismuseescollections.paris.fr/'
-  end
-
-  test 'missing image source' do
-    login_as 'jdoe'
-
-    fill_in 'search_value_0', with: 'baum'
-    find('.search_query .submit_button').click
-
-    # now we delete the source from a specific image and reload the page
-    image = Image.find_by! pid: 'daumier-cf03d626ef05e83c0b610b864a95f256dea8de2a'
-    image.update_column :source_id, nil
-    reload_page
-
-    # this used to raise errors because super_image wouldn't ensure the source
-    # on the image provided to the constructor
-    assert_text 'Femme sous un arbre'
+      # this used to raise errors because super_image wouldn't ensure the source
+      # on the image provided to the constructor
+      assert_text 'Femme sous un arbre'
+    end
   end
 
   # TODO: see https://prometheus-srv1.uni-koeln.de/redmine/projects/prometheus/wiki/2018-11-19

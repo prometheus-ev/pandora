@@ -1,4 +1,21 @@
 class Indexing::SourceSuper < Indexing::SourceParent
+  def record_id_original
+    record_id
+  end
+
+  def miro?
+    @miro_record_ids ||= Rails.configuration.x.athene_search_record_ids['miro'][name]
+
+    if @miro_record_ids.include?(process_record_id(record_id)) && !@create_institutional_uploads
+      true
+    else
+      false
+    end
+  end
+
+  def miro
+    'miro'
+  end
 
   def date_range_from
     if date_range
@@ -118,6 +135,7 @@ class Indexing::SourceSuper < Indexing::SourceParent
 
     @date = nil
     @date_range = nil
+    @_credits = nil # darmstadt_tu
   end
 
   def date_range?
@@ -127,7 +145,8 @@ class Indexing::SourceSuper < Indexing::SourceParent
   def artist_normalized(artist)
     @artist_attributions ||= Rails.configuration.x.indexing_artist_attributions['attributions']
 
-    artist.to_a.map! { |a|
+    artist = artist.to_a
+    artist.map! { |a|
       a = a.to_s.encode(Encoding::UTF_8)
 
       @artist_attributions.each { |artist_attribution|
@@ -202,6 +221,7 @@ class Indexing::SourceSuper < Indexing::SourceParent
 
     if respond_to?(:artist_normalized) && artist_normalized.to_a.any? { |a| @vgbk_artists_list.include?(a.to_s.downcase.encode(Encoding::UTF_8)) }
       if respond_to?(:date_range) && date_range?
+        # See #181.
         if date_range.to > (Time.now - 100.years)
           true
         else

@@ -25,7 +25,7 @@ class SidebarTest < ApplicationSystemTestCase
     using_wait_time 10 do
       within '#sidebar' do
         assert_text 'by John Doe'
-        assert_text "John's collaboratio..."
+        assert_text "John's collaborat..."
 
         assert_css '.thumbnail', count: 6
         find('.icon_next').click
@@ -44,7 +44,7 @@ class SidebarTest < ApplicationSystemTestCase
     within '#sidebar' do
       assert_no_text 'by N.N.'
       assert_text 'by John Doe'
-      assert_text "John's collaboratio..."
+      assert_text "John's collaborat..."
 
       within '#boxes' do
         find("#boxes div[title=Open]").click
@@ -69,34 +69,37 @@ class SidebarTest < ApplicationSystemTestCase
 
     within '#sidebar' do
       assert_text 'Jean-Baptiste ' # ... Dupont: A Upload
+      
+      dismiss_confirm do
+        find('div.close').click
+      end
+      assert_text 'Jean-Baptiste'
 
       accept_confirm do
         find('div.close').click
       end
-    end
-
-    within '#sidebar' do
+      
       assert_no_text 'Jean-Baptiste'
     end
   end
-
+  
   test 'render box with outdated params' do
     jdoe = Account.find_by! login: 'jdoe'
 
     image = Upload.last.image
-    ImageBox.create!({
+    Box.create!(
+      ref_type: 'image',
       owner_id: jdoe.id,
       image_id: image.id,
-      params: {controller: 'image', action: 'show', pid: image.id}
-    }, without_protection: true)
+    )
 
     collection = Collection.find_by! title: "John's private collection"
     collection.images << image
-    CollectionBox.create!({
+    Box.create!(
+      ref_type: 'collection',
       owner_id: jdoe.id,
       collection_id: collection.id,
-      params: {controller: 'collection', action: 'show', id: collection.id}
-    }, without_protection: true)
+    )
 
     login_as 'jdoe'
     visit '/en'
@@ -107,4 +110,6 @@ class SidebarTest < ApplicationSystemTestCase
   # test 'reorder boxes'
   # 2021-05-02: tried to implement this test but capybara isn't there yet: the
   # element can be dragged but not to a specific location within an element
+
+  # test "can't view restricted box content"
 end

@@ -10,11 +10,143 @@ class IndexingTest < ApplicationSystemTestCase
     Pandora::Elastic.new.destroy_index('test*')
   end
 
+  test 'vgbk link with pknd rudolf bauer' do
+    TestSourceVgbk.index
+
+    login_as 'jdoe'
+
+    find_link('Advanced search').find('div').click
+
+    within '.pm-source-list' do
+      uncheck 'all'
+      within '.pm-groups > li', text: '<Kind> Databases (0/1)' do
+        find('.pm-toggle a').click
+        check 'indices[test_source_vgbk]'
+      end
+    end
+
+    fill_in 'search_value_0', with: 'R. Bauer'
+    submit 'Search'
+
+    page.assert_selector('.list_row', count: 1)
+  end
+
+  test 'index synonyms masternames' do
+    TestSourceMasternames.index
+    login_as 'jdoe'
+
+    find_link('Advanced search').find('div').click
+
+    within '.pm-source-list' do
+      uncheck 'all'
+      within '.pm-groups > li', text: '<Kind> Databases (0/1)' do
+        find('.pm-toggle a').click
+        check 'indices[test_source_masternames]'
+      end
+    end
+
+    fill_in 'search_value_0', with: 'Veronikameister'
+    submit 'Search'
+
+    page.assert_selector('.list_row', count: 3)
+
+    fill_in 'search_value_0', with: ''
+    fill_in 'search_value_1', with: 'Veronikameister'
+    submit 'Search'
+
+    page.assert_selector('.list_row', count: 3)
+  end
+
+  test 'index synonym de en' do
+    TestSourceDeEn.index
+
+    login_as 'jdoe'
+
+    find_link('Advanced search').find('div').click
+
+    within '.pm-source-list' do
+      uncheck 'all'
+      within '.pm-groups > li', text: '<Kind> Databases (0/1)' do
+        find('.pm-toggle a').click
+        check 'indices[test_source_de_en]'
+      end
+    end
+
+    fill_in 'search_value_0', with: 'müller'
+    submit 'Search'
+
+    page.assert_selector('.list_row', count: 3)
+
+    fill_in 'search_value_0', with: ''
+    fill_in 'search_value_1', with: 'müller'
+    submit 'Search'
+
+    page.assert_selector('.list_row', count: 2)
+  end
+
+  test 'asterisk search order' do
+    TestSourceOrder.index
+    login_as 'jdoe'
+
+    find_link('Advanced search').find('div').click
+
+    within '.pm-source-list' do
+      uncheck 'all'
+      within '.pm-groups > li', text: '<Kind> Databases (0/1)' do
+        find('.pm-toggle a').click
+        check 'indices[test_source_order]'
+      end
+    end
+
+    fill_in 'search_value_0', with: '*'
+    submit 'Search'
+
+    assert_field 'order', with: 'title'
+    assert_link 'Sort descending' # so current direction is 'ascending'
+    fill_in 'search_value_0', with: ''
+
+    fill_in 'search_value_1', with: '*'
+    submit 'Search'
+
+    assert_field 'order', with: 'artist'
+    assert_link 'Sort descending' # so current direction is 'ascending'
+    fill_in 'search_value_1', with: ''
+
+    fill_in 'search_value_2', with: '*'
+    submit 'Search'
+
+    assert_field 'order', with: 'title'
+    assert_link 'Sort descending' # so current direction is 'ascending'
+    fill_in 'search_value_2', with: ''
+
+    fill_in 'search_value_3', with: '*'
+    submit 'Search'
+
+    assert_field 'order', with: 'location'
+    assert_link 'Sort descending' # so current direction is 'ascending'
+    fill_in 'search_value_3', with: ''
+
+    fill_in 'search_value_0', with: '*'
+    fill_in 'search_value_1', with: '*'
+    submit 'Search'
+
+    assert_field 'order', with: 'title'
+    assert_link 'Sort descending' # so current direction is 'ascending'
+    assert_text "Please use the '*' search in one search field only. The first one has been used for this search."
+
+    fill_in 'search_value_0', with: '*'
+    fill_in 'search_value_1', with: 'Albrecht'
+    submit 'Search'
+
+    assert_field 'order', with: 'relevance'
+    assert_link 'Sort ascending' # so current direction is 'descending'
+    assert_text "Please do not use the '*' search in combination with other search values. '*' inputs have been removed for this search."
+  end
+
   test 'artist array field ordering' do
     skip 'Waiting for Elastic forum feedback...'
 
     TestSourceOrder.index
-
     login_as 'jdoe'
 
     find_link('Advanced search').find('div').click
@@ -78,9 +210,7 @@ class IndexingTest < ApplicationSystemTestCase
     fill_in 'search_value_1', with: 'Michel Angelo Bonarota'
     submit 'Search'
 
-    # TODO: there is no synonym for this in the test pknd.txt, but perhaps there
-    # should be?
-    # page.assert_selector('.list_row', count: 1)
+    page.assert_selector('.list_row', count: 1)
   end
 
   test 'index vgbk expired artist' do

@@ -16,19 +16,21 @@
     <td><%= f.text_area :body_en, :size => '46x12', :class => 'mandatory' %></td>
   </tr>
   <tr>
-    <th><%= f.label :starts_at, 'Starts at'.t + " (#{'GMT'.t})" %></th>
+    <th><%= f.label :starts_at, 'Starts at'.t + " (#{Time.zone.name})" %></th>
     <td class="date_select">
-      <!-- REWRITE: options_for_field is not required anymore -->
-      <%#= f.datetime_select :starts_at, options_for_field(:starts_at, :start_year => year, :default => 1.week.from_now) %>
-        <%= f.datetime_select :starts_at, :start_year => (@announcement && @announcement.starts_at ? @announcement.starts_at.year : year) %>
+      <%= f.datetime_select(:starts_at,
+        start_year: (@announcement && @announcement.starts_at ? @announcement.starts_at.year : year),
+        default: 1.week.from_now
+      ) %>
     </td>
   </tr>
   <tr>
-    <th><%= f.label :ends_at, 'Ends at'.t + " (#{'GMT'.t})" %></th>
+    <th><%= f.label :ends_at, 'Ends at'.t + " (#{Time.zone.name})" %></th>
     <td class="date_select">
-      <!-- REWRITE: options_for_field is not required anymore -->
-      <%#= f.datetime_select :ends_at, options_for_field(:ends_at, :start_year => year, :default => 1.week.from_now) %>
-      <%= f.datetime_select :ends_at, :start_year => ((@announcement && @announcement.ends_at) ? @announcement.ends_at.year : year) %>
+      <%= f.datetime_select(:ends_at,
+        start_year: (@announcement && @announcement.ends_at ? @announcement.ends_at.year : year),
+        default: 1.week.from_now
+      ) %>
     </td>
   </tr>
   <tr>

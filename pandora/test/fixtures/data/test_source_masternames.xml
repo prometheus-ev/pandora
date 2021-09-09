@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<source>
+  <row>
+    <id>1</id>
+    <path>path1</path>
+    <artist>Meister der Hl. Veronika</artist>
+    <title>Title 1</title>
+    <location>Location 1</location>
+  </row>
+  <row>
+    <id>2</id>
+    <path>path2</path>
+    <artist>Meister der Heiligen Veronika</artist>
+    <title>Title 2</title>
+    <location>Location 2</location>
+  </row>
+  <row>
+    <id>3</id>
+    <path>path3</path>
+    <artist>Master of St. Veronica</artist>
+    <title>Title 3</title>
+    <location>Location 3</location>
+  </row>
+</source>

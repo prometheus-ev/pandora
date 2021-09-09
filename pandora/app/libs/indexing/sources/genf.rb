@@ -8,12 +8,9 @@ class Indexing::Sources::Genf < Indexing::SourceSuper
   end
 
   def path
-    @miro_record_ids ||= Rails.configuration.x.athene_search_record_ids['miro'][name]
-    if @miro_record_ids.include?(process_record_id(record_id))
-      "miro"
-    else
-      "HISBinObjH_P?ID1=#{record.xpath('.//HA_FICHES_ID/text()')}"
-    end
+    return miro if miro?
+
+    "HISBinObjH_P?ID1=#{record.xpath('.//HA_FICHES_ID/text()')}"
   end
 
   # künstler

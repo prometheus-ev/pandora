@@ -1,9 +1,10 @@
-<%= page_title %>
+<h2 class="page_title"><%= 'Conference signup confirmation'.t %></h2>
 
-<p>Vielen Dank für Ihre Anmeldung zur Tagung „Daten^7 – Digitales BilderLeben"
-am 1./2. Oktober 2019 in Köln.</p>
+<p>
+Vielen Dank für Ihre Anmeldung zur virtuellen Tagung „<%= Pandora::ConferenceSignup::TITLE %>“ vom <%= Pandora::ConferenceSignup::DATE %>.
+</p>
 
 <p>
   <%= link_to '» Register an additional participant'.t, action: 'conference_signup' %><br>
-  <%= link_to '» Conference page'.t, 'http://prometheus-bildarchiv.de/tagung2019/index' %>
+  <%= link_to '» Conference page'.t, 'http://prometheus-bildarchiv.de/tagung2021/index' %>
 </p>

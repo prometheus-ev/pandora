@@ -1,0 +1,26 @@
+<%= truncated(value.map { |v|
+  if !v.is_a?(String) && v.respond_to?(:to_s)
+    v = v.to_s
+  end
+  if v.include?(",http")
+    if v.include?("%")
+      arr = v.split("%")
+      str = ""
+      (0..(arr.count-1)).each do|index|
+        if !index.odd?
+          str << arr[index]
+        else
+          str << link_to_links(arr[index])
+        end
+      end
+      str
+    else
+      link_to_links(v)
+    end
+  else
+    sanitize(v)
+  end
+}.join(" | ").html_safe, 280, :escape => false) %>
+<% unless (artist_normalized = super_image.docvalue_field('artist_normalized')).blank? %>
+  <%= image_tag('misc/info_form_field.gif', :class => 'dim', :title => "Indexed version".t + " (" + "normalized and synonyms if available".t + "): " + artist_normalized.join(', ')) %>
+<% end %>

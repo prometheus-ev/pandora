@@ -34,7 +34,11 @@
     <% end %>
 
     <div class="popup_footer nowrap">
-      <%= add_to_sidebar('image', true, :controller => 'images', :action => 'show', :id => super_image.pid) %>
+      <% data = {type: 'image', id: super_image.pid} %>
+      <%= link_to '#', class: 'pm-to-sidebar', data: data do %>
+        <%= image_tag 'misc/add_to_sidebar.gif' %>
+        <%= 'Add image to sidebar'.t %>
+      <% end %>
     </div>
   </div>
 </div>

@@ -11,10 +11,11 @@ namespace :pandora do
       Indexing::IndexTasks.new(verbose: true).dump(index_arg)
     end
 
-    desc 'load one, several, or all backup indices into elasticsearch (see dump task for selection)'
+    desc 'load one, several, or all backup indices into elasticsearch (e.g INDEX="daumier robertin", or INDEX="all"); update mapping (optional, e.g. UPDATE_MAPPING=true)'
     task load: :environment do
       index_arg = (ENV['INDEX'] || '').downcase.split(/\s+/)
-      Indexing::IndexTasks.new(verbose: true).load(index_arg)
+      update_mapping_arg = ENV['UPDATE_MAPPING'] == 'true' ? true : false
+      Indexing::IndexTasks.new(verbose: true).load(index_arg, update_mapping_arg)
     end
 
     desc 'drop one, several, or all indices (see dump task for selection)'

@@ -12,17 +12,22 @@
   <% admins = @institution.active_admins -%>
   <legend><strong>Local administrators:</strong></legend>
   <% if admins.blank? -%>
-  <% unless @user.useradmin_like? -%>
-    There is no administrator at your institution.<br />
-  <% end -%>
+    <% unless @user.useradmin_like? -%>
+      There is no administrator at your institution.<br />
+    <% end -%>
     You will receive your account from the <span class="prometheus">prometheus</span> office.<br />
     Please send your verification (student ID or similar) by e-mail, by fax or by mail to the
     <%= link_to 'prometheus office', home_url('contact') %>.
   <% else -%>
     <ul>
-    <% for admin in admins -%>
-      <li><%= link_to_admin_profile_with_email(admin) %></li>
-    <% end -%>
+      <% admins.each do |admin| %>
+        <li>
+          <%= mail_to admin.email do %>
+            <%= admin.fullname %>
+            <%= image_tag 'misc/email.gif' %>
+          <% end %>
+        </li>
+      <% end %>
     </ul>
   <% end -%>
 </fieldset>

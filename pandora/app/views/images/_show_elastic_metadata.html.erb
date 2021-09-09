@@ -12,7 +12,9 @@
             <% end %>
           </th>
           <td class="<%= field %>-field">
-            <% if field == 'credits' %>
+            <% if field == 'artist' %>
+              <%= render :partial => 'artist', :locals => { value: value, super_image: super_image } %>
+            <% elsif field == 'credits' %>
               <% if value.is_a? Array %>
                 <%= value.map { |credit|
                   show_credit(credit)
@@ -25,9 +27,7 @@
             <% elsif field == 'rights_reproduction' %>
               <%= render partial: 'rights_reproduction', locals: {rights_reproduction: Array.wrap(value)} %>
             <% elsif field == 'keywords' %>
-              <% value.each do |keywords| %>
-                <%= list_search_links_for(:keywords, keywords.map { |k| [k.title, k.title.t] }, :controller => 'uploads', :action => 'index') %>
-              <% end %>
+              <%= render partial: 'keywords', locals: {keywords: Array.wrap(value), super_image: super_image } %>
             <% elsif field == 'keyword_artigo' %>
               <% value.each do |v| %>
                 <% keyword = v.split(",") %>

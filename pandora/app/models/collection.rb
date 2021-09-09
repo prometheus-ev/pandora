@@ -234,7 +234,8 @@ class Collection < ApplicationRecord
     owned_by(user).
     joins('LEFT JOIN collections_collaborators cc ON cc.collection_id = collections.id').
     joins('LEFT JOIN collections_viewers AS cv ON cv.collection_id = collections.id').
-    where('cc.account_id IS NOT NULL OR cv.account_id IS NOT NULL')
+    where('cc.account_id IS NOT NULL OR cv.account_id IS NOT NULL').
+    distinct
   end
 
   def self.search(field, value)
@@ -336,6 +337,59 @@ class Collection < ApplicationRecord
     end
 
     counts
+  end
+
+  # returns the images for the current collection as a Pandora::Collection
+  # observing user permissions
+  def images_pandora_collection(account, opts = {})
+    items = owned_or_administered_uploads(account)
+      .search(opts[:search_column], opts[:search_value])
+
+    if ['title', 'artist', 'location', 'credits'].include?(opts[:sort_column])
+      # we can't use AR scopes for this because the data might be in the uploads
+      # table or elasticsearch
+      items = items.map do |i|
+        Pandora::SuperImage.from(i, upload: i.upload, source: i.source)
+      end
+      items = items.to_a.sort_by{|si| si.send(opts[:sort_column]) || ''}
+      items = items.reverse if opts[:sort_direction] == 'desc'
+
+      Pandora::Collection.new(
+        items.slice((opts[:page] - 1) * opts[:per_page], opts[:per_page]) || [],
+        items.size,
+        opts[:page],
+        opts[:per_page]
+      )
+    else
+      # we keep a ref to the unsorted items because sorting by comments adds
+      # a group by clause which then confuses items.count below
+      unsorted_items = items
+
+      items = items.sorted(opts[:sort_column], opts[:sort_direction])
+      paged_images = items.
+        pageit(opts[:page], opts[:per_page]).
+        map{|i| Pandora::SuperImage.from(i)}
+
+      Pandora::Collection.new(
+        paged_images,
+        unsorted_items.count,
+        opts[:page],
+        opts[:per_page]
+      )
+    end
+  end
+
+  def owned_or_administered_uploads(account)
+    images.
+      includes(:upload, source: :institution).
+      references(:upload).
+      joins("left outer join uploads on images.pid = uploads.image_id").
+      joins("left outer join sources on uploads.database_id = sources.id").
+      joins("left outer join admins_sources on sources.id = admins_sources.source_id").
+      where("uploads.approved_record OR uploads.id IS NULL OR
+        ((sources.owner_type like 'Account' AND sources.owner_id = #{account.id}) OR
+        (sources.owner_type like 'Institution' AND admins_sources.account_id = #{account.id}))
+      ")
   end
 
   # association callback to make sure that the thumbnail_id

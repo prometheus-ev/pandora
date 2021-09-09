@@ -36,17 +36,15 @@ class Indexing::Sources::Hamburg < Indexing::SourceSuper
   end
 
   def path
-    @miro_record_ids ||= Rails.configuration.x.athene_search_record_ids['miro'][name]
-    if @miro_record_ids.include?(process_record_id(record_id))
-      "miro"
+    return miro if miro?
+
+    if (full = "#{record.at_xpath('.//files/file/versions/version[@name="full"]/url/text()')}").blank?
+      url = "#{record.at_xpath('.//files/file/versions/version[@name="original"]/url/text()')}"
     else
-      if (full = "#{record.at_xpath('.//files/file/versions/version[@name="full"]/url/text()')}").blank?
-        url = "#{record.at_xpath('.//files/file/versions/version[@name="original"]/url/text()')}"
-      else
-        url = full
-      end
-      url.sub(/http:\/\/kultdokuhh.fbkultur.uni-hamburg.de\//, '').sub(/http:\/\/localhost\//, '').sub(/https:\/\/kultdokuhh4.fbkultur.uni-hamburg.de\//,'').sub(/https:\/\/kultdokuhh-4.fbkultur.uni-hamburg.de\//,'')
+      url = full
     end
+
+    url.sub(/http:\/\/kultdokuhh.fbkultur.uni-hamburg.de\//, '').sub(/http:\/\/localhost\//, '').sub(/https:\/\/kultdokuhh4.fbkultur.uni-hamburg.de\//,'').sub(/https:\/\/kultdokuhh-4.fbkultur.uni-hamburg.de\//,'')
   end
 
   # künstler

@@ -1,0 +1,21 @@
+<% if allowed?(box.ref, :read) %>
+  <div class="sidebar_box" data-id="<%= box.id %>">
+    <span class="box_handle" title="<%= box.label %>">
+      <%= external_image_tag("sidebar/icon_box_#{box.category}.gif") %>
+      <strong><%= (box.title || "").truncate(20) %></strong>
+    </span>
+    <%= link_to_close_box(box) %>
+    <%= link_to url_for_box(box) do %>
+      <div class="open" title="<%= 'Open'.t %>"></div>
+    <% end %>
+    <%= link_to_toggle_box(box) %>
+    <div
+      class="box_content undim"
+      style="display: <%= box.expanded? ? 'block' : 'none' %>"
+    >
+      <%= render partial: "boxes/#{box.category}_box", locals: {box: box} %>
+    </div>
+  </div>
+<% else %>
+  No box for you!
+<% end %>

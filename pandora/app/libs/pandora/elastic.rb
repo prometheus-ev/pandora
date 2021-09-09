@@ -10,6 +10,44 @@ class Pandora::Elastic
     end
   end
 
+  def image_vector_query(record_id:, query: '*', distance: 'euc', num: 5)
+    alias_name = record_id.split('-').first
+    image_vector = record(record_id)['_source']['image_vector']
+
+    if distance == 'euc'
+      #euclidean
+      score_fn = "doc['image_vector'].size() == 0 ? 0 : 1 / (l2norm(params.vector,'image_vector') + 1.0)"
+    elsif distance == 'cos'
+      #cosine
+      score_fn = "doc['image_vector'].size() == 0 ? 0 : cosineSimilarity(params.vector, 'image_vector') + 1.0"
+    elsif distance == 'man'
+      #manhattan
+      score_fn = "doc['image_vector'].size() == 0 ? 0 : 1 / (l1norm(params.vector,'image_vector') + 1.0)"
+    end
+
+    data = request 'POST', "/#{aliases.join(',')}/_search", {}, {}, {
+      "size": num,
+      "query": {
+        "script_score": {
+          "query": {
+            "query_string": {
+                "query": query
+            }
+          },
+          "script": {
+            "source": score_fn,
+            "params": {
+              "vector": image_vector
+            }
+          }
+        }
+      }
+    }
+
+    require_ok!
+    data
+  end
+
   # https://www.elastic.co/guide/en/elasticsearch/reference/current/search-search.html
   def search(indices, query = {})
     query.merge!(track_total_hits: true)
@@ -109,6 +147,28 @@ class Pandora::Elastic
         'path' => 'not-available'
       }
     )
+=begin
+    index, hash = id.split('-')
+    data = request 'POST', "/#{index}/_search", {}, {}, {
+      'query' => {
+        'bool' => {
+          'filter' => [
+            {'terms' => {'record_id.raw' => [id]}}
+          ]
+        }
+      },
+      docvalue_fields: [{
+        field: "artist_normalized.raw"
+      }]
+    }
+
+    require_ok!
+    if data['hits']['hits'].empty?
+      {'_source' => { 'path' => 'not-available'}}
+    else
+      data['hits']['hits'][0]
+    end
+=end
   end
 
   def records(ids, options = {})
@@ -165,12 +225,12 @@ class Pandora::Elastic
     data
   end
 
-  def bulk(instructions)
+  def bulk(instructions, query_parameters: {})
     return true if instructions.empty?
 
     data = instructions.map{|i| JSON.dump(i)}.join("\n")
     data << "\n"
-    request 'POST', '/_bulk', {}, {}, data
+    request 'POST', '/_bulk', query_parameters, {}, data
     require_ok!
   end
 
@@ -219,6 +279,10 @@ class Pandora::Elastic
     result = request 'DELETE', "/#{index_name}"
     require_ok!
     result
+  end
+
+  def destroy_alias(alias_name)
+    destroy_index index_name_from(alias_name: alias_name)
   end
 
   def destroy_record(record_id)
@@ -407,19 +471,38 @@ class Pandora::Elastic
     index_name = create_index(source.name)
     alias_name = alias_name_from(index_name: index_name)
     tmp_file = Tempfile.new('image_list_')
+    miro_record_ids = Rails.configuration.x.athene_search_record_ids['miro'][alias_name]
+    records_created = 0
 
     source.uploads.each do |upload|
-      upload = upload.attributes
-      record_id = [alias_name, Digest::SHA1.hexdigest(upload['image_id'])].join('-')
-      path = "#{upload['image_id']}.#{upload['filename_extension']}"
+      attributes = upload.attributes
+      attributes['record_id'] = upload.id.to_s
+      attributes['path'] = "#{attributes['image_id']}.#{attributes['filename_extension']}"
+      attributes['keywords'] = upload.keywords.to_a.map{|keyword| keyword.title} if upload.keywords.count > 0
+      attributes['name'] = alias_name
+      processed_fields = Indexing::FieldProcessor.new(source: attributes, field_keys: Indexing::IndexFields.index).run
+      validated_fields = Indexing::FieldValidator.new(processed_fields: processed_fields).run
 
-      upload.merge!('record_id' => record_id)
-      upload.merge!('path' => path)
+      # If there is an existing index record ID, we want to keep it in order
+      # that collections or links are still valid. See #1012.
+      if !upload.index_record_id.blank?
+        validated_fields['record_id'] = upload.index_record_id
+      end
 
-      create_index_record(index_name, record_id, upload.to_json)
+      # Handle Miro.
+      if miro_record_ids && miro_record_ids.include?(validated_fields['record_id'])
+        validated_fields['path'] = "miro"
+      else
+        tmp_file.write("#{validated_fields['path']}\n")
+      end
 
-      tmp_file.write("#{path}\n")
+      create_index_record(index_name, validated_fields['record_id'], validated_fields)
+      records_created += 1
+
+      printf "\rRecords created: #{records_created} | updated: 0 (indexed in total: #{records_created}) | excluded: 0" unless Rails.env.test?
     end
+
+    puts
 
     tmp_file.close
 
@@ -438,6 +521,14 @@ class Pandora::Elastic
                                         type: source.type,
                                         is_time_searchable: false,
                                         record_count: source.uploads.size)
+
+    # Run post indexing tasks.
+    source_parent = Indexing::SourceParent.new
+    source_parent.index_comments(alias_name)
+    source_parent.index_ratings(alias_name)
+    source_parent.index_image_vectors(alias_name)
+
+    source.uploads.count
   end
 
   def info(time: false)
@@ -482,7 +573,7 @@ class Pandora::Elastic
   end
 
   def analyze(alias_name, analyzer, text)
-    data = request 'GET', "/#{alias_name}/_analyze", {}, {}, {
+    data = request 'GET', "/#{index_name_from(alias_name: alias_name)}/_analyze", {}, {}, {
       analyzer: analyzer,
       text: text
     }
@@ -516,6 +607,11 @@ class Pandora::Elastic
     end
 
     def client
-      @client ||= HTTPClient.new
+      @client ||= begin
+        http_client = HTTPClient.new
+        # Necessary for index packs loading with mapping update.
+        http_client.receive_timeout = 480
+        http_client
+      end
     end
 end

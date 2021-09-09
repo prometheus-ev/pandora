@@ -72,16 +72,7 @@
   <tr>
     <th><%= 'Credits'.t %></th>
     <td class="credits-field" colspan="2">
-      <% credits_output = credits.map { |credit|
-        if is_url?(credit)
-          link_to(credit, credit, :target => '_blank')
-        elsif credit.include?(",http")
-          link_to_links(credit)
-        else
-          credit
-        end
-      }.join(" | ").html_safe %>
-      <%= format_content(credits_output, escape: false) %>
+      <%= render partial: 'images/credits', locals: {credits: credits, source: source} %>
     </td>
   </tr>
   <tr>

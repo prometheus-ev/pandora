@@ -68,8 +68,12 @@ class Pandora::SearchResult
     @criteria['sort']['order']
   end
 
+  def sort_order_reverse
+    @result['sort']['order_reverse']
+  end
+
   def sort_field
-    @criteria['sort']['field']
+    @result['sort']['field']
   end
 
   def flash

@@ -1,0 +1,36 @@
+<div class="content">
+  <div class="title-line">
+    <div>
+      <small>
+        <% if box.ref.is_a?(Collection) -%>
+          <%= 'by %s' / link_to_profile(box.ref.owner, public: box.ref.public?) %>
+        <% else -%>
+          <%= 'by %s' / link_to_profile(box.ref.owner) %>
+        <% end -%>
+      </small>
+      <%= access_status(box.ref) %></div>
+  </div>
+</div>
+
+<% images = box.ref.images_pandora_collection(current_user, 
+  page: page,
+  per_page: 6
+) %>
+
+<div class="list_controls">
+  <%= pagination_for images, page %>
+</div>
+
+<div class="content body clear-float">
+<% images.each do |image| %>
+  <div class="thumbnail">
+    <div class="image">
+      <%= link_to controller: 'images', action: 'show', id: image.pid do %>
+        <%= image_tag_for(image, 'r60', { title: image }, false) %>
+      <% end %>
+    </div>
+  </div>
+<% end %>
+</div>
+
+<br class="clear-float" />

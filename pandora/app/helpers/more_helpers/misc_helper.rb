@@ -172,7 +172,7 @@ module MoreHelpers
       results_id = "#{field_id}_suggestions"
 
       %Q{<div class="scriptonly"><div id="#{results_id}" class="suggestions"></div>#{javascript_tag(
-        %Q{new Ajax.Autocompleter('#{field_id}', '#{results_id}', '#{url_for(options)}', { paramName: 'q', suggest: true })}
+        %Q{new Ajax.Autocompleter('#{field_id}', '#{results_id}', '#{url_for(options)}', { paramName: 'q', suggest: true, parameters: {x: 12} })}
       )}</div>}.html_safe
     end
 

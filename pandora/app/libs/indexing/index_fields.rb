@@ -57,7 +57,7 @@ class Indexing::IndexFields
       # Search in all index fields.
       # Remove fields which do not have type 'text'.
       # Remove fields which will be boosted.
-      all = index - ['comment_count', 'date_range'] - ['artist', 'title']
+      all = index - ['comment_count', 'date_range', 'image_vector'] - ['artist', 'title']
       # Prepend boost fields.
       all.prepend('artist^2', 'title^2')
     when 'artist'
@@ -116,16 +116,19 @@ class Indexing::IndexFields
   end
   
   def self.non_display
-    ['record_id',
-     'record_object_id',
-     'path',
-     'date_range',
-     'rating_count',
-     'rating_average',
+    ['artist_normalized',
      'comment_count',
-     'user_comments',
+     'date_range',
+     'image_vector',
+     'keyword_artigo',
+     'path',
+     'rating_average',
+     'rating_count',
+     'record_id',
+     'record_id_original',
+     'record_object_id',
      'source_url',
-     'keyword_artigo']
+     'user_comments']
   end
 
   def self.index
@@ -213,8 +216,8 @@ class Indexing::IndexFields
      'iconclass_description',
      'iconography',
      'image_code',
-     'image_id',
      'image_information',
+     'image_vector',
      'identity_artist',
      'inscription',
      'institution',
@@ -298,6 +301,7 @@ class Indexing::IndexFields
      'published_in',
      'reception',
      'record_id',
+     'record_id_original',
      'record_identifier',
      'record_object_id',
      'reference_master',

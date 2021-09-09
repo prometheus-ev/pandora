@@ -261,12 +261,10 @@ class Email < ApplicationRecord
       #     map = recipients_by_address
 
       #     if role = Role.find_by(title: recipient = recipients.singularize)
-      #       binding.pry
       #       # REWRITE: use new ar query interface
       #       # role.accounts.find(:all, account_conditions)
       #       Upgrade.conds_to_scopes(role.accounts, account_conditions)
       #     elsif Account.has_column?(recipient)
-      #       # binding.pry
       #       # REWRITE: use new ar query interface
       #       # Account.find(:all, account_conditions.merge_conditions(
       #       #   ["#{recipient} = ?", true]
@@ -278,7 +276,6 @@ class Email < ApplicationRecord
 
       #       Account.email_verified.where(newsletter: true)
       #     else
-      #       binding.pry
       #       []
       #     end.map { |user| map[address = user.email] = user; address }
       #   when SPECIAL_RECIPIENT_RE

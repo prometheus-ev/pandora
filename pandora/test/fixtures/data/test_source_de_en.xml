@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<source>
+  <row>
+    <id>1</id>
+    <object-id>1</object-id>
+    <path>path1</path>
+    <artist>müller</artist>
+    <title>Title 1</title>
+    <location>Location 1</location>
+  </row>
+  <row>
+    <id>2</id>
+    <object-id>1</object-id>
+    <path>path2</path>
+    <artist>miller</artist>
+    <title>Title 2</title>
+    <location>Location 2</location>
+  </row>
+  <row>
+    <id>3</id>
+    <path>path3</path>
+    <artist>Cook</artist>
+    <title>müller</title>
+    <location>Location 3</location>
+  </row>
+</source>

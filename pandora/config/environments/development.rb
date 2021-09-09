@@ -6,7 +6,6 @@ Rails.application.configure do
   # config.assets.unknown_asset_fallback = true
   # config.assets.quiet = true
   # config.assets.check_precompiled_asset = false
-  # binding.pry
   # p Rails.application.config.assets.precompile
   # Rails.application.config.prepend_path "#{Rails.root}/app/assets"
 

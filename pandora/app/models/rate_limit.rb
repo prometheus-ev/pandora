@@ -1,6 +1,6 @@
 class RateLimit < ApplicationRecord
 
-  LIMIT = 2000
+  LIMIT = 10000
   INTERVAL = 1.hour
   FORMAT = '%Y-%m-%dT%H'
 

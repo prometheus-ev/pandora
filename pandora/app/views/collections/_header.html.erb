@@ -18,19 +18,14 @@
   <% end %>
   </h2>
   <div class="icon-line dim">
-    <%= link_to(
-      image_tag('/images/misc/add_to_sidebar.gif', class: 'icon'),
-      '#',
-      {
-        title: 'Add collection to sidebar'.t,
-        class: 'pm-to-sidebar',
-        data: {
-          'boxable_type' => 'collection',
-          'boxable_id' => @collection.id
-        },
-        rel: 'nofollow'
-      }
-    ) %>
+    <% opts = {
+      data: {type: 'collection', id: @collection.id},
+      class: 'pm-to-sidebar',
+      title: 'Add collection to sidebar'.t
+    } %>
+    <%= link_to '#', opts do -%>
+      <%= image_tag('/images/misc/add_to_sidebar.gif', class: 'icon') %><!--
+    --><% end -%>
 
     <!-- REWRITE: we move the title attribute from the img to the a -->
     <% not_guest = current_user.mode != 'guest' %>

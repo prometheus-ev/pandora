@@ -127,16 +127,7 @@ class PandoraController < ApplicationController
 
   def toggle_news
     session[:news_collapsed_time] = Time.new.utc
-    session[:news_collapsed] = (params[:value] == ':true')
-
-    head :ok
-  end
-
-  def toggle_box
-    id, collapsed = params[:value].split(':')
-    @box = Box.find(id)
-
-    box.update_attribute(:expanded, collapsed != 'true')
+    session[:news_collapsed] = (params[:value] == 'true')
 
     head :ok
   end
@@ -199,12 +190,16 @@ class PandoraController < ApplicationController
     def conference_signup_params
       params.fetch(:signup, {}).permit(
         :person_title,
-        :first_name, :last_name,
-        :street, :postal_code, :city,
+        :first_name,
+        :last_name,
+        :street,
+        :postal_code,
+        :city,
         :country,
         :institution,
         :email,
-        :brauhaus, :akdk,
+        :presence,
+        :empfang, :feier, :abendessen,
         :note
       )
     end

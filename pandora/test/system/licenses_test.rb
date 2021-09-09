@@ -103,7 +103,7 @@ class LicensesTest < ApplicationSystemTestCase
       assert_text '1 licenses successfully renewed'
 
       assert_equal 2, institution.licenses.count
-      assert_equal Date.new(2020, 12, 31), institution.licenses.last.expires_at.to_date
+      assert_equal Date.new(2020, 12, 31), institution.licenses.last.expires_at.utc.to_date
     end
   end
 
@@ -130,7 +130,7 @@ class LicensesTest < ApplicationSystemTestCase
       assert_text '1 licenses successfully renewed'
 
       assert_equal 2, institution.licenses.count
-      assert_equal Date.new(2020, 12, 31), institution.licenses.last.expires_at.to_date
+      assert_equal Date.new(2020, 12, 31), institution.licenses.last.expires_at.utc.to_date
 
       # try to delete the license
       open_section('details')

@@ -46,4 +46,9 @@ class ImagesControllerTest < ActionDispatch::IntegrationTest
   ensure
     Indexing::Index.delete("test*")
   end
+
+  test "should return proper 404" do
+    get '/de/image/large/favicon.ico'
+    assert_response :unauthorized # 401
+  end
 end

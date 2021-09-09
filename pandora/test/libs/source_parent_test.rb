@@ -62,7 +62,7 @@ class SourceParentTest < ActionDispatch::IntegrationTest
   def test_sourceParent_artistFieldWithPkndArtistRafaello_returnsOneHit
     TestSourcePknd.index
 
-    get '/api/json/search/advanced_search', params: {f: ['artist'], v: ['Raphael'], s: ['test_source_pknd']}, headers: api_auth('jdoe')
+    get '/api/json/search/advanced_search', params: {f: ['artist'], v: ['raphael'], s: ['test_source_pknd']}, headers: api_auth('jdoe')
 
     assert_equal(1, json.size)
   end
@@ -81,5 +81,13 @@ class SourceParentTest < ActionDispatch::IntegrationTest
     result = TestSourcePkndArtistAttributions.search 'raffaello'
 
     assert_equal(3, result['hits']['total']['value'])
+  end
+
+  def test_sourceParent_searchWithPkndRudolfBauer_returnsOneHit
+    TestSourceVgbk.index
+
+    result = TestSourceVgbk.search 'R. Bauer'
+
+    assert_equal(1, result['hits']['total']['value'])
   end
 end

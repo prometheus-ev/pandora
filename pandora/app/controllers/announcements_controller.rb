@@ -87,7 +87,7 @@ class AnnouncementsController < ApplicationController
   }
 
   def new
-    @announcement = Announcement.new(:title_de => '', :title_en => '', :body_de => '', :body_en => '', :starts_at => Time.now, :ends_at => Time.now, :role => '')
+    @announcement = Announcement.new(announcement_params)
   end
 
   def create
@@ -167,8 +167,10 @@ class AnnouncementsController < ApplicationController
   #############################################################################
 
   def announcement_params
-    params.require(:announcement).permit(:title_de, :title_en, :body_de, :body_en, :starts_at, :ends_at, :role, :id)
-
+    params.fetch(:announcement, {}).permit(
+      :title_de, :title_en, :body_de, :body_en, :starts_at, :ends_at, :role,
+      :id
+    )
   end
 
 ###############################################################################

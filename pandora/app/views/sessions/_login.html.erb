@@ -4,7 +4,7 @@
   <fieldset>
     <legend>
       <strong><%= 'Personal account login'.t %></strong>
-      <%= link_to_help label: help_icon, section: 'login' %>
+      <%= link_to_help title: 'Help'.t, label: help_icon, section: 'login' %>
     </legend>
 
     <label for="login"><%= 'User name or e-mail address'.t %></label><br />
@@ -22,5 +22,11 @@
 
     <%= check_box_tag 'remember_me', '1', false %>
     <label for="remember_me"><%= 'Stay logged in'.t %></label><br />
+
+    <br />
+    <br class="vspace1" />
+    <br />
+
+    <%= 'No account yet?'.t %> <big><%= link_to 'Sign up!'.t, signup_url %></big>
   </fieldset>
 <% end -%>

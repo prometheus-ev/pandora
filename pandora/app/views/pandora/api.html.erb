@@ -180,7 +180,7 @@
 <p>
   <%= 'Delete a favorite'.t %> (<%= see_also '<code>DELETE /box/delete</code>', anchor: 'deleteBoxDelete' %>):
   <pre>
-    <%= h('curl --request DELETE -v -u <user name>:<password> -F id="<id>"') %> <%= link_to nil, @request_root + url_for(@api_options.merge(:format => 'xml', :controller => 'box', :action => 'delete')) %>
+    <%= h('curl --request DELETE -v -u <user name>:<password> -F id="<id>"') %> <%= link_to nil, @request_root + url_for(@api_options.merge(:format => 'xml', :controller => 'boxes', :action => 'destroy')) %>
   </pre>
 </p>
 

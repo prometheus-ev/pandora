@@ -70,11 +70,11 @@ Rails.application.routes.draw do
       get ':id', action: 'record'
     end
 
-    scope 'box', controller: 'box' do
-      get 'list', action: 'list'
+    scope 'box', controller: 'boxes' do
+      get 'list', action: 'index'
       post 'create', action: 'create'
       # TODO Remove legacy compatibility HTTP POST.
-      match 'delete', action: 'delete', via: ['DELETE', 'POST']
+      match 'delete', action: 'destroy', via: ['DELETE', 'POST']
     end
 
     scope 'account', controller: 'accounts' do
@@ -140,7 +140,6 @@ Rails.application.routes.draw do
 
       scope constraints: {format: 'js'} do
         post 'update', action: 'toggle_news', constraints: {key: 'news_collapsed'}
-        post 'update', action: 'toggle_box', constraints: {key: 'toggle_box'}
       end
     end
 
@@ -195,7 +194,8 @@ Rails.application.routes.draw do
       match 'publish/:id', action: 'publish', via: ['GET', 'POST']
 
       # TODO: needed for box js code
-      match ':id', action: 'show', via: ['GET', 'POST']
+      # match ':id', action: 'show', via: ['GET', 'POST']
+      get ':id', action: 'show'
 
       get 'large/:id', action: 'large'
     end
@@ -254,15 +254,24 @@ Rails.application.routes.draw do
 
         # for box loading, because Ajax.Updater seems to always send post
         # requests
-        post :show
+        # post :show
       end
     end
 
-    scope 'box', controller: 'box' do
-      post 'order', action: 'order'
-      root action: 'create', via: 'POST'
-      delete ':id', action: 'delete'
+    resources :boxes, only: ['show', 'index', 'create', 'destroy'] do
+      collection do
+        post :reorder
+      end
+      member do
+        post :toggle
+      end
     end
+
+    # scope 'box', controller: 'box' do
+    #   post 'order', action: 'order'
+    #   root action: 'create', via: 'POST'
+    #   delete ':id', action: 'delete'
+    # end
 
     scope 'administration', controller: 'administration' do
       root action: 'index', via: 'GET', as: 'administration'

@@ -129,7 +129,7 @@ module Indexing::Concerns::IndexUtils
     #
     # @param idx [String||Array of Strings] The index name(s) to search.
     # @param query [String] The search query, see: https://www.elastic.co/guide/en/elasticsearch/reference/2.4/query-dsl-query-string-query.html
-    # @param field [String] The search field, one of the Rails.configuration.x.athene_search_fields['mappings'] fields.
+    # @param field [String] The search field, one of the Indexing::IndexFields.search fields.
     # @param from [Number] Starting offset
     # @param size [Number] Number of hits to return
     # @param log [Boolean] Enable the log.
@@ -151,7 +151,9 @@ module Indexing::Concerns::IndexUtils
       # https://www.elastic.co/guide/en/elasticsearch/reference/current/query-dsl-multi-match-query.html#operator-min
       # https://www.elastic.co/guide/en/elasticsearch/reference/current/query-dsl-multi-match-query.html#type-cross-fields
       if field == 'all'
-        query_string.merge!({ type: "cross_fields" })
+        query_string.merge!({
+          type: "cross_fields"
+        })
       end
 
       result = index.client.search index: idx, body: {

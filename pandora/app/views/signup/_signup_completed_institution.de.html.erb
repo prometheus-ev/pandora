@@ -11,16 +11,21 @@
   <% admins = @institution.active_admins -%>
   <legend><strong>Lokale Administrator*innen:</strong></legend>
   <% if admins.blank? -%>
-  <% unless @user.useradmin_like? -%>
-    Ihre Institution hat keinen Administrator.<br />
-  <% end -%>
-    Die <span class="prometheus">prometheus</span>-Geschäftsstelle schaltet Ihren Zugang frei.<br />
-    Schicken Sie bitte einen Scan des Zugehörigkeitsnachweises (Immatrikulationsbescheinigung o.ä.) per E-Mail an die <%= link_to 'prometheus-Geschäftsstelle', home_url('contact') %>.
+    <% unless @user.useradmin_like? -%>
+      Ihre Institution hat keinen Administrator.<br />
+    <% end -%>
+      Die <span class="prometheus">prometheus</span>-Geschäftsstelle schaltet Ihren Zugang frei.<br />
+      Schicken Sie bitte einen Scan des Zugehörigkeitsnachweises (Immatrikulationsbescheinigung o.ä.) per E-Mail an die <%= link_to 'prometheus-Geschäftsstelle', home_url('contact') %>.
   <% else -%>
     <ul>
-    <% for admin in admins -%>
-      <li><%= link_to_admin_profile_with_email(admin) %></li>
-    <% end -%>
+      <% admins.each do |admin| %>
+        <li>
+          <%= mail_to admin.email do %>
+            <%= admin.fullname %>
+            <%= image_tag 'misc/email.gif' %>
+          <% end %>
+        </li>
+      <% end %>
     </ul>
   <% end -%>
 </fieldset>

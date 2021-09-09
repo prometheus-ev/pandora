@@ -1,6 +1,6 @@
 <ul>
-<% for match in @matches -%>
-  <% highlights = [match.fullname, match.login].map { |t| highlight(h(t), @phrases) } -%>
+<% for match in @accounts -%>
+  <% highlights = [match.fullname, match.login].map { |t| highlight(h(t), params[:q].split) } -%>
   <li><span class="informal"><%= highlights[0] %></span><br /><small><%= highlights[1] %></small></li>
 <% end -%>
 </ul>

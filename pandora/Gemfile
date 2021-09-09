@@ -67,6 +67,7 @@ gem 'dotenv'
 
 # REWRITE: to replace net/http
 gem 'httpclient'
+gem 'rest-client'
 
 # REWRITE: or to_xml isn't available
 gem 'activemodel-serializers-xml'
@@ -127,7 +128,6 @@ group :test do
   gem 'webmock'
   gem 'simplecov', require: false
   gem 'rubyzip'
-  gem 'rest-client'
   gem 'webdrivers', '~> 4.0'
 end
 

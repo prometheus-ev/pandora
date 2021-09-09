@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2021_04_12_230327) do
+ActiveRecord::Schema.define(version: 2021_08_05_192345) do
 
   create_table "accounts", id: :integer, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8", force: :cascade do |t|
     t.string "email"
@@ -60,12 +60,6 @@ ActiveRecord::Schema.define(version: 2021_04_12_230327) do
     t.index ["remember_token"], name: "index_accounts_on_remember_token"
   end
 
-  create_table "accounts_groups", id: false, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8", force: :cascade do |t|
-    t.integer "account_id"
-    t.integer "group_id"
-    t.index ["account_id", "group_id"], name: "index_accounts_groups_on_account_id_and_group_id"
-  end
-
   create_table "accounts_images", id: false, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8", force: :cascade do |t|
     t.integer "account_id"
     t.string "image_id"
@@ -76,12 +70,6 @@ ActiveRecord::Schema.define(version: 2021_04_12_230327) do
     t.integer "institution_id"
     t.integer "account_id"
     t.index ["account_id", "institution_id"], name: "index_accounts_institutions_on_account_id_and_institution_id"
-  end
-
-  create_table "accounts_permissions", id: false, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8", force: :cascade do |t|
-    t.integer "account_id"
-    t.integer "permission_id"
-    t.index ["account_id", "permission_id"], name: "index_accounts_permissions_on_account_id_and_permission_id"
   end
 
   create_table "accounts_roles", id: false, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8", force: :cascade do |t|
@@ -109,21 +97,11 @@ ActiveRecord::Schema.define(version: 2021_04_12_230327) do
     t.text "body_en"
   end
 
-  create_table "ar_mails", id: :integer, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8", force: :cascade do |t|
-    t.string "from"
-    t.string "to"
-    t.integer "last_send_attempt", default: 0
-    t.text "mail"
-    t.datetime "created_on"
-  end
-
   create_table "boxes", id: :integer, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8", force: :cascade do |t|
     t.string "image_id"
-    t.string "type"
+    t.string "ref_type"
     t.integer "owner_id"
     t.integer "collection_id"
-    t.integer "presentation_id"
-    t.text "params"
     t.integer "position"
     t.boolean "expanded", default: true
     t.datetime "created_at"
@@ -131,28 +109,12 @@ ActiveRecord::Schema.define(version: 2021_04_12_230327) do
     t.index ["collection_id"], name: "index_boxes_on_collection_id"
     t.index ["image_id"], name: "index_boxes_on_image_id"
     t.index ["owner_id"], name: "index_boxes_on_owner_id"
-    t.index ["presentation_id"], name: "index_boxes_on_presentation_id"
   end
 
   create_table "brain_busters", id: :integer, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8", force: :cascade do |t|
     t.string "question"
     t.string "answer"
     t.string "lang", default: "en"
-  end
-
-  create_table "change_sets", id: :integer, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8", force: :cascade do |t|
-    t.integer "author_id"
-    t.integer "collection_id"
-    t.datetime "created_at"
-    t.integer "presentation_id"
-  end
-
-  create_table "changes", id: :integer, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8", force: :cascade do |t|
-    t.integer "change_set_id"
-    t.string "action"
-    t.string "key"
-    t.text "value"
-    t.text "original"
   end
 
   create_table "client_applications", id: :integer, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8", force: :cascade do |t|
@@ -174,8 +136,6 @@ ActiveRecord::Schema.define(version: 2021_04_12_230327) do
     t.datetime "updated_at"
     t.integer "owner_id"
     t.text "notes"
-    t.integer "parent_id"
-    t.datetime "forked_at"
     t.string "public_access"
     t.string "thumbnail_id"
     t.text "links"
@@ -184,7 +144,6 @@ ActiveRecord::Schema.define(version: 2021_04_12_230327) do
     t.boolean "meta_image", default: false
     t.string "meta_image_reader"
     t.index ["owner_id"], name: "index_collections_on_owner_id"
-    t.index ["parent_id"], name: "index_collections_on_parent_id"
     t.index ["thumbnail_id"], name: "index_collections_on_thumbnail_id"
     t.index ["title"], name: "index_collections_on_title"
   end
@@ -223,21 +182,6 @@ ActiveRecord::Schema.define(version: 2021_04_12_230327) do
     t.datetime "created_at"
     t.datetime "updated_at"
     t.string "image_id"
-    t.integer "presentation_id"
-  end
-
-  create_table "discount_codes", id: :integer, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8", force: :cascade do |t|
-    t.string "code"
-    t.text "description"
-    t.integer "amount"
-    t.integer "discount"
-    t.boolean "repeatable", default: false
-    t.datetime "valid_from"
-    t.datetime "expires_at"
-    t.datetime "redeemed_at"
-    t.integer "user_id"
-    t.datetime "created_at"
-    t.datetime "updated_at"
   end
 
   create_table "emails", id: :integer, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8", force: :cascade do |t|
@@ -259,12 +203,6 @@ ActiveRecord::Schema.define(version: 2021_04_12_230327) do
     t.integer "newsletter"
     t.text "body_html"
     t.text "body_html_de"
-  end
-
-  create_table "groups_permissions", id: false, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8", force: :cascade do |t|
-    t.integer "group_id"
-    t.integer "permission_id"
-    t.index ["group_id", "permission_id"], name: "index_groups_permissions_on_group_id_and_permission_id"
   end
 
   create_table "images", primary_key: "pid", id: :string, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8", force: :cascade do |t|
@@ -302,38 +240,6 @@ ActiveRecord::Schema.define(version: 2021_04_12_230327) do
     t.index ["contact_id"], name: "index_institutions_on_contact_id"
     t.index ["ipuser_id"], name: "index_institutions_on_ipuser_id"
     t.index ["name"], name: "index_institutions_on_name"
-  end
-
-  create_table "invoices", id: :integer, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8", force: :cascade do |t|
-    t.datetime "due"
-    t.datetime "end"
-    t.float "amount"
-    t.datetime "issued_at"
-    t.datetime "paid_at"
-    t.datetime "reminded_at"
-    t.string "issuer"
-    t.integer "license_id"
-    t.integer "license_type_id"
-    t.string "invoice_no"
-    t.index ["license_id"], name: "index_invoices_on_license_id"
-    t.index ["license_type_id"], name: "index_invoices_on_license_type_id"
-  end
-
-  create_table "ip_nets", id: :integer, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8", force: :cascade do |t|
-    t.decimal "net1", precision: 10
-    t.decimal "net2", precision: 10
-    t.decimal "net3", precision: 10
-    t.decimal "net4", precision: 10
-    t.decimal "mask1", precision: 10
-    t.decimal "mask2", precision: 10
-    t.decimal "mask3", precision: 10
-    t.decimal "mask4", precision: 10
-    t.integer "prefix"
-    t.integer "version"
-    t.string "address"
-    t.integer "institution_id"
-    t.index ["institution_id", "net1", "net2", "net3", "net4", "mask1", "mask2", "mask3", "mask4"], name: "index_ip_nets_on_institution_id_and_net_and_mask"
-    t.index ["net1", "net2", "net3", "net4", "mask1", "mask2", "mask3", "mask4", "institution_id"], name: "index_ip_nets_on_net_and_mask_and_institution_id"
   end
 
   create_table "keywords", id: :integer, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8", force: :cascade do |t|
@@ -540,7 +446,7 @@ ActiveRecord::Schema.define(version: 2021_04_12_230327) do
     t.text "credits"
     t.string "rights_work"
     t.string "rights_reproduction"
-    t.string "addition"
+    t.text "addition"
     t.text "annotation"
     t.string "iconography"
     t.string "institution"
@@ -558,6 +464,9 @@ ActiveRecord::Schema.define(version: 2021_04_12_230327) do
     t.string "isbn"
     t.string "keyword"
     t.string "technique"
+    t.string "index_record_id"
+    t.string "epoch"
+    t.string "signature"
     t.index ["database_id"], name: "index_uploads_on_database_id"
     t.index ["image_id"], name: "index_uploads_on_image_id"
     t.index ["owner_id"], name: "index_uploads_on_owner_id"

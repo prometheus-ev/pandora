@@ -87,22 +87,30 @@ class Source < ApplicationRecord
   #   src
   # end
 
-  def self.find_and_update_or_create_by(name:, kind: '<kind> database', type: 'dump', is_time_searchable: false, record_count:)
+  def self.find_and_update_or_create_by(name:,
+                                        kind: nil,
+                                        type: nil,
+                                        institution: nil,
+                                        is_time_searchable: nil,
+                                        record_count: nil)
     source = self.find_by_name(name)
 
-    unless source
+    if source
+      source.kind = kind if kind
+      source.type = type if type
+    else
       source = Source.new(
         title: name.titleize,
-        kind: kind,
-        type: type,
-        institution: Institution.find_by!(name: 'prometheus'),
+        kind: kind || '<kind> database',
+        type: type || 'dump',
+        institution: institution || Institution.find_by!(name: 'prometheus'),
         keywords: [Keyword.ensure('Index')]
       )
       source.name = name
     end
 
-    source.record_count = record_count
-    source.is_time_searchable = is_time_searchable
+    source.is_time_searchable = is_time_searchable if is_time_searchable
+    source.record_count = record_count if record_count
     source.save!
     source.touch
 
@@ -225,17 +233,17 @@ class Source < ApplicationRecord
     end
   end
 
-  def record_count
-    if user_database? || institutional_user_database?
-      if uploads && record_count = uploads.size
-        record_count
-      else
-        0
-      end
-    else
-      self[:record_count]
-    end
-  end
+  #def record_count
+  #  if user_database? || institutional_user_database?
+  #    if uploads && record_count = uploads.size
+  #      record_count
+  #    else
+  #      0
+  #    end
+  #  else
+  #    self[:record_count]
+  #  end
+  #end
 
   def user_database?
     kind == 'User database'

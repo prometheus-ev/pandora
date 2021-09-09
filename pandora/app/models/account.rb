@@ -475,6 +475,13 @@ class Account < ApplicationRecord
     end
   end
 
+  def self.exclude(accounts)
+    return all if accounts.blank?
+
+    accounts = [accounts] unless accounts.is_a?(Array)
+    where("login NOT IN (?)", accounts.map{|a| a.login})
+  end
+
   def self.allowed(user, verb = :read)
     return all if verb == :read
     return all if user.superadmin?
@@ -516,6 +523,14 @@ class Account < ApplicationRecord
       where("#{column} LIKE ?", "%#{value}%")
     when 'fullname'
       where("CONCAT(firstname, ' ', lastname) LIKE ?", "%#{value}%")
+    when 'label'
+      clause = []
+      binds = {}
+      value.split.first(3).each.with_index do |v, i|
+        clause << "login LIKE :t#{i} OR firstname LIKE :t#{i} OR lastname LIKE :t#{i}"
+        binds["t#{i}".to_sym] = "%#{v}%"
+      end
+      where(clause.join(' OR '), binds)
     when 'institution'
       includes(:institution).references(:institutions).where('institutions.name LIKE ?', value)
     when 'roles'

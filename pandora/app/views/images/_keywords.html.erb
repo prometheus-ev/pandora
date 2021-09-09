@@ -1,0 +1,7 @@
+<% if super_image.upload? %>
+  <% keywords.each do |keyword| %>
+    <%= list_search_links_for(:keywords, keyword.map { |k| [k.title, k.title] }, :controller => 'uploads', :action => 'index') %>
+  <% end %>
+<% else %>
+  <%= keywords.join(', ') %>
+<% end %>

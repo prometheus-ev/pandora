@@ -31,4 +31,11 @@
     <location>Location 4</location>
     <date>You cannot parse me as date range.</date>
   </row>
+  <row>
+    <id>5</id>
+    <path>path5</path>
+    <artist>Rudolf Bauer</artist>
+    <title>Title 5</title>
+    <location>Location 5</location>
+  </row>
 </source>

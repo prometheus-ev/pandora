@@ -362,7 +362,7 @@ class AccountMailer < ApplicationMailer
 
     mail(
       to: @signup.email,
-      subject: 'Anmeldung zur Tagung: Daten^7 – Digitales BilderLeben (1./2. Oktober 2019)'
+      subject: "Anmeldung zur Tagung: #{Pandora::ConferenceSignup::TITLE} (#{Pandora::ConferenceSignup::DATE})."
     )
   end
 end

@@ -572,7 +572,11 @@ class Image < ApplicationRecord
 
   # TODO: adapt this for institutional user databases as well
   def upload_record?
-    (source.user_database? || source.institutional_user_database?) if source
+    if upload_record && source && (source.user_database? || source.institutional_user_database?)
+      true
+    else
+      false
+    end
   end
 
   def upload_record

@@ -146,40 +146,9 @@ window.Upgrade = {
   }
 };
 
-// box delete xhr success (collection)
-jQuery(document).on('ajax:success', '.sidebar_box [data-method=DELETE]', function(event, data, status, xhr) {
-  // for some reason, the args are not set as expected
-  data = event.originalEvent.detail[2].responseText;
-  jQuery('#boxes').html(data);
-});
-
 // box delete xhr success (announcement)
 jQuery(document).on('ajax:success', '#announcements [data-method=DELETE]', function(event, data, status, xhr) {
   jQuery('#announcements').hide();
-});
-
-// box add xhr success (image)
-jQuery(document).on('ajax:success', '.popup_footer a[data-method=POST]', function(event, data, status, xhr) {
-  // for some reason, the args are not set as expected
-  data = event.originalEvent.detail[2].responseText;
-  jQuery('#boxes').html(data);
-});
-
-// box add xhr success (collection)
-jQuery(document).on('ajax:success', '.collection-to-sidebar', function(event, data, status, xhr) {
-  // for some reason, the args are not set as expected
-  data = event.originalEvent.detail[2].responseText;
-  jQuery('#boxes').html(data);
-});
-
-// box add xhr success (collection)
-jQuery(document).on('ajax:complete', '.on-complete-apply-behavior', function(event, data, status, xhr) {
-  // for some reason, the args are not set as expected
-  data = event.originalEvent.detail[0].responseText;
-  // find first parent that specifies data-update attribute
-  let id = jQuery(event.target).parents('[data-update]').attr('data-update');
-  jQuery('#' + id).html(data);
-  Pandora.Behaviour.apply(true, id);
 });
 
 // jQuery(document).on('ajax:success', '.on-source-list', function(event, data, status, xhr) {
@@ -274,56 +243,18 @@ jQuery(document).on('click', '[id=link-to-list]', updateToListView);
 */
 
 // make the new pagination view work when loaded via ajax
-jQuery(document).on('click', '.box_content .pagination a', function(event){
-  event.preventDefault();
-  let a = jQuery(event.target);
-  let url = a.attr('href');
+// jQuery(document).on('click', '.box_content .pagination a', function(event){
+//   event.preventDefault();
+//   let a = jQuery(event.target);
+//   let url = a.attr('href');
 
-  jQuery.ajax({
-    url: url,
-    success: function(data) {
-      a.parents('.box_content').html(data);
-    }
-  })
-});
-
-// handle submit for pagination when triggerd via enter key
-jQuery(document).on('submit', 'form.page_form', function(event) {
-  event.preventDefault();
-  var url = document.location.href;
-  var newPage = jQuery(event.target).find('input[type=text]').val();
-
-  if (url.match(/[\?\&]page=\d+/)) {
-    url = url.replace(/([\?\&])page=\d+/, '$1page=' + newPage);
-  } else {
-    if (url.match(/\?/)) {
-      url += '&page=' + newPage;
-    } else {
-      url += '?page=' + newPage;
-    }
-  }
-  window.location.href = url;
-});
-
-// we also need to handle the submit event for the sidebar pagination
-jQuery(document).on('click', '.box_content .upgrade-autosubmit', function(event){
-  event.preventDefault();
-
-  let e = jQuery(event.target);
-  let form = e.parents('form');
-  let page = form.find('[name=page]').val();
-
-  if (page) {
-    jQuery.ajax({
-      type: 'GET',
-      url: form.attr('action'),
-      data: form.serialize(),
-      success: function(data) {
-        e.parents('.box_content').html(data);
-      }
-    })
-  }
-});
+//   jQuery.ajax({
+//     url: url,
+//     success: function(data) {
+//       a.parents('.box_content').html(data);
+//     }
+//   })
+// });
 
 jQuery(document).on('change', '.pm-select-all', function(event) {
   var checked = jQuery(event.target).prop('checked');
@@ -614,33 +545,231 @@ jQuery(document).on('click', '.pm-reply-to-comment', function(event) {
 
 /* "add to sidebar" handling */
 
-Upgrade.toSideBar = function(boxable_type, boxable_id) {
-  jQuery.ajax({
-    type: 'POST',
-    url: '/' + Upgrade.current_locale() + '/box',
-    data: {
-      box: {
-        action: 'show',
-        controller: boxable_type + 's', /* pluralize */
-        id: boxable_id
+// box delete xhr success (collection)
+// jQuery(document).on('ajax:success', '.sidebar_box [data-method=DELETE]', function(event, data, status, xhr) {
+//   // for some reason, the args are not set as expected
+//   data = event.originalEvent.detail[2].responseText;
+//   jQuery('#boxes').html(data);
+// });
+
+// // box add xhr success (image)
+// jQuery(document).on('ajax:success', '.popup_footer a[data-method=POST]', function(event, data, status, xhr) {
+//   // for some reason, the args are not set as expected
+//   data = event.originalEvent.detail[2].responseText;
+//   jQuery('#boxes').html(data);
+// });
+
+// // box add xhr success (collection)
+// jQuery(document).on('ajax:success', '.collection-to-sidebar', function(event, data, status, xhr) {
+//   // for some reason, the args are not set as expected
+//   data = event.originalEvent.detail[2].responseText;
+//   jQuery('#boxes').html(data);
+// });
+
+// // box add xhr success (collection)
+// jQuery(document).on('ajax:complete', '.on-complete-apply-behavior', function(event, data, status, xhr) {
+//   // for some reason, the args are not set as expected
+//   data = event.originalEvent.detail[0].responseText;
+//   // find first parent that specifies data-update attribute
+//   let id = jQuery(event.target).parents('[data-update]').attr('data-update');
+//   jQuery('#' + id).html(data);
+//   Pandora.Behaviour.apply(true, id);
+// });
+
+class Boxes {
+  constructor(selector) {
+    this.root = jQuery(selector)
+
+    this.render = this.render.bind(this)
+    this.renderId = this.renderId.bind(this)
+
+    this.onCreate = this.onCreate.bind(this)
+    this.onDestroy = this.onDestroy.bind(this)
+    this.onToggle = this.onToggle.bind(this)
+    this.onReorder = this.onReorder.bind(this)
+    this.onPaginate = this.onPaginate.bind(this)
+    this.onSubmit = this.onSubmit.bind(this)
+  }
+
+  fetchAll() {
+    const url = '/' + Upgrade.current_locale() + '/boxes'
+    return jQuery.ajax({url: url}).then(this.render)
+  }
+
+  fetchId(id, page = 1) {
+    const url = '/' + Upgrade.current_locale() + '/boxes/' + id
+    return jQuery.ajax({
+      url: url,
+      data: {page: page, per_page: 6}
+    })
+  }
+
+  render(html) {
+    this.root.html(html)
+  }
+
+  renderId(id, html) {
+    const box = this.root.find(`.sidebar_box[data-id='${id}']`)
+    // console.log(box)
+    box.replaceWith(html)
+  }
+
+  destroy(id) {
+    const url = '/' + Upgrade.current_locale() + '/boxes/' + id
+    return jQuery.ajax({
+      type: 'DELETE',
+      url: url
+    }).then(this.render)
+  }
+
+  create(type, id) {
+    const url = '/' + Upgrade.current_locale() + '/boxes'
+    return jQuery.ajax({
+      type: 'POST',
+      url: url,
+      data: {
+        box: {
+          ref_type: type,
+          [`${type}_id`]: id
+        }
       }
-    },
-    success: function(html) {
-      jQuery('#boxes').html(html)
+    }).then(this.render)
+  }
+
+  toggle(id) {
+    const url = `/${Upgrade.current_locale()}/boxes/${id}/toggle`
+    return jQuery.ajax({
+      type: 'POST',
+      url: url
+    }).then(this.render)
+  }
+
+  reorder(ids) {
+    const url = `/${Upgrade.current_locale()}/boxes/reorder`
+    return jQuery.ajax({
+      type: 'POST',
+      url: url,
+      data: {ids: ids}
+    })
+  }
+
+  onCreate(event) {
+    event.preventDefault()
+
+    var a = jQuery(event.currentTarget)
+    var type = a.data('type')
+    var id = a.data('id')
+
+    this.create(type, id).then(this.render);
+  }
+
+  onDestroy(event) {
+    event.preventDefault()
+
+    var a = jQuery(event.currentTarget)
+    var msg = a.data('pm-confirm')
+    var id = a.data('id')
+    
+    if (window.confirm(msg)) {
+      this.destroy(id).then(this.render)
     }
-  })
+  }
+
+  onToggle(event) {
+    event.preventDefault();
+
+    var a = jQuery(event.currentTarget)
+    var id = a.data('id')
+
+    this.toggle(id).then(this.render)
+  }
+
+  onReorder(event, ui) {
+    const ids = this.root.
+      find('.sidebar_box').
+      toArray().
+      map(e => e.getAttribute('data-id'))
+
+    this.reorder(ids)
+  }
+
+  onPaginate(event) {
+    event.preventDefault()
+
+    var a = jQuery(event.currentTarget)
+    var id = a.closest('.sidebar_box').data('id')
+    var page = a.attr('href').match(/page=(\d+)/)[1]
+
+    this.fetchId(id, page).then(html => {this.renderId(id, html)})
+  }
+
+  onSubmit(event) {
+    event.preventDefault()
+    event.stopImmediatePropagation()
+
+    const form = jQuery(event.target).closest('form')
+    const id = form.closest('.sidebar_box').data('id')
+    const page = form.find('input[name=page]').val()
+
+    this.fetchId(id, page).then(html => {this.renderId(id, html)})
+  }
+
+  init() {
+    this.fetchAll()
+
+    this.root.sortable({handle: '.box_handle', opacity: 0.5})
+    this.root.on('sortupdate', this.onReorder)
+
+    this.root.on('click', 'a.pm-from-sidebar', this.onDestroy)
+    this.root.on('click', 'a.pm-toggle-box', this.onToggle)
+    this.root.on('click', '.pagination a', this.onPaginate)
+    this.root.on('submit', '.pagination form', this.onSubmit)
+    this.root.on('click', '.pagination .button_middle', this.onSubmit)
+
+    jQuery(document).on('click', 'a.pm-to-sidebar', this.onCreate)
+  }
 }
 
-jQuery(document).on('click', 'a.pm-to-sidebar', function(event) {
+
+/* pagination */
+
+// handle submit for pagination when triggerd via enter key
+jQuery(document).on('submit', 'form.page_form', function(event) {
   event.preventDefault();
+  var url = document.location.href;
+  var newPage = jQuery(event.target).find('input[type=text]').val();
 
-  var a = jQuery(event.currentTarget);
+  if (url.match(/[\?\&]page=\d+/)) {
+    url = url.replace(/([\?\&])page=\d+/, '$1page=' + newPage);
+  } else {
+    if (url.match(/\?/)) {
+      url += '&page=' + newPage;
+    } else {
+      url += '?page=' + newPage;
+    }
+  }
+  window.location.href = url;
+});
 
-  var type = a.attr('data-boxable-type');
-  var id = a.attr('data-boxable-id');
+// // we also need to handle the submit event for the sidebar pagination
+// jQuery(document).on('click', '.box_content .upgrade-autosubmit', function(event){
+//   event.preventDefault();
 
-  Upgrade.toSideBar(type, id);
-})
+//   let e = jQuery(event.target);
+//   let form = e.parents('form');
+//   let page = form.find('[name=page]').val();
+
+//   if (page) {
+//     jQuery.ajax({
+//       type: 'GET',
+//       url: form.attr('action'),
+//       data: form.serialize(),
+//       success: function(data) {
+//         e.parents('.box_content').html(data);
+//       }
+//     })
+//   }
+// });
 
 
 /* handle ratings */
@@ -673,4 +802,15 @@ jQuery(document).ready(function(){
   jQuery("#source_kind").change(function(){
     Upgrade.displaySourceQuota(jQuery(this))
   });
+
+  const boxes = new Boxes('#boxes')
+  boxes.init()
 });
+
+/* restore store-in-collection button state on browser back navigation */
+jQuery(document).ready(function(){
+  var checked_images = jQuery('input[type=checkbox]:checked')
+  if (checked_images.length) {
+    jQuery('.store_controls .popup_toggle').removeClass(['disable', 'disabled'])
+  }
+})

@@ -17,12 +17,9 @@ class Indexing::Sources::FfmConedakor < Indexing::SourceSuper
   end
 
   def path
-    @miro_record_ids ||= Rails.configuration.x.athene_search_record_ids['miro'][name]
-    if @miro_record_ids.include?(process_record_id(record_id))
-      "miro"
-    else
-      "#{record.xpath('.//imagePath/text()')}".scan(/\d*$/).first
-    end
+    return miro if miro?
+
+    "#{record.xpath('.//imagePath/text()')}".sub(/https:\/\/kor.uni-frankfurt.de\/media\/download\/icon\//, '')
   end
 
   # künstler

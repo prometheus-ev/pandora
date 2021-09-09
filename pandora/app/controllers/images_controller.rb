@@ -94,7 +94,7 @@ class ImagesController < ApplicationController
       @display_fields = @super_image.display_fields - ['source_url', 'keyword_artigo']
 
       @location_fields = @super_image.location_fields
-      @latest_location   = @super_image.image.locations.order('updated_at DESC') if 
+      @latest_location = @super_image.image.locations.order('updated_at DESC') if
         @super_image.image.locations # Only uploads!
       if !@super_image.upload.latitude.blank? && !@super_image.upload.longitude.blank?
         @lat = @super_image.upload.latitude
@@ -118,7 +118,6 @@ class ImagesController < ApplicationController
 
     prepare_rating @super_image.image
 
-    # binding.pry
     # update_section(@super_image.image) {} and return
 
     respond_to do |format|
@@ -129,7 +128,7 @@ class ImagesController < ApplicationController
           render :xml => @super_image.image.legacy_to_xml(
             # REWRITE: we need to specify the format and locale explicitly
             # :link => url_for(safe_params(:format => nil, locale: nil, :only_path => false))
-            :link => url_for(safe_params(:format => 'html', locale: I18n.locale, 
+            :link => url_for(safe_params(:format => 'html', locale: I18n.locale,
               :only_path => false))
           )
         else
@@ -146,12 +145,23 @@ class ImagesController < ApplicationController
       }
       format.json {
           image_attributes = {}
+
           image_attributes.merge!({"source" => image_source_attributes})
           image_attributes.merge!({"pid" => @super_image.pid})
           image_attributes.merge!(@super_image.image.display_fields_hash)
           image_attributes.merge!({"rating" => @super_image.image.rating})
 
-          render json: image_attributes.to_json
+          Indexing::IndexFields.display.each do |field|
+            unless (value = @super_image.display_field(field)).blank?
+              if field == 'rights_work' && value == ['rights_work_vgbk']
+                image_attributes.merge!({field => 'VG Bild-Kunst'})
+              else
+                image_attributes.merge!({field => value.join(', ')})
+              end
+            end
+          end
+
+          render json: image_attributes.compact.to_json
       }
     end
   end
@@ -289,7 +299,7 @@ class ImagesController < ApplicationController
 
   def large
     si = Pandora::SuperImage.find(params[:id])
-    
+
     send_data si.image_data(:large), disposition: 'inline', content_type: 'image/jpeg'
   end
 

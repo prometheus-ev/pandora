@@ -36,11 +36,11 @@ class Pandora::ImagesDir
   end
 
   def delete_upstream_images(source_name)
-    Rails.logger.info 'Deleting upstream images of source ' + source_name + '.'
-
     source_dir = "#{ENV['PM_IMAGES_DIR']}/" + source_name
 
     if @upstream_urls[source_name]
+      Rails.logger.info 'Deleting upstream images of source ' + source_name + '.'
+
       system "rm -rf #{source_dir}/*"
     end
   end

@@ -61,7 +61,7 @@ class Indexing::IndexTasks
     end
   end
 
-  def load(indices)
+  def load(indices, update_mapping = false)
     FileUtils.mkdir_p base_dir
 
     if indices[0] == 'all'
@@ -77,12 +77,18 @@ class Indexing::IndexTasks
 
       # we need to ensure the source because the attachments are referencing
       # it, we will still update it below with the correct data
-      Source.find_and_update_or_create_by(name: alias_name,
-                                          record_count: 0)
+      source = Source.find_and_update_or_create_by(name: alias_name,
+                                                   record_count: 0)
 
       # create a new index with mapping
       settings = fix_settings(data['settings'])
-      new_index_name = elastic.create_index alias_name, settings, data['mappings']
+
+      if update_mapping
+        new_index_name = elastic.create_index alias_name, settings, Indexing::IndexMappings.read
+      else
+        new_index_name = elastic.create_index alias_name, settings, data['mappings']
+      end
+
       attachments = Indexing::Attachments.new(alias_name)
 
       # bulk import the records
@@ -108,7 +114,7 @@ class Indexing::IndexTasks
       elastic.cleanup_backups_of(alias_name: alias_name)
 
       Source.find_and_update_or_create_by(name: alias_name,
-                                          is_time_searchable: alias_name.camelize.constantize.new.respond_to?('date_range'),
+                                          is_time_searchable: source.type == 'dump' ? source.respond_to?('date_range') : false,
                                           record_count: data['records'].count)
     end
   end

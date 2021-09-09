@@ -25,20 +25,6 @@
   </tr>
   <tr>
     <th>
-      <label for="upload_discoveryplace">
-        <%= 'Discoveryplace'.t %>
-      </label>
-    </th>
-    <td>
-      <%= f.text_field :discoveryplace, options_for_field(:discoveryplace, :style => @upload.discoveryplace.blank? ? '' : 'width: 327px;') %>
-      <%= link_to_google_maps(@upload.discoveryplace) unless @upload.discoveryplace.blank? %>
-    </td>
-    <td>
-      <%= image_tag('misc/info_form_field.gif', :class => 'dim', :title => "State here the original location of the object, which can differ from the current location and consists usually of information about the town, institution and if applicable the inventory number.".t) %>
-    </td>
-  </tr>
-  <tr>
-    <th>
       <label for="upload_genre">
         <%= 'Genre'.t %>
       </label>

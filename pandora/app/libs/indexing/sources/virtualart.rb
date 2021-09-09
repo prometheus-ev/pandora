@@ -8,7 +8,7 @@ class Indexing::Sources::Virtualart < Indexing::SourceSuper
   end
 
   def path
-    "#{record.xpath('.//image_file/text()')}".gsub(/.*\//, '').sub(/.tif\z/, '.jpg')
+    "#{record.xpath('.//image_file/text()')}".gsub(/.*fileadmin\//, '').sub(/.tif\z/, '.jpg')
   end
 
   def artist

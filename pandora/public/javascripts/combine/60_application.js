@@ -137,34 +137,34 @@ Pandora.Behaviour.register({
       }
     }
   },
-  '#boxes': {
-    'dom:loaded': function(e) {
-      var uri = this.readAttribute('_order_uri');
-      if (uri) {
-        Sortable.create(this, {
-          tag:      'div',
-          only:     'sidebar_box',
-          handle:   'box_handle',
-          format:   Pandora.Utils.id_format,
-          onUpdate: function(element) {
-            // REWRITE: adds CSRF token and handle response content
-            var token = document.querySelector('meta[name=csrf-token]').content;
-            new Ajax.Request(uri.append_query_string(Sortable.serialize(element)), {
-              requestHeaders: {'X-CSRF-Token': token},
-              onSuccess: function(response, xJson) {
-                $('boxes').replace(response.responseText);
-              }
-            });
-          }
-        });
-      }
-    }
-  },
-  'div.box_content[_content_uri]': {
-    'dom:loaded': function(e) {
-      this.load_content(this.hasClassName('noscript'));
-    }
-  },
+  // '#boxes': {
+  //   'dom:loaded': function(e) {
+  //     var uri = this.readAttribute('_order_uri');
+  //     if (uri) {
+  //       Sortable.create(this, {
+  //         tag:      'div',
+  //         only:     'sidebar_box',
+  //         handle:   'box_handle',
+  //         format:   Pandora.Utils.id_format,
+  //         onUpdate: function(element) {
+  //           // REWRITE: adds CSRF token and handle response content
+  //           var token = document.querySelector('meta[name=csrf-token]').content;
+  //           new Ajax.Request(uri.append_query_string(Sortable.serialize(element)), {
+  //             requestHeaders: {'X-CSRF-Token': token},
+  //             onSuccess: function(response, xJson) {
+  //               $('boxes').replace(response.responseText);
+  //             }
+  //           });
+  //         }
+  //       });
+  //     }
+  //   }
+  // },
+  // 'div.box_content[_content_uri]': {
+  //   'dom:loaded': function(e) {
+  //     this.load_content(this.hasClassName('noscript'));
+  //   }
+  // },
   '.undim input[type=checkbox]': {
     change: function(e) {
       this.toggle_dim();
@@ -1326,6 +1326,8 @@ Pandora.ElementMethods = {
       value = collapsed ? new Date().getTime() / 1000 : '';
     }
 
+    value = value.replace(':', '')
+
     Pandora.Utils.update({ key: session_key, value: value });
   },
 
@@ -1390,310 +1392,310 @@ Pandora.ElementMethods = {
     element.setStyle({ width: dim.width + 'px', height: dim.height + 'px' });
   },
 
-  make_draggable: function(element, options, object) {
-    element = $(element);
-
-    if (element.hasClassName('placeholder')) {
-      return;
-    }
-
-    options = Pandora.Utils.merge({
-      revert: 'failure',
-      zindex: 10001,
-      scroll: window,
-      scrollSensitivity: 1
-    }, options, object && object.draggable_options);
-
-    var on_start   = options.onStart;
-    var on_dropped = options.onDropped;
-    var on_end     = options.onEnd;
-
-    options.onStart = function(draggable, e) {
-      if (on_start) {
-        on_start(draggable, e);
-      }
-
-      draggable.element._dropped = false;
-
-      if (Pandora.Utils.modifier_key(e)) {
-        draggable.element._copy_draggable = true;
-
-        draggable._clone = draggable.element.cloneNode(true);
-
-        draggable._originallyAbsolute = (draggable.element.getStyle('position') == 'absolute');
-        if (!draggable._originallyAbsolute) {
-          Position.absolutize(draggable.element);
-        }
-
-        draggable.element.parentNode.insertBefore(draggable._clone, draggable.element);
-      }
-    };
-
-    options.onDropped = function(draggable_element) {
-      if (on_dropped) {
-        on_dropped(draggable_element);
-      }
-
-      draggable_element._dropped = true;
-    };
-
-    options.onEnd = function(draggable, e) {
-      if (on_end) {
-        on_end(draggable, e);
-      }
-
-      if (draggable.element._copy_draggable) {
-        draggable.element._copy_draggable = false;
-
-        if (!draggable.element._dropped) {
-          if (!draggable._originallyAbsolute) {
-            Position.relativize(draggable.element);
-            draggable.element.style.position = 'relative';
-          }
-
-          delete draggable._originallyAbsolute;
-
-          Element.remove(draggable._clone);
-          draggable._clone = null;
-        }
-      }
-      else if (draggable.element._dropped) {
-        draggable.originalZ = options.zindex;
-      }
-    };
-
-    var handle;
-
-    if (options.handle) {
-      if (Object.isString(options.handle)) {
-        handle = element.down('.' + options.handle);
-      }
-
-      if (!handle) {
-        handle = $(options.handle);
-      }
-    }
-    else {
-      handle = element;
-    }
-
-    handle.register_cursor_handler(function(cursor, e) {
-      if (Pandora.Utils.modifier_key(e)) {
-        cursor('copy');
-      }
-    }, 'move');
-
-    element.addClassName('draggable');
-
-    return new Draggable(element, options);
-  },
-
-  make_droppable: function(element, options, object) {
-    element = $(element);
-
-    options = Pandora.Utils.merge({
-      hoverclass: 'dragdrop'
-    }, options, object && object.droppable_options);
-
-    element.addClassName('droppable');
-
-    Droppables.add(element, options);
-  },
-
-  make_croppable: function(element, options, object) {
-    element = $(element);
-
-    options = Pandora.Utils.merge({
-      minWidth:       20,
-      minHeight:      20,
-      singleton:      true,
-      skipEmpty:      true,
-      captureKeys:    false,
-      autoIncludeCSS: '../stylesheets'
-    }, options, object && object.croppable_options);
-
-    var on_end_crop = options.onEndCrop;
-
-    options.onEndCrop = function(coords, dimensions, croppable) {
-      if (on_end_crop) {
-        on_end_crop(coords, dimensions, croppable);
-      }
-
-      Pandora.Utils.toggle_clear_croppables(true);
-    };
-
-    return new Cropper.Img(element, options);
-  },
-
-  make_resizable: function(element, opts, options, object) {
-    element = $(element);
-
-    var handle, parent, container, intermediates;
-    var handle_dim, element_dim, max_dim;
-    var callback, fx, fy, set_dimensions;
-
-    if (Object.isElement(opts)) {
-      handle    = opts;
-      opts      = {};
-    }
-    else {
-      handle    = opts.handle;
-      parent    = opts.parent;
-      container = opts.container;
-      callback  = opts.callback;
-    }
-
-    options = Pandora.Utils.merge({
-      handle: handle,
-      zindex: 10001,
-      scroll: window,
-      scrollSensitivity: 1
-    }, options, object && object.resizable_options);
-
-    var on_start = options.onStart;
-    var on_end   = options.onEnd;
-    var revert   = options.revert;
-    var effect   = options.reverteffect;
-    var snap     = options.snap;
-
-    options.onStart = function(draggable, e) {
-      handle_dim  = handle.getDimensions();
-      element_dim = element.getDimensions();
-
-      var resizables = [element];
-
-      if (parent) {
-        resizables.push(parent);
-
-        intermediates = element.intermediateAncestors(parent);
-
-        if (container) {
-          var parent_offset = parent.positionedOffset();
-          var container_dim = container.getDimensions();
-
-          max_dim = {
-            width:  container_dim.width  - parent_offset.left,
-            height: container_dim.height - parent_offset.top
-          };
-        }
-      }
-
-      var slope = element_dim.height / element_dim.width;
-      fx = function(x) { return slope * x; };
-      fy = function(y) { return y / slope; };
-
-      set_dimensions = function(x, y) {
-        resizables.invoke('setDimensions', [
-          x || element_dim.width,
-          y || element_dim.height
-        ]);
-      };
-
-      if (on_start) {
-        on_start(draggable, e);
-      }
-
-      element.addClassName('resized');
-
-      if (parent) {
-        parent.addClassName('resizing');
-      }
-
-      if (max_dim) {
-        intermediates.invoke('setDimensions', max_dim);
-      }
-    };
-
-    options.onEnd = function(draggable, e) {
-      if (on_end) {
-        on_end(draggable, e);
-      }
-
-      if (e.keyCode === Event.KEY_ESC) {
-        set_dimensions();
-
-        if (max_dim) {
-          intermediates.invoke('setDimensions', element_dim);
-        }
-
-        element.removeClassName('resized');
-      }
-      else {
-        handle._dropped = true;
-
-        if (intermediates) {
-          intermediates.invoke('setDimensions', element);
-        }
-
-        if (callback) {
-          var dim = element.getDimensions();
-          callback(draggable, e, dim.width, dim.height);
-        }
-      }
-
-      if (parent) {
-        parent.removeClassName('resizing');
-      }
-    };
-
-    if (Object.isUndefined(revert)) {
-      options.revert = function() {
-        return !handle._dropped;
-      };
-    }
-
-    if (Object.isUndefined(effect)) {
-      var handle_align = {};
-
-      $w('top right bottom left').each(function(i) {
-        handle_align[i] = handle.getStyle(i);
-      });
-
-      options.reverteffect = function() {
-        handle.setStyle(handle_align);
-      };
-    }
-
-    options.snap = function(x, y, draggable) {
-      if (handle.offsetParent) {
-        if (snap) {
-          var res = snap(x, y, draggable, handle_dim, max_dim);
-          x = res[0];
-          y = res[1];
-        }
-        else if (opts.keep_ratio) {
-          var y2 = fx(x);
-          if (y2 > y) {
-            y = y2;
-          }
-          else {
-            x = fy(y);
-          }
-
-          x = Pandora.Utils.clip(x, handle_dim.width,  max_dim.width);
-          y = fx(x);
-
-          y = Pandora.Utils.clip(y, handle_dim.height, max_dim.height);
-          x = fy(y);
-        }
-        else {
-          x = Pandora.Utils.clip(x, handle_dim.width,  max_dim.width);
-          y = Pandora.Utils.clip(y, handle_dim.height, max_dim.height);
-        }
-
-        set_dimensions(x, y);
-      }
-      else {
-        var current_dim = element.getDimensions();
-        x = current_dim.width;
-        y = current_dim.height;
-      }
-
-      return [x - handle_dim.width, y - handle_dim.height];
-    };
-
-    return new Draggable(handle, options);
-  }
+  // make_draggable: function(element, options, object) {
+  //   element = $(element);
+
+  //   if (element.hasClassName('placeholder')) {
+  //     return;
+  //   }
+
+  //   options = Pandora.Utils.merge({
+  //     revert: 'failure',
+  //     zindex: 10001,
+  //     scroll: window,
+  //     scrollSensitivity: 1
+  //   }, options, object && object.draggable_options);
+
+  //   var on_start   = options.onStart;
+  //   var on_dropped = options.onDropped;
+  //   var on_end     = options.onEnd;
+
+  //   options.onStart = function(draggable, e) {
+  //     if (on_start) {
+  //       on_start(draggable, e);
+  //     }
+
+  //     draggable.element._dropped = false;
+
+  //     if (Pandora.Utils.modifier_key(e)) {
+  //       draggable.element._copy_draggable = true;
+
+  //       draggable._clone = draggable.element.cloneNode(true);
+
+  //       draggable._originallyAbsolute = (draggable.element.getStyle('position') == 'absolute');
+  //       if (!draggable._originallyAbsolute) {
+  //         Position.absolutize(draggable.element);
+  //       }
+
+  //       draggable.element.parentNode.insertBefore(draggable._clone, draggable.element);
+  //     }
+  //   };
+
+  //   options.onDropped = function(draggable_element) {
+  //     if (on_dropped) {
+  //       on_dropped(draggable_element);
+  //     }
+
+  //     draggable_element._dropped = true;
+  //   };
+
+  //   options.onEnd = function(draggable, e) {
+  //     if (on_end) {
+  //       on_end(draggable, e);
+  //     }
+
+  //     if (draggable.element._copy_draggable) {
+  //       draggable.element._copy_draggable = false;
+
+  //       if (!draggable.element._dropped) {
+  //         if (!draggable._originallyAbsolute) {
+  //           Position.relativize(draggable.element);
+  //           draggable.element.style.position = 'relative';
+  //         }
+
+  //         delete draggable._originallyAbsolute;
+
+  //         Element.remove(draggable._clone);
+  //         draggable._clone = null;
+  //       }
+  //     }
+  //     else if (draggable.element._dropped) {
+  //       draggable.originalZ = options.zindex;
+  //     }
+  //   };
+
+  //   var handle;
+
+  //   if (options.handle) {
+  //     if (Object.isString(options.handle)) {
+  //       handle = element.down('.' + options.handle);
+  //     }
+
+  //     if (!handle) {
+  //       handle = $(options.handle);
+  //     }
+  //   }
+  //   else {
+  //     handle = element;
+  //   }
+
+  //   handle.register_cursor_handler(function(cursor, e) {
+  //     if (Pandora.Utils.modifier_key(e)) {
+  //       cursor('copy');
+  //     }
+  //   }, 'move');
+
+  //   element.addClassName('draggable');
+
+  //   return new Draggable(element, options);
+  // },
+
+//   make_droppable: function(element, options, object) {
+//     element = $(element);
+
+//     options = Pandora.Utils.merge({
+//       hoverclass: 'dragdrop'
+//     }, options, object && object.droppable_options);
+
+//     element.addClassName('droppable');
+
+//     Droppables.add(element, options);
+//   },
+
+//   make_croppable: function(element, options, object) {
+//     element = $(element);
+
+//     options = Pandora.Utils.merge({
+//       minWidth:       20,
+//       minHeight:      20,
+//       singleton:      true,
+//       skipEmpty:      true,
+//       captureKeys:    false,
+//       autoIncludeCSS: '../stylesheets'
+//     }, options, object && object.croppable_options);
+
+//     var on_end_crop = options.onEndCrop;
+
+//     options.onEndCrop = function(coords, dimensions, croppable) {
+//       if (on_end_crop) {
+//         on_end_crop(coords, dimensions, croppable);
+//       }
+
+//       Pandora.Utils.toggle_clear_croppables(true);
+//     };
+
+//     return new Cropper.Img(element, options);
+//   },
+
+//   make_resizable: function(element, opts, options, object) {
+//     element = $(element);
+
+//     var handle, parent, container, intermediates;
+//     var handle_dim, element_dim, max_dim;
+//     var callback, fx, fy, set_dimensions;
+
+//     if (Object.isElement(opts)) {
+//       handle    = opts;
+//       opts      = {};
+//     }
+//     else {
+//       handle    = opts.handle;
+//       parent    = opts.parent;
+//       container = opts.container;
+//       callback  = opts.callback;
+//     }
+
+//     options = Pandora.Utils.merge({
+//       handle: handle,
+//       zindex: 10001,
+//       scroll: window,
+//       scrollSensitivity: 1
+//     }, options, object && object.resizable_options);
+
+//     var on_start = options.onStart;
+//     var on_end   = options.onEnd;
+//     var revert   = options.revert;
+//     var effect   = options.reverteffect;
+//     var snap     = options.snap;
+
+//     options.onStart = function(draggable, e) {
+//       handle_dim  = handle.getDimensions();
+//       element_dim = element.getDimensions();
+
+//       var resizables = [element];
+
+//       if (parent) {
+//         resizables.push(parent);
+
+//         intermediates = element.intermediateAncestors(parent);
+
+//         if (container) {
+//           var parent_offset = parent.positionedOffset();
+//           var container_dim = container.getDimensions();
+
+//           max_dim = {
+//             width:  container_dim.width  - parent_offset.left,
+//             height: container_dim.height - parent_offset.top
+//           };
+//         }
+//       }
+
+//       var slope = element_dim.height / element_dim.width;
+//       fx = function(x) { return slope * x; };
+//       fy = function(y) { return y / slope; };
+
+//       set_dimensions = function(x, y) {
+//         resizables.invoke('setDimensions', [
+//           x || element_dim.width,
+//           y || element_dim.height
+//         ]);
+//       };
+
+//       if (on_start) {
+//         on_start(draggable, e);
+//       }
+
+//       element.addClassName('resized');
+
+//       if (parent) {
+//         parent.addClassName('resizing');
+//       }
+
+//       if (max_dim) {
+//         intermediates.invoke('setDimensions', max_dim);
+//       }
+//     };
+
+//     options.onEnd = function(draggable, e) {
+//       if (on_end) {
+//         on_end(draggable, e);
+//       }
+
+//       if (e.keyCode === Event.KEY_ESC) {
+//         set_dimensions();
+
+//         if (max_dim) {
+//           intermediates.invoke('setDimensions', element_dim);
+//         }
+
+//         element.removeClassName('resized');
+//       }
+//       else {
+//         handle._dropped = true;
+
+//         if (intermediates) {
+//           intermediates.invoke('setDimensions', element);
+//         }
+
+//         if (callback) {
+//           var dim = element.getDimensions();
+//           callback(draggable, e, dim.width, dim.height);
+//         }
+//       }
+
+//       if (parent) {
+//         parent.removeClassName('resizing');
+//       }
+//     };
+
+//     if (Object.isUndefined(revert)) {
+//       options.revert = function() {
+//         return !handle._dropped;
+//       };
+//     }
+
+//     if (Object.isUndefined(effect)) {
+//       var handle_align = {};
+
+//       $w('top right bottom left').each(function(i) {
+//         handle_align[i] = handle.getStyle(i);
+//       });
+
+//       options.reverteffect = function() {
+//         handle.setStyle(handle_align);
+//       };
+//     }
+
+//     options.snap = function(x, y, draggable) {
+//       if (handle.offsetParent) {
+//         if (snap) {
+//           var res = snap(x, y, draggable, handle_dim, max_dim);
+//           x = res[0];
+//           y = res[1];
+//         }
+//         else if (opts.keep_ratio) {
+//           var y2 = fx(x);
+//           if (y2 > y) {
+//             y = y2;
+//           }
+//           else {
+//             x = fy(y);
+//           }
+
+//           x = Pandora.Utils.clip(x, handle_dim.width,  max_dim.width);
+//           y = fx(x);
+
+//           y = Pandora.Utils.clip(y, handle_dim.height, max_dim.height);
+//           x = fy(y);
+//         }
+//         else {
+//           x = Pandora.Utils.clip(x, handle_dim.width,  max_dim.width);
+//           y = Pandora.Utils.clip(y, handle_dim.height, max_dim.height);
+//         }
+
+//         set_dimensions(x, y);
+//       }
+//       else {
+//         var current_dim = element.getDimensions();
+//         x = current_dim.width;
+//         y = current_dim.height;
+//       }
+
+//       return [x - handle_dim.width, y - handle_dim.height];
+//     };
+
+//     return new Draggable(handle, options);
+//   }
 
 };
 

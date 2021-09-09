@@ -5,7 +5,9 @@
   <%= vbar %>
 <% end -%>
 <strong class="nowrap">
-  <%= link_to_if @source.record_count > 0 && (!current_user || !current_user.dbuser? || current_user.open_sources.include?(@source)), (@source.record_count == 1 ? '%d image' : '%d images') / @source.record_count, :controller => 'searches', :action => 'index', :term => '*', :s => [@source.name] %>
+  <% if @source.record_count > 0 && (!current_user || !current_user.dbuser? || current_user.open_sources.include?(@source)) %>
+    <%= link_to (@source.record_count == 1 ? '%d image' : '%d images') / @source.record_count, :controller => 'searches', :action => 'index', :term => '*', :s => [@source.name] %>
+  <% end %>
 </strong>
 <% if @source.open_access? && !(current_user && current_user.dbuser? && current_user == @source.dbuser) -%>
   <%= vbar %>

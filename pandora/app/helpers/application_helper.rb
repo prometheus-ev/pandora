@@ -390,38 +390,51 @@ module ApplicationHelper
   # @param [String] box the box to generate the url for
   # @return [String] the url to the box item
   def url_for_box(box, url_opts = {})
-    case box
-    when ImageBox
+    case box.category
+    when 'image'
       url_for url_opts.reverse_merge(
         controller: 'images',
         action: 'show',
         id: box.image_id
       )
-    when CollectionBox then collection_path(box.collection_id, url_opts)
+    when 'collection' then collection_path(box.collection_id, url_opts)
     else
       raise Pandora::Exception, "box #{box.inspect} has unknown type"
     end
   end
 
-  def link_to_close_box(options, html_options = {}, remote = true)
-    text = %Q{<div class="close"></div>}.html_safe
-
-    if remote
-      link_to(
-        text,
-        url_for(options),
-        data: html_options[:data],
-        remote: true,
-        method: 'DELETE',
-        title: 'Close'.t
-      )
-    else
-      link_to(text, options, html_options)
-    end
+  def link_to_close_box(box)
+    link_to(
+      '<div class="close"></div>'.html_safe,
+      '#',
+      data: {
+        'pm-confirm': "Are you sure to delete Box: '%s'" / box.title,
+        id: box.id
+      },
+      title: 'Close'.t,
+      class: 'pm-from-sidebar'
+    )
   end
 
+  # def link_to_close_box(options, html_options = {}, remote = true)
+  #   text = '<div class="close"></div>'.html_safe
+
+  #   if remote
+  #     link_to(
+  #       text,
+  #       url_for(options),
+  #       data: html_options[:data],
+  #       remote: true,
+  #       method: 'DELETE',
+  #       title: 'Close'.t
+  #     )
+  #   else
+  #     link_to(text, options, html_options)
+  #   end
+  # end
+
   ## Toggle the visibility of the box (collapsed/expanded)
-  def link_to_toggle_box(expanded, session_key, box_id = nil, expand_text = 'Expand'.t, collapse_text = 'Collapse'.t)
+  def link_to_toggle_announcements(expanded, session_key, box_id = nil, expand_text = 'Expand'.t, collapse_text = 'Collapse'.t)
     link_to(
       %Q{<span class="scriptonly box_toggle"><div class="#{expanded ? 'collapse' : 'expand'}"></div></span>}.html_safe,
       '#',
@@ -429,15 +442,22 @@ module ApplicationHelper
       title: expanded ? collapse_text : expand_text
     )
   end
+  
+  def link_to_toggle_box(box)
+    text = %Q{<span class="scriptonly box_toggle"><div class="#{box.expanded? ? 'collapse' : 'expand'}"></div></span>}.html_safe
+
+    link_to(
+      text,
+      '#',
+      data: {id: box.id},
+      title: box.expanded? ? 'Collapse'.t : 'Expand'.t,
+      class: 'pm-toggle-box'
+    )
+  end
 
   ## === Announcement =========================================================
 
   def current_announcements
-    # REWRITE: slows down development, deactivating for now
-    # actually, it wasn't the notifications slowing everything down, it was the
-    # image boxes.
-    # return []
-
     if current_user && current_user.announcement_hide_time
       since_then = current_user.announcement_hide_time
     else
@@ -455,13 +475,7 @@ module ApplicationHelper
 
   ## === Box ==================================================================
 
-  ## Get the boxes for the current user
-  def current_boxes
-    @current_boxes ||= current_user ? current_user.boxes : []
-  end
-
   # Creates link for box creation.
-  #
   # @param name [String] the type of the object, e.g. "image", "collection".
   # @param long [Boolean] ?.
   # @param box_params [Hash] a hash containing params :controller, :action and :id for the box.

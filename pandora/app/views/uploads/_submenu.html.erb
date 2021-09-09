@@ -3,7 +3,10 @@
 <% end %>
 
 <%= submenu_link_to 'Own'.t, controller: 'uploads', action: 'index' %>
-<%= submenu_link_to 'Institutional'.t, controller: 'institutional_uploads', action: 'index' if current_user && current_user.institutional_user_dbadmin? %>
+
+<% if current_user && (current_user.institutional_user_dbadmin? || current_user.admin_or_superadmin?) %>
+  <%= submenu_link_to 'Institutional'.t, controller: 'institutional_uploads', action: 'index' %>
+<% end %>
 
 <%= submenu_link_to 'Unapproved'.t, controller: 'uploads', action: 'unapproved' if  current_user && current_user.admin_or_superadmin? %>
 <%= submenu_link_to 'Approved'.t, controller: 'uploads', action: 'approved' if current_user && current_user.admin_or_superadmin? %>

@@ -108,21 +108,23 @@ class ImagesTest < ApplicationSystemTestCase
     end
   end
 
-  test 'miro' do
-    with_real_images do
-      elastic = Pandora::Elastic.new
-      elastic.update 'daumier', 'daumier-4c26deb8710753c84e6a48d27129cf47c945c3d5', {
-        'path' => 'miro'
-      }
-      elastic.refresh
+  if production_sources_available?
+    test 'miro' do
+      with_real_images do
+        elastic = Pandora::Elastic.new
+        elastic.update 'daumier', 'daumier-4c26deb8710753c84e6a48d27129cf47c945c3d5', {
+          'path' => 'miro'
+        }
+        elastic.refresh
 
-      login_as 'jdoe'
-      fill_in 'search_value_0', with: '4c26deb8710753c84e6a48d27129cf47c945c3d5'
-      find('.search_query .submit_button').click
+        login_as 'jdoe'
+        fill_in 'search_value_0', with: '4c26deb8710753c84e6a48d27129cf47c945c3d5'
+        find('.search_query .submit_button').click
 
-      img = find('img[id=daumier-4c26deb8710753c84e6a48d27129cf47c945c3d5]')
-      assert_match /\/dummy\/r140\/miro.png/, img[:src]
-      assert_match /\/dummy\/r400\/miro.png/, img[:_zoom_src]
+        img = find('img[id=daumier-4c26deb8710753c84e6a48d27129cf47c945c3d5]')
+        assert_match /\/dummy\/r140\/miro.png/, img[:src]
+        assert_match /\/dummy\/r400\/miro.png/, img[:_zoom_src]
+      end
     end
   end
 
@@ -134,19 +136,19 @@ class ImagesTest < ApplicationSystemTestCase
     assert_text "Ascona\nSwitzerland"
   end
 
-  test 'iconclass links' do
-    elastic = Pandora::Elastic.new
-    elastic.update 'daumier', 'daumier-4c26deb8710753c84e6a48d27129cf47c945c3d5', {
-      'iconclass' => ['42B7422']
-    }
-    elastic.refresh
-
-    login_as 'jdoe'
-    visit '/en/image/daumier-4c26deb8710753c84e6a48d27129cf47c945c3d5'
-    assert_link '42B7422', href: 'http://iconclass.org/rkd/42B7422'
-  end
-
   if production_sources_available?
+    test 'iconclass links' do
+      elastic = Pandora::Elastic.new
+      elastic.update 'daumier', 'daumier-4c26deb8710753c84e6a48d27129cf47c945c3d5', {
+        'iconclass' => ['42B7422']
+      }
+      elastic.refresh
+
+      login_as 'jdoe'
+      visit '/en/image/daumier-4c26deb8710753c84e6a48d27129cf47c945c3d5'
+      assert_link '42B7422', href: 'http://iconclass.org/rkd/42B7422'
+    end
+
     test 'show an image without elastic record' do
       login_as 'jdoe'
 

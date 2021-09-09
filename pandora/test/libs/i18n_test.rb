@@ -42,7 +42,6 @@ class I18nTest < ActiveSupport::TestCase
       case b
       when String then assert(test.is_a?(String), "#{locale}: expected #{stack.inspect} to be a string")
       when Hash
-        # binding.pry unless test.is_a?(Hash)
         assert(test.is_a?(Hash), "#{locale}: expected #{stack.inspect} to be a Hash, but its not")
         b.each do |k, v|
           stack.push k

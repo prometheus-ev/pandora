@@ -348,7 +348,7 @@ class SignupsTest < ApplicationSystemTestCase
     click_on 'My Uploads'
     assert_text 'Please log in with a qualified account'
 
-    click_on 'Sign up!'
+    find('a', text: 'Sign up!', match: :first).click
     choose 'Free access via your institution'
     fill_in 'User name', with: 'Hans M.'
     fill_in 'E-mail', with: 'hans.m@example.com'
@@ -499,8 +499,9 @@ class SignupsTest < ApplicationSystemTestCase
     click_on 'Obtain a free license through your institution'
     select 'Nowhere, Nowhere University'
     submit 'Proceed'
+    
     assert_text 'Local administrators'
-    assert_text 'Jean Dupont'
+    assert_link 'Jean Dupont', href: /mailto/
 
     login_as 'jdupont'
     click_on 'Administration'
@@ -593,15 +594,11 @@ class SignupsTest < ApplicationSystemTestCase
     # and the below positive message in staging
 
     # We add a sidebar item to test #479
-    box = ImageBox.create({
+    box = Box.create!(
+      ref_type: 'image',
       image_id: Upload.last.pid,
       owner_id: Account.find_by!(login: 'jdoe').id,
-      params: {
-        controller: 'images',
-        action: 'show',
-        id: Upload.last.pid
-      }
-    }, without_protection: true)
+    )
 
     login_as 'jdoe', 'wrong-pass'
 

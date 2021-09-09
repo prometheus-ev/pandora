@@ -3960,7 +3960,6 @@ Luigi Bertoni, Louis Bertoni, L. Bertoni
 Giuseppe Bertossi, Giuseppe Bertosi
 Ottavio Bertotti Scamozzi, Ottavio B. Scamozzi
 Ottavio Bertotti Scamozzi, Ottavio B. Scamozzi
-Bertram Meister, Bertram von Minden, Meister Bertram, Bertram van Byrde, Bertram van Birden, Bertram der Meister
 Conrad Bertram, Conradus Bertram, C. Bertram, Konrad Bertram
 Joachim Bertram, Joachimus Bertramus
 Johannes Bertram Numburgensis, Johannes Bertramus, Johann Bertram, Johannes Bertram de Nürnberg, Johannes Bertram de Nuenburg, Johannes Bertram Naumburgensis, Johannes Bertram, Johannes Bertram von Naumburg
@@ -5996,8 +5995,6 @@ Wilhelm Bruckner, Wilhelm Bruckner-Karplus, Wilhelm Bruckner- Karplus, Wilhelm B
 Michael Bruder, Michael Marc Bruder
 Alfred Brueckner, Alfred Brückner
 Matthias Brueckner, Matthias Brückner
-Höllenbruegel, Pieter de Jongere Bruegel, Pieter Brueghel, Pieter Breughel, Pieter de Jongere Brueghel, Pieter der Jüngere Breughel, Pieter der Jüngere Brueghel, Pieter le Jeune Breughel, Pieter de Jonge Breughel
-Bauernbruegel, Brueghel de Oudere, Pieter de Oudere Bruegel, Pieter der Ältere Brueghel, Pieter der Ältere Breughel, Peter der Ältere Bruegel, Peter der Ältere Brueghel, Pieter de Oudere Brueghel, Pieter der Ältere Bruegel, Peter de Oudere Bruegel, Peter der Ältere Breughel, Peter der Ältere Breugel, Pieter Bruegel, Pieter Brueghel, Pierre l'Ancien Breugel
 Abraham Brueghel, Abraham Bruegel, Abraham Breughel, Abraham Briegel, Abramo Brueghel
 Ambrosius Brueghel, Ambrosius Bruegel, Ambrosius Broeghel, Ambrosius Broegel, Ambrosius Breughel, Ambrogio Brueghel
 Jan Peeter Brueghel, Jan Peeter Bruegel, Jan Peter Brueghel, Jan-Pieter Brueghel, Jean-Pierre Brueghel, Jan Peter Breughel
@@ -9687,7 +9684,6 @@ Alfredo De Giorgio, Alfredo de Giorgio, Alfredo DeGiorgio
 Quirino De Giorgio, Quirino de Giorgio, Quirino DeGiorgio
 Luciano De Gironcoli, Luciano de Gironcoli, Luciano DeGironcoli
 Raffaele De Grada, Raffaele de Grada, Raffaele DeGrada
-Raffaele De Grada, Raffaele de Grada, Raffaele DeGrada
 Francesco De Grandi, Francesco de Grandi, Francesco DeGrandi
 Giuseppe De Gregorio, Giuseppe de Gregorio, Giuseppe DeGregorio
 Roger De Grey, Roger de Grey, Roger DeGrey
@@ -13265,7 +13261,6 @@ Ludwig Fischer, Ludovicus Fischer
 Ludwig Fischer, Karl Ludwig Fischer
 Ludwig von Fischer, Ludwig Fischer
 Maria Fischer, Maria Walther, M. Fischer
-Martin Fischer, Martin Fischer 
 Martin Peter Fischer, Martin Fischer
 Michael Fischer, Gerold Michael Fischer
 Michael Fischer, Michael Harald Fischer
@@ -14330,7 +14325,7 @@ Noel Bertram Gerson, Samuel Edwards, Noel B. Gerson
 Oscar Gerson, Oskar Gerson
 Wojciech Gerson, Adalbert Gerson, Wojciech Henryk Wilhelm Gerson
 Christiane Gerstel-Naubereit, Christiane Gerstel- Naubereit, Christiane Naubereit
-Müller, Georg Friedrich Konrad Ludwig Müller von Gerstenbergk, Friedrich Müller, Georg F. Müller von Gerstenbergk, Georg Friedrich Konrad Ludwig Müller, Friedrich von Gerstenbergck, Friedrich von Müller, Friedrich von Gerstenberg, Friedrich Müller von Gerstenbergck, Friedrich Müller von Gerstenbergk, Georg Friedrich Conrad Ludwig Gerstenbergk, Friedrich Konrad Ludwig Müller von Gerstenbergk, Friedrich Gerstenberg
+Georg Friedrich Konrad Ludwig Müller von Gerstenbergk, Friedrich Müller, Georg F. Müller von Gerstenbergk, Georg Friedrich Konrad Ludwig Müller, Friedrich von Gerstenbergck, Friedrich von Müller, Friedrich von Gerstenberg, Friedrich Müller von Gerstenbergck, Friedrich Müller von Gerstenbergk, Georg Friedrich Conrad Ludwig Gerstenbergk, Friedrich Konrad Ludwig Müller von Gerstenbergk, Friedrich Gerstenberg
 Georg Gerster, Georgius Gerster
 Joseph Gerstner, Josef Gerstner, Ioseph Gerstner
 Mose Gersuni, Moshe Gershuni
@@ -15267,7 +15262,6 @@ Guichardus Lugdunensis, Wicard de Lyon, Guichard of Lyon, Guichardus Archiepisco
 Giovanni Guidetti, Johannes Guidettus
 Giorgio Guidi, Giorgio Guido
 Giovanni Guidi, Joannes Guidius
-Giovanni Guidi, Lo Scheggia, Giovanni di Ser Giovanni, Master of the Adimari Cassone, Maestro del Cassone Adimari, Giovanni di Ser Giovanni di Mone Guidi, Giovanni der Ältere Guidi
 Guidobono Fratelli, Guidobono Brüder, Guidobono Gebrüder, Domenico Guidobono
 Alberto da Veiga Guignard
 Cartigny, Cobrat, Dalou, Wolf, Henri Guilbeaux, James Burkley, André Lefaivre, André Sastor
@@ -16097,7 +16091,6 @@ Gerhart Hauptmann, Gerhard Hauptmann, Gkerchart Chauptman, Gerhard Johann Robert
 G. H., Gottfried Hauptmann, G. H. v. D.
 Susette Hauptmann, Susette Hummel
 Tatjana Hauptmann, Tatiana Hauptmann
-Hausbuchmeister, Meister des Hausbuches, Meister des Hausbuches von Schloss Wolfegg, Meister des Amsterdamer Kabinetts, Meister von 1480
 Max Hauschild, Maximilian Albert Hauschild, Max Albert Hauschild
 Alois Hauser, Luigi Hauser
 Alois Hauser, A Hauser, Alois der Ältere Hauser
@@ -17355,7 +17348,6 @@ Warja Honegger-Lavater, Warja Honegger- Lavater, Warja Honegger Lavater, Warja L
 Jacques Honervogt, Jakob Honervogt, Jacques Honnervogt, Jakob Honnervogt, Jacques I. Honervogt, Jacques der Ältere Honervogt, Jacques l'ainé Honervogt, Jacques Honerno, Jacques Honeruog, Jacques Hovervogt
 Zhong Hong, Chung Hung
 Jacob Honold, Jakob Honold, Jacobus Honoldus
-Gherardo della Notte, Gherardo delle Notti, Gerrit van Honthorst, Gerard van Honthorst, Gerard H. van Honthorst, Gerrit van Hondhorst, Gerardus Honthorst
 Casper, Kaspar A. Honthumb
 Pieter de Hooch, Pieter de Hoogh
 Thomas Hood, Tom Hood, Thomas the younger Hood
@@ -18142,7 +18134,6 @@ Monika Janus-Sommer, Monika Janus- Sommer
 Peter Janßen, Peter Janssen
 Giuseppe Japelli, Giuseppe Jappelli
 Louis Jaque, Jacques Beaulieu, Louis-Jacques Beaulieu
-Giacomo Jaquerio, Jaquerus de Taurino, Iaquerus de Taurino
 Nicolas Henri Jardin, Nicolas-Henri Jardin, Nicolaus Henricus Jardin, Nicolai Henrich Jardin
 William Jardine, W. Jardine
 Valmeron de, Fauchet, Pierre F. Jarry
@@ -23139,7 +23130,6 @@ Christian von Mechel, Chr. von Mechel, Chrétien de Mechel, Chretien de Mechel
 Johann Jacob von Mechel, J. J. von Mechel, Jean Jacq. de Mechel, Johann Jakob von Mechel
 Christoph Meckel, Thomas Balkan, Cristoph Meckel, Christopher Meckel
 Max Meckel, Maximilian Meckel
-Israhel van Meckenem, Israhel van der Jüngere Meckenem, Israhel von Meckenheim
 Lotte Medelsky, Caroline Krauspe, Karoline Krauspe, Caroline Frank
 Gallus, Johann Mederitsch, Johann Georg Anton Mederitsch-Gallus, Johann Georg Anton Gallus Mederitsch, Johann Gallus, Jean Mederitsch, Jean Gallus
 István Medgyaszay, István Benkó
@@ -23220,7 +23210,6 @@ Meister der Argonautenbilder, Meister der Argonautentafeln
 Meister der Crispinuslegende
 Meister der Darmstädter Passion
 Meister der Historia Friderici et Maximiliani, Meister von Pulkau
-Meister der Josephsfolge, Meister der Josephslegende, Meister der Abtei von Afflighem, Meester van de abdij von Affligem
 Meister der Katharina von Kleve, Pelagius Meister, Meister Pelagius
 Meister der Katharinenlegende, Meister der Legende der Heiligen Katharina
 Meister der Liebesgärten, Master of the Gardens of Love
@@ -23229,7 +23218,6 @@ Meister der Pala Sforzesca, Meister des Sforzesca-Altars, Maestro della Pala Sfo
 Meister der Pollinger Tafeln, Weilheimer Meister von 1444
 Meister der Stratonike, Maestro di Stratonice, Stratonice Master, Master of the Stratonice Panels, Master of the Stratonice Cassoni, Master of the Stratonice Legend
 Meister der vierziger Jahre, Master of the 1540s
-Meister des Bambino Vispo, Meister des lebhaften Christuskindes
 Meister des Champion des Dames, Master of the Champion des Dames, Maître du Champion des Dames, Maître du Champion
 Meister des Friedrich-Altars von 1447, Meister des Znaimer Altars, Meister des Wiener-Neustädter Altars von 1447
 Meister des Regler-Altars, Meister des Erfurter Regler-Altars, Reglermeister
@@ -23239,7 +23227,6 @@ Meister von Blutenburg, Meister des Blutenburger Apostelzyklus
 Meister von Castelsardo, Maestro di Castelsardo
 Meister von Città di Castello, Meister der Madonna von Città di Castello, Meister der Madonna in San Michele in Crevole
 Meister von El Tránsito, Tránsito-Meister, Maestro del Tránsito
-Meister von Moulins, Meister der Bourbonen, Meister mit den Engeln, Meister der Bildnisse von 1488, Meister mit den Lilien
 Meister von Mühldorf, Wilhelm Pätzsold
 Meister von Rabenden, Meister des Hochaltars von Rabenden
 Meister von Wolfskehl, Meister des Grabmals des Bischofs Albert von Hohenlohe, Meister des Hohenlohe, Meister der Bamberger Bischofsgräber, Wolffskeel-Meister, Wolfskehl-Meister, Meister des Grabsteins des Otto von Wolfskehl
@@ -24603,13 +24590,11 @@ Fritz Mühlenweg, Fritz Muehelenweg
 Karl Mühlmeister, Kurt Mühlmeister
 Erich Mühsam, Erich Muehsam
 Jörg Mülich, Georges Mülich de Augsbourg, Georg Mülich, Georges Mülich
-Müller, Mülleria
 Daniel Müller Nielaba, Daniel Müller-Nielaba, Daniel Müller
 Georg Müller vom Siel, Georg Müller Vom Siel, Georg Müller- vom Siel, Georg Bernhard Müller, Georg Müller VomSiel, Georg Müller-VomSiel
 Karl Franz Alois Matthias Müller von Friedberg, Karl Müller- Friedberg, Karl Müller von Friedberg, Carl Müller von Friedberg, Carl Müller-Friedberg, Karl von Müller von Friedberg, Carl Franz Müller von Friedberg, Karl Müller-Friedberg, Karl Franz Müller von Friedberg
 M. Doktor, Wolfgang Müller von Königswinter, Wolfgang Müller, Wilhelm Müller, Wolfgang Müller-Königswinter
 E. Müller von Sondermühlen, E. M. von Sondermühlen, Müller von Sondermühlen, E. Müller
-Müller, A. Müller
 Abraham Müller, A. G. F. Müller
 Adam Heinrich Müller, Adam H. Müller, Adam von Müller, Adam Müller, Adam Heinrich von Müller, Adam Mueller, Adam Heinrich Mueller
 Adolf Müller, Adolph Müller
@@ -24785,7 +24770,7 @@ Franz Joseph Müller, Franciscus Iosephus Müller
 Franz Xaver Müller, Franz X. Müller
 Friedrich Müller, Chr Friedrich Müller
 Friedrich Müller, Fridericus Müller, Fridericus Muller, Fridericus Mullerus
-Müller, Friedrich Müller, F. Müller
+Friedrich Müller, F. Müller
 Müller Mahler, Müller Maler, Maler Müller, Federigo, Friedrich Müller, Friedrich Müller Löwenstein, Philo Nasturtius, N. Spaenholz, Fridericus Mullerus, Fridericus Müllerus, Fridericus Mueller, Friedrich Muller, F. Müller
 Friedrich Müller, Friedrich Mueller
 Friedrich Müller, Fridericus Müller
@@ -24869,7 +24854,6 @@ Heinrich Müller, Henrich Müller, Henricus Müllerus
 Heinrich Müller, Henricus Müller, Henrich Müller
 Heinrich Müller, H. Müller, Henrik Müller, Henricus Müller, Henricus Muller, Heinrich J. Müller, Henricus Mylius, Henry Muller, Henricus Molitor, Henricus Mullerus, Henricus Müllerus
 Heinz Alfred Müller, Heinz Müller
-Müller, Helferich Müller
 Helmut M. Müller, Helmut Müller
 Henning Müller, Henningus Müllerus, Henning der Ältere Müller, Henning Möller, Henning Moller
 Henning Müller, Henningus Müllerus, Henning der Jüngere Müller, Henning Möller
@@ -25145,7 +25129,7 @@ Sebastian Müller, Sebastianus Müller
 Sebastian Müller, Sebastianus Müller
 Stephan Müller, Stefan Müller
 Stephan Müller, Stephan Georg Müller
-Müller, Theodor Müller, Theodor Müller-Breslau
+Theodor Müller, Theodor Müller-Breslau
 Thomas Müller, Thomas Christian Müller
 Thomas Müller, Alfred Thomas Müller
 Thomas Müller, T. Müller, Th. Müller, T. J. Müller
@@ -25159,7 +25143,7 @@ Ursula Müller, Ursula U. Müller, Ursula Schmidt, Ursula Rowold, Ursula Findekl
 Uwe Müller, U. Müller
 Valentin Müller, Valentin Mueller
 Valentin Kurt Müller, Valentin Müller
-Müller, Valeska Müller, Valeska A. Müller, V. A. Müller
+Valeska Müller, Valeska A. Müller, V. A. Müller
 Walter Müller, Valteris Miuleris
 Walter Müller, Walter Müller-Worpswede
 Walter W Müller, Walter Müller
@@ -29132,7 +29116,6 @@ Aru, A-ju, Chuxu, Ch'u-hsü, Zhijuan Ru, Chih-chüan Ju, Xu Chu, Hsü Ch'u
 Aleksandr A. Rubcov, Aleksandr Aleksandrovic Rubcov, Alexandre Roubtzoff
 Christian Ruben, Christoph Ruben, Christoph Christian Ruben
 Albert Rubens, Albertus Rubenius, Albert Ruben
-Peter Paul Rubens, Pedro Pauolo Rubens, Petrus Paulus Rubens, Petrus Paulus Rubenius, Paul Rubens, Pet. P. Rubenius, Petrus P. Rubenius, Pietro P. Rubens, Pietro Pauolo Rubens, Pietro Paolo Rubens, Pierre Paul Rubens, Peter Paul Rubbens
 Paulus Rubeus, Paolo Rossi
 Roviale Spagnuolo, Roviale Spagnolo, Pedro de Rubiales, Pedro De Rubiales, Pedro Roviale, Pedro Ruviale, Pietro Roviale Spagnuolo, Pedro DeRubiales
 Rubin, Rubin von Rüdeger, Rubin Her, Rüdiger, Rubin von Rüôeger, Robyn, Robin, Rubin und Rüdeger, Robin und Rudinger, Rüdeger, Rudinger Meister, Rudinger, Rubin von Ruedeger
@@ -32362,7 +32345,6 @@ Mathias Soiron, Matthias Soiron
 Ap Sok, Albertus Marie Sok
 Michal Sokolnicki, Michel Sokolnicki
 Vladimir N. Sokolov, Vladimir Sokolov, Vladimir Nikolaevic Sokolov, Vl. Nik. Sokolov, V. Sokolov, Vladimir Nikolaevich Sokolov
-Susana Solano, Susana Solano 
 Juan José del Solar, Juan del Solar
 Del Gobbo, Gobbo / Del, DelGobbo, Gobbo /Del, Andrea Solari, Andrea Solario
 Francesco Solari, Francesco De Solari, Francesco Solario, Francesco De Solario, Francesco DeSolari, Francesco DeSolario

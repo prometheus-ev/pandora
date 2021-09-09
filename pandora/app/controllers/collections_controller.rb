@@ -177,25 +177,14 @@ class CollectionsController < ApplicationController
       return
     end
 
-    # view compatibility (box rendering)
-    if params[:box_id].present?
-      items = filter_owned_or_administered_uploads(@collection)
-
-      box_id = params[:box_id].split('-').last
-      @box = CollectionBox.find(box_id)
-
-      @images = Pandora::Collection.new(
-        items.pageit(page, 6),
-        items.count,
-        page,
-        6
-      )
-
-      render partial: 'box', layout: false
-      return
-    end
-
-    @images = image_records(@collection)
+    @images = @collection.images_pandora_collection(current_user,
+      search_column: search_column,
+      search_value: search_value,
+      sort_column: sort_column,
+      sort_direction: sort_direction,
+      page: page,
+      per_page: per_page
+    )
 
     # view compatibility
     @count = @collection.images.count
@@ -598,7 +587,14 @@ class CollectionsController < ApplicationController
   def images
     @collection = Collection.allowed(current_user, :read).find(params[:id])
 
-    @images = image_records(@collection)
+    @images = @collection.images_pandora_collection(current_user,
+      search_column: search_column,
+      search_value: search_value,
+      sort_column: sort_column,
+      sort_direction: sort_direction,
+      page: page,
+      per_page: per_page
+    )
 
     respond_to do |format|
       format.xml  do
@@ -663,58 +659,6 @@ class CollectionsController < ApplicationController
       Collection.
         search(search_column, search_value).
         sorted(sort_column, sort_direction)
-    end
-
-    # returns the images for the current @collection but doesn't return a scope
-    # as `records` does but a Pandora::Collection
-    def image_records(collection)
-      items = filter_owned_or_administered_uploads(collection)
-      items = items.search(search_column, search_value)
-
-      if ['title', 'artist', 'location', 'credits'].include?(sort_column)
-        # we can't use AR scopes for this because the data might be in the uploads
-        # table or elasticsearch
-        items = items.map do |i|
-          Pandora::SuperImage.from(i, upload: i.upload, source: i.source)
-        end
-        items = items.to_a.sort_by{|si| si.send(sort_column) || ''}
-        items = items.reverse if sort_direction == 'desc'
-
-        Pandora::Collection.new(
-          items.slice((page - 1) * per_page, per_page) || [],
-          items.size,
-          page,
-          per_page
-        )
-      else
-        # we keep a ref to the unsorted items because sorting by comments adds
-        # a group by clause which then confuses items.count below
-        unsorted_items = items
-
-        items = items.sorted(sort_column, sort_direction)
-        paged_images = items.
-          pageit(page, per_page).
-          map{|i| Pandora::SuperImage.from(i)}
-
-        Pandora::Collection.new(
-          paged_images,
-          unsorted_items.count,
-          page,
-          per_page
-        )
-      end
-    end
-
-    def filter_owned_or_administered_uploads(collection)
-      items = collection.images.
-      includes(:upload, source: :institution).
-      references(:upload).
-      joins("left outer join uploads on images.pid = uploads.image_id").
-      joins("left outer join sources on uploads.database_id = sources.id").
-      joins("left outer join admins_sources on sources.id = admins_sources.source_id").
-      where("uploads.approved_record OR uploads.id IS NULL OR
-        ((sources.owner_type like 'Account' AND sources.owner_id = #{current_user.id}) OR
-        (sources.owner_type like 'Institution' AND admins_sources.account_id = #{current_user.id}))")
     end
 
     def collection_params

@@ -1,3 +1,9 @@
+<% if ENV['PM_SHOW_DEPLOY_INFO'] == 'true' %>
+  <span id="deploy-info">
+    Commit <%= Pandora.revision.first(10) %> (as <%= Pandora.branch %>)
+  </span>
+<% end %>
+
 <span id="loginfo">
 <% if current_user -%>
   <%= current_user.ipuser? ?

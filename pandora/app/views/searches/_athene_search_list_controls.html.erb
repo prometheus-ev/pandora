@@ -6,12 +6,12 @@
   <div class="sort_links">
     <%= 'Sort'.t %>
     <%= link_to(
-      image_tag("misc/sort_#{sort_inverse}.png", class: 'sort_icon'),
-      params.permit!.to_h.merge(direction: sort_inverse, page: 1),
+      image_tag("misc/sort_#{@search.sort_order_reverse}.png", class: 'sort_icon'),
+      params.permit!.to_h.merge(direction: @search.sort_order_reverse, page: 1),
       class: 'search-link',
-      title: "Sort #{sort_inverse}ending".t,
+      title: "Sort #{@search.sort_order_reverse}ending".t,
     ) %>
-    <%= select_tag("order", options_for_select(@search.sort_fields.map { |field| [field.humanize.t, field] }, sort_column), 'pm-to-param' => 'order') %>
+    <%= select_tag("order", options_for_select(@search.sort_fields.map { |field| [field.humanize.t, field] }, @search.sort_field), 'pm-to-param' => 'order') %>
   </div>
   <div class="result_view">
     <%= render partial: 'shared/view_links' %>

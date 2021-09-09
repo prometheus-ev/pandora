@@ -136,7 +136,7 @@ class ElasticRecordImage
   end
 
   def display_fields
-    @display_fields ||= Rails.configuration.x.athene_search_fields['display']
+    @display_fields ||= Indexing::IndexFields.display
   end
 
   def display_field(display_field)
@@ -144,6 +144,14 @@ class ElasticRecordImage
       send(display_field)
     else
       elastic_record['_source'][display_field]
+    end
+  end
+
+  def docvalue_field(docvalue_field)
+    if elastic_record['fields'] && docvalue_field = elastic_record['fields'][docvalue_field]
+      docvalue_field
+    else
+      ""
     end
   end
 

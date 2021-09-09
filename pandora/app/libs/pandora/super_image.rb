@@ -425,6 +425,10 @@ class Pandora::SuperImage
     end
   end
 
+  def docvalue_field(docvalue_field)
+    elastic_record_image.docvalue_field(docvalue_field)
+  end
+
   def value_list(array)
     case array
     when Array

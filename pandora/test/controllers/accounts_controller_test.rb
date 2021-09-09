@@ -96,4 +96,12 @@ class AccountsControllerTest < ActionDispatch::IntegrationTest
     assert jdupont.expires_at
     assert_equal(Time.zone.parse("2018-01-13 23:59:59"), Time.zone.parse(jdupont.expires_at.to_s))
   end
+
+  test 'newsletter subscribers are not suggested' do
+    subscriber = Account.subscriber_for('subscribe-me@example.com')
+    subscriber.email_verified!
+
+    get '/en/accounts/suggest_names', params: {q: 'subscr'}, headers: api_auth('superadmin')
+    assert_no_match /Newsletter/, response.body
+  end
 end

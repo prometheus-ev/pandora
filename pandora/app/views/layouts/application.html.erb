@@ -60,9 +60,7 @@
       <div id="sidebar_header"></div>
       <div id="sidebar_header_shadow"></div>
       <%= render :partial => 'shared/layout/announcements' %>
-      <% if current_user && current_user.active? && !current_user.reset_password? && current_user.email_verified? && current_user.accepted_terms_of_use? %>
-        <%= render :partial => 'shared/layout/boxes' %>
-      <% end %>
+      <div id="boxes"></div>
     </div>
     <div id="main">
       <% unless @no_submenu %>

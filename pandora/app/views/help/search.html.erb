@@ -8,7 +8,6 @@
 
 <% with_toc do -%>
 
-<<<<<<< HEAD
   <%= section_heading 'Search', 'search' %>
   <p>
     The simple search offers the possibility for quick and easy search.
@@ -27,24 +26,9 @@
   </p>
 
   <ul>
-    <li>All</li>
-    <li>Artist</li>
-    <li>Title</li>
-    <li>Location</li>
-    <li>Discoveryplace</li>
-    <li>Genre</li>
-    <li>Material</li>
-    <li>Keyword</li>
-    <li>Description</li>
-    <li>Date</li>
-    <li>Credits</li>
-    <li>Rights reproduction</li>
-    <li>Rights work</li>
-    <li>Record</li>
-    <li>Record object</li>
-    <li>Rating average</li>
-    <li>Rating count</li>
-    <li>User comments</li>
+    <% Indexing::IndexFields.search.each do |field| %>
+      <li><%= field.humanize %></li>
+    <% end %>
   </ul>
 
   <p>

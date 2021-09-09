@@ -95,17 +95,23 @@ class Announcement < ApplicationRecord
     {notification: self.attributes}.to_json
   end
 
+  # def starts_at
+  #   if v = read_attribute(:starts_at)
+  #     v.localtime
+  #   end
+  # end
+
   # REWRITE: we need to define a few accessors since the dates end up in this
   # class as strings
-  def starts_at
-    if v = attributes["starts_at"]
-      (v.is_a?(DateTime) || v.is_a?(Time)) ? v : Time.parse(v)
-    end
-  end
-  def ends_at
-    if v = attributes["ends_at"]
-      (v.is_a?(DateTime) || v.is_a?(Time)) ? v : Time.parse(v)
-    end
-  end
+  # def starts_at
+  #   if v = attributes["starts_at"]
+  #     (v.is_a?(DateTime) || v.is_a?(Time)) ? v : Time.zone.parse(v)
+  #   end
+  # end
+  # def ends_at
+  #   if v = attributes["ends_at"]
+  #     (v.is_a?(DateTime) || v.is_a?(Time)) ? v : Time.zone.parse(v)
+  #   end
+  # end
 
 end

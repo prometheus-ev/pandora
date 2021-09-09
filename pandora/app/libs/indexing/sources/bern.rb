@@ -10,40 +10,36 @@ class Indexing::Sources::Bern < Indexing::SourceSuper
   end
 
   def path
-    @miro_record_ids ||= Rails.configuration.x.athene_search_record_ids['miro'][name]
+    return miro if miro?
 
-    if @miro_record_ids.include?(process_record_id(record_id))
-      "miro"
-    else
-      image_id = record.xpath('.//Bilder/bild/text()').to_s
+    image_id = record.xpath('.//Bilder/bild/text()').to_s
 
-      unless @paths_document
-        paths_file = File.open(Rails.configuration.x.dumps_path + "bern_paths.xml")
-        @paths_document = Nokogiri::XML(File.open(paths_file)) do |config|
-          config.noblanks
-        end
+    unless @paths_document
+      paths_file = File.open(Rails.configuration.x.dumps_path + "bern_paths.xml")
+      @paths_document = Nokogiri::XML(File.open(paths_file)) do |config|
+        config.noblanks
       end
-
-      path = @paths_document.xpath("//root/row/bild[text()='#{image_id}']/../paths/path/size[text()='original']/../path/text()").to_s || ""
-
-      if path.blank?
-        begin
-          url = URI.parse(VERSIONS_URL % image_id)
-          result = Net::HTTP.start(url.host, url.port, { :open_timeout => 1, :read_timeout => 1 })
-
-          JSON.parse(result.body).each { |version|
-            printf '-'
-            if version == 'original'
-              path = "#{version['link']}/#{image_id}.jpg"
-            end
-          }
-        rescue => exception
-          warn "\nError fetching image path for record ID #{record_id.to_s} (#{exception.class}): #{exception}"
-        end
-      end
-
-      path.sub(/^(\/*)/,'')
     end
+
+    path = @paths_document.xpath("//root/row/bild[text()='#{image_id}']/../paths/path/size[text()='original']/../path/text()").to_s || ""
+
+    if path.blank?
+      begin
+        url = URI.parse(VERSIONS_URL % image_id)
+        result = Net::HTTP.start(url.host, url.port, { :open_timeout => 1, :read_timeout => 1 })
+
+        JSON.parse(result.body).each { |version|
+          printf '-'
+          if version == 'original'
+            path = "#{version['link']}/#{image_id}.jpg"
+          end
+        }
+      rescue => exception
+        warn "\nError fetching image path for record ID #{record_id.to_s} (#{exception.class}): #{exception}"
+      end
+    end
+
+    path.sub(/^(\/*)/,'')
   end
 
   # künstler

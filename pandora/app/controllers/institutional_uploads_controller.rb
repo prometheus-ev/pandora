@@ -71,31 +71,35 @@ class InstitutionalUploadsController < ApplicationController
   end
 
   def index
-    unless current_user && current_user.institutional_user_dbadmin?
+    if current_user && (current_user.institutional_user_dbadmin? || current_user.admin_or_superadmin?)
+      if current_user.admin_or_superadmin?
+        @institutional_upload_databases = Source.where(type: 'upload').where.not(kind: 'User database').order(:title)
+      else
+        @institutional_upload_databases = current_user.admin_sources.where(type: 'upload').order(:title)
+      end
+
+      if params[:id]
+        @institutional_upload_database = @institutional_upload_databases.find(params[:id])
+      elsif !@institutional_upload_databases.empty?
+        @institutional_upload_database = @institutional_upload_databases.order(:created_at).first
+      end
+
+      scope = records.where(database: @institutional_upload_database)
+
+      @uploads = Pandora::Collection.new(
+        scope.pageit(page, per_page),
+        scope.count,
+        page,
+        per_page
+      )
+
+      set_list_title(@institutional_upload_database)
+
+      store_neighbours_for(@uploads.items)
+    else
       permission_denied
       return
     end
-
-    @institutional_upload_databases = current_user.admin_sources.where(type: "upload").order(:title)
-
-    if params[:id]
-      @institutional_upload_database = @institutional_upload_databases.find(params[:id])
-    elsif !@institutional_upload_databases.empty?
-      @institutional_upload_database = @institutional_upload_databases.order(:created_at).first
-    end
-
-    scope = records.where(database: @institutional_upload_database)
-
-    @uploads = Pandora::Collection.new(
-      scope.pageit(page, per_page),
-      scope.count,
-      page,
-      per_page
-    )
-
-    set_list_title(@institutional_upload_database)
-
-    store_neighbours_for(@uploads.items)
   end
 
   ##########
@@ -147,6 +151,26 @@ class InstitutionalUploadsController < ApplicationController
       preload(:database).
       sorted(sort_column, sort_direction).
       search(search_column, search_value)
+  end
+
+  def sort_column_default
+    upload_settings[:order] || 'title'
+  end
+
+  def sort_direction_default
+    upload_settings[:direction] || 'asc'
+  end
+
+  def per_page_default
+    upload_settings[:per_page] || super
+  end
+
+  def zoom_default
+    !upload_settings[:zoom].nil? ? upload_settings[:zoom] : true
+  end
+
+  def upload_settings
+    current_user.try(:upload_settings) || {}
   end
 
   def upload_params

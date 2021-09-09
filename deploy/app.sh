@@ -1,6 +1,17 @@
 #!/bin/bash -e
 
 function deploy {
+  OLD_COMMIT=$(ssh -p $PORT $HOST "cat $LINKED_CURRENT_PATH/BRANCH") || :
+
+  if [[ "$OLD_COMMIT" != "$COMMIT" ]]; then
+    echo "BRANCH '$OLD_COMMIT' IS DEPLOYED ON THIS TARGET, YOU ARE DEPLOYING '$COMMIT'"
+    read -p "Type 'yes' if you want to proceed? " -r
+    if ! [[ "$REPLY" == "yes" ]]; then
+      echo "aborting"
+      exit 1
+    fi
+  fi
+
   setup
   deploy_code
   cleanup
@@ -38,7 +49,8 @@ function deploy {
   remote "touch $CURRENT_PATH/pandora/tmp/restart.txt"
   remote "touch $CURRENT_PATH/rack-images/tmp/restart.txt"
 
-  remote "echo 'Revision: $REVISION' | mail -s 'deployed $DEPLOY_TARGET' $NOTIFY"
+  remote "echo '$COMMIT' > $CURRENT_PATH/BRANCH"
+  remote "echo 'Revision: $REVISION ($COMMIT)' | mail -s 'deployed $DEPLOY_TARGET' $NOTIFY"
 
   finalize
 }
@@ -47,6 +59,8 @@ function configure {
   source deploy/config.sh
   $1
   source deploy/lib.sh
+
+  export COMMIT=$COMMIT_OVERRIDE
 }
 
 export DEPLOY_TARGET=$1

@@ -19,9 +19,9 @@ class Indexing::Attachments
     field_validator.validate('rating_average', ratings_for(pid)[:average])
     field_validator.validate('comment_count', comments_for(pid).size)
     field_validator.validate('user_comments', comments_for(pid).join('; '))
+    field_validator.validate('artist_normalized', record['_source']['artist_normalized'])
 
-    record['_source'].merge!(field_validator.fields)
-
+    record['_source'].merge!(field_validator.validated_fields)
     record
   end
 

@@ -14,8 +14,8 @@ class Pandora::Query
 
     search_result = []
     number_of = elastic.counts
-    search_fields = athene_yml('athene_search_fields.yml')['search']
-    sort_fields = athene_yml('athene_search_fields.yml')['sort']
+    search_fields = Indexing::IndexFields.search
+    sort_fields = Indexing::IndexFields.sort
     boolean_fields = [['and', 'must'], ['and not', 'must_not'], ['or', 'should']]
 
     # Boolean field @criteria
@@ -73,24 +73,79 @@ class Pandora::Query
       sort_field = "relevance"
     end
 
-    if @criteria[:sort].present?
-      if @criteria[:sort][:field].present?
-        sort_field = @criteria[:sort][:field]
+    # If it is a pur asterisk search, do not sort by relevance but by asterisk search field.
+    asterisk_search_values = search_values_text.select{ |key, value|
+      value == '*'
+    }
+    non_asterisk_search_values = search_values_text.select{ |key, value|
+      value != '*' && !value.blank?
+    }
+
+    # If there are asterisk search values and non-asterisk search value, remove asterisk search values.
+    if asterisk_search_values.size > 0 && non_asterisk_search_values.size > 0
+      search_values_text.transform_values! { |value|
+        if value == '*'
+          value = ''
+        else
+          value
+        end
+      }
+
+      asterisk_search_values = {}
+
+      flash[:warning] = "Please do not use the '*' search in combination with other search values. '*' inputs have been removed for this search.".t
+    end
+
+    # Multiple asterisk search.
+    if asterisk_search_values.size > 1
+      kept_first = false
+
+      search_values_text.update(search_values_text) { |key, value|
+        if value == '*' && kept_first == false
+          kept_first = true
+          asterisk_search_values = {key => value}
+          value
+        elsif value == '*' && kept_first == true
+          ''
+        else
+          value
+        end
+      }
+
+      flash[:warning] = "Please use the '*' search in one search field only. The first one has been used for this search.".t
+    end
+
+    # Asterisk only seach.
+    if asterisk_search_values.size == 1
+      relevance_sort_field = search_fields_selected[asterisk_search_values.keys.first]
+
+      if relevance_sort_field == 'all' || !sort_fields.include?(relevance_sort_field)
+        sort_field = 'title'
+      else
+        sort_field = relevance_sort_field
       end
+    # Use user search order setting only if it is no asterisk search.
+    else
+      if search_order_setting = @user.settings(:search)[:order]
+        sort_field = search_order_setting
+      end
+    end
+
+    if @criteria.dig(:sort, :field).present?
+      sort_field = @criteria[:sort][:field]
     end
 
     # Sort order @criteria
     sort_order = "asc"
     sort_order_reverse = "desc"
 
-    if @criteria[:sort].present?
-      if @criteria[:sort][:order].present?
-        sort_order = @criteria[:sort][:order]
-      else
-        if sort_field == "relevance" || sort_field == "rating_average" || sort_field == "rating_count" || sort_field == "comment_count"
-          sort_order = "desc"
-          sort_order_reverse = "asc"
-        end
+    if @criteria.dig(:sort, :order).present?
+      sort_order = @criteria[:sort][:order]
+      sort_order_reverse = sort_order == 'asc' ? 'desc' : 'asc'
+    else
+      if sort_field == "relevance" || sort_field == "rating_average" || sort_field == "rating_count" || sort_field == "comment_count"
+        sort_order = "desc"
+        sort_order_reverse = "asc"
       end
     end
 
@@ -104,7 +159,7 @@ class Pandora::Query
       }]
     elsif sort_field == "relevance"
       sort = [{
-        "_score" => {
+        '_score' => {
           order: sort_order
         }
       }]
@@ -248,13 +303,13 @@ class Pandora::Query
             # https://www.elastic.co/guide/en/elasticsearch/reference/current/query-dsl-query-string-query.html
             query_string: {
               # Set the query value to be parsed.
-              query: "*",
+              query: search_value,
               # Select the fields for which the query is executed.
-              fields: athene_yml('athene_search_fields.yml')['mappings'][search_field]
+              fields: Indexing::IndexFields.search_mapping(field: search_field)
             }
           }
         else
-          # Surround with double quotes and use raw field (config/athene_search_fields.yml) to find exact matches for record_object_id.
+          # Surround with double quotes and use raw field (see IndexFields class) to find exact matches for record_object_id.
           if search_field == "record_id" || search_field == "record_object_id"
             search_value = "\"#{search_value}\""
           elsif search_field == "rating_average"
@@ -269,24 +324,23 @@ class Pandora::Query
           # Other field search
           # https://www.elastic.co/guide/en/elasticsearch/reference/current/query-dsl-query-string-query.html
           query_string = {
-            # Set the query value to be parsed.
             query: search_value,
             default_operator: "AND",
-            # Do not analyze wildcard since that might be a wrong guess. This has nothing to do with allowing wildcards.
-            # https://www.elastic.co/guide/en/elasticsearch/reference/current/query-dsl-query-string-query.html#_wildcards
-            analyze_wildcard: false,
-            # Select the fields for which the query is executed.
-            fields: athene_yml('athene_search_fields.yml')['mappings'][search_field]
+            fields: Indexing::IndexFields.search_mapping(field: search_field)
           }
 
           # https://www.elastic.co/guide/en/elasticsearch/reference/current/query-dsl-multi-match-query.html#operator-min
           # https://www.elastic.co/guide/en/elasticsearch/reference/current/query-dsl-multi-match-query.html#type-cross-fields
           if search_field == 'all'
             query_string.merge!({
-              type: "cross_fields",
-              fields: Indexing::IndexFields.search_mapping(field: search_field)
+              type: "cross_fields"
             })
           end
+
+          # Default query string settings.
+          query_string.merge!({
+            fuzziness: "AUTO"
+          })
 
           query_hash = {
             query_string: query_string
@@ -367,12 +421,9 @@ class Pandora::Query
     }
 
     # https://www.elastic.co/guide/en/elasticsearch/reference/current/query-dsl-bool-query.html#bool-min-should-match
-    # If there is more than 1 should clause, at least 1 should contribute to matching documents.
-    if query_should.size > 1
-      minimum_should_match = 1
-    else
-      minimum_should_match = 0
-    end
+    # If there is a should clause, at least one of both should contribute to matching documents.
+    minimum_should_match = query_should.size
+
 
     # Select checked indices only (all with a value of true)
     # checked_indices = indices.select { |key, value| value[:checked] }.keys
@@ -490,12 +541,6 @@ class Pandora::Query
     }
 
     Pandora::SearchResult.new(r, @criteria)
-  end
-
-  def athene_yml(filename)
-    file = "#{ENV['PM_ROOT']}/pandora/config/#{filename}"
-    str = ERB.new(File.read file).result(binding)
-    data = YAML.load(str)[Rails.env.to_s]
   end
 
   def elastic

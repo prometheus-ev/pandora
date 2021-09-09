@@ -1,7 +1,10 @@
 Liebe(r) <%= [@signup.person_title, @signup.first_name, @signup.last_name].reject{ |item| item.empty? }.join(' ') %>,
 
-vielen Dank für Ihre Anmeldung zur Tagung "Daten^7 – Digitales BilderLeben" 
-am 1./2. Oktober 2019 in Köln.
+Vielen Dank für Ihre Anmeldung zur virtuellen Tagung:
+
+„<%= Pandora::ConferenceSignup::TITLE %>“
+
+vom <%= Pandora::ConferenceSignup::DATE %>.
 
 Wir freuen uns auf Ihr Kommen und verbleiben mit freundlichen Grüßen
 Ihr prometheus-Team

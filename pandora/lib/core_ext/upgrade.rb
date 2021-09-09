@@ -133,7 +133,6 @@ module Upgrade
 
     base
   rescue => e
-    #debugger
     x = 12
   end
 end

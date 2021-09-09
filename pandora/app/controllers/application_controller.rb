@@ -71,7 +71,7 @@ class ApplicationController < ActionController::Base
                 :section_id, :restrict_to, :page, :per_page,
                 :view, :sort_column, :sort_direction, :sort_inverse,
                 :current_user, :search_column, :zoom, :pm_labelled_counter,
-                :admin_or_superadmin?
+                :admin_or_superadmin?, :allowed?
 
 
   def self.initialize_me!  # :nodoc:
@@ -216,6 +216,12 @@ class ApplicationController < ActionController::Base
       @current_oauth_user
     end
 
+    def allowed?(object, action = :read)
+      return false unless current_user
+
+      current_user.allowed?(object, action)
+    end
+
     def control_access
       permission_denied unless permit?(self.class.access_control(action_name))
     end
@@ -274,6 +280,9 @@ class ApplicationController < ActionController::Base
           rt = (request.url == locale_root_url ? nil : request.url)
           redirect_to controller: 'sessions', action: 'new', return_to: rt
         end
+        format.any do
+          render plain: 'unauthorized', status: 401
+        end
       end
     end
 
@@ -289,6 +298,7 @@ class ApplicationController < ActionController::Base
         end
         format.json{ render json: {message: 'not found'}, status: 404 }
         format.xml{ render xml: {message: 'not found'}, status: 404 }
+        format.all{ render plain: 'not found', status: 404 }
       end
     end
 
@@ -311,6 +321,7 @@ class ApplicationController < ActionController::Base
         end
         format.json{ render json: {message: 'internal server error'}, status: 500 }
         format.xml{ render xml: {message: 'internal_server_error'}, status: 500 }
+        format.all{ render plain: 'internal server error', status: 500 }
       end
     end
 
@@ -353,8 +364,10 @@ class ApplicationController < ActionController::Base
     end
 
     def sort_direction
-      v = (params[:direction] || sort_direction_default).downcase
-      ['asc', 'desc'].include?(v) ? v : sort_direction_default
+      if v = (params[:direction] || sort_direction_default) 
+        v = v.downcase
+        ['asc', 'desc'].include?(v) ? v : sort_direction_default
+      end
     end
 
     def sort_direction_default

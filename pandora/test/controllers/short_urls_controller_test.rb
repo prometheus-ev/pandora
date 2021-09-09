@@ -1,7 +1,6 @@
 require 'test_helper'
 
 class ShortUrlsControllerTest < ActionDispatch::IntegrationTest
-
   test 'should redirect for existing ShortUrl' do
     target_url = url_for(
       locale: 'en',
@@ -21,5 +20,4 @@ class ShortUrlsControllerTest < ActionDispatch::IntegrationTest
     assert_redirected_to '/en'
     assert_equal "The link with token 'does-not-exist' couldn't be found", flash[:error]
   end
-
 end

@@ -147,6 +147,41 @@
   </div>
 <% end %>
 
+<% if @super_image.elastic_record.dig('_source', 'image_vector') %>
+  <div id="similar_images-section" class="section_wrap clear-padding undim">
+    <a name="similar_images"></a>
+    <div class="scriptonly section_toggle">
+      <div class="collapse"></div>
+    </div>
+    <div class="section_header">
+      <div class="section_heading">
+        <%= "Similar images".t %>
+      </div>
+    </div>
+    <div class="section">
+      <div class="images">
+        <% similars = Pandora::Elastic.new.image_vector_query(record_id: @super_image.pid)['hits']['hits'].drop(1) %>
+        <table>
+          <tr>
+            <% similars.each do |similar| %>
+              <td class="image">
+                <%= link_to_image_tag(Pandora::SuperImage.new(similar['_id'], elastic_record: similar)) %>
+              </td>
+            <% end %>
+          </tr>
+          <tr>
+            <% similars.each do |similar| %>
+              <td class="dim">
+                <%= render partial: 'ratings/show', locals: {super_image: Pandora::SuperImage.new(similar['_id'], elastic_record: similar), light: true} %>
+              </td>
+            <% end %>
+          </tr>
+        </table>
+      </div>
+    </div>
+  </div>
+<% end %>
+
 <% unless @super_image.related.empty? %>
   <div id="related_images-section" class="section_wrap clear-padding undim">
     <a name="related_images"></a>

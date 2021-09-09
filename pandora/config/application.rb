@@ -91,6 +91,9 @@ module Pandora
     # Application configuration should go into files in config/initializers
     # -- all .rb files in that directory are automatically loaded.
 
+    ENV['TZ'] = 'CET'
+    config.time_zone = 'CET'
+
     if ENV['PM_EXCEPTION_RECIPIENTS'].present?
       host = `hostname`
       recipients = ENV['PM_EXCEPTION_RECIPIENTS'].split
@@ -155,6 +158,23 @@ module Pandora
         unless File.exists?(file)
           raise Pandora::Exception, [
             "revision could not be determined,",
+            "please make sure that #{file} exists"
+          ].join(' ')
+        end
+        File.read(file).strip
+      else
+        run('git', 'rev-parse', 'HEAD').strip
+      end
+    end
+  end
+
+  def self.branch
+    @branch ||= begin
+      if Rails.env.production?
+        file = Rails.root.join '..', 'BRANCH'
+        unless File.exists?(file)
+          raise Pandora::Exception, [
+            "deployed branch could not be determined,",
             "please make sure that #{file} exists"
           ].join(' ')
         end

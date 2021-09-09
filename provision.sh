@@ -6,7 +6,7 @@ RUBY_VERSION=2.6.6
 ELASTICSEARCH_VERSION=7.12.1
 
 function debian_basics {
-  apt-get update
+  apt-get update --allow-releaseinfo-change
   apt-get install -y \
     build-essential libxml2-dev libxslt-dev libssl-dev git-core \
     libreadline-dev zlib1g-dev mariadb-server default-libmysqlclient-dev \

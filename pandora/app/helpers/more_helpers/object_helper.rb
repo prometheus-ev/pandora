@@ -44,7 +44,6 @@ module MoreHelpers
     end
 
     # def object_status_for(*status)
-    #   binding.pry
     #   status.map { |i| i.to_s.capitalize.t if i }.compact.join(', ')
     # end
 
