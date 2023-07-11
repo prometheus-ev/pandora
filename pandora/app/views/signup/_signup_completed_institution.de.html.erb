@@ -1,8 +1,6 @@
-<p>
-  <strong>
-    Bitte senden Sie dazu einen aktuellen Zugehörigkeitsnachweis (Ihre Immatrikulationsbescheinigung oder einen Link zu Ihrem Auftritt auf der Institutswebseite) per E-Mail an eine*n der folgenden lokalen Administrator*innen.
-  </strong>
-</p>
+<h3>
+  Bitte senden Sie dazu einen aktuellen Zugehörigkeitsnachweis (Ihre Immatrikulationsbescheinigung oder einen Link zu Ihrem Auftritt auf der Institutswebseite) per E-Mail an eine*n der folgenden lokalen Administrator*innen.
+</h3>
 
 <br class="vspace1" />
 
@@ -29,3 +27,11 @@
     </ul>
   <% end -%>
 </fieldset>
+
+<h3>Sie gehören keiner Institution mehr an?</h3>
+<ul>
+  <li><%= link_to "Eine kostenpflichtige Lizenz erwerben", type: "paid" %></li>
+</ul>
+
+<h3>Wollen Sie die Institution wechseln?</h3>
+<%= render partial: "license_obtain" %>

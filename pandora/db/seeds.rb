@@ -1,4 +1,18 @@
-prometheus = Institution.create!({
+# needed for user database creation
+Keyword.create!(
+  title: 'upload',
+  title_de: 'Upload'
+)
+Keyword.create!(
+  title: 'index',
+  title_de: 'Index'
+)
+Keyword.create!(
+  title: 'institutional upload',
+  title_de: 'institutioneller Upload'
+)
+
+prometheus = Institution.create!(
   name: 'prometheus',
   city: 'Köln',
   title: 'prometheus - Das verteilte digitale Bildarchiv für Forschung & Lehre',
@@ -11,7 +25,7 @@ prometheus = Institution.create!({
   addressline: 'An St. Laurentius 4',
   email: 'info@prometheus-bildarchiv.de',
   issuer: 'hbz'
-}, without_protection: true)
+)
 
 superadmins = Role.create!(title: 'superadmin')
 admins = Role.create!(title: 'admin')
@@ -24,19 +38,19 @@ Role.create!(title: 'ipuser')
 Role.create!(title: 'dbadmin')
 Role.create!(title: 'subscriber')
 
-LicenseType.create!({title: 'large', amount: "1890"}, without_protection: true)
-LicenseType.create!({title: 'school', amount: "250"}, without_protection: true)
-LicenseType.create!({title: 'consortium', amount: "0"}, without_protection: true)
-LicenseType.create!({title: 'fh_campus', amount: "2100"}, without_protection: true)
-LicenseType.create!({title: 'single', amount: "30"}, without_protection: true)
-LicenseType.create!({title: 'fh_small', amount: "262"}, without_protection: true)
-LicenseType.create!({title: 'campus', amount: "4200"}, without_protection: true)
-LicenseType.create!({title: 'fh_medium', amount: "525"}, without_protection: true)
-LicenseType.create!({title: 'small', amount: "525"}, without_protection: true)
-LicenseType.create!({title: 'fh_large', amount: "945"}, without_protection: true)
-LicenseType.create!({title: 'medium', amount: "1050"}, without_protection: true)
-LicenseType.create!({title: 'library', amount: "250"}, without_protection: true)
-LicenseType.create!({title: 'school_large', amount: "400"}, without_protection: true)
+LicenseType.create!(title: 'large', amount: "1890")
+LicenseType.create!(title: 'school', amount: "250")
+LicenseType.create!(title: 'consortium', amount: "0")
+LicenseType.create!(title: 'fh_campus', amount: "2100")
+LicenseType.create!(title: 'single', amount: "30")
+LicenseType.create!(title: 'fh_small', amount: "262")
+LicenseType.create!(title: 'campus', amount: "4200")
+LicenseType.create!(title: 'fh_medium', amount: "525")
+LicenseType.create!(title: 'small', amount: "525")
+LicenseType.create!(title: 'fh_large', amount: "945")
+LicenseType.create!(title: 'medium', amount: "1050")
+LicenseType.create!(title: 'library', amount: "250")
+LicenseType.create!(title: 'school_large', amount: "400")
 
 Account.create!(
   login: 'superadmin',
@@ -75,6 +89,15 @@ Account.create!(
   research_interest: 'n.a.'
 )
 
+Source.create!(
+  title: 'User Uploads',
+  name: 'uploads',
+  kind: 'User upload',
+  type: 'user_upload',
+  institution: prometheus,
+  record_count: 0
+)
+
 brain_busters = [
   ["en", "What is two plus two?", "4"],
   ["de", "Was ist zwei plus zwei?", "4"],
@@ -98,8 +121,6 @@ brain_busters = [
   ["de", "Was ist fünf minus zwei?", "3"],
   ["en", "What is the opposite of north?", "south"],
   ["de", "Was ist das Gegenteil von Norden?", "süden"],
-  ["en", "What is the opposite of bad?", "good"],
-  ["de", "Was ist das Gegenteil von böse?", "gut"],
   ["en", "Insert the next number in this sequence: 10, 9, 8, 7, ...", "6"],
   ["de", "Nennen Sie die nächste Zahl in der Folge: 10, 9, 8, 7, ...", "6"],
   ["en", "What is 4 times four?", "16"],
@@ -139,5 +160,5 @@ brain_busters = [
 ]
 
 brain_busters.each do |r|
-  BrainBuster.create!({lang: r[0], question: r[1], answer: r[2]}, without_protection: true)
+  BrainBuster.create!(lang: r[0], question: r[1], answer: r[2])
 end

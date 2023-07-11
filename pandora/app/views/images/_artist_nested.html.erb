@@ -1,0 +1,35 @@
+<div class="artist">
+  <% if wikidata_widget %>
+    <div class="dot">・</div>
+
+    <%#
+      we show the wikidata editor only, if the original value from the source was
+      nil
+    %>
+    <%
+      allow_edit = super_image.
+        original_for('artist_nested.wikidata', position).
+        blank?
+    %>
+    <div
+      is="pm-wikidata-widget"
+      field="artist_nested.wikidata"
+      value="<%= artist['wikidata'] %>"
+      position="<%= position %>"
+      pid="<%= super_image.pid %>"
+      class="float-right",
+      allow-edit="<%= allow_edit %>"
+    ></div>
+  <% end %>
+
+  <%= artist['name'] %>
+  <% unless artist['dating'].blank? %>
+    (<i><%= artist['dating'] %></i>)
+  <% end %>
+
+
+  <% unless artist['gnd_url'].blank? %>
+    | <%= link_to 'GND', artist['gnd_url'], target: '_blank' %>
+    <%= image_tag('/images/icon/arrow-up-right-from-square-solid.png', style: 'vertical-align: baseline;') %>
+  <% end %>
+</div>

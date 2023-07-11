@@ -43,6 +43,24 @@ class Indexing::Sources::Imago < Indexing::SourceSuper
     record.xpath('.//datierung/text()')
   end
 
+  def date_range
+    d = date.to_s.strip.encode('iso-8859-1').encode('utf-8')
+
+    if d == '15445-54'
+      d = '1545-54'
+    elsif d == 'um 14225-26'
+      d = 'um 1422-26'
+    elsif d == '1909-19012'
+      d = '1909-1912'
+    elsif d == 'um 134071350'
+      d = 'um 1340/1350'
+    elsif d == '1961/62/66'
+      d = '1961/62;1966'
+    end
+
+    super(d)
+  end
+
   # standort
   def location
     "#{record.xpath('.//standort/text()')}, #{record.xpath('.//institution/text()')}".gsub(/\A, /, '').gsub(/, \z/, '')

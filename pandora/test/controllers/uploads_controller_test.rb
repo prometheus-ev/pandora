@@ -25,7 +25,7 @@ class SourcesControllerTest < ActionDispatch::IntegrationTest
     pub = Collection.find_by! title: "John's public collection"
     collab = Collection.find_by! title: "John's collaboration collection"
     upload = Upload.first
-    upload.update_attributes approved_record: true
+    upload.update approved_record: true
     priv.images << upload.image
     pub.images << upload.image
     collab.images << upload.image
@@ -52,7 +52,7 @@ class SourcesControllerTest < ActionDispatch::IntegrationTest
     priv.update_column :public_access, ''
 
     upload = Upload.first
-    upload.update_attributes approved_record: false
+    upload.update approved_record: false
     priv.images << upload.image
 
     login_as 'superadmin'
@@ -63,5 +63,30 @@ class SourcesControllerTest < ActionDispatch::IntegrationTest
     assert_redirected_to edit_upload_path(upload)
     assert_match /successfully updated/, flash[:notice]
     assert_includes priv.reload.images, upload.image
+  end
+
+  test 'assign keywords to upload' do
+    upload = Upload.first
+    keyword = Keyword.find_by!(title: 'painting')
+    login_as 'jdoe'
+
+    patch upload_path(upload.id, locale: 'en'), params: {
+      upload: {keyword_list: "painting,oil on canvas"}
+    }
+    new_keyword = Keyword.last
+    keyword.reload
+    assert_equal 'Gemälde', keyword.title_de
+    assert_equal 'oil on canvas', new_keyword.title
+
+    patch upload_path(upload.id, locale: 'de'), params: {
+      upload: {keyword_list: "Gemälde, Öl auf Leinwand"}
+    }
+    assert_response :redirect
+    new_keyword = Keyword.last
+    keyword.reload
+
+    assert_equal 'Gemälde', keyword.reload.title_de
+    assert_equal 'Öl auf Leinwand', new_keyword.title_de
+    assert_nil new_keyword.title
   end
 end

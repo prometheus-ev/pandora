@@ -6,11 +6,57 @@ module Indexing::IndexMappings
   # https://www.elastic.co/guide/en/elasticsearch/reference/current/mapping.html
   def self.read
     properties = {
+      record_id: {
+        # TODO Type text should not be needed here, we might be able to remove it.
+        type: "text",
+        analyzer: "indexing_analyzer",
+        search_analyzer: "search_analyzer",
+        fields: {
+          raw: {
+            type: "keyword"
+            # Index the keyword field since we need to search for exact matches. true is the default for keyword fields.
+            # index: true
+          }
+        }
+      },
+      record_object_id: {
+        # TODO Type text should not be needed here, we might be able to remove it.
+        type: "text",
+        analyzer: "indexing_analyzer",
+        search_analyzer: "search_analyzer",
+        fields: {
+          raw: {
+            type: "keyword"
+            # Index the keyword field since we need to search for exact matches. true is the default for keyword fields.
+            # index: true
+          }
+        }
+      },
+      record_object_id_count: {
+        type: "text",
+        analyzer: "indexing_analyzer",
+        search_analyzer: "search_analyzer",
+        fields: {
+          raw: {
+            type: "keyword"
+          },
+          short: {
+            type: 'short'
+          }
+        }
+      },
+      # https://www.elastic.co/guide/en/elasticsearch/reference/current/nested.html
+      # https://www.elastic.co/guide/en/elasticsearch/reference/current/sort-search-results.html#nested-sorting
+      artist_nested: {
+        type: 'nested',
+        include_in_parent: true
+      },
       # The artist field as type text for searching and type keyword for sorting.
       artist: {
         # https://www.elastic.co/guide/en/elasticsearch/reference/current/text.html
         type: "text",
         analyzer: "indexing_analyzer",
+        # https://www.elastic.co/guide/en/elasticsearch/reference/current/search-analyzer.html
         search_analyzer: "search_analyzer",
         # https://www.elastic.co/guide/en/elasticsearch/reference/current/term-vector.html
         term_vector: "yes",
@@ -20,7 +66,8 @@ module Indexing::IndexMappings
           # raw is used for sorting.
           raw: {
             # https://www.elastic.co/guide/en/elasticsearch/reference/current/keyword.html
-            type: "keyword",
+            type: 'keyword',
+            normalizer: 'sort_normalizer',
             index: false
           }
         }
@@ -49,6 +96,10 @@ module Indexing::IndexMappings
           }
         }
       },
+      title_nested: {
+        type: 'nested',
+        include_in_parent: true
+      },
       title: {
         type: "text",
         analyzer: "indexing_analyzer",
@@ -57,6 +108,24 @@ module Indexing::IndexMappings
         fields: {
           raw: {
             type: "keyword",
+            normalizer: 'sort_normalizer',
+            index: false
+          }
+        }
+      },
+      location_nested: {
+        type: 'nested',
+        include_in_parent: true
+      },
+      location: {
+        type: "text",
+        analyzer: "indexing_analyzer",
+        search_analyzer: "search_analyzer",
+        term_vector: "yes",
+        fields: {
+          raw: {
+            type: "keyword",
+            normalizer: 'sort_normalizer',
             index: false
           }
         }
@@ -94,6 +163,53 @@ module Indexing::IndexMappings
         type: "date",
         format: Rails.configuration.x.indexing_custom_date_formats.join('||')
       },
+      credits_nested: {
+        type: 'nested',
+        include_in_parent: true
+      },
+      credits: {
+        type: "text",
+        analyzer: "indexing_analyzer",
+        search_analyzer: "search_analyzer",
+        term_vector: "yes",
+        fields: {
+          raw: {
+            type: "keyword",
+            normalizer: 'sort_normalizer',
+            index: false
+          }
+        }
+      },
+      rights_work: {
+        type: "text",
+        analyzer: "indexing_analyzer",
+        search_analyzer: "search_analyzer",
+        term_vector: "yes",
+        fields: {
+          raw: {
+            type: "keyword",
+            normalizer: 'sort_normalizer',
+            index: false
+          }
+        }
+      },
+      rights_reproduction_nested: {
+        type: 'nested',
+        include_in_parent: true
+      },
+      rights_reproduction: {
+        type: "text",
+        analyzer: "indexing_analyzer",
+        search_analyzer: "search_analyzer",
+        term_vector: "yes",
+        fields: {
+          raw: {
+            type: "keyword",
+            normalizer: 'sort_normalizer',
+            index: false
+          }
+        }
+      },
       rating_average: {
         type: "text",
         term_vector: "yes",
@@ -108,42 +224,40 @@ module Indexing::IndexMappings
           }
         }
       },
-      record_id: {
-        # TODO Type text should not be needed here, we might be able to remove it.
-        type: "text",
-        analyzer: "indexing_analyzer",
-        search_analyzer: "search_analyzer",
-        fields: {
-          raw: {
-            type: "keyword"
-            # Index the keyword field since we need to search for exact matches. true is the default for keyword fields.
-            # index: true
-          }
-        }
-      },
-      record_object_id: {
-        # TODO Type text should not be needed here, we might be able to remove it.
-        type: "text",
-        analyzer: "indexing_analyzer",
-        search_analyzer: "search_analyzer",
-        fields: {
-          raw: {
-            type: "keyword"
-            # Index the keyword field since we need to search for exact matches. true is the default for keyword fields.
-            # index: true
-          }
-        }
-      },
       description: {
         type: "text",
         analyzer: "indexing_analyzer",
         search_analyzer: "search_analyzer",
         term_vector: "yes"
       },
+      license_nested: {
+        type: 'nested',
+        include_in_parent: true
+      },
+      person_nested: {
+        type: 'nested',
+        include_in_parent: true
+      },
+      # See #1638.
+      authority_files: {
+        type: 'nested',
+        include_in_parent: true
+      },
       # Field required for image search. See #1271 and #1289.
       image_vector: {
         type: "dense_vector",
         dims: 80
+      },
+      is_main_record: {
+        type: "text",
+        analyzer: "indexing_analyzer",
+        search_analyzer: "search_analyzer",
+        term_vector: "yes",
+        fields: {
+          raw: {
+            type: "keyword"
+          }
+        }
       }
     }
 
@@ -153,7 +267,6 @@ module Indexing::IndexMappings
         index_mapping_field.to_sym => {
           type: "text",
           analyzer: "indexing_analyzer",
-          # https://www.elastic.co/guide/en/elasticsearch/reference/current/search-analyzer.html
           search_analyzer: "search_analyzer",
           term_vector: "yes",
           fields: {

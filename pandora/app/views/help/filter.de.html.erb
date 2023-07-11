@@ -1,0 +1,62 @@
+<h2><%= 'Filter help'.t %></h2>
+
+<p>
+  (Siehe auch <%= link_to_help section: 'search', label: 'Suche' %>,
+  <%= link_to_help section: 'syntax', label: 'Suchsyntax' %>,
+  <%= link_to_help section: 'results', label: 'Ergebnisliste' %> und
+  <%= link_to_help section: 'copyright_and_publication', label: 'Bildrecht und Publikation' %>.)
+</p>
+
+<p>
+  Sie können Ihre Suchergebnisse mit Hilfe von Filtern einschränken.
+</p>
+
+<% with_toc do -%>
+
+  <%= section_heading 'Filter by date'.t, 'filter_by_date' %>
+  <p>
+    Sie können Ihre Suchergebnisse mit Hilfe eines Datumsbereichs einschränken. Der Datumsbereich ist durch ein Startdatum und Enddatum definiert.
+    Daten werden in Jahren eingegeben.
+    Wenn Sie nur ein Datum eingeben, wird der Datumsbereich auf ein einzelnes Jahr aktualisiert.
+  </p>
+
+  <b><%= 'Filter by date'.t + ' - ' + 'Limitations'.t %></b>
+  <p>
+    Ca. 80 % aller Datenstätze sind mit Datierungen versehen, wobei ca. 75 % der Datensätze mit Datierungen zum Filtern verfügbar sind.
+  </p>
+
+  <%= section_heading 'Nach Objekten filtern', 'filter_by_objects' %>
+  <p>
+    Es gibt einige Bilddatenbanken die ihre Daten als Objekte speichern. Objekte verknüpfen zugehörige Bilder mit den jeweiligen Metadaten. Für Objektbilder speichern wir eine Objekt-ID, um diese Information zu erhalten. Mit „Nach Objekten filtern“ können Sie Ihre Suchergebnisse einschränken, um nur Objekte anzuzeigen.
+  </p>
+
+  <p>
+    Wenn Sie beispielsweise nach
+    <%= link_to({controller: 'searches',
+                 action: 'advanced',
+                 'search_field[1]': 'title',
+                 'search_value[1]': 'Kölner Dom'}, target: '_blank') do %>„Kölner Dom“<% end %>
+    suchen, sehen Sie in der Ergebnisliste unter einzelnen Bildern weitere Ansichten, wie Gerhard Richters „Südquerhausfenster“ in „ConedaKOR Frankfurt, Goethe-Universität Frankfurt am Main, Institut für Kunstgeschichte“. Wenn Sie nun bei aktiviertem „Filtern nach Objekten“ nach
+    <%= link_to({controller: 'searches',
+                 action: 'advanced',
+                 'search_field[1]': 'title',
+                 'search_value[1]': 'Kölner Dom',
+                 'objects': '1'}, target: '_blank') do %>„Kölner Dom“<% end %>
+    suchen, sehen Sie in den Suchergebnissen nur Objekte.
+  </p>
+
+  <p>
+    Sehen Sie sich die Objektdatenbanken an:
+
+    <ul>
+    <% Pandora::Elastic.new.indices_with_objects.each do |index| %>
+      <li>
+        <%= link_to index[:title], { controller: 'searches', action: 'advanced', 'search_field[0]': 'all', 'search_value[0]': '*', 'objects': '1', "indices[#{index[:name]}]": 'true' }, target: '_blank' %>
+      </li>
+    <% end %>
+    </ul>
+  </p>
+
+<% end -%>
+
+<%= render :partial => 'footer' %>

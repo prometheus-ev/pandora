@@ -1,19 +1,14 @@
-<p class="athene-search-sample-p">
+<p class="sample-p">
   <% for image in images do %>
-    <!-- REWRITE: we use SuperImage everywhere to have a unified image interface -->
-    <%#= link_to(image_tag("/", :alt => "", :id => image['_source']['record_id'], :class => "athene-search-sample-image" ), { :controller => 'image', :action => 'show', :id => image['_source']['record_id'] }, :class => "athene-search-sample-link") %>
-    <!-- <script>
-      loadRecordImageWithRecordIdUrlIndexAndPath("<%= image['_source']['record_id'] %>", "<%#= url_for(:controller => 'search', :action => 'athene_search_request_record_image_blob') %>", "<%= image["_index"].gsub(/_\d+/, "") %>", "<%= ERB::Util.url_encode(image['_source']['path']) %>");
-    </script> -->
     <% si = Pandora::SuperImage.new(image['_source']['record_id']) %>
     <%= link_to(
-      image_tag(si.image_url(:medium), alt: "", id: image['_source']['record_id'], class: 'athene-search-sample-image'),
+      image_tag(si.image_url(:medium), alt: "", id: image['_source']['record_id'], class: 'sample-image'),
       {
         controller: 'images',
         action: 'show',
         id: image['_source']['record_id']
       },
-      class: 'athene-search-sample-link'
+      class: 'sample-link'
     ) %>
   <% end %>
 </p>

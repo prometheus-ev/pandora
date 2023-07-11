@@ -8,6 +8,10 @@ class Indexing::Sources::Salzburg < Indexing::Sources::Parents::Dilps
     record.xpath('.//Epoche/text()')
   end
 
+  def date_range
+    super(date)
+  end
+
   # signature
   def signature
     record.xpath('.//Signatur/text()')

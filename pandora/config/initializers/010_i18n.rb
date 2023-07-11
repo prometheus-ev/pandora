@@ -14,6 +14,7 @@ module I18n
     def call(exception, locale, key, options)
       if exception.is_a?(MissingTranslation)
         msg = "translation not found for locale '#{locale}' and key '#{key}'"
+        msg << " see #{caller[2]}"
         if ENV['PM_RAISE_TRANSLATIONS'] == 'true'
           raise Pandora::Exception, msg
         else
@@ -51,7 +52,7 @@ module I18n
 
       def self.coverage_setup
         file = "#{ENV['PM_ROOT']}/pandora/tmp/coverage/.translations.json"
-        if File.exists?(file) && File.stat(file).mtime > 3600.seconds.ago
+        if File.exist?(file) && File.stat(file).mtime > 3600.seconds.ago
           puts "using existing translation coverage file"
           self.coverage = JSON.parse(File.read file)
         end

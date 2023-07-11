@@ -1,0 +1,2 @@
+class TestSourceBoolean < TestSource
+end

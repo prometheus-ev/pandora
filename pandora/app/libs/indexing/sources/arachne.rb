@@ -38,6 +38,10 @@ class Indexing::Sources::Arachne < Indexing::SourceSuper
     record.xpath('.//wwwDatierung/text()')
   end
 
+  def date_range
+    super(date.to_s)
+  end
+
   # standort
   def location
     record.xpath('.//wwwAufbewahrung/text()')

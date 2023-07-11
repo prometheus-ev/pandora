@@ -25,7 +25,7 @@ class Pandora::SumStats
     with_dates do |date, stats|
       filename = date.strftime("#{ENV['PM_STATS_DIR']}/top_terms/%Y%m/%d.json")
 
-      if stats && !File.exists?(filename)
+      if stats && !File.exist?(filename)
         FileUtils.mkdir_p(File.dirname filename)
         File.open filename, 'w' do |f|
           f.write JSON.dump(stats.top_terms)
@@ -85,7 +85,7 @@ class Pandora::SumStats
           }
 
           ss = ::SumStats.find_or_create_by! criteria
-          ss.update_attributes(
+          ss.update(
             sessions_campus: stats.sessions.count - stats.personalized.sessions.count,
             sessions_personalized: stats.personalized.sessions.count,
             downloads_campus: stats.legacy_downloads.count - stats.personalized.legacy_downloads.count,
@@ -108,14 +108,14 @@ class Pandora::SumStats
         args = [date]
 
         filename = date.strftime("#{ENV['PM_STATS_DIR']}/packs/%Y%m/%d.json.gz")
-        if File.exists?(filename)
+        if File.exist?(filename)
           args << Pandora::Stats.load(filename)
         else
           args << nil
         end
 
         filename = date.strftime("#{ENV['PM_STATS_DIR']}/top_terms/%Y%m/%d.json")
-        if File.exists?(filename)
+        if File.exist?(filename)
           args << JSON.parse(File.read(filename))
         else
           args << nil

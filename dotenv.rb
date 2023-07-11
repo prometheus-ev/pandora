@@ -14,12 +14,15 @@ ENV['PM_ROOT'] = dotenv_root
 
 Dotenv.load(
   "#{dotenv_root}/.env.#{current_env}",
-  "#{dotenv_root}/.env"
+  "#{dotenv_root}/.env",
+  "#{dotenv_root}/.env.defaults"
 )
 
 required = [
   'PM_ASD_SECRET',
+  'PM_ASD_LIFETIME',
   'PM_BASE_URL',
+  'PM_BRAIN_BUSTER_SALT',
   'PM_DEV_ADDRESS',
   'PM_DUMPS_DIR',
   'PM_ELASTIC_URI',

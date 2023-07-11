@@ -43,7 +43,9 @@ class Indexing::Sources::StuttgartIkg < Indexing::SourceSuper
   end
 
   def date_range
-    super(date.to_s)
+    d = date.to_s.strip
+
+    super(d)
   end
 
   def epoch

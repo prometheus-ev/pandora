@@ -108,7 +108,7 @@ class SignupController < ApplicationController
       )
     end
 
-    @user.settings.locale = locale
+    @user.account_settings.locale = locale
 
     if @user.update(attribs)
 
@@ -154,7 +154,7 @@ class SignupController < ApplicationController
 
     return if @user.dbuser? || @user.ipuser?
 
-    if @user.update_attributes(user_email_params)
+    if @user.update(user_email_params)
       @user.deliver_token(:email_confirmation)
       render action: 'email_confirmation_sent'
     else
@@ -274,10 +274,10 @@ class SignupController < ApplicationController
           return
         end
       elsif @user.mode == 'paypal'
-        redirect_to PaymentTransaction.transaction_for(@user).url
+        redirect_to PaymentTransaction.transaction_for(@user).url, allow_other_host: true
         return
       elsif @user.mode == 'invoice'
-          @user.deliver(:invoice_notice, @invoice_address, nil)
+          @user.deliver(:invoice_notice, address: @invoice_address)
         render action: 'signup_completed'
         return
       end

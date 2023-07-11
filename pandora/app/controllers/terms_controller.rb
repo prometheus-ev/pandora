@@ -3,15 +3,7 @@ class TermsController < ApplicationController
   skip_before_action :verify_account_terms_accepted, only: ['edit', 'update']
 
   def show
-    respond_to do |format|
-      format.html
-      format.all do
-        render(
-          partial: 'terms_of_use.html',
-          layout: false, content_type: 'text/html'
-        )
-      end
-    end
+    send_file "public/docs/terms_of_use#{Locale.ext(true)}.pdf"
   end
 
   def edit
@@ -39,7 +31,8 @@ class TermsController < ApplicationController
 
       respond_to do |format|
         format.html do
-          redirect_to(params[:return_to] || root_url)
+          url = params[:return_to].presence || root_url
+          redirect_to(url, allow_other_host: true)
         end
         format.json do
           render json: current_user.to_json(only: [:id, :firstname, :lastname, :email, :accepted_terms_of_use_revision])

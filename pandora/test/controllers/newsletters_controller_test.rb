@@ -3,32 +3,35 @@ require 'test_helper'
 class NewslettersControllerTest < ActionDispatch::IntegrationTest
   test 'deliver newsletter that has already been delivered' do
     jdoe = Account.find_by! login: 'jdoe'
-    jdoe.update_attributes newsletter: true
+    jdoe.update newsletter: true
 
     mrossi = Account.find_by! login: 'mrossi'
-    mrossi.update_attributes newsletter: true
+    mrossi.update newsletter: true
 
     newsletter = Email.newsletter
-    newsletter.update_attributes(
+    newsletter.update(
       _translations: {
         'en': {body: 'Something new!'},
         'de': {body: 'Neuigkeiten!'}
       }
     )
 
+    # ActiveJob::Base.queue_adapter = :async
+
     login_as 'superadmin'
     post "/en/newsletters/#{newsletter.id}/deliver"
     assert_equal 'Newsletter successfully delivered!', flash[:notice]
+    assert_equal 2, ActionMailer::Base.deliveries.count
 
     post "/en/newsletters/#{newsletter.id}/deliver"
-    assert_equal 'Newsletter has already been deliverd', flash[:notice]
+    assert_equal 'Newsletter has already been delivered', flash[:notice]
 
     assert_equal 2, ActionMailer::Base.deliveries.count
   end
 
   test 'everyone can see the archive and show a web preview' do
     email = Email.newsletter
-    email.update_attributes(
+    email.update(
       _translations: {
         'en': {body: 'A test'},
         'de': {body: 'Ein test'}
@@ -63,7 +66,7 @@ class NewslettersControllerTest < ActionDispatch::IntegrationTest
 
   test 'only admins and superadmins can make modifications' do
     email = Email.newsletter
-    email.update_attributes(
+    email.update(
       _translations: {
         'en': {body: 'A test'},
         'de': {body: 'Ein test'}

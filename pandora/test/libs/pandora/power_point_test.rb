@@ -19,7 +19,7 @@ class PowerPointTest < ActiveSupport::TestCase
     ]
 
     presentation.save Rails.root.join('tmp/presentation.pptx')
-    assert File.exists?(Rails.root.join('tmp/presentation.pptx'))
+    assert File.exist?(Rails.root.join('tmp/presentation.pptx'))
   end
 
   test 'from collection' do
@@ -39,6 +39,6 @@ class PowerPointTest < ActiveSupport::TestCase
     filename = Rails.root.join('tmp/presentation.pptx')
     presentation = Pandora::PowerPoint.from_collection(collection)
     presentation.save filename
-    assert File.exists?(filename)
+    assert File.exist?(filename)
   end
 end

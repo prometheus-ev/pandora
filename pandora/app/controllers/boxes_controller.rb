@@ -1,6 +1,6 @@
 class BoxesController < ApplicationController
   skip_before_action :login_required, only: [:index]
-  skip_before_action :store_location
+  # skip_before_action :store_location
 
   skip_before_action :verify_account_email, only: [:index]
   skip_before_action :verify_account_active, only: [:index]

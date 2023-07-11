@@ -1,0 +1,55 @@
+<pm-offensive-language>
+  <span class="original {state.revealed ? 'd-inline' : 'd-none'}"><!--
+ -->{state.content}<a href="#" onclick={event => showModal(event)}>*</a></span>
+  <template if={!state.revealed}>{props.replacement[0]}</template>
+  <a
+    href="#"
+    onclick={event => showModal(event)}
+    onmouseover={event => noParentHover(event, true)}
+    onmouseout={event => noParentHover(event, false)}
+  >
+    <span
+      class="replacement {state.revealed ? 'd-none' : 'd-inline'}"
+    >{props.replacement.slice(1)}</span>
+  </a>
+
+  <script>
+    export default class {
+      onBeforeMount(props, state) {
+        this.toggle = this.toggle.bind(this)
+
+        state.revealed = (props.revealed == 'true')
+        state.content = this.root.textContent
+
+        for (const n of this.root.childNodes) {
+          this.root.removeChild(n)
+        }
+
+        this.on('ol.toggle', (event) => this.toggle(event.data.reveal))
+      }
+
+      showModal(event) {
+        event.preventDefault()
+
+        this.bus.emit('ol.modal', {
+          toggle: this.toggle,
+          current: this.state.revealed
+        })
+      }
+
+      toggle(newState) {
+        this.update({revealed: newState})
+      }
+
+      noParentHover(event, activate) {
+        const parent = this.root.parentElement
+        const tn = parent.tagName
+
+        if (tn == 'A') {
+          const f = activate ? 'add' : 'remove'
+          parent.classList[f]('text-decoration-none')
+        }
+      }
+    }
+  </script>
+</pm-offensive-language>

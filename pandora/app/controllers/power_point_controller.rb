@@ -14,7 +14,7 @@ class PowerPointController < ApplicationController
         disposition: 'attachment'
       )
     else
-      permission_denied
+      forbidden
     end
   end
 

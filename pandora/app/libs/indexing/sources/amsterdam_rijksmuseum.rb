@@ -7,11 +7,15 @@ class Indexing::Sources::AmsterdamRijksmuseum < Indexing::SourceSuper
     "#{record.xpath('.//id/text()')}".gsub(/\Aen-/, "")
   end
 
-  def record_object_id
-    record_object_ids = record.xpath('.//objectNumber/text()').map { |record_object_id|
-      record_object_id.to_s
-    }
-    [name, Digest::SHA1.hexdigest(record_object_ids.uniq.join('|'))].join('-')
+  # No objects with multiple records available, move objectNumber to record_identifier.
+  #def record_object_id
+  #  if !(text = record.xpath('.//objectNumber/text()')).empty?
+  #    [name, Digest::SHA1.hexdigest(text.to_s)].join('-')
+  #  end
+  #end
+
+  def record_identifier
+    "#{record.xpath('.//objectNumber/text()')}"
   end
 
   def path

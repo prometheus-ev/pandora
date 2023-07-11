@@ -3,7 +3,7 @@ class Pandora::DilpsImporter
   def initialize(name)
     if !Indexing::Index.client(false).indices.exists_alias(name: name)
       @source = Source.find_and_update_or_create_by(name: name, type: 'dump')
-      @source.name.camelize.constantize.index
+      ('Indexing::Sources::' + @source.name.camelize).constantize.index
     end
 
     @source = Source.find_and_update_or_create_by(name: name, type: 'upload')
@@ -38,7 +38,18 @@ class Pandora::DilpsImporter
     upload = Upload.new
 
     index_record.sort.each do |key, value|
-      next if ['record_id', 'record_id_original', 'path', 'artist_normalized', 'rating_count', 'rating_average', 'comment_count', 'user_comments'].include?(key)
+      next if ['record_id',
+               'record_id_original',
+               'path',
+               'artist_normalized',
+               'date_range',
+               'date_range_from',
+               'date_range_to',
+               'rating_count',
+               'rating_average',
+               'comment_count',
+               'user_comments',
+               'image_vector'].include?(key)
 
       if upload.respond_to?(key)
         upload.send("#{key}=", value.join(', '))
@@ -53,12 +64,13 @@ class Pandora::DilpsImporter
     end
 
     if upload.rights_work.blank?
-      upload.rights_work = "Nicht bekannt"
+      upload.rights_work = "Unknown"
     end
 
     if upload.rights_reproduction.blank?
+      upload.rights_reproduction = "Unknown"
+
       if upload.credits.blank?
-        upload.rights_reproduction = "Nicht bekannt"
         upload.credits = "[Bildnachweis nicht vorhanden]"
       end
     end

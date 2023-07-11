@@ -6,10 +6,6 @@ class AnalyzerTest < ActiveSupport::TestCase
     Pandora::Elastic.new.add_alias_to(index_name: new_index_name)
   end
 
-  def teardown
-    Pandora::Elastic.new.destroy_alias('test')
-  end
-
   test 'analyzer with term r. bauer' do
     skip 'For local analyzer testing only.'
 
@@ -70,6 +66,18 @@ class AnalyzerTest < ActiveSupport::TestCase
     puts JSON.pretty_generate(analysis)
 
     analysis = Pandora::Elastic.new.analyze 'test', 'artist_normalized_search_analyzer', 'dorothea lange'
+
+    puts JSON.pretty_generate(analysis)
+  end
+
+  test 'analyzers with term sunflower asterisk' do
+    skip 'For local analyzer testing only.'
+
+    analysis = Pandora::Elastic.new.analyze 'test', 'indexing_analyzer', 'sonnenblume*'
+
+    puts JSON.pretty_generate(analysis)
+
+    analysis = Pandora::Elastic.new.analyze 'test', 'search_analyzer', 'sonnenblume*'
 
     puts JSON.pretty_generate(analysis)
   end

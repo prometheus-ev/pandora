@@ -13,6 +13,12 @@
   </tr>
   <%= render :partial => 'object_title', :locals => { :f => f } %>
   <tr>
+    <th class="pb-2">
+      <%= f.label :add_to_index %>
+    </th>
+    <td><%= f.check_box :add_to_index %></td>
+  </tr>
+  <tr>
     <th>
       <label for="upload_date">
         <%= 'Date'.t %>
@@ -52,10 +58,20 @@
       </label><br /><small>(<%= 'One per line'.t %>)</small>
     </th>
     <td>
-      <%= f.text_area(:keyword_list,
-        options_for_field(:keywords, :rows => 5, :value => @upload.keyword_list)
-      ) %>
-      <%= suggest_keywords_for 'upload', :keyword_list %>
+      <%= f.text_area :keyword_list, rows: 3 %>
+      <div id="keyword_suggestions" class="suggestions"></div>
+      <script>
+        new Ajax.Autocompleter(
+          'upload_keyword_list',
+          'keyword_suggestions',
+          '<%= suggest_keywords_path %>',
+          {
+            paramName: 'value',
+            suggest: true,
+            parameters: 'type=upload'
+          }
+        )
+      </script>
     </td>
     <td>
       <%= image_tag('misc/info_form_field.gif', :class => 'dim', :title => "Allot keywords to the object that define the content, form or context and help to search for it.".t) %>

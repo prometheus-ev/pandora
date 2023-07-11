@@ -35,6 +35,10 @@ class Indexing::Sources::Archgiessen < Indexing::SourceSuper
     record.xpath('.//datierung/text()')
   end
 
+  def date_range
+    super(date.to_s)
+  end
+
   # standort
   def location
     "#{record.xpath('.//standort_ort/text()')}, #{record.xpath('.//standort_land/text()')}".gsub(/\A, /, '').gsub(/, \z/, '')

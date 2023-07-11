@@ -2,16 +2,42 @@ require "application_system_test_case"
 Dir["./test/test_sources/*.rb"].each {|file| require file }
 
 class IndexingTest < ApplicationSystemTestCase
-  setup do
-    Pandora::Elastic.new.destroy_index('test*')
-  end
+  test 'index multi word synonyms' do
+    with_all_synonyms do
+      Pandora::Indexing::Indexer.index(['test_source_multi_word_synonyms'])
+      #TestSourceMultiWordSynonyms.index
+    end
 
-  teardown do
+    login_as 'jdoe'
+
+    find_link('Advanced search').find('div').click
+
+    within '.pm-source-list' do
+      uncheck 'all'
+      within '.pm-groups > li', text: 'Museum Databases (0/1)' do
+        find('.pm-toggle a').click
+        check 'indices[test_source_multi_word_synonyms]'
+      end
+    end
+
+    fill_in 'search_value_0', with: 'Mona Lisa'
+    submit 'Search'
+
+    page.assert_selector('.list_row', count: 4)
+
+    fill_in 'search_value_0', with: ''
+    fill_in 'search_value_2', with: 'Mona Lisa'
+    submit 'Search'
+
+    page.assert_selector('.list_row', count: 4)
+
     Pandora::Elastic.new.destroy_index('test*')
   end
 
   test 'vgbk link with pknd rudolf bauer' do
-    TestSourceVgbk.index
+    with_all_synonyms do
+      TestSourceVgbk.index
+    end
 
     login_as 'jdoe'
 
@@ -29,10 +55,15 @@ class IndexingTest < ApplicationSystemTestCase
     submit 'Search'
 
     page.assert_selector('.list_row', count: 1)
+
+    Pandora::Elastic.new.destroy_index('test*')
   end
 
   test 'index synonyms masternames' do
-    TestSourceMasternames.index
+    with_all_synonyms do
+      TestSourceMasternames.index
+    end
+
     login_as 'jdoe'
 
     find_link('Advanced search').find('div').click
@@ -55,10 +86,14 @@ class IndexingTest < ApplicationSystemTestCase
     submit 'Search'
 
     page.assert_selector('.list_row', count: 3)
+
+    Pandora::Elastic.new.destroy_index('test*')
   end
 
   test 'index synonym de en' do
-    TestSourceDeEn.index
+    with_all_synonyms do
+      TestSourceDeEn.index
+    end
 
     login_as 'jdoe'
 
@@ -82,6 +117,39 @@ class IndexingTest < ApplicationSystemTestCase
     submit 'Search'
 
     page.assert_selector('.list_row', count: 2)
+
+    Pandora::Elastic.new.destroy_index('test*')
+  end
+
+  test 'index synonym sonnenblume asterisk' do
+    with_all_synonyms do
+      TestSourceSunflowerAsterisk.index
+    end
+
+    login_as 'jdoe'
+
+    find_link('Advanced search').find('div').click
+
+    within '.pm-source-list' do
+      uncheck 'all'
+      within '.pm-groups > li', text: '<Kind> Databases (0/1)' do
+        find('.pm-toggle a').click
+        check 'indices[test_source_sunflower_asterisk]'
+      end
+    end
+
+    fill_in 'search_value_0', with: 'sunflower*'
+    submit 'Search'
+
+    page.assert_selector('.list_row', count: 4)
+
+    fill_in 'search_value_0', with: ''
+    fill_in 'search_value_0', with: 'sonnenblume*'
+    submit 'Search'
+
+    page.assert_selector('.list_row', count: 4)
+
+    Pandora::Elastic.new.destroy_index('test*')
   end
 
   test 'asterisk search order' do
@@ -141,6 +209,8 @@ class IndexingTest < ApplicationSystemTestCase
     assert_field 'order', with: 'relevance'
     assert_link 'Sort ascending' # so current direction is 'descending'
     assert_text "Please do not use the '*' search in combination with other search values. '*' inputs have been removed for this search."
+
+    Pandora::Elastic.new.destroy_index('test*')
   end
 
   test 'artist array field ordering' do
@@ -153,7 +223,7 @@ class IndexingTest < ApplicationSystemTestCase
 
     within '.pm-source-list' do
       uncheck 'all'
-      within '.pm-groups > li', text: '<Kind> Databases (0/1)' do
+      within '.pm-groups > li', text: 'Museum Databases (0/1)' do
         find('.pm-toggle a').click
         check 'indices[test_source_order]'
       end
@@ -172,10 +242,14 @@ class IndexingTest < ApplicationSystemTestCase
     within '.list_row:nth-child(2)' do
       assert_text 'Bogus | Dolittle'
     end
+
+    Pandora::Elastic.new.destroy_index('test*')
   end
 
   test 'index pknd simple advanced all and artist search' do
-    TestSourcePknd.index
+    with_all_synonyms do
+      TestSourcePknd.index
+    end
 
     login_as 'jdoe'
 
@@ -211,10 +285,14 @@ class IndexingTest < ApplicationSystemTestCase
     submit 'Search'
 
     page.assert_selector('.list_row', count: 1)
+
+    Pandora::Elastic.new.destroy_index('test*')
   end
 
   test 'index vgbk expired artist' do
-    TestSourceVgbk.index
+    with_all_synonyms do
+      TestSourceVgbk.index
+    end
 
     login_as 'jdoe'
 
@@ -231,7 +309,7 @@ class IndexingTest < ApplicationSystemTestCase
     fill_in 'search_value_0', with: '*'
     submit 'Search'
 
-    within '.list_row:nth-child(1)' do
+    within '.list_row', text: /Title 1/ do
       assert_no_text 'VG Bild-Kunst'
     end
 
@@ -246,10 +324,14 @@ class IndexingTest < ApplicationSystemTestCase
     within '.list_row:nth-child(4)' do
       assert_text 'VG Bild-Kunst'
     end
+
+    Pandora::Elastic.new.destroy_index('test*')
   end
 
   test 'index vgbk expired artist source without date_range' do
-    TestSource.index
+    with_all_synonyms do
+      TestSource.index
+    end
 
     login_as 'jdoe'
 
@@ -257,7 +339,7 @@ class IndexingTest < ApplicationSystemTestCase
 
     within '.pm-source-list' do
       uncheck 'all'
-      within '.pm-groups > li', text: '<Kind> Databases (0/1)' do
+      within '.pm-groups > li', text: 'Museum Databases (0/1)' do
         find('.pm-toggle a').click
         check 'indices[test_source]'
       end
@@ -266,21 +348,22 @@ class IndexingTest < ApplicationSystemTestCase
     fill_in 'search_value_0', with: '*'
     submit 'Search'
 
-    within '.list_row:nth-child(1)' do
+    within '.list_row', text: 'Florenz' do # Katźe auf Stuhl
       assert_text 'VG Bild-Kunst'
     end
 
-    within '.list_row:nth-child(2)' do
+    within '.list_row', text: 'Katze auf Stuhl (Seitenansicht)' do
       assert_text 'VG Bild-Kunst'
     end
 
-    within '.list_row:nth-child(3)' do
+    within '.list_row', text: 'Hamster auf Stuhl' do
       assert_no_text 'VG Bild-Kunst'
     end
+
+    Pandora::Elastic.new.destroy_index('test*')
   end
 
   test 'index, rate, reindex, search and sort by rating count and average' do
-    # Index.
     TestSource.index
 
     login_as 'jdoe'
@@ -289,15 +372,14 @@ class IndexingTest < ApplicationSystemTestCase
 
     within '.pm-source-list' do
       uncheck 'all'
-      within '.pm-groups > li', text: '<Kind> Databases (0/1)' do
+      within '.pm-groups > li', text: 'Museum Databases (0/1)' do
         find('.pm-toggle a').click
         check 'indices[test_source]'
       end
     end
 
-    fill_in 'search_value_0', with: 'Title 1'
+    fill_in 'search_value_0', with: 'Hamster auf Stuhl'
     submit 'Search'
-
     within '.list_row:nth-child(1)' do
       find("img[title='View full record']").find(:xpath, '..').click
     end
@@ -308,9 +390,8 @@ class IndexingTest < ApplicationSystemTestCase
 
     back
 
-    fill_in 'search_value_0', with: 'Title 2'
+    fill_in 'search_value_0', with: 'Maus auf Stuhl'
     submit 'Search'
-
     within '.list_row:nth-child(1)' do
       find("img[title='View full record']").find(:xpath, '..').click
     end
@@ -325,15 +406,14 @@ class IndexingTest < ApplicationSystemTestCase
 
     within '.pm-source-list' do
       uncheck 'all'
-      within '.pm-groups > li', text: '<Kind> Databases (0/1)' do
+      within '.pm-groups > li', text: 'Museum Databases (0/1)' do
         find('.pm-toggle a').click
         check 'indices[test_source]'
       end
     end
 
-    fill_in 'search_value_0', with: 'Title 2'
+    fill_in 'search_value_2', with: 'Maus auf Stuhl'
     submit 'Search'
-
     within '.list_row:nth-child(1)' do
       find("img[title='View full record']").find(:xpath, '..').click
     end
@@ -358,11 +438,11 @@ class IndexingTest < ApplicationSystemTestCase
     end
 
     within '.list_row:nth-child(1)' do
-      assert_text 'Title 2'
+      assert_text 'Maus auf Stuhl'
     end
 
     within '.list_row:nth-child(2)' do
-      assert_text 'Title 1'
+      assert_text 'Hamster auf Stuhl'
     end
 
     # Sort by rating average.
@@ -371,12 +451,14 @@ class IndexingTest < ApplicationSystemTestCase
     end
 
     within '.list_row:nth-child(1)' do
-      assert_text 'Title 1'
+      assert_text 'Hamster auf Stuhl'
     end
 
     within '.list_row:nth-child(2)' do
-      assert_text 'Title 2'
+      assert_text 'Maus auf Stuhl'
     end
+
+    Pandora::Elastic.new.destroy_index('test*')
   end
 
   test 'index, comment, answer comment, reindex, search comment' do
@@ -392,7 +474,7 @@ class IndexingTest < ApplicationSystemTestCase
 
     within '.pm-source-list' do
       uncheck 'all'
-      within '.pm-groups > li', text: '<Kind> Databases (0/1)' do
+      within '.pm-groups > li', text: 'Museum Databases (0/1)' do
         find('.pm-toggle a').click
         check 'indices[test_source]'
       end
@@ -445,6 +527,8 @@ class IndexingTest < ApplicationSystemTestCase
     submit 'Search'
 
     page.assert_selector('.list_row', count: 1)
+
+    Pandora::Elastic.new.destroy_index('test*')
   end
 
   test 'raise exception when no encoding is given' do

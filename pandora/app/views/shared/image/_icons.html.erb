@@ -15,7 +15,11 @@
 
     <%= icon_for_active_inactive(list, 'image/plus%s.gif', { :class => 'icon', :title => 'View full record'.t }, { :controller => 'images', :action => 'show', :id => super_image.pid }) %>
 
-    <%= icon_for_active_inactive(true, 'image/plusplus%s.gif', { :class => 'icon', :title => 'Large size image'.t }) { |img, link_options, html_options| link_to img, controller: 'images', action: 'large', id: super_image.pid } %>
+    <%= icon_for_active_inactive(
+      true,
+      'image/plusplus%s.gif',
+      { :class => 'icon', :title => 'View original'.t }) { |img, link_options, html_options|
+        link_to img, super_image.image_url(:original) } %>
 
     <%= icon_for_active_inactive(current_user.mode != 'guest', 'icon/download%s.gif', { :class => 'icon', :title => 'Download image and metadata.'.t + "#{' ' + 'Not available for guest-account.'.t if current_user.mode == 'guest'}" }, { :controller => 'images', :action => 'download', :id => super_image.pid, :format => 'zip' }) %>
 

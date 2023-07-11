@@ -1,8 +1,4 @@
-class Indexing::Sources::HamburgAegyptologie < Indexing::SourceSuper
-  def records
-    document.xpath('//bilder/bild')
-  end
-
+class Indexing::Sources::HamburgAegyptologie < Indexing::Sources::Parents::Hamburg
   def record_id
     @mapping ||= begin
       ids_file = File.open(File.join(Rails.configuration.x.dumps_path, "hamburg_dilps_ids"))
@@ -29,10 +25,6 @@ class Indexing::Sources::HamburgAegyptologie < Indexing::SourceSuper
       current_id = text.sub(/Bilder:/, "")
       @mapping[current_id] || current_id
     end
-  end
-
-  def record_object_id
-    [name, Digest::SHA1.hexdigest(record.xpath('ancestor::bilder/_id/text()').to_a.join('|'))].join('-')
   end
 
   def path
@@ -64,6 +56,12 @@ class Indexing::Sources::HamburgAegyptologie < Indexing::SourceSuper
   # datierung
   def date
     record.xpath('ancestor::bilder/datum/text()')
+  end
+
+  def date_range
+    d = date.to_s.strip
+
+    super(d)
   end
 
   # standort

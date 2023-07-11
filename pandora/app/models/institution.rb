@@ -1,4 +1,5 @@
 require 'resolv'
+require 'pandora/validation/email_validator'
 
 class Institution < ApplicationRecord
 
@@ -18,12 +19,12 @@ class Institution < ApplicationRecord
 
   REQUIRED = %w[name title city country]
 
-  DEFAULT_DATABASE_QUOTA = 50000 # in megabytes
+  DEFAULT_DATABASE_QUOTA = 51200 # in megabytes
 
   validates_presence_of   *REQUIRED
   validates_format_of     :name, :with => /\A#{LETTER_RE}/,
                           :message => 'must begin with a letter'
-  validates_as_email      :email, allow_blank: true
+                          validates :email, :'pandora/validation/email' => true, allow_blank: true
   validates_uniqueness_of :name, :title, :case_sensitive => false
 
   # REWRITE: re-activating custom legacy validations
@@ -52,6 +53,10 @@ class Institution < ApplicationRecord
     }
 
     campus_id
+  end
+
+  def self.roots
+    where(campus_id: nil)
   end
 
   def self.issuer_ids
@@ -188,14 +193,23 @@ class Institution < ApplicationRecord
 
   def authorizes_ip?(ip)
     result = false
+
     ip_ranges.each do |r|
       return false if r.excludes?(ip)
       result |= r.contains?(ip)
     end
+
     hostnames.each do |h|
-      resolver = Resolv::DNS.new
-      return true if resolver.getaddress('wendig.io').to_s == ip
+      begin
+        resolver = Resolv::DNS.new
+        return true if resolver.getaddress(h).to_s == ip
+      rescue Resolv::ResolvError => e
+        Rails.logger.info("Institution#authorizes_ip?: #{e.message}")
+        
+        false
+      end
     end
+
     result
   end
 
@@ -292,9 +306,6 @@ class Institution < ApplicationRecord
         LicenseType.find(new_license_type)
 
       if real_license_type
-        # REWRITE: we need to use the reemplementation for the date extraction
-        # Upgrade.extract_multi_param_date(license_attributes, 'valid_from')
-
         # just change the current license if the license types are the same...
         old_date = (license && license.valid_from ? license.valid_from.to_date : nil)
         change_current_license = (
@@ -302,21 +313,20 @@ class Institution < ApplicationRecord
           license_attributes['valid_from'] == old_date
         )
 
-        # ...and valid_from hasn't changed either
-        # change_current_license &&=
-        #   license.valid_from &&
-        #   license_attributes['valid_from'] == license.valid_from
-        # change_current_license &&= license.valid_from &&
-        #   license.type_cast_multiparameter_attribute(
-        #     'valid_from', license_attributes
-        #   ) == license.valid_from
+        if paid_from = license_attributes[:paid_from]
+          if paid_from.is_a?(Time)
+            license_attributes[:paid_from] = paid_from  
+          end
 
-        if (paid_from = license_attributes[:paid_from]) =~ /\A\d+\z/
-          license_attributes[:paid_from] = Time.at(paid_from.to_i)
+          if paid_from.is_a?(String)
+            if paid_from.match?(/\A\d+\z/)
+              license_attributes[:paid_from] = Time.at(paid_from.to_i)
+            end
+          end
         end
 
         if change_current_license
-          license.update_attributes(
+          license.update(
             license_attributes.except(:license_type, :valid_from)
           )
         else
@@ -375,14 +385,11 @@ class Institution < ApplicationRecord
   end
 
   def all_departments(conditions = {})
-    departments.empty? ? [] : self.class.find(:all, conditions.merge_conditions(
-      sql_in(:id, all_department_ids)
-    ))
+    departments.empty? ? [] : self.class.where(id: all_department_ids)
   end
 
   def all_department_ids(ids = [])
-    departments.each { |i| ids << i.id; i.all_department_ids(ids) }
-    ids
+    departments.map{|i| [i.id] + i.all_department_ids}.uniq
   end
 
   def top_campus

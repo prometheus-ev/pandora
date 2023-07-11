@@ -1,16 +1,21 @@
 <% list_search_options = { :controller => 'sources', :action => open_access ? action_name : 'index' } -%>
 
-<% if row.keywords.empty? -%>
-  <strong>
-    <%= '%d image' / row.record_count %>
-  </strong>
-<% else -%>
-  <!-- REWRITE: re-indent and make html_safe-->
-  <!-- TODO: these should probably not be translated -->
-  <% image_string = row.record_count == 1 ? 'image' : 'images' %>
+<% counts = (@sources_counts || {})[row.name] %>
+<% c = (counts ? counts['records'] : 0) %>
+<% record_count = pm_labelled_delimited_counter(c, '%s record', '%s records') %>
+
+<strong>
+<%= link_to(
+  record_count,
+  {controller: 'searches',
+   action: 'advanced',
+   'search_value[0]': '*',
+   #objects: 1,
+   indices: {"#{row.name}": true}}) %>
+</strong>
+<% unless row.keywords.empty? -%>
   <%=
-    (("<strong>%d #{image_string}</strong> pertaining to <strong>%s</strong>" / row.record_count) %
-      list_search_links_for(:keywords, row.keywords.map { |k| [k.title, k.title] }, list_search_options)).html_safe
+    ("pertaining to <strong>%s</strong>" % [list_search_links_for(:keywords, row.keywords.map { |k| [k.t, k.t] }, list_search_options)]).html_safe
   %>
 <% end -%>
   <br />
@@ -36,5 +41,6 @@
 <% end -%>
 <% if row.open_access? && !row.url.blank? -%>
   <br class="vspace2" />
-  <%= gogif %> <%= link_to 'Database homepage'.t, row.url %>
+  <%= link_to 'Database homepage'.t, row.url %>
+  <%= image_tag('/images/icon/arrow-up-right-from-square-solid.png', style: 'vertical-align: baseline;') %>
 <% end -%>

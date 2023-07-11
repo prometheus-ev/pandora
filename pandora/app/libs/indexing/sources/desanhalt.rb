@@ -47,6 +47,10 @@ class Indexing::Sources::Desanhalt < Indexing::SourceSuper
     "#{record.xpath('.//Datierung/von/text()')} - #{record.xpath('.//Datierung/bis/text()')} (#{record.xpath('.//Datierung/Text/text()')})".gsub(/0* - 0* /, '').gsub(/\([0\-]*\)/, "")
   end
 
+  def date_range
+    super(date)
+  end
+
   # standort
   def location
     record.xpath('.//Ort/Standort/text()')

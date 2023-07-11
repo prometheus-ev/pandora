@@ -1,0 +1,142 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<source>
+  <row>
+    <id>1</id>
+    <path>path1</path>
+    <artist>Artist 1</artist>
+    <title>ag</title>
+    <location>Location 1</location>
+    <date>1980</date>
+    <credits>Credit 1</credits>
+    <rights-work>Rights work 1</rights-work>
+    <rights-reproduction>Rights reproduction 1</rights-reproduction>
+  </row>
+  <row>
+    <id>2</id>
+    <path>path2</path>
+    <artist>Artist 2</artist>
+    <title>Af</title>
+    <location>Location 2</location>
+    <date>1981</date>
+    <credits>Credit 2</credits>
+    <rights-work>Rights work 2</rights-work>
+    <rights-reproduction>Rights reproduction 2</rights-reproduction>
+  </row>
+  <row>
+    <id>3</id>
+    <path>path3</path>
+    <artist>Artist 3</artist>
+    <title>_äe</title>
+    <location>Location 3</location>
+    <date>1981</date>
+    <credits>Credit 3</credits>
+    <rights-work>Rights work 3</rights-work>
+    <rights-reproduction>Rights reproduction 3</rights-reproduction>
+  </row>
+  <row>
+    <id>4</id>
+    <path>path4</path>
+    <artist>Artist 4</artist>
+    <title>Äd</title>
+    <location>Location 4</location>
+    <date>1981</date>
+    <credits>Credit 4</credits>
+    <rights-work>Rights work 4</rights-work>
+    <rights-reproduction>Rights reproduction 4</rights-reproduction>
+  </row>
+  <row>
+    <id>5</id>
+    <path>path5</path>
+    <artist>Artist 5</artist>
+    <title>!ac</title>
+    <location>Location 5</location>
+    <date>1981</date>
+    <credits>Credit 5</credits>
+    <rights-work>Rights work 5</rights-work>
+    <rights-reproduction>Rights reproduction 5</rights-reproduction>
+  </row>
+  <row>
+    <id>6</id>
+    <path>path6</path>
+    <artist>Artist 6</artist>
+    <title>"Ab</title>
+    <location>Location 6</location>
+    <date>1981</date>
+    <credits>Credit 6</credits>
+    <rights-work>Rights work 6</rights-work>
+    <rights-reproduction>Rights reproduction 6</rights-reproduction>
+  </row>
+  <row>
+    <id>7</id>
+    <path>path7</path>
+    <artist>Artist 7</artist>
+    <title>äa</title>
+    <location>Location 7</location>
+    <date>1981</date>
+    <credits>Credit 7</credits>
+    <rights-work>Rights work 7</rights-work>
+    <rights-reproduction>Rights reproduction 7</rights-reproduction>
+  </row>
+  <row>
+    <id>8</id>
+    <path>path8</path>
+    <artist>Artist 8</artist>
+    <title>*Ba</title>
+    <location>Location 8</location>
+    <date>1981</date>
+    <credits>Credit 8</credits>
+    <rights-work>Rights work 8</rights-work>
+    <rights-reproduction>Rights reproduction 8</rights-reproduction>
+  </row>
+  <row>
+    <id>9</id>
+    <path>path9</path>
+    <artist>Artist 9</artist>
+    <title>bb</title>
+    <location>Location 9</location>
+    <date>1981</date>
+    <credits>Credit 9</credits>
+    <rights-work>Rights work 9</rights-work>
+    <rights-reproduction>Rights reproduction 9</rights-reproduction>
+  </row>
+  <row>
+    <id>10</id>
+    <path>path10</path>
+    <artist>Artist 10</artist>
+    <title>*Bc</title>
+    <location>Location 10</location>
+    <date>1981</date>
+    <credits>Credit 10</credits>
+    <rights-work>Rights work 10</rights-work>
+    <rights-reproduction>Rights reproduction 10</rights-reproduction>
+  </row>
+  <row>
+    <id>11</id>
+    <path>path11</path>
+    <artist>Artist 11</artist>
+    <title>123</title>
+    <location>Location 11</location>
+    <date>1991</date>
+    <credits>Credit 11</credits>
+    <rights-work>Rights work 11</rights-work>
+    <rights-reproduction>Rights reproduction 11</rights-reproduction>
+  </row>
+  <row>
+    <id>12</id>
+    <path>path12</path>
+    <artist>Artist 12</artist>
+    <title>12 | c'11 | cKs</title>
+    <location>Location 12</location>
+    <date>1992</date>
+    <credits>Credit 12</credits>
+    <rights-work>Rights work 12</rights-work>
+    <rights-reproduction>Rights reproduction 12</rights-reproduction>
+  </row>
+  <row>
+    <id>13</id>
+    <path>path12</path>
+    <artist>Donatello</artist>
+    <title>Hase auf Stuhl</title>
+    <location>Rom</location>
+  </row>
+</source>

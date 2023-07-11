@@ -1,6 +1,7 @@
 <ul>
   <% # Keep indentation as is in order that keywords show up nicely in the textarea %>
   <% @keywords.each do |keyword| %>
-    <li><%= highlight(keyword.title, h(@query)) %></li>
+    <li><%= highlight(keyword.t, h(@query)) %>
+<span class="informal"><br /><small><%= keyword.uploads.first.title %></small></span></li>
   <% end %>
 </ul>

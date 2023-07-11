@@ -6,7 +6,7 @@ class Settings < ApplicationRecord
 
   LIST_SETTINGS = {
     :order     => [],
-    :direction => [[SORT_DIRECTIONS, nil]],
+    :direction => [[['ASC', 'DESC'], nil]],
     :per_page  => [[1..100, 10]]
   }
 
@@ -24,60 +24,60 @@ class Settings < ApplicationRecord
     self[key] = original if defined?(original)
   end
 
-  class Proxy
+  # class Proxy
 
-    extend Forwardable
+  #   extend Forwardable
 
-    def_delegators :@_default, :spec, :values_for, :default_for,
-                               :include?, :valid?, :legal?, :errors, :is_a?
+  #   def_delegators :@_default, :spec, :values_for, :default_for,
+  #                              :include?, :valid?, :legal?, :errors, :is_a?
 
-    attr_reader :klass, :hash
+  #   attr_reader :klass, :hash
 
-    def initialize(klass, hash = {})
-      @klass, @hash, @_hash = klass, hash, hash.dup
-      reload(nil, true)
-    end
+  #   def initialize(klass, hash = {})
+  #     @klass, @hash, @_hash = klass, hash, hash.dup
+  #     reload(nil, true)
+  #   end
 
-    alias_method :to_hash, :hash
-    alias_method :save, :valid?
+  #   alias_method :to_hash, :hash
+  #   alias_method :save, :valid?
 
-    def update_attribute(key, value)
-      @_default[key] = value
-      save.tap { |ok| hash[key.to_s] = @_default[key] if ok }
-    end
+  #   def update_attribute(key, value)
+  #     @_default[key] = value
+  #     save.tap { |ok| hash[key.to_s] = @_default[key] if ok }
+  #   end
 
-    alias_method :[]=, :update_attribute
+  #   alias_method :[]=, :update_attribute
 
-    def update_attributes(hash)
-      hash.all? { |key, value| update_attribute(key, value) }
-    end
+  #   def update(hash)
+  #     hash.all? { |key, value| update_attribute(key, value) }
+  #   end
 
-    def reload(options = nil, init = false)
-      @_default = klass.default
+  #   def reload(options = nil, init = false)
+  #     @_default = klass.default
 
-      hash.clear.merge!(@_hash) unless init
-      hash.reverse_merge!(@_default)
-    end
+  #     hash.clear.merge!(@_hash) unless init
+  #     hash.reverse_merge!(@_default)
+  #   end
 
-    def method_missing(method, *args, &block)
-      if hash.respond_to?(method)
-        hash.send(method, *args, &block)
-      else
-        key = method.to_s
+  #   def method_missing(method, *args, &block)
+  #     if hash.respond_to?(method)
+  #       hash.send(method, *args, &block)
+  #     else
+  #       key = method.to_s
 
-        if setter = key.sub!(/=\z/, '')
-          if respond_to?(key) || hash.respond_to?(key)
-            super
-          else
-            update_attribute(key, *args)
-          end
-        else
-          (errors[key.to_sym] ? @_default : hash)[key, *args]
-        end
-      end
-    end
+  #       if setter = key.sub!(/=\z/, '')
+  #         if respond_to?(key) || hash.respond_to?(key)
+  #           super
+  #         else
+  #           update_attribute(key, *args)
+  #         end
+  #       else
+  #         (errors[key.to_sym] ? @_default : hash)[key, *args]
+  #       end
+  #     end
+  #   end
 
-  end
+  # end
 
   def self.provides_settings(hash)
     spec = HashWithIndifferentAccess.new
@@ -129,21 +129,21 @@ class Settings < ApplicationRecord
     provides_list_settings(SEARCH_SETTINGS.merge(extra), &block)
   end
 
-  def self.for(user)
-    anonymous = !user || user.anonymous?
+  # def self.for(user)
+  #   anonymous = !user || user.anonymous?
 
-    hash = Hash.new { |h, k|
-      key = "#{k}_settings"
+  #   hash = Hash.new { |h, k|
+  #     key = "#{k}_settings"
 
-      h[k] = if anonymous
-        key.camelize.constantize.proxy(block_given? ? yield(key) : {})
-      else
-        user.send(key) || user.send("build_#{key}")
-      end
-    }
+  #     h[k] = if anonymous
+  #       key.camelize.constantize.proxy(block_given? ? yield(key) : {})
+  #     else
+  #       user.send(key) || user.send("build_#{key}")
+  #     end
+  #   }
 
-    base_class? ? hash : hash[name.underscore.sub(/_settings\z/, '')]
-  end
+  #   base_class? ? hash : hash[name.underscore.sub(/_settings\z/, '')]
+  # end
 
   # REWRITE: changed, not to use 'returning' anymore
   def self.default
@@ -160,9 +160,9 @@ class Settings < ApplicationRecord
     spec[key][:values]
   end
 
-  def self.proxy(hash = {})
-    Proxy.new(self, hash)
-  end
+  # def self.proxy(hash = {})
+  #   Proxy.new(self, hash)
+  # end
 
   extend Forwardable
 

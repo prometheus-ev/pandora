@@ -30,6 +30,28 @@ class Indexing::Sources::Amtub < Indexing::SourceSuper
     "#{record.xpath('.//objektdatierung/text()')} (Projekt: #{record.xpath('.//projektdatierung/text()')})".gsub(/ \(Projekt: \)/, "")
   end
 
+  def date_range
+    objektdatierung = record.xpath('.//objektdatierung/text()').to_s
+    projektdatierung = record.xpath('.//projektdatierung/text()').to_s
+    date = ''
+
+    if !objektdatierung.blank?
+      date = objektdatierung
+    end
+
+    if date.blank? && !projektdatierung.blank?
+      date = projektdatierung
+    end
+
+    if date == '31.02.1902'
+      date = '28.02.1902'
+    elsif date == '1841-18429'
+      date = '1841-1842'
+    end
+
+    super(date)
+  end
+
   # standort
   def location
     record.xpath('.//ort/text()')

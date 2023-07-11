@@ -65,7 +65,7 @@ class NewslettersController < ApplicationController
     allowed =
       (current_user && current_user.admin_or_superadmin?) ||
       (@email.newsletter? && @email.delivered?)
-    return permission_denied unless allowed
+    return forbidden unless allowed
   end
 
   def webview
@@ -75,7 +75,7 @@ class NewslettersController < ApplicationController
       (current_user && current_user.admin_or_superadmin?) ||
       (@email.newsletter? && @email.delivered?)
 
-    return permission_denied unless allowed
+    return forbidden unless allowed
   end
 
   def recipients
@@ -107,7 +107,7 @@ class NewslettersController < ApplicationController
   def create
     @email = Email.newsletter
 
-    if @email.update_attributes(newsletter_params)
+    if @email.update(newsletter_params)
       if params[:deliver].present?
         @email.deliver(current_user)
         flash[:notice] = message(@email, "'%s' successfully created and delivered!")
@@ -127,14 +127,15 @@ class NewslettersController < ApplicationController
   def update
     @email = records.find(params[:id])
 
-    if @email.update_attributes(newsletter_params)
-      if params[:deliver].present?
-        @email.deliver(current_user)
-        flash[:notice] = message(@email, "'%s' successfully updated and delivered!")
-      else
-        flash[:notice] = message(@email, "'%s' successfully updated!")
-      end
+    if @email.update(newsletter_params)
+      # if params[:deliver].present?
+      #   @email.deliver_later(current_user)
+      #   flash[:notice] = message(@email, "'%s' successfully updated and delivered!")
+      # else
+      #   flash[:notice] = message(@email, "'%s' successfully updated!")
+      # end
 
+      flash[:notice] = message(@email, "'%s' successfully updated!")
       redirect_to action: 'show', id: @email
     else
       # view compatibility
@@ -148,10 +149,10 @@ class NewslettersController < ApplicationController
     @email = records.find(params[:id])
 
     if @email.delivered?
-      flash[:notice] = message(@email, 'has already been deliverd')
+      flash[:notice] = message(@email, 'has already been delivered')
       redirect_to action: 'show', id: @email.id
     else
-      @email.deliver(current_user)
+      @email.deliver_later(current_user)
 
       flash[:notice] = message(@email, 'successfully delivered!')
       redirect_to action: 'show', id: @email.id

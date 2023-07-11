@@ -1,0 +1,21 @@
+<pm-modal class={classes()}>
+  <div class="backdrop" onclick={event => close()} />
+
+  <div class="content">
+    <slot />
+  </div>
+
+  <script>
+    export default class {
+      close() {
+        if (this.props.close) {
+          this.props.close()
+        }
+      }
+
+      classes() {
+        return this.props.open ? 'open' : ''
+      }
+    }
+  </script>
+</pm-modal>

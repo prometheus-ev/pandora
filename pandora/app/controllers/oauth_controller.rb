@@ -1,7 +1,7 @@
 class OauthController < ApplicationController
 
   skip_before_action :login_required, :except => [:authorize, :revoke]
-  skip_before_action :store_location, :except => [:authorize, :revoke]
+  # skip_before_action :store_location, :except => [:authorize, :revoke]
   skip_before_action :verify_authenticity_token
   
   # before_action :oauth_required,                  :only => [:invalidate, :capabilities]

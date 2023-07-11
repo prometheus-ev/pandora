@@ -1,20 +1,8 @@
 <h2 class="page_title"><%= 'Terms of use'.t %></h2>
 
 <% if current_user.terms_of_use_changed? -%>
-  <p class="icon_box note">
-    <%= render :partial => 'terms_of_use_changed' %>
-  </p>
+  <%= render :partial => 'terms_of_use_changed' %>
 <% end %>
-
-<p>
-  <%= link_to '» PDF', public_path_for(pdf = "docs/terms_of_use#{Locale.ext(true)}.pdf"), :target => '_blank' %>
-  [<%= number_to_human_size(File.size(Rails.root.join('public', pdf))) %>]
-</p>
-
-<div class="scroll">
-  <%= render :partial => 'terms_of_use' %>
-  <%= mail_to INFO_ADDRESS %>
-</div>
 
 <% if current_user.accepted_terms_of_use? %>
   <p>
@@ -25,7 +13,12 @@
   <%= form_tag({:action => 'update'}, method: :patch) do -%>
     <%= hidden_field_tag :return_to, params[:return_to] %>
     
-    <p><label><%= check_box_tag 'accepted' %> <%= 'I read the above terms of use carefully and agree!'.t %></label></p>
+    <p>
+      <label>
+        <%= check_box_tag 'accepted' %>
+        <%= 'I read the %s carefully and agree!' / link_to('terms of use'.t, public_path_for("docs/terms_of_use#{Locale.ext(true)}.pdf"), :target => '_blank') %>
+      </label>
+    </p>
     <%= submit_button 'Proceed...'.t %>
 
   <% end %>

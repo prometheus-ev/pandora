@@ -38,6 +38,12 @@ class Indexing::Sources::ErlangenDrucke < Indexing::SourceSuper
     record.xpath('.//mods/mods/originInfo/dateIssued[@keyDate="yes"]/text()')
   end
 
+  def date_range
+    d = date.to_s.strip
+
+    super(d)
+  end
+
   # institution
   def location
     "#{record.xpath('.//note/text()')}".gsub(/Einblattdrucke der /, '')

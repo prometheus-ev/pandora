@@ -1,5 +1,4 @@
 class Indexing::Sources::Bpk < Indexing::SourceSuper
-  # TODO Where is this expression in pandora? In pandora bpk has 17256 records, in athene only 13634
   def records
     document.xpath('//PHOTO[not(contains(OBJECTTYPE, "Fotografie") and contains(INSTITUTION, "Kunstbibliothek"))]')
   end
@@ -241,6 +240,7 @@ class Indexing::Sources::Bpk < Indexing::SourceSuper
 
   # schlagwörter
   def keyword
-    record.xpath('.//KEY/text()')
+    raw = record.xpath('.//KEY/text()').text || ''
+    raw.split(/\s*;\s*/)
   end
 end

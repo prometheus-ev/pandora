@@ -12,8 +12,6 @@ namespace :pandora do
       system(cmd)
 
       Indexing::Index.delete('*')
-      Indexing::IndexTasks.new.load(['robertin'])
-      Indexing::IndexTasks.new.load(['daumier'])
     else
       puts 'A reset is only available in a development environment.'
     end

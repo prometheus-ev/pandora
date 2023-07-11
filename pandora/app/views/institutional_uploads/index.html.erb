@@ -1,14 +1,15 @@
-<div class="institutional_database_select"><%= "Select institutional database:".t %>
+<div class="institutional_database_select">
+  <h3><%= "Select institutional database:".t %></h3>
   <% if @institutional_upload_database %>
-    <% select_options = options_for_select(@institutional_upload_databases.map{ |source| [source.title, url_for(institutional_uploads_path(source.id))] }, url_for(institutional_uploads_path(@institutional_upload_database.id))) %>
+    <% select_options = options_for_select(@institutional_upload_databases.map{ |source| [source.select_option_title, url_for(institutional_uploads_path(source.id))] }, url_for(institutional_uploads_path(@institutional_upload_database.id))) %>
     <%= select_tag(
       :institutional_uploads_database, select_options, { :onchange => "window.location=this.value" }) %>
-
-    <%= render_sections %w[header] %>
-    <%= render partial: 'shared/list/list', locals: {custom: true, klass: Upload} %>
   <% else %>
-    <% select_options = options_for_select(@institutional_upload_databases.map{ |source| [source.title, url_for(institutional_uploads_path(source.id))] }) %>
+    <% select_options = options_for_select(@institutional_upload_databases.map{ |source| [source.select_option_title, url_for(institutional_uploads_path(source.id))] }) %>
     <%= select_tag(
       :institutional_uploads_database, select_options, { :prompt => "Please select a database", :onchange => "window.location=this.value" }) %>
   <% end %>
 </div>
+
+<%= render_sections %w[header] %>
+<%= render partial: 'shared/list/list', locals: {custom: true, klass: Upload} %>

@@ -1,0 +1,8 @@
+---
+:columns_for:
+  :list:
+    - title
+    - created_at
+    - updated_at
+  :search:
+    - title

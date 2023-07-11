@@ -2,10 +2,7 @@
 
 <%= error_messages_for :upload %>
 
-<!-- REWRITE: we need to specify the object and the param so that the url can be
-calculated automatically -->
 <%= form_for @upload, url: institutional_uploads_path(@institutional_upload_database.id), :html => { :multipart => true, :onsubmit => 'return check_input();', :class => 'edit-form' } do |f| -%>
   <%= render_section Upload, 'object_obligatory!', f: f %>
   <p><br/></p>
 <% end -%>
-

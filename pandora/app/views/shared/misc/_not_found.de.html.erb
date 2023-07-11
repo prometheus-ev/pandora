@@ -7,9 +7,9 @@
 <p>
   Hoffentlich wird Sie eine dieser Seiten wieder auf den richtigen Weg bringen:
   <ul>
-    <li><a href="http://prometheus-bildarchiv.de">prometheus-Homepage</a></li>
-    <li><a href="http://prometheus.uni-koeln.de/pandora">prometheus-Bildarchiv Startseite</a></li>
-    <li><a href="http://prometheus.uni-koeln.de/pandora/sitemap">prometheus-Bildarchiv Sitemap</a></li>
+    <li><a href="<%= ENV['PM_HOME_URL'] %>">prometheus-Homepage</a></li>
+    <li><a href="<%= ENV['PM_BASE_URL'] %>">prometheus-Bildarchiv Startseite</a></li>
+    <li><a href="<%= ENV['PM_BASE_URL'] %>/sitemap">prometheus-Bildarchiv Sitemap</a></li>
     <li>
       <a href="javascript:history.back()">Oder gehen Sie zurück zu der Seite, von der Sie kamen</a>
       (<noscript>erfordert, dass JavaScript aktiviert ist; </noscript>alternativ betätigen Sie den Zurück-Button Ihres Browsers)
@@ -18,5 +18,5 @@
 </p>
 
 <p>
-  Jedenfalls wären wir Ihnen für eine kurze Mitteilung dankbar: <a href="mailto:info@prometheus-bildarchiv.de">info@prometheus-bildarchiv.de</a>.
+  Jedenfalls wären wir Ihnen für eine kurze Mitteilung dankbar: <a href="mailto:<%= ENV['PM_INFO_ADDRESS'] %>"><%= ENV['PM_INFO_ADDRESS'] %></a>.
 </p>

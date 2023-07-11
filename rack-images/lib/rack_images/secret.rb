@@ -1,8 +1,6 @@
 require 'digest'
 
 module RackImages::Secret
-  TOKEN_LIFETIME = 60 * 60 # 1 hour
-  
   TOKEN_LENGTH = 40
   TIMESTAMP_LENGTH = 10
 
@@ -25,13 +23,11 @@ module RackImages::Secret
 
   # generates token to be used as _asd= parameter value in urls
   # @param [String] request_path the request path
-  # @param [Integer, String] timestamp the timestamp (utc seconds since 1970)
+  # @param [Integer, String] timestamp the end-of-life timestamp (utc seconds since 1970)
   # @return [String] token
-  def self.token_for(request_path, timestamp = nil)
-    timestamp ||= Time.now.to_i + TOKEN_LIFETIME
-
-    key = key_for(request_path, timestamp)
-    "#{timestamp}#{key}"
+  def self.token_for(request_path, timestamp)
+    key = key_for(request_path, timestamp.to_i)
+    "#{timestamp.to_i}#{key}"
   end
 
 

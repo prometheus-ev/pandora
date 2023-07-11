@@ -1,0 +1,61 @@
+<h2><%= 'Filter help'.t %></h2>
+
+<p>
+  (See also <%= link_to_help section: 'search', label: 'Search' %>,
+  <%= link_to_help section: 'syntax', label: 'Query syntax' %>,
+  <%= link_to_help section: 'results', label: 'Resultslist' %>, and
+  <%= link_to_help section: 'copyright_and_publication', label: 'Copyright and publication' %>.)
+</p>
+
+<p>
+  You can set filters to narrow down your search results.
+</p>
+
+<% with_toc do -%>
+
+  <%= section_heading 'Filter by date', 'filter_by_date' %>
+  <p>
+    You can filter a search result by a date range defined by a start date and an end date. Dates are entered in years.
+    If you enter a single date, the date range will be updated to the single year.
+  </p>
+
+  <b><%= 'Filter by date - limitations'.t %></b>
+  <p>
+    About 80 % of all records do have datings, whereas about 75 % of the records with datings are currently available for date filtering.
+  </p>
+
+  <%= section_heading 'Filter by objects', 'filter_by_objects_with_multiple_records' %>
+  <p>
+    There are some image databases that store their data as objects. Objects link associated images to the respective metadata. For object images, we save an object ID in order to preserve that information. With "Filter by objects", you can restrict your search results to only show objects.
+  </p>
+
+  <p>
+    For example, if you search for
+    <%= link_to({controller: 'searches',
+                 action: 'advanced',
+                 'search_field[1]': 'title',
+                 'search_value[1]': 'Kölner Dom'}, target: '_blank') do %>"Kölner Dom"<% end %> (Cologne Cathedral),
+    you will see further views below individual images in the list of results, such as Gerhard Richter’s “Südquerhausfenster” (south transept window) in “ConedaKOR Frankfurt, Goethe University Frankfurt am Main, Institute of Art History”. Now, if you search for
+    <%= link_to({controller: 'searches',
+                 action: 'advanced',
+                 'search_field[1]': 'title',
+                 'search_value[1]': 'Kölner Dom',
+                 'objects': '1'}, target: '_blank') do %>"Kölner Dom"<% end %>
+    with "Filter by objects" activated, you will only see objects in the search results.
+  </p>
+
+  <p>
+    Have a look at our object databases:
+
+    <ul>
+    <% Pandora::Elastic.new.indices_with_objects.each do |index| %>
+      <li>
+        <%= link_to index[:title], { controller: 'searches', action: 'advanced', 'search_field[0]': 'all', 'search_value[0]': '*', 'objects': '1', "indices[#{index[:name]}]": 'true' }, target: '_blank' %>
+      </li>
+    <% end %>
+    </ul>
+  </p>
+
+<% end -%>
+
+<%= render :partial => 'footer' %>

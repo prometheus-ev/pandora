@@ -1,0 +1,2 @@
+class TestSourceSorting < TestSource
+end

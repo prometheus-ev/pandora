@@ -1,28 +1,37 @@
+require 'pandora/validation/email_validator'
+
 class Source < ApplicationRecord
 
   include Util::Config
   include Util::Attribution
 
+  KINDS = {
+    institutional: 'Institutional database',
+    museum: 'Museum database',
+    research: 'Research database'
+  }
+
   self.inheritance_column = :_type_disabled
 
-  enum type: [:dump, :upload]
+  enum type: [:dump, :upload, :user_upload]
 
   belongs_to              :institution
   belongs_to              :contact, class_name: 'Account', foreign_key: 'contact_id', optional: true
 
   has_and_belongs_to_many :source_admins, -> {with_role('dbadmin')}, :class_name => 'Account', join_table: "admins_sources", :uniq => true
 
-  belongs_to              :dbuser,  class_name: 'Account', foreign_key: 'dbuser_id',  optional: true
-  belongs_to              :owner, polymorphic: true,  foreign_key: 'owner_id',  optional: true
+  belongs_to              :dbuser, class_name: 'Account', foreign_key: 'dbuser_id', optional: true
+  belongs_to              :owner, polymorphic: true, foreign_key: 'owner_id', optional: true
 
   has_many                :images, :dependent => :destroy
   has_many                :uploads, :foreign_key => 'database_id', :dependent => :destroy
   has_many                :rated_images, lambda{where(Image.conditions_for_rated[:conditions])}, class_name: 'Image', :dependent => :destroy
 
-  has_and_belongs_to_many :keywords, :uniq => true, :order => 'title'
+  has_many :keyword_source, dependent: :destroy
+  has_many :keywords, -> {distinct.order('title ASC')}, through: :keyword_source
 
   # Required attributes for a source
-  REQUIRED = %w[name title kind institution keywords]
+  REQUIRED = %w[name title kind institution]
 
   validates_presence_of   *REQUIRED
 
@@ -31,13 +40,13 @@ class Source < ApplicationRecord
   validates_format_of     :name, :with => /\A\w+\z/,
                           :message => 'must only consist of word characters'
                           # in particular: must not match Image::PID_SEPARATOR!
-  validates_as_email      :email, allow_blank: true
+                          validates :email, :'pandora/validation/email' => true, allow_blank: true
   validates_presence_of   :emails, if: :can_exploit_rights?
 
-  validates_uniqueness_of :name
+  validates_uniqueness_of :name, case_sensitive: true
 
   # number in megabytes
-  validates :quota, numericality: { only_integer: true, greater_than_or_equal_to: 0, less_than_or_equal_to: 50000, allow_nil: true  }
+  validates :quota, numericality: { only_integer: true, greater_than_or_equal_to: 0, less_than_or_equal_to: 51200, allow_nil: true  }
 
   # Action to be taken before validation
   before_validation :sanitize_email
@@ -48,21 +57,18 @@ class Source < ApplicationRecord
   #############################################################################
 
   def self.create_user_database(user)
-    src = Source.new(
-      :title       => "User database #{user.id}",
-      :kind        => "User database",
-      :type        => "upload",
-      :institution => Institution.find_by!(name: 'prometheus'),
-      :owner_id    => user.id,
-      :keywords    => [Keyword.ensure('Upload')],
-      :quota       => Account::DEFAULT_DATABASE_QUOTA
+    src = Source.create!(
+      name: "user_database_#{user.id}",
+      title:  "User database #{user.id}",
+      kind:  "User database",
+      type:  "upload",
+      institution:  Institution.find_by!(name: 'prometheus'),
+      owner: user,
+      keywords:  [Keyword.find_or_create_by!(title: 'upload')],
+      quota:  Account::DEFAULT_DATABASE_QUOTA
     )
 
-    src.name = "user_database_#{user.id}"
-    src.save!
-
-    user.database = src
-    user.save!
+    user.reload_database
 
     src
   end
@@ -92,6 +98,7 @@ class Source < ApplicationRecord
                                         type: nil,
                                         institution: nil,
                                         is_time_searchable: nil,
+                                        object_count: nil,
                                         record_count: nil)
     source = self.find_by_name(name)
 
@@ -104,17 +111,26 @@ class Source < ApplicationRecord
         kind: kind || '<kind> database',
         type: type || 'dump',
         institution: institution || Institution.find_by!(name: 'prometheus'),
-        keywords: [Keyword.ensure('Index')]
+        keywords: [Keyword.find_or_create_by!(title: 'index')]
       )
       source.name = name
     end
 
     source.is_time_searchable = is_time_searchable if is_time_searchable
+    source.object_count = object_count if object_count
     source.record_count = record_count if record_count
     source.save!
     source.touch
 
     source
+  end
+
+  def self.institutional_sources
+    where(type: 'upload').where.not(kind: 'User database')
+  end
+
+  def self.institutional_source_names
+    institutional_sources.pluck(:name)
   end
 
   def self.active_names
@@ -175,7 +191,11 @@ class Source < ApplicationRecord
       elsif column == 'institution'
         includes(:institution).references(:institution).where("institutions.name LIKE ? or institutions.title LIKE ?", "%#{value}%", "%#{value}%")
       elsif column == 'keywords'
-        includes(:keywords).references(:keywords).where('keywords.title LIKE ?', "%#{value}%")
+        column_name = (I18n.locale == :en ? 'title' : 'title_de')
+
+        includes(:keywords).
+          references(:keywords).
+          where("keywords.#{column_name} LIKE ?", "%#{value}%")
       else
         where("sources.#{column} LIKE ?", "%#{value}%")
       end
@@ -210,7 +230,7 @@ class Source < ApplicationRecord
   end
 
   def self.sort_columns
-    ['name', 'title', 'kind', 'city', 'country', 'institution', 'record_count']
+    ['name', 'title', 'kind', 'city', 'country', 'institution', 'record_count', 'created_at']
   end
 
   #############################################################################
@@ -276,13 +296,11 @@ class Source < ApplicationRecord
   end
 
   def keyword_list
-    keywords.map{|k| k.title}.join("\n")
+    Pandora::KeywordList.new(self).read
   end
 
   def keyword_list=(value)
-    unless value.nil?
-      self.keywords = Keyword.from_keyword_list(value)
-    end
+    Pandora::KeywordList.new(self).write(value)
   end
 
   def human_title
@@ -292,6 +310,14 @@ class Source < ApplicationRecord
   def fulltitle
     department_title = "#{human_title}, #{institution.fulltitle}"
     !institution.campus.blank? ? department_title + ", #{institution.campus.fulltitle}" : department_title
+  end
+
+  def select_option_title
+    if city.blank?
+      title
+    else
+      "#{title}, #{city}"
+    end
   end
 
   def record_module
@@ -313,7 +339,7 @@ class Source < ApplicationRecord
   def sample
     @sample ||= begin
       elastic = Pandora::Elastic.new
-      data = elastic.search [name], {size: 20}
+      data = elastic.sample [name]
       data['hits']['total']['value'] > 0 ? data['hits']['hits'].shuffle : []
     rescue Pandora::Exception => e
       []

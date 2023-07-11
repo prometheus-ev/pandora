@@ -1,99 +1,118 @@
 class Indexing::Sources::Mka < Indexing::SourceSuper
   def records
-    document.xpath('//row')
+    Indexing::XmlReaderNodeSet.new(document, "lido:lido", '.')
   end
 
   def record_id
-    record.xpath('.//id/text()')
+    record.at_xpath('./administrativeMetadata/recordWrap/recordID/text()').to_s
+  end
+
+  def inventory_no
+    record.at_xpath('./descriptiveMetadata/objectIdentificationWrap/repositoryWrap/repositorySet/workID/text()').to_s
   end
 
   def path
-    "servlet/return/#{record.at_xpath('.//id/text()')}.jpg?oid=#{record.at_xpath('.//id/text()')}&dimension=1"
+    "https://api.stiftung-imai.de/api/v1/vid/#{inventory_no}"
   end
 
-  def s_keyword
-    [record.xpath('.//keywords/text()'), record.xpath('.//category/text()')]
-  end
-
-  def s_material
-    [record.xpath('.//copyright/text()'), record.xpath('.//caption/text()'), record.xpath('.//productionformat/text()')]
-  end
-
-  # künstler
+  # Since artist_nested exists, artist is only used for sorting via artist.raw.
   def artist
-    record.xpath('.//author/text()')
+    artist_names.join(' | ')
+  end
+
+  def artist_nested
+    nested_artists = []
+    artists = record.xpath('./descriptiveMetadata/eventWrap/eventSet/event/eventActor/actorInRole')
+    return unless artists
+
+    artists.each do |artist|
+      a = {}
+      a['name'] = artist.xpath('./actor/nameActorSet/appellationValue').map(&:text).uniq.join(', ')
+      a['gnd_url'] = artist.at_xpath("./actor/actorID[@source='Gemeinsame Normdatei (GND)']/text()").to_s
+
+      nested_artists << a
+    end
+
+    nested_artists
   end
 
   def artist_normalized
-    super(artist)
+    super(artist_names)
   end
 
-  # titel
   def title
-    record.xpath('.//headline/text()')
+    record.xpath('./descriptiveMetadata/objectIdentificationWrap/titleWrap/titleSet/appellationValue').text
   end
 
-  # datierung
   def date
-    record.xpath('.//year/text()')
+    record.at_xpath('./descriptiveMetadata/eventWrap/eventSet/event/eventDate/displayDate/text()').to_s
   end
 
-  # land
+  def date_range
+    super(date)
+  end
+
   def country
-    record.xpath('.//countryname/text()')
+    record.at_xpath('./descriptiveMetadata/eventWrap/eventSet/event/eventPlace/displayPlace/text()').to_s
   end
 
-  # gattung
   def genre
-    record.xpath('.//category/text()')
+    genres = record.xpath("./descriptiveMetadata/objectClassificationWrap/objectWorkTypeWrap/objectWorkType/term").map(&:text) + record.xpath("./descriptiveMetadata/objectClassificationWrap/classificationWrap/classification[@type='Sachgruppe']/term").map(&:text)
+
+    genres.uniq
   end
 
-  # produktionsformat
-  def format
-    record.xpath('.//productionformat/text()')
+  def duration
+    duration = record.at_xpath('./descriptiveMetadata/objectIdentificationWrap/objectMeasurementsWrap/objectMeasurementsSet/displayObjectMeasurements')
+
+    duration.text.delete_prefix('Dauer: ') if duration
   end
 
-  # länge
-  def length
-    record.xpath('.//misc/text()')
+  def material_technique
+    record.xpath('./descriptiveMetadata/eventWrap/eventSet/event/eventMaterialsTech/displayMaterialsTech/text()').map(&:text).uniq
   end
 
-  # farbe
-  def colour
-    record.xpath('.//copyright/text()')
-  end
+  def keywords
+    keywords = record.at_xpath('./descriptiveMetadata/objectIdentificationWrap/objectDescriptionWrap/objectDescriptionSet/descriptiveNoteValue')
 
-  # ton
-  def sound
-    record.xpath('.//caption/text()')
-  end
-
-  # schlagwörter
-  def keyword
-    record.xpath('.//keywords/text()')
+    keywords.text.split(', ') if keywords
   end
 
   def location
-    @_institution ||= 'imai - inter media art institute'
+    'Stiftung IMAI - Inter Media Art Institute'
   end
 
   def rights_reproduction
-    location
+    record.at_xpath('./administrativeMetadata/recordWrap/recordRights/rightsType/term/text()').to_s
   end
 
   def rights_work
     if is_any_artist_in_vgbk_artists_list?
       rights_work_vgbk
+    else
+      artist
     end
   end
-
 
   def credits
     location
   end
 
-  # Datensatz in Quelldatenbank
   def source_url
-    "http://89.107.70.240/servlet/objecthandling?oid=#{record.xpath('.//id/text()')}"
+    i_n = inventory_no.delete_prefix('IMAI.W.')
+
+    if i_n.size < 4
+      i_n = i_n.rjust(4, '0')
+    end
+
+    "https://stiftung-imai.de/videos/katalog/medium/#{i_n}"
+  end
+
+  private
+
+  def artist_names
+    artist_nested.map { |artist|
+      artist['name']
+    }
   end
 end

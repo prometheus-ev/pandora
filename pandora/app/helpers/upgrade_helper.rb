@@ -30,7 +30,7 @@ module UpgradeHelper
       options[:header_message] ||= I18n.t('errors.template.header', count: count, model: options[:object_name])
       options[:message] ||= I18n.t('errors.template.body')
 
-      error_messages = objects.sum {|object| object.errors.full_messages.map {|msg| content_tag(:li, msg) } }.join
+      error_messages = objects.sum([]) {|object| object.errors.full_messages.map {|msg| content_tag(:li, msg) } }.join
 
       contents = ''
       contents << content_tag(options[:header_tag] || :h2, options[:header_message]) unless options[:header_message].blank?
@@ -113,7 +113,7 @@ module UpgradeHelper
   def pm_l(time, opts = {})
     return nil unless time
 
-    I18n.localize time, opts
+    I18n.localize time, **opts
   end
 
   def link_to_image_tag(image)
@@ -126,5 +126,40 @@ module UpgradeHelper
                 title: hover_over_image_title(image).html_safe,
                 onerror: "this.setAttribute('data-error', 'true');")
     end
+  end
+
+  def search_with_keyword_path(str)
+    url_for(
+      controller: 'searches',
+      action: 'advanced',
+      'search_field[0]' => 'keyword',
+      'search_value[0]' => str
+    )
+  end
+
+  def pm_titles_with_url(titles)
+    results = titles.map do |title|
+      unless title.include?(',http')
+        next format_content(title, escape: false)
+      end
+
+      unless title.include?("%")
+        next link_to_links(title)
+      end
+
+      arr = title.split('%')
+      str = ""
+      (0..(arr.count - 1)).each do |i|
+        if !i.odd?
+          str << arr[i]
+        else
+          str << link_to_links(arr[i])
+        end
+      end
+      
+      str
+    end
+
+    results.join(" | ").html_safe
   end
 end

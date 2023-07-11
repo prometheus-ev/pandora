@@ -35,6 +35,12 @@ class Indexing::Sources::EichstaettUb < Indexing::SourceSuper
     record.xpath('.//meta[@name="DC.date"]/@content')
   end
 
+  def date_range
+    d = date.to_s.strip
+
+    super(d)
+  end
+
   # institution
   def location
     "#{record.xpath('.//meta[@name="DC.coverage"]/@content')}, #{record.xpath('.//meta[@name="DC.institution"]/@content')}".gsub(/\A, /, '').gsub(/, \z/, '')

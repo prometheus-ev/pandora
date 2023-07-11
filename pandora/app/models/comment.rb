@@ -1,5 +1,4 @@
 class Comment < ApplicationRecord
-
   include Util::Attribution
 
   # REWRITE: presentation functionality is to be removed
@@ -8,6 +7,7 @@ class Comment < ApplicationRecord
 
   belongs_to :image, optional: true
   belongs_to :collection, optional: true
+
   belongs_to :author,  :class_name => 'Account', :foreign_key => 'author_id', optional: true
   belongs_to :parent,  :class_name => 'Comment', :foreign_key => 'parent_id', optional: true
   has_many   :replies, lambda{includes(EAGER_LOADING)}, :class_name => 'Comment', :foreign_key => 'parent_id', :dependent => :destroy
@@ -37,6 +37,10 @@ class Comment < ApplicationRecord
 
   def self.roots
     where(parent_id: nil)
+  end
+
+  def self.not_deleted
+    where('author_id IS NOT NULL')
   end
 
   def commentable
@@ -85,5 +89,4 @@ class Comment < ApplicationRecord
     src = image.source if image
     %w[contact admin].map { |key| src["#{key}_id"] }.include?(author_id) if src
   end
-
 end

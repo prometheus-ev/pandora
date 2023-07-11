@@ -1,14 +1,8 @@
-<p>
-  <strong>
-    Please send by email your verification (student ID or similar)
-    to one of the following local administrators in order to prove
-    your affiliation to your institution!
-  </strong>
-</p>
+<h3>
+  Please send by email your verification (student ID or similar) to one of the following local administrators in order to prove your affiliation to your institution!
+</h3>
 
-<br class="vspace1" />
-
-<fieldset>
+<fieldset style="margin: 10px;">
   <% admins = @institution.active_admins -%>
   <legend><strong>Local administrators:</strong></legend>
   <% if admins.blank? -%>
@@ -31,3 +25,11 @@
     </ul>
   <% end -%>
 </fieldset>
+
+<h3>You are not affiliated with an institution anymore?</h3>
+<ul>
+  <li><%= link_to "Obtain a paid license", type: "paid" %></li>
+</ul>
+
+<h3>Do you want to change the institution?</h3>
+<%= render partial: "license_obtain" %>

@@ -65,7 +65,7 @@
   <tr>
     <th><%= 'Language'.t %></th>
     <td>
-    <% if locale = @user.settings.locale %>
+    <% if locale = @user.account_settings.locale %>
       <%= I18n.t(locale) %>
     <% end %>
     </td>

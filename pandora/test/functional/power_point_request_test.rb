@@ -97,7 +97,7 @@ class PowerPointRequestTest < ActionDispatch::IntegrationTest
     collection = Collection.find_by! title: "John's private collection"
     get "/en/powerpoint/collection/#{collection.id}"
 
-    assert_equal 'application/vnd.openxmlformats-officedocument.presentationml.presentation', response.content_type
+    assert_equal 'application/vnd.openxmlformats-officedocument.presentationml.presentation', response.media_type
     assert_match 'attachment', response.headers['content-disposition']
     assert_match 'filename="presentation.pptx"', response.headers['content-disposition']
   end

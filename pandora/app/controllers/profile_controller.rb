@@ -36,14 +36,17 @@ class ProfileController < ApplicationController
 
     if @user.email_changed?
       @user.email_verified_at = nil
-      @user.deliver_token(:email_confirmation)
-    end
-
-    if @user.research_interest_changed?
-      @user.deliver(:research_interest_check)
     end
 
     if @user.save
+      if @user.saved_change_to_email?
+        @user.deliver_token(:email_confirmation)
+      end
+
+      if @user.saved_change_to_research_interest?
+        @user.deliver(:research_interest_check)
+      end
+
       flash[:notice] = 'Your account has been successfully updated'.t
       redirect_to action: 'show'
     else

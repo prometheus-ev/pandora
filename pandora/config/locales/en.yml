@@ -2,12 +2,45 @@ en:
   en: English
   de: German
 
+  messages:
+    offensive: |
+      Titles and descriptions in historical records sometimes contain
+      discrimatory terms. We opted to mask these terms by default. However, in
+      case you require it for your research endeavors, we provide the option to
+      display the original vocabulary.
+    wikidata_editor: |
+      Use the field below to search Wikidata. The search is triggered by every
+      key stroke. To connect a wikidata entry, select it from the dropdown menu
+      and click "save".
+
+  prompts:
+    sure: Are you sure?
+
+  verbs:
+    hide: hide
+    hide_all: hide all
+    display: display
+    display_all: display all
+    add_a_wikidata_id: add a Wikidata ID
+    edit: edit
+    save: save
+    search_in_prometheus: search this in prometheus
+    delete: delete
+    cancel: cancel
+
+  start_typing: start typing …
+  to_wikidata_item: go to the Wikidata Page
+
   activerecord:
     attributes:
+      source:
+        auto_approve_records: "Auto-approve records (Institutional uploads only)"
       account:
         mode: Access mode
         firstname: First name
         lastname: Last name
+      upload:
+        add_to_index: Show this upload as search result (to all users)
     errors:
       messages:
         record_invalid: "Validation failed: %{errors}"
@@ -283,3 +316,9 @@ en:
   translation_English_to_German: "Translations from English to German"
   # accounts
   has_user_database: "This user has an upload database"
+  # Objects and records
+  '%s_records_dative': "%s records"
+  '%s_objects_dative': "%s objects"
+  'objects_dative': "objects"
+  'records_dative': "records"
+  "All with keyword artigo": "All with ARTigo tags"

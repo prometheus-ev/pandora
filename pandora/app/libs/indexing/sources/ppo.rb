@@ -74,6 +74,12 @@ class Indexing::Sources::Ppo < Indexing::SourceSuper
     record.xpath('.//entstjahr/text()')
   end
 
+  def date_range
+    d = date.to_s.strip
+
+    super(d)
+  end
+
   # datierung_original
   def date_original
     record.xpath('.//entstjahr_orig/text()')

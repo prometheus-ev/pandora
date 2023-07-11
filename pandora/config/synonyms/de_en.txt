@@ -46522,7 +46522,7 @@ für eine zeitung berichten, report for a newspaper
 für ein handelsgeschäft, relating to a trading transaction
 für ein weiteres jahr, for another year
 für etwas anderes halten, mistake for something else
-für etwas anderes halten, mistake for something else 
+für etwas anderes halten, mistake for something else
 für etwas anderes halten, take for sth. else
 für etwas bestimmen, earmark
 für etwas verantwortlich sein, answer for sth
@@ -65233,7 +65233,7 @@ jemanden mit einem preis auszeichnen, award a prize to someone
 jemanden mit einer geldstrafe bestrafen, fine sb.
 jemanden mit einer geldstrafe bestrafen, to fine sb.
 jemanden mit etwas prellen, fob sb off with sth
-jemanden mit fahrverbot belegen, suspend someone's driving licence driver's license 
+jemanden mit fahrverbot belegen, suspend someone's driving licence driver's license
 jemanden mit falschen hoffnungen ködern, dangle hopes before someone
 jemanden mit offenen armen empfangen, welcome someone with open arms
 jemanden mit vertraulichkeit behandeln, treat someone with familiarity
@@ -80841,7 +80841,7 @@ mißbrauchen, abuse
 missbrauchend, abusing
 missbrauchen, misuse
 mißbrauchen, misuse
-mißbrauchen, practise on 
+mißbrauchen, practise on
 missbrauchen, slating
 mißbrauch, misfeasance
 mißbrauch, misusage
@@ -81539,7 +81539,7 @@ mit prüfungsvorhalt, subject to inspection
 mit quasten, tasselled
 mit quecksilber legieren, amalgamate
 mitra auriphrygiata, golden mitre
-mitra, mitre 
+mitra, mitre
 mit randbemerkungen versehen, marginalize
 mit rand versehend, margining
 mit rand versehen, margined
@@ -95361,7 +95361,7 @@ rechtschreibreform, spelling reform
 rechtschreibung, orthography
 rechtschreibung, spelling
 rechtsdenkmal, monument of legal history
-rechts der mitte, right of centre center 
+rechts der mitte, right of centre center
 rechtsdrehung, clockwise rotation
 rechtseinwand, demurrer
 rechtsempfinden, sense of justice
@@ -95918,7 +95918,7 @@ regungslos, motionless
 rehabilitation, rehabilitating
 rehabilitation, rehabilitation
 rehabilitationsföhigkeit, vindicableness
-rehabilitationszentrum, rehabilitation centre center 
+rehabilitationszentrum, rehabilitation centre center
 rehabilitierend, rehabilitating
 rehabilitieren, rehabilitate
 rehabilitierte, rehabilitated
@@ -97688,6 +97688,7 @@ rollkorb, sap-roller
 rollkugel, control ball
 rollschicht, brick-on-edge course
 rollschuh, roll skate
+rollsiegel, cylinder seal, cylinder seals
 rollstühle, wheel chairs
 rollstuhl, roll chair
 rollt ab, unrolls

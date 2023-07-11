@@ -16,12 +16,16 @@
 <% else -%>
   <%= link_to 'Sign up'.t, signup_url(host: request.base_url) %>
   <span class="pale">/</span>
-  <%= link_to 'Log in'.t, :controller => 'sessions', :action => 'new', :host =>  request.base_url %>
+  <%= link_to 'Log in'.t, :controller => 'sessions', :action => 'new', :host => request.base_url %>
 <% end -%>
 </span>
 
 <span>
   <%= render partial: 'help_link' %>
+</span>
+
+<span>
+  <%= link_to 'Feedback'.t, { :controller => 'pandora', :action => 'feedback', :host => request.base_url }, { :title => 'Feedback'.t } %>
 </span>
 
 <% if action_name == 'pandora' && current_user -%>

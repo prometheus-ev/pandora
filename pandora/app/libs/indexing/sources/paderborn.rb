@@ -48,6 +48,12 @@ class Indexing::Sources::Paderborn < Indexing::SourceSuper
     record.xpath('.//Datierung/text()')
   end
 
+  def date_range
+    d = date.to_s.strip
+
+    super(d)
+  end
+
   # standort
   def location
     record.xpath('.//Standort/text()')

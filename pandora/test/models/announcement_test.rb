@@ -4,6 +4,8 @@ class AnnouncementTest < ActiveSupport::TestCase
 
   def setup
     @announcement = valid_announcement
+
+    super
   end
 
   # Validation tests

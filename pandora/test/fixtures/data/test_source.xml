@@ -3,10 +3,10 @@
   <row>
     <id>1</id>
     <object-id>1</object-id>
-    <path>path1</path>
+    <path>path1.jpg</path>
     <artist>Raphael</artist>
-    <title>Title 1</title>
-    <location>Location 1</location>
+    <title>Katze auf Stuhl</title>
+    <location>Florenz</location>
     <date>1919</date>
     <rights-reproduction>Feist, Peter H.  (Wikidata: %Q1250020,https://www.wikidata.org/wiki/Q1250020%)</rights-reproduction>
     <rights-reproduction>CC BY SA 4.0 international,https://creativecommons.org/licenses/by-sa/4.0/legalcode</rights-reproduction>
@@ -14,17 +14,90 @@
   <row>
     <id>2</id>
     <object-id>1</object-id>
-    <path>path2</path>
+    <path>path2.jpg</path>
     <artist>Raphael</artist>
-    <title>Title 2</title>
-    <location>Location 2</location>
+    <title>Katze auf Stuhl (Seitenansicht)</title>
+    <location>Venedig</location>
     <date>2019</date>
   </row>
   <row>
     <id>3</id>
-    <path>path3</path>
-    <artist>Artist 3</artist>
-    <title>Title 3</title>
-    <location>Location 3</location>
+    <object-id>2</object-id>
+    <path>path3.jpg</path>
+    <artist>Donatello</artist>
+    <title>Hamster auf Stuhl</title>
+    <location>Venedig</location>
+  </row>
+  <row>
+    <id>4</id>
+    <object-id>4</object-id>
+    <path>path4.jpg</path>
+    <artist>Donatello</artist>
+    <title>Maus auf Stuhl</title>
+    <location>Venedig</location>
+  </row>
+  <row>
+    <id>5</id>
+    <object-id>5</object-id>
+    <path>path5.jpg</path>
+    <artist>Donatello</artist>
+    <title>Ratte auf Stuhl</title>
+    <location>Venedig</location>
+  </row>
+  <row>
+    <id>6</id>
+    <object-id>6</object-id>
+    <path>path6.jpg</path>
+    <artist>Donatello</artist>
+    <title>Wellensittich auf Stuhl</title>
+    <location>Venedig</location>
+  </row>
+  <row>
+    <id>7</id>
+    <object-id>7</object-id>
+    <path>path7.jpg</path>
+    <artist>Donatello</artist>
+    <title>Schmetterling auf Stuhl</title>
+    <location>Venedig</location>
+  </row>
+  <row>
+    <id>8</id>
+    <object-id>8</object-id>
+    <path>path8.jpg</path>
+    <artist>Donatello</artist>
+    <title>Fliege auf Stuhl</title>
+    <location>Venedig</location>
+  </row>
+  <row>
+    <id>9</id>
+    <object-id>9</object-id>
+    <path>path9.jpg</path>
+    <artist>Donatello</artist>
+    <title>Schlange auf Stuhl</title>
+    <location>Venedig</location>
+  </row>
+  <row>
+    <id>10</id>
+    <object-id>10</object-id>
+    <path>path10.jpg</path>
+    <artist>Donatello</artist>
+    <title>Seestern auf Stuhl</title>
+    <location>Venedig</location>
+  </row>
+  <row>
+    <id>11</id>
+    <object-id>11</object-id>
+    <path>path11.jpg</path>
+    <artist>Donatello</artist>
+    <title>Igel auf Stuhl</title>
+    <location>Venedig</location>
+  </row>
+  <row>
+    <id>12</id>
+    <object-id>12</object-id>
+    <path>path12.jpg</path>
+    <artist>Donatello</artist>
+    <title>Affe auf Stuhl</title>
+    <location>Venedig</location>
   </row>
 </source>

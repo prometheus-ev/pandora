@@ -44,7 +44,7 @@
             <%= l time, format: :long %>
           <% end %>
         <% elsif sort_column == 'credits' %>
-          <%= render partial: 'shared/rights_work', locals: {rights_work: super_image.rights_work} %>
+          <%= render partial: 'images/rights_work', locals: {rights_work: Array.wrap(super_image.rights_work)} %>
         <% elsif super_image.send(sort_column).is_a?(Time) %>
           <%= l super_image.send(sort_column), format: :long %>
         <% else %>
@@ -108,14 +108,19 @@
     <% end %>
   <% end %>
 
-  <%= render partial: 'images/metadata', locals: {
+  <%= render partial: 'images/row_metadata', locals: {
     artists: Array.wrap(super_image.artist),
+    artists_nested: Array.wrap(super_image.display_field('artist_nested')),
     titles: Array.wrap(super_image.title),
+    titles_nested: Array.wrap(super_image.display_field('title_nested')),
     locations: Array.wrap(super_image.location),
+    locations_nested: Array.wrap(super_image.display_field('location_nested')),
     date: super_image.date || "",
     credits: Array.wrap(super_image.credits),
-    rights_work: Array.wrap(super_image.rights_work),
-    rights_reproduction: Array.wrap(super_image.rights_reproduction),
+    credits_nested: Array.wrap(super_image.display_field('credits_nested')),
+    rights_work: Array.wrap(super_image.display_field('rights_work')),
+    rights_reproduction: Array.wrap(super_image.display_field('rights_reproduction')),
+    rights_reproduction_nested: Array.wrap(super_image.display_field('rights_reproduction_nested')),
     source: super_image.source,
     record_id: super_image.pid,
     record_object_id: Array.wrap(super_image.record_object_id),

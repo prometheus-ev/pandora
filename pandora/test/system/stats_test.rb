@@ -8,7 +8,7 @@ class StatsTest < ApplicationSystemTestCase
     # we set the nowhere license as if it had been active at the time of the
     # download
     nowhere = Institution.find_by! name: 'nowhere'
-    nowhere.license.update_attributes(
+    nowhere.license.update(
       valid_from: Date.new(2019, 1, 1),
       expires_at: Date.new(2019, 12, 31)
     )
@@ -59,19 +59,19 @@ class StatsTest < ApplicationSystemTestCase
 
     # create child (of prometheus which has issuer='hbz') and add some stats
     # data
-    office = Institution.create!({
+    office = Institution.create!(
       campus: Institution.find_by(name: 'prometheus'),
       name: 'office',
       title: 'Project Office',
       city: 'Cologne',
       country: 'Germany',
-      license: License.new({
+      license: License.new(
         license_type: LicenseType.find_by!(title: 'library'),
         valid_from: 1.month.ago,
         paid_from: 2.months.from_now.beginning_of_quarter,
         expires_at: 1.month.from_now
-      }, without_protection: true)
-    }, without_protection: true)
+      )
+    )
     SumStats.create!(
       year: 2019, month: 1, day: 17,
       institution_id: office.id,
@@ -96,10 +96,10 @@ class StatsTest < ApplicationSystemTestCase
     # we also include 'nowhere' to check if its only included when licensed
     # properly
     nowhere = Institution.find_by! name: 'nowhere'
-    nowhere.update_attributes(
+    nowhere.update(
       issuer: 'hbz'
     )
-    nowhere.license.update_attributes(
+    nowhere.license.update(
       valid_from: Date.new(2019, 1, 1),
       expires_at: Date.new(2019, 12, 31)
     )
@@ -120,9 +120,9 @@ class StatsTest < ApplicationSystemTestCase
     assert_text '2018_12,nowhere,Nowhere University,0,0,0'
 
     title = 'prometheus - Das verteilte digitale Bildarchiv für Forschung & Lehre'
-    assert_text "2018_12,prometheus,#{title} - Summary,0,0,0"
-    assert_text "2019_01,prometheus,#{title} - Summary,9,7,5"
-    assert_text "2019_02,prometheus,#{title} - Summary,81,70,22"
+    assert_text "2018_12,prometheus,#{title},0,0,0"
+    assert_text "2019_01,prometheus,#{title},9,7,5"
+    assert_text "2019_02,prometheus,#{title},81,70,22"
 
     # remove the license and try again (since prometheus is always licensed,
     nowhere.license.destroy
@@ -131,5 +131,20 @@ class StatsTest < ApplicationSystemTestCase
     submit 'Generate'
 
     assert_no_text 'Nowhere University'
+  end
+
+  test 'newsletter facts' do
+    jdoe = Account.find_by!(login: 'jdoe')
+    jdoe.update_column :newsletter, true
+    subscriber = Account.subscriber_for('someone@example.com')
+    subscriber.update newsletter: true, email_verified_at: Time.now
+
+    login_as 'superadmin'
+    
+    visit '/en/stats/facts'
+    select '2021'
+    submit 'Generate'
+
+    assert_text 'Newsletter subscribers: 2'
   end
 end

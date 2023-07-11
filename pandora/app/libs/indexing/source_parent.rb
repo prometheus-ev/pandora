@@ -63,7 +63,11 @@ class Indexing::SourceParent
 
     if (superclass.name == superclass_name ||
         (superclass.superclass && superclass.superclass.name == superclass_name))
-      self.index_array(sources: [source.name.underscore], create_institutional_uploads: create_institutional_uploads, log: log)
+      self.index_array(
+        sources: [source.name.underscore],
+        create_institutional_uploads: create_institutional_uploads,
+        log: log
+      )
     else
       logger.error "Only sources available in directory app/libs/indexing/sources can be indexed."
     end
@@ -141,13 +145,7 @@ class Indexing::SourceParent
       logger.info remaining_sources.sort
     }
 
-    logger.info ""
-    klapsch_record_ids = filter_records(Indexing::Index.aliases, KLAPSCH_FILTER)
-    logger.info "#{klapsch_record_ids.size} indexed records containing \"#{KLAPSCH_FILTER}\":"
-    klapsch_record_ids.each do |klapsch_record_id|
-      logger.info klapsch_record_id
-    end
-    logger.info ""
+    check_klapsch(Indexing::Index.aliases)
 
     records_indexed_total
   end
@@ -167,6 +165,18 @@ class Indexing::SourceParent
     record_ids
   end
 
+  def self.check_klapsch(alias_names)
+    logger.info ""
+    klapsch_record_ids = filter_records(alias_names, KLAPSCH_FILTER)
+    logger.info "#{klapsch_record_ids.size} indexed records containing \"#{KLAPSCH_FILTER}\":"
+
+    klapsch_record_ids.each do |klapsch_record_id|
+      logger.info klapsch_record_id
+    end
+
+    logger.info ""
+  end
+
   #############################################################################
   # Instance methods
   #############################################################################
@@ -179,6 +189,10 @@ class Indexing::SourceParent
 
   def logger
     @logger ||= Rails.logger
+  end
+
+  def check_klapsch(alias_names)
+    self.class.check_klapsch(alias_names)
   end
 
   # Index a Source subclass. If necessary the index is created.
@@ -289,6 +303,8 @@ class Indexing::SourceParent
     logger.info "-" * 100
     index_image_vectors(name)
     logger.info "-" * 100
+    index_user_metadata(name)
+    logger.info "-" * 100
 
     if @create_institutional_uploads
       Pandora::DilpsImporter.new(name).import
@@ -314,7 +330,7 @@ class Indexing::SourceParent
   # @param index_name [String] The name of the index.
   # @param log [Boolean] Enable the log.
   def index_image_vectors(index_name = "_all", log = false)
-    if File.exists?(vectors_file = File.join(ENV['PM_VECTORS_DIR'], '/', "#{name}.json"))
+    if File.exist?(vectors_file = File.join(ENV['PM_VECTORS_DIR'], '/', "#{name}.json"))
       logger.info "Parsing image vectors file..."
       image_vectors = JSON.parse(File.read(vectors_file))
     else
@@ -355,7 +371,8 @@ class Indexing::SourceParent
           end
         end
 
-        elastic.bulk bulk, query_parameters: {'refresh': true}
+        elastic.bulk bulk
+        elastic.bulk_commit(refresh: true)
         printf "\rImage vectors indexed: #{image_vectors_indexed}" unless Rails.env.test?
       end
     }
@@ -455,6 +472,10 @@ class Indexing::SourceParent
     comments_indexed
   end
 
+  def index_user_metadata(index_name = '_all')
+    Pandora::Indexing::Indexer.index_user_metadata(index_name)
+  end
+
   # Count the records of the source's index.
   #
   # @return [Fixnum] The number of records.
@@ -469,33 +490,33 @@ class Indexing::SourceParent
     Nokogiri::XML(IO.readlines(file)[0]).encoding
   end
 
-  # Get a Nokogiri XML document from a XML file.
+  # Get a Nokogiri XML document from a XML file or read a JSON file.
   #
-  # @return [Nokogiri::XML::Document] The Nokogiri XML document.
+  # @return The Nokogiri XML document or JSON object.
   # @todo Notify user per email if anything goes wrong.
   def document(file = nil)
     if file
-      file_name = Rails.configuration.x.dumps_path + name + "/" + file
+      @file_name = Rails.configuration.x.dumps_path + name + "/" + file
     else
-      file_name = Dir.glob("#{Rails.configuration.x.dumps_path}#{name}.{xml,json}").first
+      @file_name = Dir.glob("#{Rails.configuration.x.dumps_path}#{name}.{xml,json}").first
     end
 
-    if File.extname(file_name) == '.xml'
-      if File.exist?(file_name)
-        @document = xml_document(file_name)
+    if File.extname(@file_name) == '.xml'
+      if File.exist?(@file_name)
+        @document = xml_document(@file_name)
       else
         logger.info "!" * 100
-        logger.info "#{file_name} does not exist."
+        logger.info "#{@file_name} does not exist."
         logger.info "!" * 100
 
         @document = Nokogiri::XML("")
       end
     else
-      if File.exist?(file_name)
-        @document = json_document(file_name)
+      if File.exist?(@file_name)
+        @document = json_document(@file_name)
       else
         logger.info "!" * 100
-        logger.info "#{file_name} does not exist."
+        logger.info "#{@file_name} does not exist."
         logger.info "!" * 100
 
         @document = {}
@@ -517,8 +538,10 @@ class Indexing::SourceParent
       "dresden",
       "test_source_xml_reader",
       "metropolitan",
+      "mka",
       "smk",
-      "paris_musees"
+      "paris_musees",
+      "albertina"
     ]
 
     if xml_reader_source_names.any? { |n| name.include?(n) }
@@ -551,6 +574,7 @@ class Indexing::SourceParent
     Indexing::FieldProcessor.new.process_record_id(record_id, name)
   end
 
+
   private
 
   def process_records(recs, new_index_name, log = false)
@@ -571,7 +595,10 @@ class Indexing::SourceParent
     elsif recs && recs.is_a?(Indexing::XmlReaderNodeSet)
       records_counted = "unknown"
       records_parser_info = ", using Nokogiri::XML::Reader for parsing."
-    elsif recs && recs.is_a?(Array)
+    elsif recs && recs.is_a?(Indexing::Sources::Albertina::RecordEmitter)
+      records_counted = recs.count.to_s
+      records_parser_info = ", using Nokogiri::XML::Reader and specialized emitter for parsing"
+    elsif recs && (recs.is_a?(Array) || recs.is_a?(Hash))
       records_counted = recs.size.to_s
       records_parser_info = ", using JSON for parsing."
     else
@@ -589,6 +616,9 @@ class Indexing::SourceParent
     end
 
     logger.info "Records counted: " + records_counted + records_parser_info
+    preprocess_record_object_ids if is_object? && !@node_name.blank?
+
+    rights_work_artist_updater = Indexing::RightsWorkArtistUpdater.new
 
     recs.each do |record|
       # Assign the record to the record instance variable with the help of the record setter method.
@@ -600,9 +630,12 @@ class Indexing::SourceParent
         # If the records_to_exclude method exist and the record ID is included, we do not index.
       elsif self.respond_to?("records_to_exclude") && records_to_exclude.include?(record_id.to_s)
         @records_excluded += 1
+      elsif self.respond_to?(:exclude?) && self.exclude?
+        @records_excluded += 1
       else
         processed_fields = Indexing::FieldProcessor.new(source: self, field_keys: Indexing::IndexFields.index).run
         validated_fields = Indexing::FieldValidator.new(processed_fields: processed_fields).run
+        validated_fields = rights_work_artist_updater.run(validated_fields)
 
         # Does the processed record ID already exist? If so, then update.
         if @index.client.exists? index: new_index_name, id: validated_fields['record_id']

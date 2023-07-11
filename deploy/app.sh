@@ -23,7 +23,7 @@ function deploy {
   if [[ " $APPS " =~ .*\ pandora\ .* ]]; then
     CURRENT=$CURRENT_PATH/pandora
     remote "echo $RUBY_VERSION > $CURRENT/.ruby-version"
-    remote "ln -sfn $SHARED_PATH/database.pandora.yml $CURRENT/config/database.yml"
+    # remote "ln -sfn $SHARED_PATH/database.pandora.yml $CURRENT/config/database.yml"
     remote "ln -sfn $SHARED_PATH/terms_of_use.en.pdf $CURRENT/public/docs/terms_of_use.en.pdf"
     remote "ln -sfn $SHARED_PATH/terms_of_use.de.pdf $CURRENT/public/docs/terms_of_use.de.pdf"
     remote "ln -sfn $SHARED_PATH/log.pandora $CURRENT/log"
@@ -50,12 +50,13 @@ function deploy {
   remote "touch $CURRENT_PATH/rack-images/tmp/restart.txt"
 
   remote "echo '$COMMIT' > $CURRENT_PATH/BRANCH"
-  remote "echo 'Revision: $REVISION ($COMMIT)' | mail -s 'deployed $DEPLOY_TARGET' $NOTIFY"
+  remote "echo 'Revision: $REVISION ($COMMIT)' | mail -s 'deployed $DEPLOY_TARGET' $NOTIFY" || :
 
   finalize
 }
 
 function configure {
+  source deploy/config.defaults.sh
   source deploy/config.sh
   $1
   source deploy/lib.sh
@@ -66,4 +67,21 @@ function configure {
 export DEPLOY_TARGET=$1
 
 configure $DEPLOY_TARGET
+
+if [ "$DRY_RUN" == "true" ]; then
+  echo "Dry run mode: no deployments were made"
+  echo "--- settings:"
+  echo "REPO: $REPO"
+  echo "PORT: $PORT"
+  echo "KEEP: $KEEP"
+  echo "APPS: $APPS"
+  echo "RUBY_VERSION: $RUBY_VERSION"
+  echo "HOST: $HOST"
+  echo "DEPLOY_TO: $DEPLOY_TO"
+  echo "NOTIFY: $NOTIFY"
+  echo "COMMIT: $COMMIT"
+  echo "---"
+  exit
+fi
+
 deploy

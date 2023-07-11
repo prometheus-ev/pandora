@@ -1,6 +1,8 @@
+require 'pandora/validation/email_validator'
+
 class Account < ApplicationRecord
   include Util::Config
-  include Util::SQL
+  include Util::LegacySql
 
   has_one                 :license,                                                                            :dependent => :destroy
   has_one                 :account_settings,                                     :foreign_key => 'user_id',    :dependent => :destroy, required: false
@@ -9,13 +11,14 @@ class Account < ApplicationRecord
   has_one                 :image_settings,                                       :foreign_key => 'user_id',    :dependent => :destroy, required: false
   has_one                 :search_settings,                                      :foreign_key => 'user_id',    :dependent => :destroy, required: false
   has_one                 :upload_settings,                                      :foreign_key => 'user_id',    :dependent => :destroy, required: false
+
   has_one                 :database, :class_name => 'Source', as: :owner, :foreign_key => 'owner_id', :dependent => :destroy
 
   has_many                :collections,                                          :foreign_key => 'owner_id',   :dependent => :destroy
   has_many                :boxes, lambda{order('position')},                     :foreign_key => 'owner_id',   :dependent => :destroy
   has_many                :payment_transactions,                                 :foreign_key => 'client_id'
   has_many                :invoices,              :through    => 'license'
-  has_many                :contact_sources,       :class_name => 'Source',       :foreign_key => 'contact_id', :dependent => :restrict_with_error
+  has_many                :contact_sources,       :class_name => 'Source',       :foreign_key => 'contact_id'
   has_many                :open_sources,          :class_name => 'Source',       :foreign_key => 'dbuser_id'
   has_many                :tokens, lambda{includes(:client_application).order('authorized_at DESC')}, :class_name => 'OauthToken',   :foreign_key => 'user_id',    :dependent => :destroy
 
@@ -23,7 +26,8 @@ class Account < ApplicationRecord
   belongs_to              :institution, optional: true
   belongs_to              :creator,               :class_name => 'Account',      :foreign_key => 'creator_id', optional: true
 
-  has_and_belongs_to_many :roles,                                                :uniq => true
+  has_many :account_roles
+  has_many :roles, through: :account_roles
 
   has_and_belongs_to_many :admin_institutions,    :class_name => 'Institution',  :uniq => true
   has_and_belongs_to_many :admin_sources,         :class_name => 'Source',       join_table: "admins_sources",  :uniq => true
@@ -95,16 +99,11 @@ class Account < ApplicationRecord
   validates_length_of       :login, :within => 3..99
   validates_with Pandora::Validation::UserName
 
-  validates_as_email        :email, :unless => :anonymous?
+  validates :email, :'pandora/validation/email' => true, :unless => :anonymous?
 
   validates_uniqueness_of   :login, :email, :case_sensitive => false,
                             :unless => :anonymous?
 
-
-  # Callback method before saving object state
-  before_save       :encrypt_password
-  # Calback method before validation
-  before_validation :sanitize_email, :ensure_settings
 
   IPUSER_LOGIN = 'campus'.freeze
   DBUSER_LOGIN = 'source'.freeze
@@ -126,13 +125,6 @@ class Account < ApplicationRecord
   BAN_DURATION = 10.minutes
 
   FILTERS = %w[active pending expired guest].freeze
-
-  HASH_ITERATIONS = !(shi = SECRETS[:hash_iterations].freeze).blank? ? shi :
-    !Rails.env.production? ? 10_000 : raise('HASH_ITERATIONS missing')
-
-  HASH_FUNCTION   = !(shf = SECRETS[:hash_function].freeze).blank? ? shf :
-    !Rails.env.production? ? 'sha1' : raise('HASH_FUNCTION missing')
-
 
   def account_settings
     super || build_account_settings(start_page: 'searches')
@@ -167,6 +159,12 @@ class Account < ApplicationRecord
     :upload_settings
   )
 
+  # Callback method before saving object state
+  before_save       :encrypt_password
+  # Calback method before validation
+  before_validation :sanitize_email, :ensure_settings
+  after_validation :reset_notified_at
+
   def ensure_settings
     account_settings
     collection_settings
@@ -175,6 +173,13 @@ class Account < ApplicationRecord
     upload_settings
   end
 
+  def reset_notified_at
+    future = (mode == 'guest' ? 1.week.from_now : 1.month.from_now)
+    
+    if expires_at && expires_at > future
+      self.notified_at = nil
+    end
+  end
 
   def self.authenticate(login_or_email, password)
     return nil if login_or_email.blank? || password.blank?
@@ -246,10 +251,8 @@ class Account < ApplicationRecord
     PBKDF2.new(
       :password      => password,
       :salt          => salt,
-      :iterations    => HASH_ITERATIONS,
-      # REWIRTE: seems to modify the string but its frozen
-      # :hash_function => HASH_FUNCTION
-      :hash_function => HASH_FUNCTION.dup
+      :iterations    => ENV['PM_HASH_ITERATIONS'].to_i,
+      :hash_function => ENV['PM_HASH_FUNCTION'].dup
     ).hex_string if password && salt
   end
 
@@ -269,9 +272,79 @@ class Account < ApplicationRecord
   end
 
   def self.count_active_users
-    # REWRITE: use new ar interface
-    # count(conditions_for_active_user)
-    Upgrade.conds_to_scopes(self, conditions_for_active_user).count
+    user_role_id = Role.find_by!(title: 'user').id
+    role_ids = Role.where(title: ['dbadmin', 'dbuser']).pluck(:id).map{|id| id.to_s}.join(',')
+    institution_ids = Institution.licensed_ids(true).map{|id| id.to_s}.join(',')
+    
+    joins('JOIN accounts_roles ar ON ar.account_id = accounts.id').
+    joins('JOIN roles r ON r.id = ar.role_id').
+    where(
+      "
+        (
+          (ar.role_id = %d)
+          AND
+          (
+            (
+              (
+                (
+                  institution_id IS NULL
+                  OR
+                  (
+                    ar.role_id IN (%s)
+                    AND EXISTS(
+                      (
+                        SELECT 1
+                        FROM sources
+                        WHERE sources.record_count > 0 AND sources.admin_id = accounts.id
+                        LIMIT 1
+                      )
+                      UNION
+                      (
+                        SELECT 1
+                        FROM sources
+                        WHERE sources.record_count > 0 AND sources.contact_id = accounts.id
+                        LIMIT 1
+                      )
+                      UNION
+                      (
+                        SELECT 1
+                        FROM sources
+                        WHERE sources.record_count > 0 AND sources.dbuser_id = accounts.id
+                        LIMIT 1
+                      )
+                    )
+                  )
+                  OR
+                  accounts.institution_id IN (%s)
+                )
+                AND (disabled_at IS NULL)
+              )
+              AND (status = 'activated')
+            )
+            AND
+            (
+              NOT (
+                expires_at IS NOT NULL
+                AND expires_at <= '%s'
+                AND NOT EXISTS(
+                  SELECT 1
+                  FROM accounts_roles
+                  WHERE
+                    (`accounts_roles`.account_id = `accounts`.id)
+                    AND
+                    (`accounts_roles`.role_id IN (9))
+                  LIMIT 1
+                )
+              )
+            )
+          )
+        )
+      ",
+      user_role_id,
+      role_ids,
+      institution_ids,
+      Time.now.utc
+    ).count
   end
 
   def self.subscribed?(email)
@@ -289,6 +362,11 @@ class Account < ApplicationRecord
         lastname: 'Subscriber',
         roles: [Role.find_by(title: 'subscriber')],
         institution: Institution.find_by(name: 'prometheus'),
+        # the flag is used to flag "normal" users as recipients, it is not used
+        # for "subscription-only" accounts (actually, that's wrong, it IS used
+        # to flag all recipients for the newsletter but for subscription-only
+        # accounts, the flag is only set after the email address has been
+        # confirmed)
         newsletter: false
       )
     end
@@ -432,6 +510,14 @@ class Account < ApplicationRecord
   def user_admin_institutions(other = nil)
     results = (admin_privileges_on?(other) ? Institution.all : admin_institutions)
     results.order(:name).uniq
+  end
+
+  def user_admin_licensed_institutions(other = nil)
+    user_admin_institutions = user_admin_institutions(other)
+    prometheus = Institution.find_by!(name: 'prometheus')
+    user_admin_institutions = user_admin_institutions.to_a.select{|i| i.license || (i.campus && i.campus.license)}
+    user_admin_institutions << prometheus if admin_or_superadmin?
+    user_admin_institutions
   end
 
   attr_accessor :needs_research_interest
@@ -596,14 +682,22 @@ class Account < ApplicationRecord
         case verb
           when :read   then true
           when :delete then false
-        else              admin? || object.source_admins.include?(self) || object.contact == self
+        else admin? || object.source_admins.include?(self) || object.contact == self
         end
       when Image, ElasticRecordImage
         if verb == :read
-          (!dbuser? || open_sources.include?(object.source)) &&
-            (object.upload_record? ? object.upload.approved_record || object.upload.database && (object.upload.database.owned_by?(self) || 
-              self.admin_institutions.include?(object.upload.database.owner) || self.admin_sources.include?(object.upload.database)) || 
-              admin_or_superadmin? : true)
+          return false if dbuser? && !open_sources.include?(object.source)
+          return true unless object.upload_record?
+          return true if object.upload.approved_record
+          return true if admin_or_superadmin?
+
+          if object.upload.database
+            return true if object.upload.database.owned_by?(self)
+            return true if self.admin_institutions.include?(object.upload.database.owner)
+            return true if self.admin_sources.include?(object.upload.database)
+          end
+
+          false
         elsif verb == :comment
           user? || superadmin? || admin?
         end
@@ -622,6 +716,8 @@ class Account < ApplicationRecord
         admin?
       when Upload
         object.database.owned_by?(self) or admin_or_superadmin?
+      when Keyword
+        admin_or_superadmin?
       else
         false
     end
@@ -730,15 +826,6 @@ class Account < ApplicationRecord
     where('login <> ? AND login <> ?', IPUSER_LOGIN, DBUSER_LOGIN)
   end
 
-  def self.conditions_for_not_anonymous
-    Pandora.deprecate "should not be used anymore, refactor!"
-    { :conditions => ['login <> ? AND login <> ?', IPUSER_LOGIN, DBUSER_LOGIN] }
-  end
-
-  def self.conditions_for_activated
-    { :conditions => ['status = ?', 'activated'] }
-  end
-
   def expired?
     _expired? || !licensed?
   end
@@ -760,65 +847,12 @@ class Account < ApplicationRecord
     dbadmin?
   end
 
-  def self.conditions_for_expired(at = Time.now.utc, op = :<=)
-    unless (role_ids = [*Role.find_by!(title: 'dbadmin')].map(&:id)).empty?
-      qtn, rtn = quoted_table_name, connection.quote_table_name('accounts_roles')
-
-      role_condition = " AND NOT EXISTS (SELECT 1 FROM #{rtn} WHERE %s LIMIT 1)" % sql_and(
-        "#{rtn}.account_id = #{qtn}.id", sql_in("#{rtn}.role_id", role_ids)
-      )
-    end
-
-    # the records will be returned read-only due to joins being a string. pass
-    # ':readonly => false' to override. BUT: collides with valid count options.
-    { :conditions => [
-      "expires_at IS NOT NULL AND expires_at #{op} ?#{role_condition}", at
-    ], :joins => [:roles] }
-  end
-
   def not_expired?
     !_expired?
   end
 
-  def self.conditions_for_not_expired
-    expired_options    = conditions_for_expired.dup
-    expired_conditions = expired_options.delete(:conditions).dup
-
-    expired_options.update_conditions(
-      ["NOT (#{expired_conditions.shift})", *expired_conditions]
-    )
-  end
-
   def licensed?
     active_dbadmin? || active_dbuser? || mode != 'institution' || !institution || institution.licensed?
-  end
-
-  def self.conditions_for_licensed
-    qtn, stn = quoted_table_name, Source.quoted_table_name
-
-    role_ids = Role.where(title: ['dbadmin', 'dbuser']).pluck(:id)
-    institution_ids = Institution.licensed_ids(true)
-
-    # subquery to determine a DB admin's/user's active sources
-    role_sub = "SELECT 1 FROM #{stn} WHERE %s LIMIT 1" % sql_and(
-      sql_or(*%w[admin contact dbuser].map { |i| "#{stn}.#{i}_id = #{qtn}.id" }),
-      "#{stn}.record_count > 0"
-    )
-
-    role_condition = role_ids.empty? ? '' :
-      " OR (#{sql_in('accounts_roles.role_id', role_ids)} AND EXISTS (#{role_sub}))"
-
-    institution_condition = institution_ids.empty? ? '' :
-      " OR #{sql_in(:institution_id, institution_ids)}"
-
-    { :conditions => "institution_id IS NULL#{role_condition}#{institution_condition}",
-      :joins => [:roles] }
-  end
-
-  def self.conditions_for_user
-    # REWRITE: this is a simple name based finder. Use that instead
-    # { :conditions => ['accounts_roles.role_id = ?', Role[:user].id], :joins => [:roles] }
-    { :conditions => ['accounts_roles.role_id = ?', Role.find_by(title: 'user').id], :joins => [:roles] }
   end
 
   def active?
@@ -829,15 +863,18 @@ class Account < ApplicationRecord
     !active?
   end
 
-  # Conditions for an account being considered active
-  def self.conditions_for_active
-    conditions_for_licensed.merge_conditions(conditions_for_enabled).
-                            merge_conditions(conditions_for_activated).
-                            merge_conditions(conditions_for_not_expired)
+  def self.expire_before(ts = nil)
+    ts ||= 1.week.from_now
   end
-  #
-  ###
 
+  def self.expire
+    where('expires_at IS NOT NULL')
+  end
+
+  def self.with_status
+    where("status IS NOT NULL AND status <> ''")
+  end
+  
   def self.enabled
     where('disabled_at IS NULL')
   end
@@ -863,12 +900,23 @@ class Account < ApplicationRecord
     ', name)
   end
 
-  def self.expired(at = nil, op = :<=)
+  def self.expired(at = nil)
     where('expires_at IS NOT NULL AND expires_at <= ?', at || Time.now.utc).
     without_role('dbadmin')
   end
 
-  def self.not_expired(at = nil)
+  # return a scope representing accounts with upcoming expiry
+  # @param advance [Integer] seconds in advance to consider account 'expiring'
+  # @return [ActiveRecord::Relation] the scope representing the accounts
+  def self.upcoming_expiry(advance)
+    now = Time.now.utc
+
+    # now > expires_at - advance && expires_at > now
+
+    expire.where('expires_at < ? AND expires_at > ?', now + advance, now)
+  end
+
+  def self.not_expired
     where.not(id: expired)
   end
 
@@ -878,6 +926,10 @@ class Account < ApplicationRecord
 
   def self.guests
     where(mode: 'guest')
+  end
+
+  def self.non_guests
+    where("mode <> 'guest'")
   end
 
   def self.anonymous
@@ -899,14 +951,6 @@ class Account < ApplicationRecord
     user? && active?
   end
 
-  def self.conditions_for_active_user
-    conditions_for_user.merge_conditions(conditions_for_active)
-  end
-  #
-  ###
-
-  ###
-  #
   def disabled?
     disabled_at
   end
@@ -922,12 +966,15 @@ class Account < ApplicationRecord
     save validate: false
   end
 
-  def self.conditions_for_enabled
-    { :conditions => 'disabled_at IS NULL' }
+  def self.stale_signups(date = 1.week.ago)
+    not_anonymous.where("
+      (lastname != 'Subscriber' AND status IS NULL AND created_at < :ts) OR
+      (lastname = 'Subscriber' AND NOT newsletter AND created_at < :ts)
+    ", ts: date.utc)
   end
 
-  def self.stale_signups(date = 1.week.ago)
-    not_anonymous.where('status IS NULL AND created_at < ?', date.utc)
+  def self.not_notified
+    where('notified_at IS NULL')
   end
 
   def paid!
@@ -955,23 +1002,19 @@ class Account < ApplicationRecord
 
   def email_verified?
     #email_verified_at && email_verified_at > 1.year.ago.utc
-    email_verified_at
+    !!email_verified_at
   end
 
   def email_verified!
-    update_attribute(:email_verified_at, Time.now.utc)
+    update_column(:email_verified_at, Time.now.utc)
 
     if !status?
-      update_attributes(status: 'pending')
+      update_column(:status, 'pending')
     end
   end
 
   def self.email_verified
     where('email_verified_at IS NOT NULL')
-  end
-
-  def self.conditions_for_email_verified
-    { :conditions => 'email_verified_at IS NOT NULL' }
   end
 
   # Have the terms of used changed since being accepted by the user?
@@ -1003,7 +1046,7 @@ class Account < ApplicationRecord
   end
 
   def notified!
-    update_attribute(:notified_at, Time.now.utc)
+    update_column(:notified_at, Time.now.utc)
   end
 
   def remember_token?
@@ -1030,15 +1073,6 @@ class Account < ApplicationRecord
     self.remember_token = nil
 
     save validate: false
-  end
-
-  def token_auth(reset = false)
-    reset_password! if reset
-    [t = (reset ? 1.hour : 1.day).from_now.utc.to_i, magic_encrypt(t)]
-  end
-
-  def magic_encrypt(timestamp)
-    sha1("#{login}--#{email}--#{timestamp}")
   end
 
   def reset_password?
@@ -1092,25 +1126,35 @@ class Account < ApplicationRecord
     creator_id
   end
 
-  def settings(type = 'account')
-    @settings ||= Settings.for(self)
-    @settings[type.to_s]
-  end
+  # def settings(type = 'account')
+  #   @settings ||= Settings.for(self)
+  #   @settings[type.to_s]
+  # end
 
   def locale
-    settings.locale
+    account_settings.locale
   end
 
   def locale=(locale)
-    settings.assign_attributes(locale: locale)
+    account_settings.assign_attributes(locale: locale)
   end
 
-  def deliver(what, *args)
-    AccountMailer.send(what, self, *args).deliver_now
+  def deliver(what, **args)
+    AccountMailer.with(user: self, **args).send(what).deliver_now
   end
 
   def deliver_token(what, reset = false)
-    deliver(what, *token_auth(reset))
+    timestamp, token = token_auth(reset)
+    deliver(what, timestamp: timestamp, token: token)
+  end
+
+  def token_auth(reset = false)
+    reset_password! if reset
+    [t = (reset ? 1.hour : 1.day).from_now.utc.to_i, magic_encrypt(t)]
+  end
+
+  def magic_encrypt(timestamp)
+    sha1("#{login}--#{email}--#{timestamp}")
   end
 
   def database_quota_bytes
@@ -1141,8 +1185,6 @@ class Account < ApplicationRecord
     # NOTE: This prevents login, since crypted_password != digest(password)
     def reset_password!
       reset_tokens
-      # REWRITE, this method deosn't exist anymore
-      # update_attribute_with_validation_skipping(:crypted_password, '')
       update_column :crypted_password, ''
     end
 

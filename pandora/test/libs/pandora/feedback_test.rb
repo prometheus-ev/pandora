@@ -6,10 +6,10 @@ class Pandora::FeedbackTest < ActiveSupport::TestCase
       name: 'Paul'
     )
     assert_not signup.valid?
-    assert_includes signup.errors[:base], 'Your email was empty...'
+    assert_includes signup.errors[:base], 'Your message was empty...'
 
     signup.email = 'not an email'
     assert_not signup.valid?
-    assert_includes signup.errors[:base], 'Your message was empty...'
+    assert_includes signup.errors[:base], 'Your e-mail address is invalid'
   end
 end

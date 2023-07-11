@@ -1,16 +1,18 @@
 class ApplicationController < ActionController::Base
-  if Rails.env.production?
-    rescue_from StandardError, with: :internal_server_error
+  rescue_from StandardError, with: :internal_server_error
 
+  if Rails.env.production?
     protect_from_forgery with: :null_session
   else
     protect_from_forgery with: :exception
   end
 
-  rescue_from ActiveRecord::RecordNotFound, with: :not_found
+  rescue_from ActiveRecord::RecordNotFound do |exception|
+    not_found 'not found'
+  end
 
   include OauthSystem
-  include Util::ActionAPI
+  include Util::ActionApi
   # REWRITE: we include this ourselves now, without calling the gem's init.rb
   include BrainBusterSystem
 
@@ -37,7 +39,7 @@ class ApplicationController < ActionController::Base
   before_action :store_request
   before_action :set_locale
   before_action :set_url_options
-  before_action :store_location,   :except => [:suggest_keywords, :delete]
+  # before_action :store_location,   :except => [:suggest_keywords, :delete]
   before_action :login_required
   before_action :verify_account_signup_complete
   before_action :verify_account_email
@@ -54,6 +56,7 @@ class ApplicationController < ActionController::Base
 
     # custom start pages
     'search'             => { :controller => 'searches' },
+    'searches'           => { :controller => 'searches' },
     'advanced_search'    => { :controller => 'searches', :action => 'advanced' },
     'collections'        => { :controller => 'collections' },
     'public_collections' => { :controller => 'collections', :action => 'public' },
@@ -70,9 +73,11 @@ class ApplicationController < ActionController::Base
                 :back_or_default, :safe_params, :count_for_section, :section_partial,
                 :section_id, :restrict_to, :page, :per_page,
                 :view, :sort_column, :sort_direction, :sort_inverse,
-                :current_user, :search_column, :zoom, :pm_labelled_counter,
-                :admin_or_superadmin?, :allowed?
-
+                :current_user, :search_column, :zoom,
+                :pm_labelled_counter,
+                :pm_labelled_delimited_counter,
+                :admin_or_superadmin?, :allowed?,
+                :user_login, :user_institution, :user_is_personalized
 
   def self.initialize_me!  # :nodoc:
     unless name == 'ApplicationController'
@@ -200,6 +205,29 @@ class ApplicationController < ActionController::Base
       end
     end
 
+    def user_login
+      return nil unless current_user
+
+      current_user.login
+    end
+
+    def user_institution
+      return nil unless current_user
+      return nil unless current_user.institution
+
+      current_user.institution.name
+    end
+
+    def user_is_personalized
+      return false unless current_user
+
+      !current_user.ipuser?
+    end
+
+    def pandora_feedback_request?
+      controller_name == 'pandora' && action_name == 'feedback'
+    end
+
     def api_request?
       request.path.match?(/^\/(api|pandora\/api)\//)
     end
@@ -223,52 +251,20 @@ class ApplicationController < ActionController::Base
     end
 
     def control_access
-      permission_denied unless permit?(self.class.access_control(action_name))
-    end
-
-    def permission_denied(warning = nil)
-      respond_to do |format|
-        format.html do
-          link = helpers.link_to(human_location, request.path)
-          flash[:warning] = [
-            "You don't have privileges to access this %s." / link,
-            'Please log in with a qualified account.'.t
-          ].join(' ').html_safe
-
-          redirect_to login_path
-        end
-      end
-
-      false
+      forbidden unless permit?(self.class.access_control(action_name))
     end
 
     def login_required
-      access_denied unless current_user
+      unauthorized unless current_user
     end
 
-    def access_denied
-      respond_to do |format|
-        format.json do
-          response.headers['WWW-Authenticate'] = 'Basic realm="prometheus image archive"'
-          render json: {message: 'Please log in first'.t}, status: 401
-        end
-        format.xml do
-          response.headers['WWW-Authenticate'] = 'Basic realm="prometheus image archive"'
-          render xml: {message: 'Please log in first'.t}, status: 401
-        end
-        format.blob do
-          render body: nil, status: 401
-        end
-        format.js do
-          url = url_for(controller: 'sessions', action: 'new')
-          render(
-            plain: "location.href = '#{url}'",
-            content_type: 'text/javascript'
-          )
-        end
-        format.any(:html, :zip) do
-          # flash.keep
 
+    # generic rendering
+
+    # status 401, used to be access_denied
+    def unauthorized
+      respond_to do |format|
+        format.any(:html, :zip) do
           link = helpers.link_to human_location, request.path
           flash[:prompt] = [
             'Please log in first.'.t,
@@ -280,13 +276,53 @@ class ApplicationController < ActionController::Base
           rt = (request.url == locale_root_url ? nil : request.url)
           redirect_to controller: 'sessions', action: 'new', return_to: rt
         end
+        format.json do
+          response.headers['WWW-Authenticate'] = 'Basic realm="prometheus image archive"'
+          render json: {message: 'Please log in first'.t}, status: 401
+        end
+        format.xml do
+          response.headers['WWW-Authenticate'] = 'Basic realm="prometheus image archive"'
+          render xml: {message: 'Please log in first'.t}, status: 401
+        end
+        format.blob do
+          render body: nil, status: 401
+        end
+        # TODO: why do we still need this?
+        format.js do
+          url = url_for(controller: 'sessions', action: 'new')
+          render(
+            plain: "location.href = '#{url}'",
+            content_type: 'text/javascript'
+          )
+        end
         format.any do
           render plain: 'unauthorized', status: 401
         end
       end
     end
 
-    def not_found
+    # 403, used to be permission_denied
+    def forbidden(message = nil)
+      respond_to do |format|
+        format.html do
+          link = helpers.link_to(human_location, request.path)
+          flash[:warning] = [
+            "You don't have privileges to access this %s." / link,
+            'Please log in with a qualified account.'.t
+          ].join(' ').html_safe
+
+          redirect_to login_path
+        end
+        format.json{ render json: {message: message}, status: 403 }
+        format.xml{ render xml: {message: message}, status: 403 }
+        format.any do
+          format.all{ render plain: 'forbidden', status: 403 }
+        end
+      end
+    end
+
+    # 404
+    def not_found(message = 'not found')
       respond_to do |format|
         format.html do
           @no_submenu = true
@@ -296,18 +332,31 @@ class ApplicationController < ActionController::Base
             status: 404
           )
         end
-        format.json{ render json: {message: 'not found'}, status: 404 }
-        format.xml{ render xml: {message: 'not found'}, status: 404 }
-        format.all{ render plain: 'not found', status: 404 }
+        format.json{ render json: {message: message}, status: 404 }
+        format.xml{ render xml: {message: message}, status: 404 }
+        format.all{ render plain: message, status: 404 }
       end
     end
 
+    # 422
+    def unprocessable_entity(message = 'unprocessable entity')
+      respond_to do |format|
+        format.json{ render json: {message: message}, status: 422 }
+        format.xml{ render xml: {message: message}, status: 422 }
+      end
+    end
+
+    # 500
     def internal_server_error(exception)
-      if ENV['PM_EXCEPTION_RECIPIENTS'].present?
-        ExceptionNotifier.notify_exception(
-          exception,
-          env: request.env, data: { message: 'was doing something wrong' }
-        )
+      # we notify in any env if recipients are defined
+      notify(exception)
+
+      production_mode = 
+        Rails.env.production? ||
+        ENV['PM_PRODUCTION_ERROR_HANDLING'] == 'true'
+
+      unless production_mode
+        raise exception
       end
 
       respond_to do |format|
@@ -320,9 +369,25 @@ class ApplicationController < ActionController::Base
           )
         end
         format.json{ render json: {message: 'internal server error'}, status: 500 }
-        format.xml{ render xml: {message: 'internal_server_error'}, status: 500 }
+        format.xml{ render xml: {message: 'internal server error'}, status: 500 }
         format.all{ render plain: 'internal server error', status: 500 }
       end
+    end
+
+    def notify(exception)
+      return unless ENV['PM_EXCEPTION_RECIPIENTS'].present?
+
+      skip_for = [
+        ActionController::BadRequest,
+        ActionController::UnknownFormat,
+        ActionDispatch::Http::MimeNegotiation::InvalidType
+      ]
+      return if skip_for.any?{ |s| exception.is_a?(s) }
+
+      ExceptionNotifier.notify_exception(
+        exception,
+        env: request.env, data: { message: 'was doing something wrong' }
+      )
     end
 
     def log_user
@@ -337,6 +402,9 @@ class ApplicationController < ActionController::Base
       end
       Rails.logger.info who
     end
+
+
+    # request accessors
 
     # REWRITE: we add page and per_page to access pagination parameters in a
     # uniform manner (when needed)
@@ -364,7 +432,7 @@ class ApplicationController < ActionController::Base
     end
 
     def sort_direction
-      if v = (params[:direction] || sort_direction_default) 
+      if v = (params[:direction] || sort_direction_default)
         v = v.downcase
         ['asc', 'desc'].include?(v) ? v : sort_direction_default
       end
@@ -407,34 +475,6 @@ class ApplicationController < ActionController::Base
       false
     end
 
-    # REWRITE: we use these to simplify rendering api errors
-    def render_api(status, data)
-      respond_to do |format|
-        format.json {render json: data, status: status}
-        format.xml {render xml: data, status: status}
-      end
-    end
-
-    def render_api_401(message)
-      render_api 401, 'message' => message
-    end
-
-    def render_api_403(message)
-      render_api 403, 'message' => message
-    end
-
-    def render_api_404(message)
-      render_api 404, 'message' => message
-    end
-
-    def render_api_422(message)
-      render_api 422, 'message' => message
-    end
-
-    def render_api_200(message)
-      render_api 200, 'message' => message
-    end
-
     def set_url_options
       ApplicationMailer.default_url_options = default_url_options
       PaymentTransaction.root_url = locale_root_url
@@ -447,13 +487,13 @@ class ApplicationController < ActionController::Base
         host: request.host,
         port: request.port,
         protocol: request.protocol,
-        locale: params[:locale] || I18n.default_locale
+        locale: current_locale
       }
     end
 
     # logged-in users don't need to pass captcha
     def captcha_passed?
-      current_user && !current_user.dbuser? || super
+      current_user && !current_user.dbuser?
     end
 
     # builds a url to the home page specified in the env var PM_HOME_URL
@@ -462,8 +502,14 @@ class ApplicationController < ActionController::Base
       "#{ENV['PM_HOME_URL']}/#{I18n.locale}/#{path}"
     end
 
-    def public_path_for(relative_path, only_path = true)
-      File.join(only_path ? root_path(locale: nil) : root_url(locale: nil), relative_path)
+    def public_path_for(relative_path, only_path = true, host: false)
+      path = File.join(only_path ? root_path(locale: nil) : root_url(locale: nil), relative_path)
+
+      if host
+        path = request.base_url + path
+      end
+
+      return path
     end
 
     # call-seq:
@@ -516,19 +562,30 @@ class ApplicationController < ActionController::Base
     #
     # Stores the URL of the current request in the session (as +return_to+).
     # We can return there by calling #redirect_back_or_default.
-    def store_location
-      if session_enabled? && request.get? && !request.xhr?
-        return if format = params[:format] and format != 'html'
+    # def store_location
+    #   if session_enabled? && request.get? && !request.xhr?
+    #     return if format = params[:format] and format != 'html'
 
-        session[:previous_return_to] = session[:return_to]
-        session[:return_to]          = location || request.env['HTTP_REFERER']
-      end
+    #     session[:previous_return_to] = session[:return_to]
+    #     session[:return_to]          = location || request.env['HTTP_REFERER']
+    #   end
+    # end
+
+    def user_root_path
+      return nil unless current_user
+
+      opts = DEFAULT_LOCATION[current_user.account_settings.start_page]
+      locale = current_user.locale || default_locale
+
+      opts.blank? ?
+        locale_root_path(locale: locale) :
+        opts.merge(locale: locale)
     end
 
     def default_location(key = :redirect)
       result = nil
 
-      if key == :start && current_user && !(current_user_settings_start_page = DEFAULT_LOCATION[current_user.settings.start_page]).blank?
+      if key == :start && current_user && !(current_user_settings_start_page = DEFAULT_LOCATION[current_user.account_settings.start_page]).blank?
         result = current_user_settings_start_page
       else
         result = DEFAULT_LOCATION[key]
@@ -567,28 +624,14 @@ class ApplicationController < ActionController::Base
     #
     # Redirects to the <tt>step</tt>th most recent URL stored in the session by
     # #store_location or to the passed default.
-    def redirect_back_or_default(*where)
-      redirect_to back_or_default(*where)
-    end
+    # def redirect_back_or_default(*where)
+    #   redirect_to back_or_default(*where)
+    # end
 
     def safe_params(*unsafe)
       overrides = unsafe.extract_options!
       output_params = params.except(*UNSAFE_OPTIONS + unsafe).merge(overrides)
 
-      # Dirty evil hack to substitude athene action names with their routes in generated links
-      if output_params['controller'] == 'search'
-        if output_params['action'] == 'athene_search'
-          output_params['action'] = 'search'
-        elsif output_params['action'] == 'advanced_search'
-          output_params['action'] = 'advanced_search'
-        end
-      # REWRITE: doesn't seem to be reached
-      elsif output_params['controller'] == 'images' && output_params['action'] == 'show_athene_search'
-        output_params['action'] = 'show'
-      end
-
-      # REWRITE: needs permit! not to clash with .to_h later, check if it is
-      # really safe
       output_params.permit!
     end
 
@@ -679,29 +722,6 @@ class ApplicationController < ActionController::Base
       [left_neighbour, right_neighbour, session[:neighbourhood]]
     end
 
-    def get_suggestions(klass, options = {})
-      @phrase, @matches = params[:q], []
-      @phrases = @phrase.split
-
-      return if @phrases.empty?
-
-      clauses, args = [], []
-      clause = options.delete(:clause)
-
-      @phrases.each { |phrase|
-        clauses << clause
-        clause.count('?').times { args << "%#{phrase}%" }
-      }
-
-      conds = options.
-        merge(:readonly => true).
-        merge_conditions([clauses.join(' AND '), *args])
-      scope = Upgrade.conds_to_scopes(klass, conds)
-      @matches = scope.to_a
-
-      yield @matches if block_given?
-    end
-
     def restrict_to(*roles)
       yield if current_user && permit?(roles.join('|'))
     end
@@ -749,10 +769,6 @@ class ApplicationController < ActionController::Base
       end
     end
 
-    def set_locale(locale = nil)
-      I18n.locale = params[:locale] || default_locale
-    end
-
     def determine_layout
       'application' unless request.xhr?
     end
@@ -765,34 +781,8 @@ class ApplicationController < ActionController::Base
       request.session_options
     end
 
-    def format_for_api(status, message = nil, api_headers = {}, &block)
-      respond_to do |format|
-        api = lambda {
-          api_headers.each { |k, v| response.set_header k, v }
-
-          render_status(status, message)
-        }
-
-        format.html(&block)
-        format.zip(&block)
-        format.json do
-          api_headers.each { |k, v| response.set_header k, v }
-          render json: {message: message}, status: status
-        end
-        format.xml do
-          api_headers.each { |k, v| response.set_header k, v }
-          render xml: {message: message}, status: status
-        end
-        format.all do
-          api_headers.each { |k, v| response.set_header k, v }
-          render plain: message, status: status
-        end
-      end
-    end
-
     def limit_request_rate
-      # See #1205.
-      if !api_request? || (current_user && current_user.id == 87416)
+      if !api_request? && !pandora_feedback_request?
         return
       end
 
@@ -874,6 +864,15 @@ class ApplicationController < ActionController::Base
       end
     end
 
+    def pm_labelled_delimited_counter(count, label, plural_label)
+      delimited_count = view_context.number_with_delimiter(count, locale: I18n.locale)
+      if count == 1
+        label / delimited_count
+      else
+        plural_label / delimited_count
+      end
+    end
+
     def prepare_exception_notifier
       request.env["exception_notifier.exception_data"] = {
         :current_user => current_user
@@ -883,13 +882,25 @@ class ApplicationController < ActionController::Base
 
     # ng locale
 
+    # called before every action
+    def set_locale(locale = nil)
+      I18n.locale = current_locale
+    end
+
+    def current_locale
+      locale ||= params[:locale] || default_locale
+      locale = 'de' unless I18n.available_locales.include?(locale.to_sym)
+
+      locale
+    end
+
     def default_locale
       user_locale || agent_locale || 'en'
     end
 
     def user_locale
       if current_user && !current_user.ipuser?
-        current_user.settings.locale
+        current_user.account_settings.locale
       end
     end
 
@@ -903,10 +914,11 @@ class ApplicationController < ActionController::Base
     end
 
 
-    # ng auth
+    # auth
 
     def log_in(account, options = {})
       session[:account_id] = account.id
+      @current_user = account
 
       if options[:remember_me]
         account.remember_me!
@@ -1077,7 +1089,21 @@ class ApplicationController < ActionController::Base
     end
 
     def formatted_response_with_message(m, status = :forbidden, &block)
-      format_for_api(status, m.is_a?(Array) ? m.first.gsub(/%\{|\}%/, '') : m, &block)
+      message = (m.is_a?(Array) ? m.first.gsub(/%\{|\}%/, '') : m)
+
+      respond_to do |format|
+        format.html(&block)
+        format.zip(&block)
+        format.json do
+          render json: '"' + message + '"', status: status
+        end
+        format.xml do
+          render xml: {message: message}, status: status
+        end
+        format.all do
+          render plain: message, status: status
+        end
+      end
     end
 
     def formatted_redirect_with_warning(warning, controller, action, status = :forbidden)
@@ -1091,8 +1117,6 @@ class ApplicationController < ActionController::Base
       }
     end
 
-    # end ng
-
     # tries to find specified user settings value but instead of raising an
     # exception, returns nil if nothing could be retrieved
     # @param [String] type one of 'account', 'image', 'upload', 'collection' and
@@ -1100,14 +1124,16 @@ class ApplicationController < ActionController::Base
     # @param [String] key the setting to retrieve
     # @return the setting when found and configured for the user or nil
     def try_setting(type, key)
-      if current_user && current_user.settings(type)
-        current_user.settings(type)[key]
+      if current_user
+        if settings = current_user.send("#{type}_settings".to_sym)
+          settings[key]
+        end
       end
     end
 
     def authenticate_from_token_warnings(user, link_expired, matching_token)
       unless user
-        no_user_warning = "User account does not exist. Without confirmation, accounts are deleted after #{DEFAULT_CLEANUP_DURATION}.".t + ' ' +
+        no_user_warning = "User account does not exist. Without confirmation, accounts are deleted after 1 week.".t + ' ' +
             'If this is the case, please create a new one.'.t
         if flash[:warning].blank?
           flash[:warning] = no_user_warning

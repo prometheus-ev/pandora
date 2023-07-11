@@ -38,7 +38,7 @@ module BrainBusterSystem
   end
 
   def encrypt_brain_buster(str)
-    Digest::SHA256.hexdigest("--#{str}--#{SECRETS[:bb_salt]}--")
+    Digest::SHA256.hexdigest("--#{str}--#{ENV['PM_BRAIN_BUSTER_SALT']}--")
   end
 
   def self.included(base)

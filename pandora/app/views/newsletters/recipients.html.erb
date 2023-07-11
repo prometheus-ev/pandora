@@ -8,12 +8,14 @@
     <% for recipient, expansion in recipients -%>
       <dt><strong><%=h recipient %></strong></dt>
       <dd>
-      <% if expansion.is_a?(Array) -%>
-        <ul>
-        <% for address in expansion -%>
-          <li><%=h address %></li>
+      <% if expansion.is_a?(Array) || expansion.is_a?(ActiveRecord::Relation) -%>
+        <% if expansion.size > 0 -%>
+          <ul>
+          <% for address in expansion -%>
+            <li><%=h address %></li>
+          <% end -%>
+          </ul>
         <% end -%>
-        </ul>
       <% else -%>
         <%=h expansion || "<#{'not found'.t.upcase}>" %>
       <% end -%>

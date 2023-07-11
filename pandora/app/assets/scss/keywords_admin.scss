@@ -1,0 +1,71 @@
+.keyword-list {
+  overflow: hidden;
+  padding: 0 !important;
+
+  a img {
+    opacity: 0.6;
+  }
+
+  a:hover img {
+    opacity: 1;
+  }
+}
+
+.keyword-list td {
+  padding: 10px;
+}
+
+.keyword-list tr.even {
+  background-color: #303030;
+}
+
+// .keyword-list .pm-title {
+//   font-style: italic;
+//   // border-bottom: 2px dotted rgb(80, 80, 80);
+//   padding-bottom: 10px;
+// }
+
+// .keyword-list .pm-title:last-child {
+//   border-bottom: none;
+//   padding-bottom: 0;
+// }
+
+// .keyword-list .pm-white-space {
+//   padding-top: 10px;
+//   font-size: 10px;
+// }
+
+// .keyword-list .pm-counts {
+//   padding-top: 5px;
+//   float: right;
+//   text-align: right;
+// }
+
+.keyword-list .pm-keyword {
+  // display: inline-block;
+  /*height: 19px;*/
+  min-width: 5px;
+  line-height: 1.6em;
+  background-color: #303030;
+  padding: 5px;
+  margin-right: 5px;
+  margin-bottom: 5px;
+  cursor: pointer;
+}
+
+.keyword-list .pm-keyword a {
+  display: none;
+}
+
+.keyword-list.pm-controls .pm-keyword a {
+  display: inline;
+  // padding-bottom: 0;
+}
+
+// .keyword-list.pm-controls .pm-keyword  {
+//   display: block;
+// 
+
+.keyword-list .pm-keyword.selected {
+  background-color: gray;
+}

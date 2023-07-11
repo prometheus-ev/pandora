@@ -50,7 +50,7 @@
           </tr>
           <tr>
             <td>
-              <%= f.select(:license, (licenses = Upload.pconfig[:licenses]).map{ |license| [license.blank? ? '' : license.t, license] }, {:selected => !(license = @upload.license).blank? ? (licenses.include?(license) ? license : 'Other') : '', :include_blank => true }, :onchange => 'toggle_other_license_text_field();' ) %>
+              <%= f.select(:license, (licenses = Upload.pconfig[:licenses].keys).map{ |license| [license.blank? ? '' : license.t, license] }, {:selected => !(license = @upload.license).blank? ? (licenses.include?(license) ? license : 'Other') : '', :include_blank => true }, :onchange => 'toggle_other_license_text_field();' ) %>
             </td>
           </tr>
           <tr id="license_table_row" <%= "style=\"display: none;\"".html_safe if license.blank? || licenses.include?(license) %>>
@@ -76,8 +76,8 @@
           </tr>
           <tr>
             <td>
-              <%= f.radio_button :rights_work, 'VG Bild-Kunst', :checked => @upload.rights_work.blank? || @upload.rights_work == 'VG Bild-Kunst' %>
-              <label for="upload_rights_work_vg_bild-kunst" class="pad"><%= link_to_vgbk %></label>
+              <%= f.radio_button :rights_work, 'rights_work_vgbk', :checked => @upload.rights_work.blank? || @upload.rights_work == 'VG Bild-Kunst' %>
+              <label for="upload_rights_work_rights_work_vgbk" class="pad"><%= link_to_vgbk %></label>
             </td>
           </tr>
           <tr>

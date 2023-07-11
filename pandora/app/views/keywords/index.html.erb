@@ -1,0 +1,25 @@
+<h1 class="page_title">
+  <%= 'Keywords'.t %>
+</h1>
+
+<div class="search_query">
+  <label for="value" class="search_heading">
+    <%= "Search keywords".t %>:
+  </label>
+  <%= list_search_for Keyword %>
+</div>
+
+<div class="list_controls">
+  <%= pagination = pagination_for(@keywords, page, sort_column) %>
+  <%= render partial: 'shared/per_page_selector' %>
+  <%= sorting = render partial: 'shared/list/sort_links' %>
+</div>
+
+<table class="keyword-list w-100">
+  <%= render partial: "row", collection: @keywords.items, locals: {cycle_name: 'list'} %>
+</table>
+
+<div class="list_controls">
+  <%= pagination %>
+  <%= sorting %>
+</div>

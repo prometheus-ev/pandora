@@ -3,8 +3,11 @@
 }
 
 .pm-zoomed {
-  position: absolute;
   max-width: 280px !important;
   max-height: 280px !important;
+}
+
+.pm-detached {
+  position: absolute;
   -webkit-transform: translate(-50%, -50%);
 }

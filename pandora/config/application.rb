@@ -7,11 +7,13 @@ require "rails"
 require "active_model/railtie"
 require "active_job/railtie"
 require "active_record/railtie"
+# require "active_storage/engine"
 require "action_controller/railtie"
 require "action_mailer/railtie"
+# require "action_mailbox/engine"
+# require "action_text/engine"
 require "action_view/railtie"
 # require "action_cable/engine"
-# require "sprockets/railtie"
 require "rails/test_unit/railtie"
 
 # Require the gems listed in Gemfile, including any gems
@@ -42,13 +44,19 @@ end
 module Pandora
   class Application < Rails::Application
     # Initialize configuration defaults for originally generated Rails version.
-    config.load_defaults 5.1
+    config.load_defaults 7.0
+
+    # Configuration for the application, engines, and railties goes here.
+    #
+    # These settings can be overridden in specific environments using the files
+    # in config/environments, which are processed later.
+    #
+    # config.time_zone = "Central Time (US & Canada)"
+    # config.eager_load_paths << Rails.root.join("extras")
 
     config.action_controller.forgery_protection_origin_check = false
 
     config.to_prepare do
-      # REWRITE: this is needed to have a working configuration in development
-      # after every reload of the Util::Config module
       # TODO: find a better solution for this
       Util::Config.init(Rails.root.join('config', 'app').to_s, '.yml')
     end
@@ -75,7 +83,7 @@ module Pandora
         Dir["#{Rails.root}/app/libs/indexing/sources/**/*.rb"].each{|f| require f}
       end
       m = TOPLEVEL_BINDING.receiver # get a hold of main
-      m.send :include, Indexing::Sources
+      m.send :include, ::Indexing::Sources
     end
 
     # REWRITE: this was the default in early rails versions so let's set it
@@ -114,11 +122,22 @@ module Pandora
         #   "ActionController::RoutingError",
         #   "ActionController::UnknownFormat"
         # ]
-        ignore_exceptions: [],
+        ignore_exceptions: [
+          # ActionController::BadRequest,
+          # ActionController::UnknownFormat,
+          # ActionDispatch::Http::MimeNegotiation::InvalidType
+        ],
         ignore_if: ->(env, exception) {
           case exception
           when ActionController::BadRequest
-            !!exception.message.match(/Invalid encoding for parameter/)
+            result = (
+              exception.message.match(/Invalid encoding for parameter/) ||
+              exception.message.match(/Invalid query parameters: expected Hash/) ||
+              exception.message.match(/Invalid query parameters: invalid %-encoding/)
+            )
+
+            !!result
+          when ActionDispatch::Http::MimeNegotiation::InvalidType then true
           else
             false
           end
@@ -138,16 +157,14 @@ module Pandora
       end
     end
 
-    config.x.athene_search_fields = Rails.application.config_for(:athene_search_fields)
-    config.x.athene_search_indices = Rails.application.config_for(:athene_search_indices)
-    config.x.athene_search_record_ids = Rails.application.config_for(:athene_search_record_ids)
+    config.x.indexing_warburg_and_miro_record_ids = Rails.application.config_for(:indexing_warburg_and_miro_record_ids)
 
     config.x.indexing_vgbk_artists =        Rails.application.config_for('indexing-vgbk-artists')
+    config.x.indexing_non_vgbk_artists =    Rails.application.config_for('indexing-non-vgbk-artists')
     config.x.indexing_artist_attributions = Rails.application.config_for(:indexing_artist_attributions)
     config.x.indexing_custom_date_formats = Rails.application.config_for(:indexing_custom_date_formats)
 
     config.x.dumps_path = ENV['PM_DUMPS_DIR']
-    config.x.synonyms_path = ENV['PM_SYNONYMS_DIR']
   end
 
   # REWRITE: we use this to add a meta tag to the default layout

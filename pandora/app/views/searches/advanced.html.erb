@@ -26,7 +26,7 @@
         </td>
         <% if i + 1 == @search.field_selected.keys.size %>
           <td>
-            <div class="row-adder-athene-search scriptonly" title="<%= row_adder_title = 'Add another query condition'.t %>"></div>
+            <div class="row-adder scriptonly" title="<%= row_adder_title = 'Add another query condition'.t %>"></div>
             <noscript><%= image_submit_tag 'misc/row-adder.gif', :name => 'commit', :value => 'noop', :class => 'row-adder', :title => row_adder_title %></noscript>
           </td>
         <% else %>
@@ -35,37 +35,107 @@
       </tr>
     <% } %>
     <tr>
-      <% if admin_or_superadmin? %>
-        <td>
-          <label for="sample"><%= 'Sample?'.t %></label>
-          <%= check_box_tag 'sample', '1', @search.sample %>
-        </td>
-        <td>
-          <%= text_field_tag 'sample_size', @search.sample_size || '1', :size => 2 %>
-        </td>
-      <% else %>
-        <td colspan="2">
-        </td>
-      <% end %>
-      <td>
-        <% help_link = link_to(
-              'syntax help'.t,
+      <td colspan="2">
+        <%= link_to(
+              'Syntax help'.t,
               help_url(section: 'syntax', host: request.host, anchor: nil),
               {title: 'Syntax help'.t}
             )
         %>
-        <%= "See %s for details and examples." / help_link %>
       </td>
-      <td style="padding-right: 5px;">
+      <td colspan="2" style="padding-right: 5px;">
         <%= search_button %>
       </td>
-      <td>
-      </td>
+      <td></td>
     </tr>
+    <% if params[:search_value] && !params[:search_value].compact_blank.empty? %>
+    <tr>
+      <td colspan="5" style="border-bottom: 0px solid #444; padding-top: 5px;"></td>
+    </tr>
+    <tr>
+      <td colspan="5" style="padding-top: 5px;"></td>
+    </tr>
+    <tr>
+      <td colspan="2" style="vertical-align: middle;">
+        <%= check_box_tag 'time', '1', @search.time, style: 'float: none; vertical-align: middle;' %>
+        <%= label_tag 'time', 'Filter by date'.t, style: 'float: none; vertical-align: middle;' %>
+      </td>
+      <td>
+        <%= number_field_tag 'date[from]',
+          @search.time ? @search.date_range_from : nil,
+          id: 'from-year',
+          style: 'width: 220px;',
+          onClick: 'document.getElementById("time").checked = true;' %>
+      </td>
+      <td>
+        <%= number_field_tag 'date[to]',
+          @search.time ? @search.date_range_to : nil,
+          id: 'to-year',
+          style: 'width: 220px;',
+          onClick: 'document.getElementById("time").checked = true;' %>
+      </td>
+      <td></td>
+    </tr>
+    <tr>
+      <td colspan="2"></td>
+      <td><%= 'From year'.t %></td>
+      <td><%= 'To year'.t %></td>
+      <td></td>
+    </tr>
+    <tr>
+      <td colspan="2" style="vertical-align: middle;">
+        <%= check_box_tag 'objects', '1', @search.objects, style: 'float: none; vertical-align: middle;' %>
+        <%= label_tag 'objects', 'Filter by objects'.t, style: 'float: none; vertical-align: middle;' %>
+      </td>
+      <td colspan="3"></td>
+    </tr>
+    <% if admin_or_superadmin? %>
+    <tr>
+      <td colspan="2" style="vertical-align: middle;">
+        <%= check_box_tag 'sample', '1', @search.sample, style: 'float: none; vertical-align: middle;' %>
+        <%= label_tag 'sample', 'Filter by sample'.t, style: 'float: none; vertical-align: middle;' %>
+      </td>
+      <td>
+        <%= number_field_tag 'sample_size',
+          @search.sample_size || 1,
+          style: 'width: 220px;' %>
+      </td>
+      <td colspan="2"></td>
+    </tr>
+    <tr>
+      <td colspan="2"></td>
+      <td><%= 'Sample size'.t %></td>
+      <td colspan="2"></td>
+    </tr>
+    <% end %>
+    <tr>
+      <td colspan="2">
+        <%= link_to(
+              'Filter help'.t,
+              help_url(section: 'filter', host: request.host, anchor: nil),
+              {title: 'Filter help'.t}
+            )
+        %>
+      </td>
+      <td colspan="2" style="padding-right: 5px;">
+        <div class="submit_button_wrap float-right">
+          <div class="autosubmit scriptonly" _name="commit">
+            <div class="button_wrap submit_button">
+              <div class="button_left"></div>
+              <div class="button_middle"><%= 'Filter'.t %></div>
+              <div class="button_right"></div>
+            </div>
+          </div>
+          <div class="noscript_button noscript"><img src="/images/misc/button_send_left.gif"><input type="submit" name="commit" value="Filter" class="submit" data-disable-with="Filter"><img src="/images/misc/button_send_right.gif"></div>
+        </div>
+      </td>
+      <td></td>
+    </tr>
+    <% end %>
   </table>
 
-  <%= render :partial => 'athene_search_results_none' %>
+  <%= render :partial => 'no_results' %>
   <%= render :partial => 'source_list' %>
 <% end %>
 
-<%= render :partial => 'athene_search_results' %>
+<%= render :partial => 'results' %>

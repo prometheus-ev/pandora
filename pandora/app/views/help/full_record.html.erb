@@ -1,0 +1,30 @@
+<h2><%= 'Full record view help'.t %></h2>
+
+<% with_toc do %>
+
+  <%= section_heading 'Similar images', 'similarity' %>
+  <p>
+  An image similarity search was integrated using image vectors that were created on the basis of the self-supervised learning algorithm SwAV (Swapping Assignments between Views). The algorithm is described in Caron et al. [1], an implementation is provided by Facebook [2]. A SwAV model [3] pre-trained with the ImageNet data set [4] was used as a model. Resulting image vectors, which are shortened to 80 dimensions sufficient for the result, were precalculated for all images in the image archive and saved in the index.
+  The search engine queries are reduced to calculating the distance between the vectors stored in the index. The smallest distance is calculated using the Euclidean distance.
+  </p>
+
+  <h4>References</h4>
+
+  <ol>
+    <li>
+      Mathilde Caron and Ishan Misra and Julien Mairal and Priya Goyal and Piotr Bojanowski and Armand Joulin (2020). Unsupervised Learning of Visual Features by Contrasting Cluster Assignments. CoRR, abs/2006.09882.
+    </li>
+    <li>
+      <a href="https://github.com/facebookresearch/swav" target="_blank">https://github.com/facebookresearch/swav</a>
+    </li>
+    <li>
+      <a href="https://pl-bolts-weights.s3.us-east-2.amazonaws.com/swav/swavimagenet/swavimagenet.pth.tar" target="_blank">https://pl-bolts-weights.s3.us-east-2.amazonaws.com/swav/swavimagenet/swavimagenet.pth.tar</a>
+    </li>
+    <li>
+      <a href="https://www.image-net.org/" target="_blank">https://www.image-net.org/</a>
+    </li>
+  </ol>
+
+<% end %>
+
+<%= render :partial => 'footer' %>

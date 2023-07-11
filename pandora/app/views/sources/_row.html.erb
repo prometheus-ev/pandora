@@ -6,7 +6,7 @@
       <%= link_to row.title, row %>
       <span class="dim">
       <% if current_user && current_user.allowed?(row) -%>
-        <%= link_to image_tag('icon/edit.gif', :class => 'icon', :title => 'Edit'.t), { :action => 'edit', :id => row }, { :title => 'Edit'.t } %>
+        <%= link_to image_tag('icon/edit.gif', :class => 'icon'), { :controller => 'sources', :action => 'edit', :id => row }, { :title => 'Edit'.t } %>
       <% elsif row.open_access? -%>
         <%= gogif %> <strong><%= link_to_open_source row %></strong>
       <% end -%>

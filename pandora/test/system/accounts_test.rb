@@ -34,7 +34,7 @@ class AccountsTest < ApplicationSystemTestCase
     submit
 
     assert_text 'You have to accept our terms of use to be able to use the prometheus image archive'
-    check 'I read the above terms of use carefully and agree!'
+    check 'I read the terms of use carefully and agree!'
     submit
 
     assert_text 'Advanced search'
@@ -106,6 +106,13 @@ class AccountsTest < ApplicationSystemTestCase
     assert_includes jdoe.admin_institutions, nowhere
     assert_equal nowhere, jdoe.institution
 
+    # change email address to another user's address
+    visit "/en/accounts/jdoe/edit"
+    fill_in 'E-mail', with: 'mrossi@prometheus-bildarchiv.de'
+    submit
+    assert_text 'Email has already been taken'
+    assert_equal 0, ActionMailer::Base.deliveries.size
+
     # change the username
     click_on 'Active'
     within '.list_row:first-child' do
@@ -121,7 +128,7 @@ class AccountsTest < ApplicationSystemTestCase
 
   test 'update clickandbuy account' do
     jdoe = Account.find_by! login: 'jdoe'
-    jdoe.update_attributes expires_at: 6.years.ago, mode: 'clickandbuy'
+    jdoe.update expires_at: 6.years.ago, mode: 'clickandbuy'
 
     login_as 'superadmin'
     click_on 'Administration'
@@ -140,6 +147,7 @@ class AccountsTest < ApplicationSystemTestCase
   end
 
   test 'reset a user password (as admin)' do
+    assert_equal 0, ActionMailer::Base.deliveries.count
     login_as 'superadmin'
     click_on 'Administration'
     
@@ -348,5 +356,86 @@ class AccountsTest < ApplicationSystemTestCase
 
     click_on 'Deutsch'
     assert_field 'Sprache', with: 'de'
+  end
+
+  test 'expiry notification' do
+    login_as 'jdoe'
+
+    jdoe = Account.find_by!(login: 'jdoe')
+    jdoe.update_columns expires_at: 10.days.from_now, mode: 'guest'
+
+    with_env 'PM_SILENT' => 'true' do
+      Pandora::UpcomingExpiry.new.run
+      assert_nil jdoe.reload.notified_at
+      # too early
+
+      travel 14.days do
+        Pandora::UpcomingExpiry.new.run
+        assert_nil jdoe.reload.notified_at
+        # too late
+      end
+
+      travel 8.days do
+        # first try
+        Pandora::UpcomingExpiry.new.run
+        assert_not_nil jdoe.reload.notified_at
+        text = ActionMailer::Base.deliveries.last.body.to_s
+        assert_match /With your guest account you were able to test/, text
+        assert_match /http:\/\/localhost:47001\/en\/license/, text
+        visit '/en/license'
+        assert_text 'You have a guest account'
+        assert_text 'Obtain license'
+        
+        # reset account and set 'institution' mode, then notify
+        jdoe.update_columns notified_at: nil, mode: 'institution'
+        Pandora::UpcomingExpiry.new.run
+        assert_not_nil jdoe.reload.notified_at
+        text = ActionMailer::Base.deliveries.last.body.to_s
+        assert_match /your personal prometheus account at your institution/, text
+        assert_match /http:\/\/localhost:47001\/en\/license/, text
+        visit '/en/license'
+        assert_text 'You have a free account from your institution'
+        assert_text 'Obtain license / Change institution'
+
+        # reset account and set 'invoice' mode, then notify
+        jdoe.update_columns notified_at: nil, mode: 'invoice'
+        Pandora::UpcomingExpiry.new.run
+        assert_not_nil jdoe.reload.notified_at
+        text = ActionMailer::Base.deliveries.last.body.to_s
+        assert_match /your personal prometheus account is about to expire/, text
+        assert_match /http:\/\/localhost:47001\/en\/license/, text
+        visit '/en/license'
+        assert_text 'You have a single license via invoice'
+        assert_text 'Obtain license'
+
+        # this should not notify again
+        assert_no_changes 'ActionMailer::Base.deliveries.count' do
+          Pandora::UpcomingExpiry.new.run
+        end
+
+        choose 'Invoice'
+        fill_in 'Address', with: 'Seestraße 35'
+        fill_in 'Postal code', with: '56634'
+        fill_in 'City', with: 'Frankfurt am Main'
+        check 'I read the terms of use carefully and agree'
+        submit
+        assert_text 'The prometheus office has been informed'
+
+        # simulate that the account was extended
+        jdoe.update expires_at: 1.year.from_now
+
+        # this should still not notify again
+        assert_no_changes 'ActionMailer::Base.deliveries.count' do
+          Pandora::UpcomingExpiry.new.run
+        end
+
+      end
+
+      travel 1.year + 1.week do
+        assert_changes 'ActionMailer::Base.deliveries.count' do
+          Pandora::UpcomingExpiry.new.run
+        end
+      end
+    end
   end
 end

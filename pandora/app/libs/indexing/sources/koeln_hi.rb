@@ -41,6 +41,12 @@ class Indexing::Sources::KoelnHi < Indexing::SourceSuper
     metadata_text('sWzEwOGsvYg6hAy')
   end
 
+  def date_range
+    d = date.to_s.strip
+
+    super(d)
+  end
+
   def format
     metadata_text('lsA7ccxdGBSaLLyy')
   end

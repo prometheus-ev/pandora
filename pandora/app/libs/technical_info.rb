@@ -7,7 +7,7 @@ module TechnicalInfo
   PASSENGER_VERSION = "Phusion Passenger Apache Module"
 
   APACHE_VERSION = %w[apache2 httpd].find { |name|
-    if File.exists?(prog = "/usr/sbin/#{name}")
+    if File.exist?(prog = "/usr/sbin/#{name}")
       break %x{#{prog} -v | awk '/^Server version:/{print $3}'}.chomp
     end
   } || 'Apache'

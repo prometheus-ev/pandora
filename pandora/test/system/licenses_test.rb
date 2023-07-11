@@ -72,7 +72,7 @@ class LicensesTest < ApplicationSystemTestCase
       assert_select 'Paid from', selected: Pandora::Utils.quarter_for(Date.today)
 
       click_on 'List'
-      within '.list_row:nth-child(3)' do
+      within '.list_row', text: 'prometheus' do
         assert_css 'input[type=checkbox]'
       end
     end
@@ -96,7 +96,7 @@ class LicensesTest < ApplicationSystemTestCase
       submit 'Renew licenses'
       assert_text 'You have to select at least one institution'
 
-      within '.list_row:nth-child(3)' do
+      within '.list_row', text: 'prometheus' do
         check 'id[]'
       end
       submit 'Renew licenses'

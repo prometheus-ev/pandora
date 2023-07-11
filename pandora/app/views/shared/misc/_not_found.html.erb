@@ -7,9 +7,9 @@
 <p>
   Hopefully one of these pages will get you back on track:
   <ul>
-    <li><a href="http://prometheus-bildarchiv.de">The prometheus Homepage</a></li>
-    <li><a href="http://prometheus.uni-koeln.de/pandora">The prometheus Image Archive start page</a></li>
-    <li><a href="http://prometheus.uni-koeln.de/pandora/sitemap">The prometheus Image Archive sitemap</a></li>
+    <li><a href="<%= ENV['PM_HOME_URL'] %>">The prometheus Homepage</a></li>
+    <li><a href="<%= ENV['PM_BASE_URL'] %>">The prometheus Image Archive start page</a></li>
+    <li><a href="<%= ENV['PM_BASE_URL'] %>/sitemap">The prometheus Image Archive sitemap</a></li>
     <li>
       <a href="javascript:history.back()">Or try going back to the page you were coming from</a>
       (<noscript>requires JavaScript to be enabled; </noscript>alternatively, just hit your browser's back-button)
@@ -18,5 +18,5 @@
 </p>
 
 <p>
-  Anyway, a short note would be greatly appreciated: <a href="mailto:info@prometheus-bildarchiv.de">info@prometheus-bildarchiv.de</a>.
+  Anyway, a short note would be greatly appreciated: <a href="mailto:<%= ENV['PM_INFO_ADDRESS'] %>"><%= ENV['PM_INFO_ADDRESS'] %></a>.
 </p>

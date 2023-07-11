@@ -51,6 +51,16 @@ class Indexing::Sources::MuensterTheologie < Indexing::SourceSuper
     record.xpath('.//archiv_ort/text()')
   end
 
+  def date_range
+    d = date.to_s.strip.encode('iso-8859-1').encode('utf-8')
+
+    if d == '18879/80'
+      d = '1879/80'
+    end
+
+    super(d)
+  end
+
   # abbildungsnachweis
   def credits
     "#{record.xpath('.//deskriptor/text()')}, #{record.xpath('.//funktion_rolle/text()')}, #{record.xpath('.//ort_26/text()')}, #{record.xpath('.//verlag_26/text()')}, #{record.xpath('.//jahr_26/text()')}, S. #{record.xpath('.//band_26/text()')} | Diathekssignatur: #{record.xpath('.//signatur/text()')}".gsub(/S.  /, '').gsub(/(, ){2,}/, ', ').gsub(/\A, \|/, '')

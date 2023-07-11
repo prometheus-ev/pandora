@@ -1,0 +1,28 @@
+<h2><%= 'Hilfe zum vollständigen Datensatz'.t %></h2>
+
+<% with_toc do %>
+
+  <%= section_heading 'Ähnliche Bilder', 'similarity' %>
+  <p>
+  Es wurde eine Bildähnlichkeitssuche mithilfe von Bildvektoren, die auf Basis des Self-supervised Learning Algorithmus SwAV (Swapping Assignments between Views) erstellt worden sind, integriert. Der Algorithmus ist in Caron et al. [1] beschrieben, eine Implementation wird von Facebook bereitgestellt [2]. Als Modell wurde ein mit dem ImageNet Datensatz [3] vortrainiertes SwAV Modell [4] verwendet. Resultierende Bildvektoren, die auf für das Ergebnis ausreichende 80 Dimensionen gekürzt sind, wurden für alle Bilder im Bildarchiv vorberechnet und im Index gespeichert.
+  Die Anfragen der Suchmaschine reduzieren sich damit auf die Berechnung der Distanz zwischen den im Index gespeicherten Vektoren. Die geringste Distanz wird durch den euklidische Abstand berechnet.
+  </p>
+
+  <h4>Literatur</h4>
+
+  <ol>
+    <li>
+      Mathilde Caron and Ishan Misra and Julien Mairal and Priya Goyal and Piotr Bojanowski and Armand Joulin (2020). Unsupervised Learning of Visual Features by Contrasting Cluster Assignments. CoRR, abs/2006.09882.
+    </li>
+    <li>
+      <a href="https://github.com/facebookresearch/swav" target="_blank">https://github.com/facebookresearch/swav</a>
+    </li>
+    <li>
+      <a href="https://pl-bolts-weights.s3.us-east-2.amazonaws.com/swav/swavimagenet/swavimagenet.pth.tar" target="_blank">https://pl-bolts-weights.s3.us-east-2.amazonaws.com/swav/swavimagenet/swavimagenet.pth.tar</a>
+    </li>
+    <li>
+      <a href="https://www.image-net.org/" target="_blank">https://www.image-net.org/</a>
+    </li>
+  </ul>
+
+<% end %>

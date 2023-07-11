@@ -1,0 +1,5 @@
+<%= Rails.env %>:
+  artists:
+    - 'Ulrich Rückriem'
+    - 'Werner Düttmann'
+    - 'Alfred Berger'

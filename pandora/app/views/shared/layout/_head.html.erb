@@ -26,6 +26,10 @@
   <%= javascript_include_tag "/javascripts/combined.js?#{cs}" %>
 <% end %>
 
+<% file = "#{Rails.root}/public/app.js" %>
+<% cs = Digest::SHA1.hexdigest(File.read file) %>
+<%= javascript_include_tag "/app.js?#{cs}", type: 'module' %>
+
 <script>
   Pandora.update_url = '<%= url_for(controller: 'pandora', action: 'toggle_news') %>'
   Pandora.root_url = '<%= root_url locale: nil %>'
@@ -36,6 +40,6 @@
 <% end %>
 
 <% file = "#{Rails.root}/public/javascripts/app/#{controller_name}.js" %>
-<% if File.exists?(file) %>
+<% if File.exist?(file) %>
   <%= javascript_include_tag "app/#{controller_name}" %>
 <% end %>

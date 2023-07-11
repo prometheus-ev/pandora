@@ -1,0 +1,179 @@
+$input-border-width: 1px;
+$input-focus-border-color: yellow;
+$small-font-size: 10px;
+
+.d-inline-block {
+  display: inline-block;
+}
+
+.d-flex {
+  display: flex;
+}
+
+.d-block {
+  display: block;
+}
+
+.d-none {
+  display: none !important;
+}
+
+.float-right {
+  float: right !important;
+}
+
+.flex-column {
+  flex-direction: column;
+}
+
+.flex-wrap {
+  flex-wrap: wrap;
+}
+
+.align-items-center {
+  align-items: center;
+}
+
+.align-items-end {
+  align-items: flex-end;
+}
+
+.align-self-center {
+  align-self: center;
+}
+
+.justify-content-center {
+  justify-content: center;
+}
+
+.justify-content-between {
+  justify-content: space-between;
+}
+
+.justify-content-stretch {
+  justify-content: stretch;
+}
+
+.justify-content-end {
+  justify-content: flex-end;
+}
+
+// spacing
+
+$spacers: (
+  0: 0,
+  1: 0.3rem,
+  2: 0.6rem,
+  3: 1rem,
+  4: 1.5rem,
+  5: 75px
+);
+
+$sides: (
+  s: 'left',
+  e: 'right',
+  t: 'top',
+  b: 'bottom'
+);
+
+@each $size, $amount in $spacers {
+  .m-#{$size} {
+    margin: $amount !important;
+  }
+
+  .mx-#{$size} {
+    margin-right: $amount !important;
+    margin-left: $amount !important;
+  }
+
+  .my-#{$size} {
+    margin-top: $amount !important;
+    margin-bottom: $amount !important;
+  }
+
+  .p-#{$size} {
+    padding: $amount !important;
+  }
+
+  .px-#{$size} {
+    padding-right: $amount !important;
+    padding-left: $amount !important;
+  }
+
+  .py-#{$size} {
+    padding-top: $amount !important;
+    padding-bottom: $amount !important;
+  }
+
+  @each $s, $side in $sides {
+    .m#{$s}-#{$size} {
+      margin-#{$side}: $amount !important;
+    }
+
+    .p#{$s}-#{$size} {
+      padding-#{$side}: $amount !important;
+    }
+  }
+}
+
+.border {
+  border: 1px solid gray;
+}
+
+.h-100 {
+  height: 100%;
+}
+
+.w-100 {
+  width: 100%;
+}
+
+.position-relative {
+  position: relative;
+}
+
+.position-absolute {
+  position: absolute;
+}
+
+.bg-dark {
+  background-color: #262626;
+}
+
+.fw-normal {
+  font-weight: normal;
+}
+
+
+// adapter
+
+.border-box {
+  box-sizing: border-box;
+}
+
+
+//  legacy
+
+.text-right {
+  text-align: right;
+}
+
+.flex-shrink-0 {
+  flex-shrink: 0;
+}
+
+.text-small {
+  font-size: 0.9em;
+  line-height: 1.4em;
+}
+
+.text-muted {
+  color: gray;
+}
+
+
+// typo
+
+.text-decoration-none {
+  text-decoration: none !important;
+}

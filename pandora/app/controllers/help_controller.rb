@@ -16,8 +16,12 @@ class HelpController < ApplicationController
       return
     end
 
-    flash[:info] = 'There currently exists no help page for %s.' / params[:section].humanize.t
-    render action: 'show'
+    respond_to do |format|
+      format.html do
+        flash[:info] = 'There currently exists no help page for %s.' / params[:section].humanize.t
+        render action: 'show'
+      end
+    end
   end
 
 
@@ -29,7 +33,9 @@ class HelpController < ApplicationController
         {section: 'login', label: 'Login'.t},
         {section: 'search', label: 'Search'.t},
         {section: 'syntax', label: 'Query syntax'.t},
+        {section: 'filter', label: 'Results filter'.t},
         {section: 'results', label: 'Results list'.t},
+        {section: 'full_record', label: 'Full record'.t},
         {section: 'copyright_and_publication', label: 'Copyright and publication'.t},
         {section: 'collection', label: 'Collection'.t},
         {section: 'uploads', label: 'My Uploads'.t},

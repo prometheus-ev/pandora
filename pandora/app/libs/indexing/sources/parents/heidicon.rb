@@ -27,8 +27,8 @@ class Indexing::Sources::Parents::Heidicon < Indexing::SourceSuper
 
   def record_object_id
     object_id = "#{record.xpath('.//ancestor::administrativeMetadata/recordWrap/recordID/text()')}"
+
     [name, Digest::SHA1.hexdigest("#{object_id}")].join('-')
-    #[name, Digest::SHA1.hexdigest(record.xpath('.//ancestor::administrativeMetadata/recordWrap/recordID/text()').to_a.join('|'))].join('-')
   end
 
   def path
@@ -118,7 +118,13 @@ class Indexing::Sources::Parents::Heidicon < Indexing::SourceSuper
   end
 
   def date_range
-    super(date)
+    if d = date
+      d = d.strip
+    end
+
+    if d != ''
+      super(d)
+    end
   end
 
   # epoche
@@ -414,8 +420,8 @@ class Indexing::Sources::Parents::Heidicon < Indexing::SourceSuper
 
   # bildrecht
   def rights_reproduction
-    str =  [record.xpath('.//ancestor::lido/administrativeMetadata/resourceWrap/resourceSet/resourceSource/legalBodyName/appellationValue/text()')].join(", ")
-    str << " [#{record.xpath('.//ancestor::lido/administrativeMetadata/resourceWrap/resourceSet/rightsResource/rightsType/term[@lang="de"]/text()')}]".gsub(/ \[\]/,'')
+    str =  [record.xpath('.//resourceSource/legalBodyName/appellationValue/text()')].join(", ")
+    str << " [#{record.xpath('.//rightsResource/rightsType/term[@lang="de"]/text()')}]".gsub(/ \[\]/,'')
   end
 
   # bechreibung

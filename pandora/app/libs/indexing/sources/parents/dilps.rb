@@ -62,7 +62,11 @@ class Indexing::Sources::Parents::Dilps < Indexing::SourceSuper
 
   # datierung
   def date
-    record.xpath('.//dating/text()')
+    record.xpath('.//dating/text()').to_s.strip
+  end
+
+  def date_range(date)
+    super(date)
   end
 
   # bildnachweis

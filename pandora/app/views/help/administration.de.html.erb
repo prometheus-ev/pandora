@@ -224,7 +224,7 @@
     <p>
       Wenn Sie die Administrationsfunktion innerhalb Ihrer Institution abgeben möchten, schicken
       Sie bitte eine kurze E-Mail an die <span class="prometheus">prometheus</span>-Geschäftsstelle
-      (<%= mail_to INFO_ADDRESS %>). Gleichzeitig sollte der/die neue Administrator*in das Formular
+      (<%= mail_to ENV['PM_INFO_ADDRESS'] %>). Gleichzeitig sollte der/die neue Administrator*in das Formular
       <%= link_to '"Antrag auf einen Administrationszugang"', home_url('license/instructions-for-administrators') %>
       ausgefüllt an die <span class="prometheus">prometheus</span>-Geschäftsstelle senden.
     </p>

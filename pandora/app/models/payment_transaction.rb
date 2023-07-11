@@ -72,15 +72,17 @@ class PaymentTransaction < ApplicationRecord
     paypal_confirmation_mail = (service == 'paypal' && client.status == 'activated')
 
     if status == 'confirmed' && service == 'paypal'
-      update_attributes(status: 'succeeded')
+      update(status: 'succeeded')
       client.paid!
       success = true
     else
-      update_attributes(status: 'failed')
+      update(status: 'failed')
       success = false
     end
 
-    client.deliver(:paypal_confirmation, success) if paypal_confirmation_mail
+    if paypal_confirmation_mail
+      client.deliver(:paypal_confirmation, success: success)
+    end
 
     success
   end
@@ -94,11 +96,11 @@ class PaymentTransaction < ApplicationRecord
         !PaymentTransaction.exists?(:pp_transaction_id => params[:txn_id])
 
       self.pp_transaction_id = params[:txn_id]
-      self.update_attributes(status: 'confirmed')
+      self.update(status: 'confirmed')
       true
     else
       # TODO: Is some extra logging needed here?
-      update_attributes(status: 'failed')
+      update(status: 'failed')
 
       false
     end

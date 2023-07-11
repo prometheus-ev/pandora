@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<source>
+  <row>
+    <id>1</id>
+    <path>path1</path>
+    <artist>Leonardo</artist>
+    <title>Katze</title>
+    <location>Location 1</location>
+    <date>1980</date>
+    <credits>Credit 1</credits>
+    <rights-work>Rights work 1</rights-work>
+    <rights-reproduction>Rights reproduction 1</rights-reproduction>
+  </row>
+  <row>
+    <id>2</id>
+    <path>path2</path>
+    <artist>Michelangelo</artist>
+    <title>Katze</title>
+    <location>Location 2</location>
+    <date>1981</date>
+    <credits>Credit 2</credits>
+    <rights-work>Rights work 2</rights-work>
+    <rights-reproduction>Rights reproduction 2</rights-reproduction>
+  </row>
+  <row>
+    <id>3</id>
+    <path>path3</path>
+    <artist>Leonardo</artist>
+    <title>Hund</title>
+    <location>Location 3</location>
+    <date>1981</date>
+    <credits>Credit 3</credits>
+    <rights-work>Rights work 3</rights-work>
+    <rights-reproduction>Rights reproduction 3</rights-reproduction>
+  </row>
+</source>

@@ -8,7 +8,12 @@ class Indexing::Sources::MarburgLba < Indexing::SourceSuper
   end
 
   def path
-    %Q{width/"5000"/height/"5000"/url/"http:{|}{|}137.248.186.134{|}lba-cgi-local{|}pic.sh{-}jpg{|}#{record.at_xpath('.//Negativnummer/text()')}.jpg"}
+    dirty = %Q{width/"5000"/height/"5000"/url/"http:{|}{|}137.248.186.134{|}lba-cgi-local{|}pic.sh{-}jpg{|}#{record.at_xpath('.//Negativnummer/text()')}.jpg"}
+    dirty.
+      gsub('"', '%22').
+      gsub('{', '%7B').
+      gsub('|', '%7C').
+      gsub('}', '%7D')
   end
 
   def negative_identifier
@@ -53,6 +58,12 @@ class Indexing::Sources::MarburgLba < Indexing::SourceSuper
   # datierung
   def date
     "#{record.xpath('.//Ausstellungsdatum/text()')} (Ausstellungsdatum)"
+  end
+
+  def date_range
+    d = record.xpath('.//Ausstellungsdatum/text()').to_s.strip
+
+    super(d)
   end
 
   # groesse

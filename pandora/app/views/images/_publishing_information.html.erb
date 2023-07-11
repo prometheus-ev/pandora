@@ -12,7 +12,7 @@
       <ul>
         <li>
           Rights of the work:
-          <% representative = rights_representative(@image, false) -%>
+          <% representative = @image.rights_representative -%>
     <% if (rights_work = @image.rights_work).blank? -%>
           <span>No information provided</span>
           <p>
@@ -24,7 +24,7 @@
             to send an inquiry to ask for publication permission.
     </p>
           <% else -%>
-            <%= render partial: 'shared/rights_work', locals: {rights_work: rights_work} %>
+            <%= render partial: 'images/rights_work', locals: {rights_work: Array.wrap(rights_work)} %>
           <% if representative -%>
     <p>
             The artist is represented by <%= representative %> and utilization rights
@@ -52,7 +52,7 @@
             credit information (<strong>see 2.</strong>).
           </p>
         <% else -%>
-          <%= render partial: 'images/rights_reproduction', locals: {rights_reproduction: rights_reproduction} %>
+          <%= render partial: 'images/rights_reproduction', locals: {rights_reproduction: Array.wrap(rights_reproduction)} %>
           <p>
             Permission to use the photograph/reproduction requires authorization
             directly from the copyright-holder, which means the photographer or

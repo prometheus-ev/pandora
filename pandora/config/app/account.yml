@@ -7,10 +7,10 @@
     - created_at
     - updated_at
   :search:
-    - login
-    - email
     - fullname
     - lastname
+    - login
+    - email
     - institution
     - roles
     - notes

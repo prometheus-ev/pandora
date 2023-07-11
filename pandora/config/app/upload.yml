@@ -21,18 +21,29 @@
   - location
 
 :licenses:
-  - 'None'
-  - 'In the public domain'
-  - 'CC0'
-  - 'CC BY (Attribution)'
-  - 'CC BY-SA (Attribution-ShareAlike)'
-  - 'CC BY-ND (Attribution-NoDerivs)'
-  - 'CC BY-NC (Attribution-NonCommercial)'
-  - 'CC BY-NC-SA (Attribution-NonCommercial-ShareAlike)'
-  - 'CC BY-NC-ND (Attribution-NonCommercial-NoDerivs)'
-  - 'Other'
+  'None':
+    ''
+  'In the public domain':
+    ''
+  'CC0':
+    'https://creativecommons.org/publicdomain/zero/1.0/'
+  'CC BY (Attribution)':
+    'https://creativecommons.org/licenses/by/4.0/'
+  'CC BY-SA (Attribution-ShareAlike)':
+    'https://creativecommons.org/licenses/by-sa/4.0/'
+  'CC BY-NC (Attribution-NonCommercial)':
+    'https://creativecommons.org/licenses/by-nc/4.0/'
+  'CC BY-NC-SA (Attribution-NonCommercial-ShareAlike)':
+    'https://creativecommons.org/licenses/by-nc-sa/4.0/'
+  'CC BY-ND (Attribution-NoDerivs)':
+    'https://creativecommons.org/licenses/by-nd/4.0/'
+  'CC BY-NC-ND (Attribution-NonCommercial-NoDerivs)':
+    'https://creativecommons.org/licenses/by-nc-nd/4.0/'
+  'Other':
+    ''
 
 :rights_work:
   - 'VG Bild-Kunst'
+  - 'rights_work_vgbk'
   - 'In the public domain'
   - 'Unknown'

@@ -38,6 +38,12 @@ class Indexing::Sources::Uustb < Indexing::SourceSuper
     record.xpath('.//a5060/a5064/text()')
   end
 
+  def date_range
+    d = date.to_s.strip
+
+    super(d)
+  end
+
   # gattung
   def genre
     "#{record.xpath('.//a5220/text()')}, #{record.xpath('.//a5222/text()')}".gsub(/\A, /, '').gsub(/, \z/, '')

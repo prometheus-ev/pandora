@@ -1,0 +1,160 @@
+<pm-size-indicator>
+  <div if={enabled()} class="d-flex py-4 pe-4">
+    <div
+      class="ref d-flex justify-content-stretch"
+      style="height: {personHeight()}px; margin-top: {offset()}px"
+    >
+      <div
+        class="align-self-center"
+      >{state.refHeight}cm</div>
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        class="me-2"
+        width="20px"
+        viewBox="0 0 20 150"
+      >
+        <defs>
+          <marker id="triangle" viewBox="0 0 10 10"
+            refX="1" refY="5"
+            markerUnits="strokeWidth"
+            markerWidth="10" markerHeight="10"
+            orient="auto-start-reverse"
+          >
+            <path d="M 0 0 L 10 5 L 0 10 z" fill="#aaaaaa"/>
+          </marker>
+        </defs>
+
+        <line
+          x1="10" y1="5"
+          x2="10" y2="145"
+          stroke="white"
+          stroke-width="0.5"
+          marker-start="url(#triangle)"
+          marker-end="url(#triangle)"
+        />
+      </svg>
+      <img src="/images/image/size_indicator.png" />
+    </div>
+    <div class="ms-4">
+      <div
+        class="artwork d-flex justify-content-center align-items-center mb-2"
+        style="width: {rect()[1]}px; height: {rect()[0]}px"
+      ></div>
+      
+      <div>
+        {artHeight()} cm × {artWidth()} cm
+      </div>
+
+      <div class="text-muted">
+        {props.unparsed}
+      </div>
+    </div>
+  </div>
+
+  <template if={!enabled()}>{props.unparsed}</template>
+
+
+  <script>
+    export default class {
+      onBeforeMount(props, state) {
+        const limit = 560.0
+        console.log(props)
+
+        state.refWidth = parseInt(props.refWidth, 10)
+        state.refHeight = parseInt(props.refHeight, 10)
+        state.artWidth = parseInt(props.artWidth, 10)
+        state.artHeight = parseInt(props.artHeight, 10)
+        state.max = parseInt(props.max, 10)
+
+        state.rect = [
+          this.project(state.artHeight),
+          this.project(state.artWidth)
+        ]
+
+        state.factor = 1.0
+        if (state.rect[0] * state.factor > limit) {
+          state.factor *= limit / state.rect[0]
+        }
+        if (state.rect[1] * state.factor > limit) {
+          state.factor *= limit / state.rect[1]
+        }
+
+        const img = this.image()
+        if (img) {
+          img.addEventListener('load', this.update)
+        }
+      }
+
+      enabled() {
+        // return false
+        
+        const m = this.state.max
+        const w = this.state.artWidth
+        const h = this.state.artHeight
+        // console.log(m, w, h)
+
+        if (!w || !h) {return false}
+
+        if (m && (w > m || h > m)) {return false}
+
+        return true
+      }
+
+      project(length) {
+        const cm = 150 / this.state.refHeight
+        return cm * length
+      }
+
+      personHeight() {
+        return this.project(150) * this.state.factor
+      }
+
+      offset() {
+        const result = this.rect()[1] - this.personHeight() + 2
+        return result < 0 ? 0 : result
+      }
+
+      rect() {
+        const result = [
+          this.state.rect[0] * this.state.factor,
+          this.state.rect[1] * this.state.factor
+        ]
+
+        if (!this.imgMatchesDims()) result.reverse()
+
+        return result
+      }
+
+      artWidth() {
+        return (this.imgMatchesDims() ? this.state.artWidth : this.state.artHeight)
+      }
+
+      artHeight() {
+        return (this.imgMatchesDims() ? this.state.artHeight : this.state.artWidth)
+      }
+
+      imgMatchesDims() {
+        const o = this.orientation()
+        if (o == 'landscape' && this.state.rect[0] > this.state.rect[1]) return false
+        if (o == 'portrait' && this.state.rect[0] < this.state.rect[1]) return false
+
+        return true
+      }
+
+      orientation() {
+        const img = this.image()
+        if (!img) return null
+
+        return (img.offsetWidth > img.offsetHeight ? 'landscape' : 'portrait')
+      }
+
+      image() {
+        const selector = this.props.imageSelector
+
+        if (selector) {
+          return document.querySelector(selector)
+        }
+      }
+    }
+  </script>
+</pm-size-indicator>

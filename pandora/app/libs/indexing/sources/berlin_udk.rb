@@ -39,6 +39,12 @@ class Indexing::Sources::BerlinUdk < Indexing::SourceSuper
     record.xpath('.//dating/text()')
   end
 
+  def date_range
+    date = record.xpath('.//dating/text()').to_s.strip
+
+    super(date)
+  end
+
   # bildnachweis
   def credits
     ("#{record.xpath('.//literature/text()')}," +

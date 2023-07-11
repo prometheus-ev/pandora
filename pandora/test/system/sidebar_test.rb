@@ -38,7 +38,7 @@ class SidebarTest < ApplicationSystemTestCase
     end
 
     # test with deactivated collection owner
-    c.owner.update_attributes status: 'deactivated'
+    c.owner.update status: 'deactivated'
     visit '/'
 
     within '#sidebar' do

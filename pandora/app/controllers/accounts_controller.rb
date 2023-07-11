@@ -1,7 +1,4 @@
 class AccountsController < ApplicationController
-
-  skip_before_action :store_location, :only => ADMINISTRATIVE_ACTIONS + [:suggest_names]
-
   # the partial remote forms are using POST requests to the show action
   # when the cancel button is clicked ... obviously without the token
   skip_before_action :verify_authenticity_token, only: ['show', 'login']
@@ -88,8 +85,15 @@ class AccountsController < ApplicationController
     @user = Account.new(ap)
 
     roles = (ap[:role_ids] ? Role.find(ap[:role_ids]) : Role.where(title: 'user'))
-    return permission_denied unless roles.empty? || current_user.roles_allowed?(roles)
-    return redirect_back_or_default if anonymous?(roles)
+    unless roles.empty? || current_user.roles_allowed?(roles)
+      forbidden
+      return
+    end
+
+    if anonymous?(roles)
+      redirect_to action: 'new'
+      return
+    end
 
     @user.roles = roles
 
@@ -145,13 +149,17 @@ class AccountsController < ApplicationController
       end
 
       recipients.each { |recipient|
-        current_user.deliver(:usermail, recipient, @text)
+        current_user.deliver(:usermail, recipient: recipient, text: @text)
       }
 
-      current_user.deliver(:usermail_response, recipients, @text)
+      current_user.deliver(:usermail_response,
+        recipients: recipients,
+        text: @text
+      )
 
       flash[:notice] = 'Your message has been delivered.'.t
-      redirect_back_or_default(:previous, :start)
+      redirect_back fallback_location: locale_root_path
+      # redirect_back_or_default(:previous, :start)
     end
   end
 

@@ -33,6 +33,12 @@ class Indexing::Sources::ZuerichZhdk < Indexing::SourceSuper
     _label("madek_core:portrayed_object_date")
   end
 
+  def date_range
+    d = date.to_s.strip
+
+    super(d)
+  end
+
   def artist
     _label("madek_core:authors", "last-name")
   end

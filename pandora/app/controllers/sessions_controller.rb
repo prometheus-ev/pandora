@@ -47,7 +47,8 @@ class SessionsController < ApplicationController
         session[:accepted_terms_of_use] = true
       end
 
-      redirect_to(params[:return_to].presence || locale_root_url)
+      url = params[:return_to].presence || locale_root_url
+      redirect_to(url, allow_other_host: true)
     else
       flash[:warning] = [
         'Your institution %s does no longer hold a license.' / institution.title,
@@ -89,6 +90,7 @@ class SessionsController < ApplicationController
       return
     end
 
+
     if @account
       log_in(@account, remember_me: params[:remember_me] == '1')
 
@@ -97,14 +99,18 @@ class SessionsController < ApplicationController
 
       notify_upcoming_expiry(@account)
 
-      redirect_to(params[:return_to] || default_location(:start))
+      url = params[:return_to].presence ||
+        user_root_path ||
+        locale_root_url
+      redirect_to(url, allow_other_host: true)
     end
   end
 
   def destroy
     log_out
 
-    redirect_to(ENV['PM_LOGOUT_URL'] || login_path)
+    url = ENV['PM_LOGOUT_URL'] || login_path
+    redirect_to(url, allow_other_host: true)
   end
 
 
@@ -145,7 +151,7 @@ class SessionsController < ApplicationController
     else
       # no, really no cookies enabled!
       @current_page, @domain = safe_params, request.host
-      render :template => 'pandora/no_cookies'
+      render template: 'pandora/no_cookies'
     end
 
     false

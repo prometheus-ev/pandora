@@ -1,0 +1,81 @@
+<% c_count = row.collections.count %>
+<% s_count = row.sources.count %>
+<% u_count = row.uploads.count %>
+<% inuse = (c_count + s_count + u_count > 0) %>
+
+<tr class="<%= cycle('odd', 'even') %>">
+  <td class="d-flex justify-content-between">
+    <div class="pe-5">
+      <%= row.locale_title %>
+
+      <% if row.other_title.present? %>
+        <div class="text-muted text-small">
+          (<%= 'translation'.t %>: <%= row.other_title %>)
+        </div>
+      <% end %>
+    </div>
+
+    <% if row.has_whitespace? %>
+      <div class="pm-white-space">
+        <%= 'Has whitespace'.t %>:
+
+        <% if row.locale_title.present? %>
+          <%= row.locale_title.inspect %>
+        <% end %>
+        
+        <% if row.other_title.present? %>
+          <div class="text-muted">
+            (<%= 'translation' %>: <%= row.other_title.inspect %>)
+          </div>
+        <% end %>
+      </div>
+    <% end %>
+
+    <div class="d-flex flex-column text-right flex-shrink-0">
+      <div class="pm-buttons">
+        <%= link_to(
+          image_tag('icon/edit.gif'),
+          edit_keyword_path(row),
+          class: 'icon edit-icon',
+          title: 'Edit'.t
+        ) %>
+
+        <% confirm = 'Are you sure?' %>
+        <% if inuse
+            confirm += ' The keyword will be removed from all sources, uploads and collections'
+        end %>
+
+        <%= link_to(
+          image_tag('icon/delete.gif'),
+          keyword_path(row),
+          class: 'icon delete-icon',
+          title: 'Delete'.t,
+          data: {confirm: confirm.t},
+          method: 'DELETE'
+        ) %>
+      </div>
+
+      <div class="text-small text-muted mt-1">
+        <% if inuse %>
+          <% if c_count > 0 %>
+            <%= link_to all_collections_path(field: 'keywords', value: row.locale_title) do %>
+              <%= pm_labelled_counter(c_count, '%d collection'.t, '%d collections'.t) %><br />
+            <% end %>
+          <% end %>
+          <% if s_count > 0%>
+            <%= link_to sources_path(field: 'keywords', value: row.locale_title) do %>
+              <%= pm_labelled_counter(s_count, '%d source'.t, '%d sources'.t) %><br />
+            <% end %>
+          <% end %>
+          <% if u_count > 0%>
+            <%= link_to all_uploads_path(field: 'keywords', value: row.locale_title) do %>
+              <%= pm_labelled_counter(u_count, '%d upload'.t, '%d uploads'.t) %>
+            <% end %>
+          <% end %>
+        <% else %>
+          <%= 'Not used by any objects'.t %>
+        <% end %>
+      </div>
+    </div>
+  </td>
+</tr>

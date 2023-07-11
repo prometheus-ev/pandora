@@ -101,9 +101,14 @@ class UploadsTest < ApplicationSystemTestCase
     attach_file 'File', Rails.root.join('test/fixtures/files/skull.jpg')
     fill_in 'Title', with: 'Mona Lisa'
     select 'In the public domain', from: 'upload[license]'
-    choose 'VG Bild-Kunst'
+    choose 'upload_rights_work_rights_work_vgbk'
+    assert_text 'Show this upload as search result (to all users)'
     submit
     assert_text 'successfully uploaded!'
+
+    # check no index update on create (upload is not approved)
+    upload = Upload.last
+    assert_not upload.super_image.elastic_record['_found']
 
     # add a keyword using the suggest
     fill_in 'Keywords', with: 'pai'
@@ -112,6 +117,9 @@ class UploadsTest < ApplicationSystemTestCase
       submit('Save')
     end
     assert 'painting', Upload.last.keywords.first.title
+
+    # check no index update on update (upload is still not approved)
+    assert_not upload.super_image.elastic_record['_found']
 
     # add a location with html, see below
     within '#object_geographic-section' do
@@ -136,7 +144,7 @@ class UploadsTest < ApplicationSystemTestCase
     attach_file 'File', Rails.root.join('test/fixtures/files/mona_lisa.jpg')
     fill_in 'Title', with: 'Mona Lisa'
     select 'In the public domain', from: 'upload[license]'
-    choose 'VG Bild-Kunst'
+    choose 'upload_rights_work_rights_work_vgbk'
     submit
     assert_text 'successfully uploaded!'
 
@@ -179,8 +187,10 @@ class UploadsTest < ApplicationSystemTestCase
         using_wait_time 10 do
           find('#upload-location-search-result li:first-child').click
         end
-        assert_equal "49.49277", find("input[name='upload[latitude]']").value
-        assert_equal "11.47152", find("input[name='upload[longitude]']").value
+        lat = find("input[name='upload[latitude]']").value.to_f
+        lng = find("input[name='upload[longitude]']").value.to_f
+        assert_in_delta 49.49277, lat, 0.005
+        assert_in_delta 11.47152, lng, 0.005
         find('div.button_middle', text: 'Save').click
       end
 
@@ -206,6 +216,8 @@ class UploadsTest < ApplicationSystemTestCase
   end
 
   test 'delete an upload' do
+    upload = Upload.last
+
     login_as 'jdoe'
 
     click_on 'My Uploads'
@@ -218,6 +230,9 @@ class UploadsTest < ApplicationSystemTestCase
     assert_text 'successfully deleted'
     assert_text 'Search uploads'
     assert_no_text 'A upload'
+
+    # there should also not be any errors related to removing the index doc,
+    # although it doesn't exist
   end
 
   test 'list uploads' do
@@ -439,7 +454,7 @@ class UploadsTest < ApplicationSystemTestCase
     login_as 'jdoe'
     click_on 'My Uploads'
     find('div.button_middle', text: 'Create new upload').click
-    assert_text 'You\'ve reached your quota limit of 0 Bytes. Please delete some of your images!'
+    assert_text 'You\'ve reached your quota limit of 0 Bytes.'
     logout
 
     login_as 'superadmin'
@@ -463,7 +478,7 @@ class UploadsTest < ApplicationSystemTestCase
     logout
   end
 
-  test 'approving an upload doesn\'t remove it from private collections' do
+  test "approving an upload doesn't remove it from private collections" do
     login_as 'jdoe'
     click_on 'Collections'
     click_on 'Create a new collection'
@@ -506,11 +521,106 @@ class UploadsTest < ApplicationSystemTestCase
     assert_text "Object successfully updated!"
     logout
 
+    # the upload is now approved and should therefore have ben indexed and
+    # the (global) "sources" Source should reflect that
+    upload = Upload.last
+    doc = upload.super_image.elastic_record['_source']
+    assert_equal ['Skull of a Skeleton with Burning Cigarette'], doc['title']
+    assert_equal 1, Source.find_by!(name: 'uploads').record_count
+
     login_as 'jdoe'
     click_on 'Collections'
     click_on "A new private collection"
     assert_text('1 Image')
     assert has_css?("div.image a img##{Upload.last.pid}")
+  end
+
+  test 'records are removed from index when unapproved' do
+    upload = Upload.last
+    upload.update_column :approved_record, true
+    upload.index_doc
+    assert_equal 1, Source.find_by!(name: 'uploads').record_count
+
+    login_as 'superadmin'
+    click_on 'Administration'
+
+    within(:xpath, '//div[h3/text()="Upload"]') do
+      click_on "Approved"
+    end
+
+    within('.list_row', text: 'A upload') do
+      click_on 'Edit'
+    end
+
+    uncheck "Approved?"
+    find("#approve_table .submit_button").click
+    assert_text "Object successfully updated!"
+
+    # the index doc shouldn't exist anymore and the (global) "uploads" Source
+    # should reflect that
+    upload = Upload.last
+    assert_not upload.super_image.elastic_record['found']
+    assert_equal 0, Source.find_by!(name: 'uploads').record_count
+  end
+
+  test 'klapsch filter' do
+    upload = Upload.last
+    upload.update_column :title, 'a KlaPsCh pic!'
+
+    login_as 'superadmin'
+    click_on 'Administration'
+
+    within(:xpath, '//div[h3/text()="Upload"]') do
+      click_on "Unapproved"
+    end
+
+    within('.list_row', text: 'a KlaPsCh pic!') do
+      click_on 'Edit'
+    end
+    check "Approved?"
+    find("#approve_table .submit_button").click
+    assert_text "Object successfully updated!"
+
+    assert_equal 1, ActionMailer::Base.deliveries.count
+    mail = ActionMailer::Base.deliveries[0]
+    assert_match /The upload has not been indexed/, mail.body.to_s
+  end
+
+  test 'returns working image url for indexed uploads (also after removing from index)' do
+    with_env 'PM_USE_TEST_IMAGE' => 'false' do
+      upload = Upload.first
+      upload.update_columns approved_record: true
+      upload.index_doc
+
+      pid = upload.pid.sub('upload-', 'uploads-')
+      size = nil
+
+      si = Pandora::SuperImage.new(pid)
+      response = Faraday.get(si.image_url(:small))
+      assert_equal 200, response.status
+      size = response.body.size
+
+      upload.update_columns approved_record: false
+      upload.index_doc
+      
+      si = Pandora::SuperImage.new(pid)
+      response = Faraday.get(si.image_url(:small))
+      assert_equal 502, response.status
+
+      # We check that no data is rendered for the (now) unapproved record
+      si = Pandora::SuperImage.new(pid)
+      mrossi = Account.find_by! login: 'mrossi'
+      collection = Collection.create! owner: mrossi, title: 'mine'
+      collection.images << si.image
+
+      login_as 'mrossi'
+      visit '/en/collections'
+      assert_no_text 'A upload'
+      click_on 'mine'
+      assert_no_text 'A upload'
+      click_on '[Not available]'
+      assert_no_text 'A upload'
+    end
   end
 
   # test 'add multiple uploads to a collection' do

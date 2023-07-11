@@ -17,7 +17,7 @@ end
 # after the test run, we generate the report for unused translations
 if ENV['COVERAGE'] == 'true'
   at_exit do
-    I18n::Backend::Pandora.coverage_report
+    ::I18n::Backend::Pandora.coverage_report
   end
 end
 
@@ -39,6 +39,8 @@ require 'minitest/mock'
 #   end
 # end
 
+Dir["#{Rails.root}/test/test_sources/*.rb"].each{|f| require f}
+
 class ActiveSupport::TestCase
   # we load the existing translations coverage data if available and not
   # outdated
@@ -47,9 +49,7 @@ class ActiveSupport::TestCase
   end
 
   DatabaseCleaner.clean_with :truncation
-
-  # Setup all fixtures in test/fixtures/*.yml for all tests in alphabetical order.
-  # fixtures :all
+  DatabaseCleaner.clean
 
   system "rm -rf #{ENV['PM_ROOT']}/pandora/tmp/test"
   Pandora::ImagesDir.new.run
@@ -62,34 +62,30 @@ class ActiveSupport::TestCase
   system "rm -rf #{backup_dir}"
   system "cp -a #{ENV['PM_ROOT']}/pandora/tmp/test #{backup_dir}"
 
-  def self.production_sources_available?
-    files = [
-      "#{Rails.root}/test/fixtures/index_packs/robertin.json.gz",
-      "#{Rails.root}/test/fixtures/index_packs/daumier.json.gz"
-    ]
-    files.all?{|f| File.exists?(f)}
-  end
-
-  if production_sources_available?
-    if !Indexing::Index.exists?('robertin')
-      puts "importing 'robertin' index data"
-      Indexing::IndexTasks.new.load(['robertin'])
-    end
-
-    if !Indexing::Index.exists?('daumier')
-      puts "importing 'daumier' index data"
-      Indexing::IndexTasks.new.load(['daumier'])
-    end
-  end
-
   self.use_transactional_tests = true
-  # self.pre_loaded_fixtures = true
 
   File.truncate "#{Rails.root}/log/test.log", 0
 
-  def setup
+  setup do
     I18n.locale = :en
+
+    # dropping non-default indices
+    names = Pandora::Elastic.new.aliases - ['daumier', 'robertin']
+    Indexing::IndexTasks.new.drop(names) unless names.empty?
+
+    # TODO see https://github.com/rails/rails/issues/37270
+    (ActiveJob::Base.descendants << ActiveJob::Base).each do |job_class|
+      job_class.disable_test_adapter
+    end
+
+    Pandora::Elastic.new.destroy_all
   end
+
+  # def around(&block)
+  #   DatabaseCleaner.clean do
+  #     yield
+  #   end
+  # end
 
   def reload_page
     page.evaluate_script("window.location.reload()")
@@ -148,7 +144,10 @@ class ActiveSupport::TestCase
   end
 
   def links_from_email(email)
-    email.body.to_s.scan(/http[^\n> ]+/)
+    body = !email.body.multipart? ? email.body : email.body.parts.find{ |p|
+      p.content_type.match?(/^text\/plain/)
+    }
+    body.to_s.scan(/http[^\n> ]+/).map{|l| l.gsub(/=0D/, '')}
   end
 
   def link_from_email(email)
@@ -202,18 +201,29 @@ class ActiveSupport::TestCase
   #   end
   # end
 
-  def with_translations_raised
-    old = ENV['PM_RAISE_TRANSLATIONS']
-    ENV['PM_RAISE_TRANSLATIONS'] = 'true'
+  def with_locale(locale)
+    old = I18n.locale
+    I18n.locale = locale
     yield
-    ENV['PM_RAISE_TRANSLATIONS'] = old
+    I18n.locale = old
+  end
+
+  def with_translations_raised
+    with_env 'PM_RAISE_TRANSLATIONS' => 'true' do
+      yield
+    end
   end
 
   def with_real_images
-    old = ENV['PM_USE_TEST_IMAGE']
-    ENV['PM_USE_TEST_IMAGE'] = 'false'
-    yield
-    ENV['PM_USE_TEST_IMAGE'] = old
+    with_env 'PM_USE_TEST_IMAGE' => 'false' do
+      yield
+    end
+  end
+
+  def with_all_synonyms
+    with_env 'PM_SYNONYMS_DIR' => '/vagrant/pandora/config/synonyms/' do
+      yield
+    end
   end
 
   def with_env(overrides = {})
@@ -227,7 +237,6 @@ class ActiveSupport::TestCase
       ENV[key] = old[key]
     end
   end
-
 
   def close_other_tabs
     window = page.driver.browser.window_handles
@@ -254,16 +263,24 @@ class ActiveSupport::TestCase
     page.evaluate_script('window.history.back()')
   end
 
-  def create_upload(filename, options = {})
+  def create_upload(file, options = {})
+    if file.is_a?(Rack::Test::UploadedFile)
+      options[:file] = file
+    else
+      options.reverse_merge!(
+        title: file.humanize.capitalize,
+        file: Rack::Test::UploadedFile.new(
+          "#{Rails.root}/test/fixtures/files/#{file}.jpg",
+          'image/jpeg'
+        )
+      )
+    end
+
     options.reverse_merge!(
       database: Account.find_by!(login: 'jdoe').database,
-      title: filename.humanize.capitalize,
       rights_reproduction: 'None, do not use!',
       rights_work: 'None, do not use!',
-      file: Rack::Test::UploadedFile.new(
-        "#{Rails.root}/test/fixtures/files/#{filename}.jpg",
-        'image/jpeg'
-      )
+      add_to_index: true
     )
 
     Upload.create!(options)
@@ -317,6 +334,22 @@ class ActiveSupport::TestCase
     patch '/en/terms', params: {accepted: 1}
   end
 
+  def elastic
+    @elastic ||= Pandora::Elastic.new
+  end
+
+  def require_test_sources
+    Dir["#{Rails.root}/test/test_sources/*.rb"].each{ |file| require file }
+  end
+
+  def pid_for(id, source_id = 'test_source')
+    Pandora::SuperImage.pid_for(source_id, id)
+  end
+
+  def elastic
+    Pandora::Elastic.new
+  end
+
   def stats_data
     # parse log files
     cache = Pandora::LogCache.new
@@ -368,6 +401,11 @@ class ActiveSupport::TestCase
     {width: w, height: h}
   end
 
+  def mime_type_for(file)
+    stdout = Pandora.run('file', '--mime-type', '-b', file)
+    stdout.strip
+  end
+
   # Announcement helper methods
 
   def valid_announcement
@@ -400,5 +438,42 @@ class ActiveSupport::TestCase
       n.title_en = n.title_en + " #{i}"
       n.save
     }
+  end
+
+  # institutional uploads helpers
+
+  def institutional_upload_source(admins, institution = nil)
+    institution ||= Institution.find_by!(name: "prometheus")
+
+    Source.create!(
+      name: institution.name,
+      title: institution.name.titleize,
+      kind: "Institutional database",
+      type: "upload",
+      institution: institution,
+      owner: institution,
+      keywords: [Keyword.find_by!(title: 'Institutional Upload')],
+      quota: Institution::DEFAULT_DATABASE_QUOTA,
+      source_admins: admins
+    )
+  end
+
+  def institutional_upload(source, filename, options = {})
+    options.reverse_merge!(
+      database: source,
+      title: filename.humanize.capitalize,
+      rights_reproduction: 'None, do not use!',
+      rights_work: 'None, do not use!',
+      keywords: [Keyword.new(title: 'One'), Keyword.new(title: 'Two')],
+      file: Rack::Test::UploadedFile.new(
+        "#{Rails.root}/test/fixtures/files/#{filename}.jpg",
+        'image/jpeg'
+      ),
+      add_to_index: true
+    )
+
+    upload = Upload.create!(options)
+    upload.index_doc
+    upload
   end
 end

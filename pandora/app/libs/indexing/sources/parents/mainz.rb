@@ -1,5 +1,6 @@
 class Indexing::Sources::Parents::Mainz < Indexing::SourceSuper
   def records
+    @node_name = 'Bild'
     document.xpath('//Bild')
   end
 
@@ -9,6 +10,10 @@ class Indexing::Sources::Parents::Mainz < Indexing::SourceSuper
 
   def record_object_id
     [name, Digest::SHA1.hexdigest(title.text + location.text)].join('-')
+  end
+
+  def record_object_id_count
+    @record_object_id_count[record_object_id]
   end
 
   def path
@@ -42,6 +47,12 @@ class Indexing::Sources::Parents::Mainz < Indexing::SourceSuper
 
   def date
     record.xpath('.//p_Datierung/text()')
+  end
+
+  def date_range
+    d = date.to_s.strip
+
+    super(d)
   end
 
   # standort

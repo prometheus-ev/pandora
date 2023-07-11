@@ -3,7 +3,7 @@ require "application_system_test_case"
 class CollectionsTest < ApplicationSystemTestCase
   test 'filter & sort collections' do
     collection = Collection.find_by!(title: "John's private collection")
-    collection.update_attributes(
+    collection.update(
       keyword_list: "fotografie\nwelthauptstadt der fotografie"
     )
 
@@ -34,7 +34,7 @@ class CollectionsTest < ApplicationSystemTestCase
 
   test 'create a collection' do
     mrossi = Account.find_by!(login: 'mrossi')
-    mrossi.update_attributes locale: 'de'
+    mrossi.update locale: 'de'
     
     login_as 'jdoe'
 
@@ -56,9 +56,10 @@ class CollectionsTest < ApplicationSystemTestCase
     # make sure the suggest is closed and doesn't cover the submit button (!)
     find("body").native.send_keys :escape
     submit
-    
+
     # assert that the notification mail is sent in mrossi's locale
     mail = ActionMailer::Base.deliveries.first
+    assert_match /text\/plain/, mail.content_type
     assert_match /Sie wurden als Mitarbeiter/, mail.body.to_s
 
     assert_text "Collection 'nice ones' successfully created!", wait: 5
@@ -121,110 +122,114 @@ class CollectionsTest < ApplicationSystemTestCase
     end
   end
 
-  if production_sources_available?
-    test 'add an image to a collection, download it, then remove the image' do
-      login_as 'jdoe'
+  test 'add an image to a collection, download it, then remove the image' do
+    TestSource.index
 
-      fill_in 'search_value_0', with: 'baum'
-      find('.search_query .submit_button').click
+    login_as 'jdoe'
 
-      row = find('.list_row', text: 'Femme sous un arbre')
-      row.find('.store_image .popup_toggle').click
-      select "John's private collection", from: "own_collections_selector"
-      assert_text "Image successfully stored in collection 'John's private collection'"
+    fill_in 'search_value_0', with: 'stuhl'
+    find('.search_query .submit_button').click
 
-      click_on 'Collections'
-      click_on "John's private collection"
+    row = find('.list_row', text: 'Katze auf Stuhl')
+    row.find('.store_image .popup_toggle').click
+    select "John's private collection", from: "own_collections_selector"
+    assert_text "Image successfully stored in collection 'John's private collection'"
 
-      # test list view
-      within_upper_list_controls do
-        click_on 'List'
+    click_on 'Collections'
+    click_on "John's private collection"
+
+    # test list view
+    within_upper_list_controls do
+      click_on 'List'
+    end
+    assert_text 'Katze auf Stuhl'
+
+    click_on 'Download collection'
+
+    # we are happy with no errors here: The zip content will be verified in an
+    # API test
+
+    within '#images-section' do
+      accept_confirm do
+        click_on 'Delete image from collection'
       end
-      assert_text 'Femme sous un arbre'
-
-      click_on 'Download collection'
-
-      # we are happy with no errors here: The zip content will be verified in an
-      # API test
-
-      within '#images-section' do
-        accept_confirm do
-          click_on 'Delete image from collection'
-        end
-        assert_text 'none'
-      end
-
-      click_on 'Deutsch'
-      click_on 'Suche'
-
-      fill_in 'search_value_0', with: 'baum'
-      find('.search_query .submit_button').click
-
-      row = find('.list_row', text: 'Femme sous un arbre')
-      row.find('.store_image .popup_toggle').click
-      select "John's private collection", from: "own_collections_selector"
-      assert_text "Bild erfolgreich in der Bildsammlung 'John's private collection' gespeichert."
-
-      click_on 'Bildsammlungen'
-      click_on "John's private collection"
-
-      # test list view
-      within_upper_list_controls do
-        click_on 'Listenansicht'
-      end
-      assert_text 'Femme sous un arbre'
-
-      within '#images-section' do
-        accept_confirm do
-          click_on 'Lösche das Bild aus der Bildsammlung'
-        end
-      end
+      assert_text 'none'
     end
 
-    test 'add several images to an existing collection at once' do
-      collection = Collection.find_by!(title: "John's private collection")
-      ca = collection.created_at
-      ua = collection.updated_at
+    click_on 'Deutsch'
+    click_on 'Suche'
 
-      login_as 'jdoe'
+    fill_in 'search_value_0', with: 'stuhl'
+    find('.search_query .submit_button').click
 
-      fill_in 'search_value_0', with: 'baum'
-      find('.search_query .submit_button').click
+    row = find('.list_row', text: 'Katze auf Stuhl')
+    row.find('.store_image .popup_toggle').click
+    select "John's private collection", from: "own_collections_selector"
+    assert_text "Bild erfolgreich in der Bildsammlung 'John's private collection' gespeichert."
 
-      results = all('.list_row')
-      results[0..2].each do |r|
-        r.find('input[type=checkbox]').click
+    click_on 'Bildsammlungen'
+    click_on "John's private collection"
+
+    # test list view
+    within_upper_list_controls do
+      click_on 'Listenansicht'
+    end
+    assert_text 'Katze auf Stuhl'
+
+    within '#images-section' do
+      accept_confirm do
+        click_on 'Lösche das Bild aus der Bildsammlung'
       end
+    end
+  end
 
-      find('.store_controls.position-top .button_middle').click
-      select("John's private collection")
-      assert_text '3 images successfully stored'
+  test 'add several images to an existing collection at once' do
+    TestSource.index
 
-      collection.reload
-      assert_equal collection.created_at, ca
-      assert collection.updated_at > ua
+    collection = Collection.find_by!(title: "John's private collection")
+    ca = collection.created_at
+    ua = collection.updated_at
+
+    login_as 'jdoe'
+
+    fill_in 'search_value_0', with: 'stuhl'
+    find('.search_query .submit_button').click
+
+    results = all('.list_row')
+    results[0..2].each do |r|
+      r.find('input[type=checkbox]').click
     end
 
-    test 'add several images to a new collection at once' do
-      login_as 'jdoe'
+    find('.store_controls.position-top .button_middle').click
+    select("John's private collection")
+    assert_text '3 images successfully stored'
 
-      fill_in 'search_value_0', with: 'baum'
-      find('.search_query .submit_button').click
+    collection.reload
+    assert_equal collection.created_at, ca
+    assert collection.updated_at > ua
+  end
 
-      results = all('.list_row')
-      results[0..2].each do |r|
-        r.find('input[type=checkbox]').click
-      end
+  test 'add several images to a new collection at once' do
+    TestSource.index
 
-      find('.store_controls.position-top .button_middle').click
-      find('.button_middle', text: 'New Collection').click
+    login_as 'jdoe'
 
-      fill_in 'Title', with: 'my collection'
-      submit
+    fill_in 'search_value_0', with: 'stuhl'
+    find('.search_query .submit_button').click
 
-      assert_text '3 images successfully stored'
-      assert_text 'Advanced search'
+    results = all('.list_row')
+    results[0..2].each do |r|
+      r.find('input[type=checkbox]').click
     end
+
+    find('.store_controls.position-top .button_middle').click
+    find('.button_middle', text: 'New Collection').click
+
+    fill_in 'Title', with: 'my collection'
+    submit
+
+    assert_text '3 images successfully stored'
+    assert_text 'Advanced search'
   end
 
   test 'try to add upload to a public collection' do
@@ -345,6 +350,7 @@ class CollectionsTest < ApplicationSystemTestCase
     # should have generated notification to mrossi
     mail = ActionMailer::Base.deliveries.first
     assert_match /Added as collaborator/, mail.subject
+    assert_match /text\/plain/, mail.content_type
     assert_equal ['mrossi@prometheus-bildarchiv.de'], mail.to
 
     logout
@@ -397,6 +403,7 @@ class CollectionsTest < ApplicationSystemTestCase
     # should have generated notification to mrossi
     mail = ActionMailer::Base.deliveries[1]
     assert_match /Removed as collaborator/, mail.subject
+    assert_match /text\/plain/, mail.content_type
     assert_equal ['mrossi@prometheus-bildarchiv.de'], mail.to
   end
 
@@ -429,7 +436,7 @@ class CollectionsTest < ApplicationSystemTestCase
   test 'sort collection images' do
     leonardo = create_upload 'leonardo', approved_record: true
     mona_lisa = Upload.find_by! title: 'A upload'
-    mona_lisa.update_attributes approved_record: true
+    mona_lisa.update approved_record: true
     c = Collection.find_by! title: "John's private collection"
     c.images << leonardo.image
     c.images << mona_lisa.image
@@ -498,7 +505,7 @@ class CollectionsTest < ApplicationSystemTestCase
     jdoe.collection_settings = CollectionSettings.new(per_page: 20)
     collection = Collection.find_by!(title: "John's private collection")
     upload = Upload.first
-    upload.update_attributes approved_record: true
+    upload.update approved_record: true
     collection.images << upload.image
     login_as 'jdoe'
 
@@ -509,20 +516,20 @@ class CollectionsTest < ApplicationSystemTestCase
     end
   end
 
-  if production_sources_available?
-    test 'add several images to a collection at the same time' do
-      login_as 'jdoe'
+  test 'add several images to a collection at the same time' do
+    TestSource.index
 
-      fill_in 'search_value_0', with: 'baum'
-      find('.search_query .submit_button').click
+    login_as 'jdoe'
 
-      find('.list_row:nth-child(1) .image_list_item').click
-      find('.list_row:nth-child(2) .image_list_item').click
+    fill_in 'search_value_0', with: 'stuhl'
+    find('.search_query .submit_button').click
 
-      find('div.store_controls.position-top .button_middle', text: 'Store images in...').click
-      select "John's collaboration collection", from: 'own_collections_selector'
-      assert_text "2 images successfully stored in collection 'John's collaboration collection'"
-    end
+    find('.list_row:nth-child(1) .image_list_item').click
+    find('.list_row:nth-child(2) .image_list_item').click
+
+    find('div.store_controls.position-top .button_middle', text: 'Store images in...').click
+    select "John's collaboration collection", from: 'own_collections_selector'
+    assert_text "2 images successfully stored in collection 'John's collaboration collection'"
   end
 
   test "using viewer/collaborator autocomplete shouldn't lead to login" do
@@ -566,12 +573,12 @@ class CollectionsTest < ApplicationSystemTestCase
 
   test 'keyword links' do
     priv = Collection.find_by!(title: "John's private collection")
-    priv.update_attributes(
+    priv.update(
       keyword_list: "gold\nsilver"
     )
 
     pub = Collection.find_by!(title: "John's public collection")
-    pub.update_attributes(
+    pub.update(
       keyword_list: 'gold'
     )
 
@@ -617,13 +624,13 @@ class CollectionsTest < ApplicationSystemTestCase
     jdoe = Account.find_by(login: "jdoe")
     mrossi = Account.find_by(login: "mrossi")
 
-    shared_by_collection = Collection.create!({
+    shared_by_collection = Collection.create!(
       title: "John's shared collection",
       description: 'shared by John with Mario',
       viewers: [mrossi],
       collaborators: [mrossi],
       owner: jdoe
-    }, without_protection: true)
+    )
 
     login_as 'jdoe'
     click_on 'Uploads'
@@ -641,5 +648,21 @@ class CollectionsTest < ApplicationSystemTestCase
     click_on 'Uploads'
     find(:xpath, "//div[@data-upload-id=1]").find("div.store_image").click
     assert_text "This image of your database is not available to public collections until approval of the prometheus office."
+  end
+
+  test 'show all' do
+    mrossi = Account.find_by!(login: 'mrossi')
+    mrossi.collections.create title: 'Pretty stuff'
+
+    login_as 'mrossi'
+
+    visit '/en/collections'
+    click_on 'All'
+
+    assert_text 'Pretty stuff'
+    assert_text "John Expired's public collection"
+    assert_text "John's collaboration collection"
+    assert_text "John's public collection"
+    assert_no_text "John's private collection"
   end
 end

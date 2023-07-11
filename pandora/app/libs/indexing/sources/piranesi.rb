@@ -27,6 +27,12 @@ class Indexing::Sources::Piranesi < Indexing::SourceSuper
     record.xpath(".//Datierung/text()")
   end
 
+  def date_range
+    d = date.to_s.strip
+
+    super(d)
+  end
+
   def credits
     record.xpath(".//Abildungsnachweis/text()", ".//Literatur/text()")
   end

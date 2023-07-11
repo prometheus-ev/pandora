@@ -32,6 +32,12 @@ class Indexing::Sources::Parents::Filemaker < Indexing::SourceSuper
     "#{record.xpath('.//datierungsvermerk/text()')}"
   end
 
+  def date_range
+    d = date.strip.encode('iso-8859-1').encode('utf-8')
+
+    super(d)
+  end
+
   # standort
   def location
     record.xpath('.//ort/text()')

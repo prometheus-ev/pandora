@@ -15,7 +15,13 @@ class Indexing::Sources::ParisMusees < Indexing::SourceSuper
   end
 
   def record_object_id
-    record.xpath('../../entityId/text()')
+    if record_object_id_count > 1
+      [name, Digest::SHA1.hexdigest(record.xpath('../../entityId/text()').to_s)].join('-')
+    end
+  end
+
+  def record_object_id_count
+    record.xpath('../..').xpath('//fieldVisuelsPrincipal').count
   end
 
   def path
@@ -92,7 +98,7 @@ class Indexing::Sources::ParisMusees < Indexing::SourceSuper
       reject(&:blank?).join(" | ")
   end
 
-  def dimensions
+  def size
     record.xpath('../../fieldOeuvreDimensions/fieldOeuvreDimension/entity').map do |entity|
       fieldDimension(entity)
     end.reject(&:blank?).join (" | ")

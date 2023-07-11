@@ -30,7 +30,7 @@ class Pandora::LogCache
       gzip = "#{filename}.gz"
 
       out = Pandora::Stats.new(@requests[date])
-      if File.exists?(gzip)
+      if File.exist?(gzip)
         out = (out + Pandora::Stats.load(filename)).uniq
         File.delete gzip
       end
@@ -39,7 +39,7 @@ class Pandora::LogCache
         f.write out.to_json
       end
 
-      # free drop the data we just wrote to the pack file, so the memory is
+      # drop the data we just wrote to the pack file, so the memory is
       # freed
       @requests.delete date
 

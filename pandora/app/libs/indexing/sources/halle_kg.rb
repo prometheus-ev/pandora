@@ -67,6 +67,22 @@ class Indexing::Sources::HalleKg < Indexing::SourceSuper
     record.xpath('.//column[@name="datierung"]/text()')
   end
 
+  def date_range
+    d = date.to_s.strip
+
+    if d == 'vor 1585.'
+      d = 'vor 1585'
+    elsif d == '18568-69'
+      d = '1868-69'
+    elsif d == '1958.'
+      d = '1958'
+    elsif d == '1959.'
+      d = '1959'
+    end
+
+    super(d)
+  end
+
   # bildnachweis
   def credits
     record.xpath('.//column[@name="quelle"]/text()')

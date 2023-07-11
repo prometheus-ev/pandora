@@ -2,15 +2,14 @@ require "application_system_test_case"
 
 class InstitutionalUploadsTest < ApplicationSystemTestCase
   setup do
-    @jdoe = Account.find_by(login: "jdoe")
-    @jdoe.roles.push(Role.find_by(title: 'dbadmin'))
-    @jdoe.save!
+    u = Account.find_by(login: "jdoe")
+    u.roles << Role.find_by(title: 'dbadmin')
   end
 
   test 'create institutional uploads database' do
     login_as 'superadmin'
     click_on 'Administration'
-    
+
     section = find('h3', text: 'Source').find(:xpath, 'following-sibling::*[1]')
     section.click_on 'Create'
     fill_in 'Name', with: 'my_first_institutional_uploads_database'
@@ -29,13 +28,14 @@ class InstitutionalUploadsTest < ApplicationSystemTestCase
   end
 
   test 'create institutional upload' do
-    database = initialize_prometheus_institutional_uploads_database
+    jdoe = Account.find_by!(login: "jdoe")
+    database = institutional_upload_source([jdoe])
 
     login_as 'jdoe'
     click_on "My Uploads"
     click_on "Institutional"
 
-    find('#institutional_uploads_database').select 'Prometheus'
+    find('#institutional_uploads_database').select 'Prometheus, Köln'
 
     find('div.button_middle', text: 'Create new institutional upload').click
     attach_file 'File', Rails.root.join('test/fixtures/files/galette.jpg')
@@ -45,23 +45,30 @@ class InstitutionalUploadsTest < ApplicationSystemTestCase
     submit
     assert_text 'successfully uploaded!'
 
+
+    # the source isn't auto-approving, so the index isn't populated
+    doc = Upload.last.super_image.elastic_record['_source']
+    assert_nil doc['title']
+
     click_on "My Uploads"
     click_on "Institutional"
 
-    find('#institutional_uploads_database').select 'Prometheus'
+    find('#institutional_uploads_database').select 'Prometheus, Köln'
 
     assert_text "Galette"
+
   end
 
   test 'read_institutional_upload' do
-    database = initialize_prometheus_institutional_uploads_database
-    upload = create_institutional_upload(database, "galette", options = {})
+    jdoe = Account.find_by!(login: "jdoe")
+    database = institutional_upload_source([jdoe])
+    upload = institutional_upload(database, "galette", options = {})
 
     login_as 'jdoe'
     click_on "My Uploads"
     click_on "Institutional"
 
-    find('#institutional_uploads_database').select 'Prometheus'
+    find('#institutional_uploads_database').select 'Prometheus, Köln'
 
     within "div[data-upload-id=\"#{upload.id}\"]" do
       find(:xpath, "//a[img[@id=\"#{upload.image.pid}\"]]").click
@@ -71,14 +78,15 @@ class InstitutionalUploadsTest < ApplicationSystemTestCase
   end
 
   test 'update institutional upload' do
-    database = initialize_prometheus_institutional_uploads_database
-    upload = create_institutional_upload(database, "galette", options = {})
+    jdoe = Account.find_by!(login: "jdoe")
+    database = institutional_upload_source([jdoe])
+    upload = institutional_upload(database, "galette", options = {})
 
     login_as 'jdoe'
     click_on "My Uploads"
     click_on "Institutional"
 
-    find('#institutional_uploads_database').select 'Prometheus'
+    find('#institutional_uploads_database').select 'Prometheus, Köln'
 
     within "div[data-upload-id=\"#{upload.id}\"]" do
       click_on "Edit upload"
@@ -95,14 +103,15 @@ class InstitutionalUploadsTest < ApplicationSystemTestCase
   end
 
   test 'delete institutional upload' do
-    database = initialize_prometheus_institutional_uploads_database
-    upload = create_institutional_upload(database, "galette", options = {})
+    jdoe = Account.find_by!(login: "jdoe")
+    database = institutional_upload_source([jdoe])
+    upload = institutional_upload(database, "galette", options = {})
 
     login_as 'jdoe'
     click_on "My Uploads"
     click_on "Institutional"
 
-    find('#institutional_uploads_database').select 'Prometheus'
+    find('#institutional_uploads_database').select 'Prometheus, Köln'
 
     within "div[data-upload-id=\"#{upload.id}\"]" do
       accept_confirm do
@@ -114,26 +123,25 @@ class InstitutionalUploadsTest < ApplicationSystemTestCase
   end
 
   test 'switch between institutional user databases' do
-    database1 = initialize_prometheus_institutional_uploads_database
+    jdoe = Account.find_by!(login: "jdoe")
+    database1 = institutional_upload_source([jdoe])
 
     nowhere = Institution.find_by(name: "nowhere")
-    database2 = create_institutional_upload_database(nowhere)
-    database2.source_admins = [@jdoe]
-    database2.save!
+    database2 = institutional_upload_source([jdoe], nowhere)
 
     prometheus = Institution.find_by(name: "prometheus")
     database3 = Source.new(
-      :title       => "Prometheus 2",
-      :kind        => "Institutional database",
-      :type        => "upload",
-      :institution => prometheus,
-      :owner_id    => prometheus.id,
-      :keywords    => [Keyword.ensure('Institutional Upload')],
-      :quota       => Institution::DEFAULT_DATABASE_QUOTA
+      title: "Prometheus 2",
+      kind: "Institutional database",
+      type: "upload",
+      institution: prometheus,
+      owner_id: prometheus.id,
+      keywords: [Keyword.find_by!(title: 'institutional upload')],
+      quota: Institution::DEFAULT_DATABASE_QUOTA
     )
 
     database3.name = "prometheus_2"
-    database3.source_admins = [@jdoe]
+    database3.source_admins = [jdoe]
     database3.save!
 
     prometheus.databases.push database3
@@ -144,11 +152,11 @@ class InstitutionalUploadsTest < ApplicationSystemTestCase
     click_on "Institutional"
 
     assert_equal(3, (options = (select = find('#institutional_uploads_database')).find_all('option')).size)
-    assert_equal("Nowhere", options[0].text)
-    assert_equal("Prometheus", options[1].text)
-    assert_equal("Prometheus 2", options[2].text)
+    assert_equal("Nowhere, Nowhere", options[0].text)
+    assert_equal("Prometheus, Köln", options[1].text)
+    assert_equal("Prometheus 2, Köln", options[2].text)
 
-    select.select 'Prometheus'
+    select.select 'Prometheus, Köln'
 
     find('div.button_middle', text: 'Create new institutional upload').click
     attach_file 'File', Rails.root.join('test/fixtures/files/galette.jpg')
@@ -163,7 +171,7 @@ class InstitutionalUploadsTest < ApplicationSystemTestCase
 
     # no prompt, when database is selected
     assert_equal(3, (options = (select = find('#institutional_uploads_database')).find_all('option')).size)
-    select.select 'Nowhere'
+    select.select 'Nowhere, Nowhere'
 
     find('div.button_middle', text: 'Create new institutional upload').click
     attach_file 'File', Rails.root.join('test/fixtures/files/john.jpg')
@@ -176,7 +184,7 @@ class InstitutionalUploadsTest < ApplicationSystemTestCase
     find(:xpath, '//a[img[@title="Back to institutional_uploads"]]').click
     assert_text 'John'
 
-    select.select 'Prometheus 2'
+    select.select 'Prometheus 2, Köln'
 
     find('div.button_middle', text: 'Create new institutional upload').click
     attach_file 'File', Rails.root.join('test/fixtures/files/rembrandt.jpg')
@@ -189,57 +197,68 @@ class InstitutionalUploadsTest < ApplicationSystemTestCase
     find(:xpath, '//a[img[@title="Back to institutional_uploads"]]').click
     assert_text 'Self portrait'
 
-    select.select 'Prometheus'
+    select.select 'Prometheus, Köln'
     assert_text 'Galette'
   end
 
-  if production_sources_available?
-    test 'index institutional_upload and search' do
-      database = initialize_prometheus_institutional_uploads_database
+  test 'index institutional_upload and search' do
+    jdoe = Account.find_by!(login: "jdoe")
+    database = institutional_upload_source([jdoe])
 
-      create_institutional_upload(database, "galette", options = {})
+    TestSource.index
+    TestSourceSorting.index
 
-      database.index
-      # It takes a short time for the index to show up in advancde search.
-      sleep 1
+    institutional_upload(database, "galette", options = {})
 
-      login_as 'jdoe'
-      find_link('Advanced search').find('div').click
-      within '.pm-source-list' do
-        groups = all('.pm-groups .pm-header').map{|e| e.text.strip}
-        assert_equal ['Institutional Databases (1/1)', 'Museum Databases (1/1)', 'Research Databases (1/1)'], groups
-      end
+    database.index
+    # It takes a short time for the index to show up in advancde search.
+    sleep 1
 
-      find('#group_Museum_databases').click
-      find('#group_Research_databases').click
-
-      fill_in 'search_value_0', with: 'Galette'
-      find('.search_query .submit_button').click
-      assert_text 'Galette'
-      assert_text 'Prometheus, prometheus - Das verteilte digitale Bildarchiv für Forschung & Lehre'
-
-      find('div.image a img[title="Galette"]').click
-      assert_text 'One, Two'
+    login_as 'jdoe'
+    find_link('Advanced search').find('div').click
+    within '.pm-source-list' do
+      groups = all('.pm-groups .pm-header').map{|e| e.text.strip}
+      assert_equal(
+        [
+          'Institutional Databases (1/1)',
+          'Museum Databases (1/1)',
+          'Research Databases (1/1)'
+        ],
+        groups
+      )
     end
+
+    find('#group_Museum_databases').click
+    find('#group_Research_databases').click
+
+    fill_in 'search_value_0', with: 'Galette'
+    find('.search_query .submit_button').click
+    assert_text 'Galette'
+    assert_text 'Prometheus, prometheus - Das verteilte digitale Bildarchiv für Forschung & Lehre'
+
+    find('div.image a img[title="Galette"]').click
+    assert_link 'One'
+    assert_link 'Two'
   end
 
-  test 'add institutional upload to collection (should be auto-approved)' do
-    database = initialize_prometheus_institutional_uploads_database
+  test 'add institutional upload to collection' do
+    jdoe = Account.find_by!(login: "jdoe")
+    database = institutional_upload_source([jdoe])
 
-    upload = create_institutional_upload(database, "galette", options = {})
+    upload = institutional_upload(database, "galette", options = {})
 
-    Collection.create!({
+    Collection.create!(
       title: "John's institutional uploads collection",
       description: 'John\'s institutional uploads',
-      owner: @jdoe,
+      owner: jdoe,
       keywords: [Keyword.new(title: 'institutional uploads')],
-    }, without_protection: true)
+    )
 
     login_as 'jdoe'
     click_on 'Uploads'
     click_on 'Institutional'
     select = find('#institutional_uploads_database')
-    select.select "Prometheus"
+    select.select "Prometheus, Köln"
 
     find(:xpath, "//div[@data-upload-id=\"#{upload.id}\"]").find("div.store_image").click
     within 'div.store_images.popup' do
@@ -253,6 +272,10 @@ class InstitutionalUploadsTest < ApplicationSystemTestCase
     assert find('div.image a img[title="Galette"]')
 
     click_on 'Edit'
+    assert_text 'Change public access or share as soon as all your database images included in your collection are approved!'
+
+    upload.update(approved_record: true)
+    reload_page
     assert_no_text 'Change public access or share as soon as all your database images included in your collection are approved!'
 
     click_on "Collections"
@@ -276,17 +299,18 @@ class InstitutionalUploadsTest < ApplicationSystemTestCase
   end
 
   test 'remove dbadmin role for institutional uploads database' do
-    @jdoe.boxes.destroy_all
-    database = initialize_prometheus_institutional_uploads_database
+    jdoe = Account.find_by!(login: "jdoe")
+    jdoe.boxes.destroy_all
+    database = institutional_upload_source([jdoe])
 
-    upload = create_institutional_upload(database, "galette", options = {})
+    upload = institutional_upload(database, "galette", options = {})
 
-    collection = Collection.create!({
+    collection = Collection.create!(
       title: "John's institutional uploads collection",
-      description: 'John\'s institutional uploads',
-      owner: @jdoe,
-      keywords: [Keyword.new(title: 'institutional uploads')],
-    }, without_protection: true)
+      description: "John's institutional uploads",
+      owner: jdoe,
+      keywords: [Keyword.new(title: 'institutional uploads')]
+    )
 
     collection.images.push(Pandora::SuperImage.new(upload.pid).image)
     collection.save
@@ -295,7 +319,7 @@ class InstitutionalUploadsTest < ApplicationSystemTestCase
     click_on 'My Uploads'
     click_on 'Institutional'
     select = find('#institutional_uploads_database')
-    select.select "Prometheus"
+    select.select "Prometheus, Köln"
     find(:xpath, "//div[@data-upload-id=\"#{upload.id}\"]").find("div.store_image").click
     within 'div.store_images.popup' do
       click_on 'Add image to sidebar'
@@ -337,17 +361,12 @@ class InstitutionalUploadsTest < ApplicationSystemTestCase
     assert_text "Source 'prometheus' successfully updated!"
     logout
 
-    # we want to check that the uploads aren't shown in the sidebar anymore but
-    # with #1211, institutional uploads are auto-approved so they remain visible
 
     login_as 'jdoe'
-
-    # NOTE: this simply checks for a div with id containing 'sidebar_box-' which
-    # seems obsolete
-    # assert has_xpath?("//div[contains(@id, 'sidebar_box-')]")
-    within("div#boxes div.sidebar_box:nth-child(2)") do
-      assert_text "John's institutio..."
-      assert has_css?(".thumbnail")
+    
+    # we want to check that the uploads aren't shown in the sidebar anymore
+    within("div#boxes") do
+      assert_no_css "a[href='/en/image/#{upload.pid}']"
     end
 
     click_on "My Uploads"
@@ -357,33 +376,34 @@ class InstitutionalUploadsTest < ApplicationSystemTestCase
     visit institutional_databases_path(:locale => 'en')
     assert_text "You don't have privileges to access this institutional_uploads page. Please log in with a qualified account."
     visit "/en/image/#{upload.pid}"
-    assert_no_text "You don't have privileges to access this images page. Please log in with a qualified account."
+    assert_text "You don't have privileges to access this images page. Please log in with a qualified account."
 
     click_on "Collections"
     within(:xpath, "//tr[td/div/a[contains(text(), \"John's institutional uploads collection\")]]") do
-      assert has_css?("td.thumbnail img")
-      assert_no_text "1 image (of which 0 images are visible to your user)"
+      assert has_no_css?("td.thumbnail img")
+      assert_text "1 image (of which 0 images are visible to your user)"
     end
-    
+
     click_on "John's institutional uploads collection"
-    assert has_css?("div.thumbnail div.image img")
-    assert_text "1 image"
-    within('#images-section .image') do
-      assert has_css?("img")
+    assert has_no_css?("div.thumbnail div.image img")
+    assert_no_text "1 image"
+    within('#images-section') do
+      assert_text 'none'
     end
   end
 
   test 'delete institutional user database' do
-    database = initialize_prometheus_institutional_uploads_database
+    jdoe = Account.find_by!(login: "jdoe")
+    database = institutional_upload_source([jdoe])
 
-    upload = create_institutional_upload(database, "galette", options = {})
+    upload = institutional_upload(database, "galette", options = {})
 
-    collection = Collection.create!({
+    collection = Collection.create!(
       title: "John's institutional uploads collection",
       description: 'John\'s institutional uploads',
-      owner: @jdoe,
+      owner: jdoe,
       keywords: [Keyword.new(title: 'institutional uploads')],
-    }, without_protection: true)
+    )
 
     collection.images.push(Pandora::SuperImage.new(upload.pid).image)
     collection.save
@@ -392,7 +412,7 @@ class InstitutionalUploadsTest < ApplicationSystemTestCase
     click_on 'My Uploads'
     click_on 'Institutional'
     select = find('#institutional_uploads_database')
-    select.select "Prometheus"
+    select.select "Prometheus, Köln"
     find("[title='Store image in...']").find(:xpath, '..').click
     click_on 'Add image to sidebar'
 
@@ -406,7 +426,7 @@ class InstitutionalUploadsTest < ApplicationSystemTestCase
     database.destroy
 
     login_as 'jdoe'
-    assert @jdoe.admin_sources.empty?
+    assert jdoe.admin_sources.empty?
   end
 
   test 'have several admins for institutional uploads databases' do
@@ -415,7 +435,7 @@ class InstitutionalUploadsTest < ApplicationSystemTestCase
     mrossi.save!
 
     prometheus = Institution.find_by(name: "prometheus")
-    create_institutional_upload_database(prometheus)
+    institutional_upload_source([], prometheus)
     
     login_as 'superadmin'
     click_on "Administration"
@@ -439,60 +459,61 @@ class InstitutionalUploadsTest < ApplicationSystemTestCase
     login_as 'jdoe'
     click_on 'My Uploads'
     click_on 'Institutional'
-    assert_equal("Prometheus", find('#institutional_uploads_database option').text)
+    assert_equal("Prometheus, Köln", find('#institutional_uploads_database option').text)
     logout
 
     login_as 'mrossi'
     click_on 'My Uploads'
     click_on 'Institutional'
-    assert_equal("Prometheus", find('#institutional_uploads_database option').text)
+    assert_equal("Prometheus, Köln", find('#institutional_uploads_database option').text)
   end
 
-  def initialize_prometheus_institutional_uploads_database
-    prometheus = Institution.find_by(name: "prometheus")
+  test 'klapsch filter' do
+    jdoe = Account.find_by!(login: "jdoe")
+    database = institutional_upload_source([jdoe])
+    database.update_column :auto_approve_records, true
 
-    database = create_institutional_upload_database(prometheus)
-    database.source_admins = [@jdoe]
-    database.save!
-    database
+    login_as 'jdoe'
+    click_on "My Uploads"
+    click_on "Institutional"
+
+    find('#institutional_uploads_database').select 'Prometheus, Köln'
+
+    find('div.button_middle', text: 'Create new institutional upload').click
+    attach_file 'File', Rails.root.join('test/fixtures/files/galette.jpg')
+    fill_in 'Title', with: 'Bal du moulin de la Galette'
+    select 'In the public domain', from: 'upload[license]'
+    choose 'In the public domain'
+    submit
+    assert_text 'successfully uploaded!'
+
+    within '#object_basic-section' do
+      fill_in 'Artist', with: 'Mr. klapSCH and friends'
+      submit
+    end
+
+    assert_equal 1, ActionMailer::Base.deliveries.count
+    mail = ActionMailer::Base.deliveries[0]
+    assert_match /The upload has not been indexed/, mail.body.to_s
   end
 
-  def create_institutional_upload_database(institution)
-    src = Source.new(
-      :title       => institution.name.titleize,
-      :kind        => "Institutional database",
-      :type        => "upload",
-      :institution => institution,
-      :owner_id    => institution.id,
-      :keywords    => [Keyword.ensure('Institutional Upload')],
-      :quota       => Institution::DEFAULT_DATABASE_QUOTA
-    )
+  test 'indexing institutional uploads handles index_record_id' do
+    jdoe = Account.find_by!(login: "jdoe")
+    database = institutional_upload_source([jdoe])
+    upload = institutional_upload(database, "galette", approved_record: true)
+    upload_pid = upload.image_id
+    db_pid = "#{database.name}-#{upload_pid.split('-')[1]}"
 
+    si = Pandora::SuperImage.new(upload_pid)
+    si.index_doc
 
-    src.name = institution.name
-    src.save!
+    # the file should have been copied from 'upload' to 'prometheus'
+    si = Pandora::SuperImage.new(db_pid)
+    file = "#{ENV['PM_IMAGES_DIR']}/#{database.name}/original/#{upload_pid}.jpg"
+    assert File.exist?(file)
 
-    institution.databases.push src
-    institution.save!
-
-    src
+    si = Pandora::SuperImage.new(upload_pid)
+    si.remove_index_doc
+    assert_not File.exist?(file)
   end
-
-  def create_institutional_upload(database, filename, options = {})
-    options.reverse_merge!(
-      database: database,
-      title: filename.humanize.capitalize,
-      rights_reproduction: 'None, do not use!',
-      rights_work: 'None, do not use!',
-      keywords: [Keyword.new(title: 'One'), Keyword.new(title: 'Two')],
-      file: Rack::Test::UploadedFile.new(
-        "#{Rails.root}/test/fixtures/files/#{filename}.jpg",
-        'image/jpeg'
-      ),
-      approved_record: true
-    )
-
-    Upload.create!(options)
-  end
-
 end

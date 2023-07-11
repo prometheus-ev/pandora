@@ -9,8 +9,7 @@
   </tr>
   <tr>
     <th><%= 'Keywords'.t %></th>
-    <!-- TODO: these should probably not be translated -->
-    <td><%= list_search_links_for :keywords, @source.keywords.map { |k| [k.title, k.title.t] }, :action => 'index' %></td>
+    <td><%= list_search_links_for :keywords, @source.keywords.map { |k| [k.t, k.t] }, :action => 'index' %></td>
   </tr>
   <tr>
     <th><%= 'Contact'.t %></th>
@@ -18,7 +17,7 @@
   </tr>
   <tr>
     <th><%= 'Integrated since'.t %></th>
-    <td><%= @source.created_at.to_s(:coarse) %></td>
+    <td><%= @source.created_at.to_fs(:coarse) %></td>
   </tr>
 <% restrict_to :superadmin, :admin do -%>
 <% for column in Source.display_columns -%>

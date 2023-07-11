@@ -9,7 +9,7 @@ class Indexing::XmlReaderNodeSet
   # @param document [Nokogiri::XML::Document] The XML Reader document.
   # @param record_element_name [String] The name of the record element.
   # @param xpath_query [String] A XPath query that further restricts the element selection.
-  def initialize(document, record_element_name, xpath_query)
+  def initialize(document, record_element_name, xpath_query = '.')
     @document = document
     @record_element_name = record_element_name
     @xpath_query = xpath_query

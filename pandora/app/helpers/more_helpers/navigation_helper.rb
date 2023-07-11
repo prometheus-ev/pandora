@@ -79,7 +79,7 @@ module MoreHelpers
     def submenu_links
       # REWRITE: override protected state for 'linkable_actions'
       # TODO: find better way
-      actions = controller.send(:linkable_actions) - CREATE_ACTIONS
+      actions = controller.send(:linkable_actions) - [:create, :new]
       allowed_actions_for_current_user(actions).map { |action|
         submenu_link_to(action.humanize, :action => action)
       }.join.html_safe

@@ -1,0 +1,22 @@
+<pm-spinner>
+  This should show an animation, but its a dummy, for now it just renders
+  another tag:
+
+  <div>
+    <pm-message />
+  </div>
+
+  <script>
+    import Message from './message.riot'
+
+    // we can load other libs here
+    import {sortBy} from '../lib/util'
+
+    export default class {
+      static components = {
+        'pm-message': Message
+      }
+    }
+    
+  </script>
+</pm-spinner>

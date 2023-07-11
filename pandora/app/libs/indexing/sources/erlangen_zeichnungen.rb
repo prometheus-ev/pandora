@@ -41,6 +41,12 @@ class Indexing::Sources::ErlangenZeichnungen < Indexing::SourceSuper
     record.xpath('.//marc/record/datafield[@tag="260"]/subfield[@code="c"]/text()')
   end
 
+  def date_range
+    d = date.to_s.strip
+
+    super(d)
+  end
+
   # institution
   def location
     "Erlangen, Universitätsbibliothek, #{record.xpath('.//marc/record/datafield[@tag="852"]/subfield[@code="j"]/text()')} (Signatur)"

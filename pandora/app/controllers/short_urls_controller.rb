@@ -1,5 +1,5 @@
 class ShortUrlsController < ApplicationController
-  skip_before_action :store_location
+  # skip_before_action :store_location
   skip_before_action :login_required
   skip_before_action :verify_account_email
   skip_before_action :verify_account_active
@@ -14,7 +14,10 @@ class ShortUrlsController < ApplicationController
     if @short_url
       redirect_to @short_url.url, status: :moved_permanently
     else
-      flash[:error] = "The link with token '%s' couldn't be found" / @token
+      flash[:error] = (@token.nil? ?
+        "No token was given".t :
+        "The link with token '%s' couldn't be found" / @token
+      )
       redirect_to locale_root_path
     end
   end

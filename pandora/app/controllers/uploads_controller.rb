@@ -14,7 +14,7 @@ class UploadsController < ApplicationController
 
   def self.initialize_me!  # :nodoc:
     control_access [:superadmin, :admin] => action_symbols - [:feed],
-                   [:user] => [:index, :associated, :new, :create, :update, :show, :edit, :edit_selected, :update_selected, :destroy, :disconnect, :record, :record_image_url, :suggest_keywords]
+                   [:user] => [:index, :associated, :new, :create, :update, :show, :edit, :edit_selected, :update_selected, :destroy, :disconnect, :record, :record_image_url]
 
     linkable_actions :all, :unapproved, :approved, :new
   end
@@ -40,7 +40,7 @@ class UploadsController < ApplicationController
         },
         :direction => {
           :select  => UploadSettings.values_for(:direction),
-          :default => DEFAULT_DIRECTION,
+          :default => 'ASC',
           :doc     => 'Direction to sort database records in.'
         },
         :field => {
@@ -177,6 +177,7 @@ class UploadsController < ApplicationController
 
   def new
     @upload = Upload.new(upload_params)
+    @upload.add_to_index = true if @upload.add_to_index.nil?
 
     # view compatibility
     @page_title = "Select a file and add the mandatory metadata".t
@@ -190,6 +191,8 @@ class UploadsController < ApplicationController
     upload_latest = current_user.database.uploads.order('updated_at DESC').first
 
     if @upload.save
+      @upload.index_doc
+
       flash[:notice] = [
         'File successfully uploaded!'.t,
         translate_with_link(
@@ -247,14 +250,16 @@ class UploadsController < ApplicationController
       @upload.image.collections.each do |c|
         if c.thumbnail == @upload.image
           c.thumbnail = nil
-          c.save          
+          c.save
         end
       end
       # remove re-unapproved upload from public collections
-      @upload.image.collections = @upload.image.collections.select{|c| !c.public_access}   
+      @upload.image.collections = @upload.image.collections.select{|c| !c.public_access}
     end
 
-    if @upload.save
+    if @upload.update(upload_params)
+      @upload.index_doc
+
       respond_to { |format|
         format.html do
           flash[:notice] = "Object successfully updated!".t
@@ -269,7 +274,7 @@ class UploadsController < ApplicationController
       respond_to do |format|
         format.html do
           set_mandatory_fields
-          
+
           render :action => 'edit', status: 422
         end
 
@@ -312,12 +317,6 @@ class UploadsController < ApplicationController
       end
     end
 
-    @various_keywords = false
-    @uploads.each do |u|
-      @various_keywords = true if u.keywords.count > 0
-      @upload.keywords = @upload.keywords.pluck(:title) & u.keywords.pluck(:title)
-    end
-
     # view compatibility
     @page_title = 'Multi-Edit'.t + ': ' + @uploads.size.to_s + ' ' + (@uploads.size > 1 ? 'images'.t : 'image'.t)
     @page_info = 'Be careful, you are changing the metadata of multiple objects!'.t + ' ' + '<various values>'.t + ' ' + 'denotes that various values exist for the field in the various objects. A single value hints that all objects have the same value.'.t
@@ -329,7 +328,16 @@ class UploadsController < ApplicationController
     attribs = upload_params
     attribs.delete_if{ |_, value| value == VARIOUS_VALUES }
 
-    if @uploads.all?{|u| u.update_attributes attribs}
+    success = @uploads.all? do |u|
+      if u.update(attribs)
+        u.index_doc
+        true
+      else
+        false
+      end
+    end
+
+    if success
       flash[:notice] = "Objects successfully updated!".t
       redirect_to :action => :edit_selected, :uploads => params[:uploads]
     else
@@ -350,6 +358,8 @@ class UploadsController < ApplicationController
 
   def destroy
     @upload = records(:write).find(params[:id])
+
+    @upload.remove_index_doc
 
     @upload.image.destroy
     @upload.destroy
@@ -379,15 +389,6 @@ class UploadsController < ApplicationController
     :returns => { :xml => { :root => 'upload' }, :json => {} }
   }
 
-  def suggest_keywords
-    @query = params[:q]
-    @keywords = Keyword.
-      search(@query).
-      pageit(1, 10)
-
-    render partial: 'suggest_keywords', layout: false
-  end
-
   def record_image_url
     @upload = records.find(params[:id])
     si = Pandora::SuperImage.new(@upload.pid, upload: @upload)
@@ -400,10 +401,9 @@ class UploadsController < ApplicationController
     upload_record = records(:read).find(params[:id])
 
     upload_record_hash = upload_record.attributes.except("id", "parent_id", "image_id", "approved_record", "public_record", "destroy_record", "index_record", "indexed_record", "filename_extension", "file_size", "created_at", "updated_at")
-    # upload_record_hash["keywords"] = upload_record.keywords.join(TEXTAREA_SEPARATOR)
-    upload_record_hash['keyword_list'] = upload_record.keyword_list
+    upload_record_hash["keyword_list"] = upload_record.keywords.map{|keyword| keyword.title}.join(TEXTAREA_SEPARATOR)
 
-    if Upload.pconfig[:licenses].include?(upload_record.license) || upload_record.license.blank?
+    if Upload.pconfig[:licenses].keys.include?(upload_record.license) || upload_record.license.blank?
       upload_record_hash["license_text_field"] = ""
     else
       upload_record_hash["license"] = "Other"
@@ -418,10 +418,11 @@ class UploadsController < ApplicationController
 
     def check_quota
       if space_used_in_bytes > current_user.database_quota_bytes
-        flash[:notice] = 
-          "You've reached your quota limit of ".t + 
+        link = helpers.link_to('Please contact the prometheus office to extend your quota'.t, home_url('contact'))
+        flash[:notice] = helpers.sanitize(
+          "You've reached your quota limit of ".t +
           number_to_human_size(current_user.database_quota_bytes, precision: 2) + ". " +
-          "Please delete some of your images!".t
+          link + ".")
         redirect_to :action => 'index'
       end
     end
@@ -461,7 +462,8 @@ class UploadsController < ApplicationController
           :latitude, :longitude, :discoveryplace, :date, :artist, :genre,
           :keyword_list, :location, :addition, :annotation, :iconography,
           :institution, :inventory_no, :origin, :other_persons, :photographer,
-          :size, :subtitle, :text, :parent_id, :material, :description
+          :size, :subtitle, :text, :parent_id, :material, :description,
+          :add_to_index
         )
       end
     end
@@ -486,7 +488,7 @@ class UploadsController < ApplicationController
     def per_page_default
       upload_settings[:per_page] || super
     end
-    
+
     def zoom_default
       !upload_settings[:zoom].nil? ? upload_settings[:zoom] : true
     end

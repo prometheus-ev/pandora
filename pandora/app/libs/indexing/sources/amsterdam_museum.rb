@@ -4,18 +4,23 @@ class Indexing::Sources::AmsterdamMuseum < Indexing::SourceSuper
   end
 
   def record_id
-    "#{record.xpath('.//reproduction.identifier_URL/text()')}".gsub(/.*\\/, '')
+    "#{record.xpath('./reproduction.identifier_URL/text()')}".gsub(/.*\\/, '')
   end
 
   def record_object_id
-    record_object_ids = record.xpath('ancestor::record/object_number/text()').map { |record_object_id|
-      record_object_id.to_s
-    }
-    [name, Digest::SHA1.hexdigest(record_object_ids.uniq.join('|'))].join('-')
+    if !(record_object_id = record.xpath('ancestor::record/object_number/text()')).empty?
+      [name, Digest::SHA1.hexdigest(record_object_id.to_s)].join('-')
+    end
+  end
+
+  def record_object_id_count
+    if (count = record.xpath('ancestor::record/reproduction/reproduction.identifier_URL/text()').size) > 1
+      count
+    end
   end
 
   def path
-    "#{record.at_xpath('.//reproduction.identifier_URL/text()')}".downcase.gsub(/..\\..\\dat\\collectie\\images\\/, '').gsub('\\', '/').gsub(' ', '%20').sub(/^(\/*)/,'')
+    "#{record.at_xpath('./reproduction.identifier_URL/text()')}".downcase.gsub(/..\\..\\dat\\collectie\\images\\/, '').gsub('\\', '/').gsub(' ', '%20').sub(/^(\/*)/,'')
   end
 
   # künstler

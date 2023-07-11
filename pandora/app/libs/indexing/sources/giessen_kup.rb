@@ -18,5 +18,3 @@ class Indexing::Sources::GiessenKup < Indexing::Sources::Parents::Filemaker
     end
   end
 end
-
-

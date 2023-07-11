@@ -32,6 +32,12 @@ class Indexing::Sources::GiessenLri < Indexing::SourceSuper
     record.xpath('.//Ereignisdatum/text()')
   end
 
+  def date_range
+    d = record.xpath('.//Erscheinungs-Datum/text()').to_s.strip
+
+    super(d)
+  end
+
   # standort
   def location
     record.xpath('.//standort/text()') +

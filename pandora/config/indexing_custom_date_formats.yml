@@ -1,10 +1,15 @@
 <%= Rails.env %>:
+  # https://docs.oracle.com/javase/8/docs/api/java/time/format/DateTimeFormatter.html
   # https://docs.oracle.com/javase/8/docs/api/java/time/format/DateTimeFormatter.html#patterns
   # https://www.elastic.co/guide/en/elasticsearch/reference/current/date.html
+  # https://www.elastic.co/guide/en/elasticsearch/reference/current/mapping-date-format.html
+
   # Default formats:
   - "strict_date_optional_time"
+  # -13000-01-01T00:00:00.000+01:00
+  # https://github.com/elastic/elasticsearch/pull/73034
+  - "date_optional_time"
   - "epoch_millis"
-  # https://www.elastic.co/guide/en/elasticsearch/reference/current/mapping-date-format.html
   # Custom formats:
   - "yyyy"
   - "yyy"

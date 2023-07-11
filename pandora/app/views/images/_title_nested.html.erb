@@ -1,0 +1,8 @@
+<div>
+  <%= title['name'] %>
+  <% unless title['wikidata'].blank? %>
+    | <%= link_to title['wikidata'], { controller: 'searches', action: 'advanced', 'search_field[0]': 'all', 'search_value[0]': title['wikidata'] } %>
+    (<%= link_to 'Wikidata', "https://www.wikidata.org/wiki/#{title['wikidata']}", target: '_blank' %>
+    <%= image_tag('/images/icon/arrow-up-right-from-square-solid.png', style: 'vertical-align: baseline;') %>)
+  <% end %>
+</div>

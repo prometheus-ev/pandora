@@ -20,4 +20,10 @@ class ShortUrlsControllerTest < ActionDispatch::IntegrationTest
     assert_redirected_to '/en'
     assert_equal "The link with token 'does-not-exist' couldn't be found", flash[:error]
   end
+
+  test 'should gracefully fail for nil tokens' do
+    get '/en/u'
+    assert_redirected_to '/en'
+    assert_equal 'No token was given', flash[:error]
+  end
 end

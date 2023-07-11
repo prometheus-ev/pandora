@@ -33,6 +33,16 @@ class Indexing::Sources::KoelnRba < Indexing::SourceSuper
     record.xpath('.//Field[@Type="5060"]/Field[@Type="5064"]/@Value')
   end
 
+  def date_range
+    d = date.to_s.strip
+
+    if d == 'um 19151915'
+      d = 'um 1915'
+    end
+
+    super(d)
+  end
+
   # standort
   def location
     "#{record.xpath('.//Field[@Type="ob28"][@Value="Verwalter"]/Field[@Type="2864"]/@Value')}, #{record.xpath('.//Field[@Type="ob28"][@Value="Verwalter"]/Field[@Type="2900"]/@Value')}"

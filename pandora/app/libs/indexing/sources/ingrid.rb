@@ -25,12 +25,18 @@ class Indexing::Sources::Ingrid < Indexing::SourceSuper
 
   # titel
   def title
-    record.xpath('.//Titel[2]/text()')
+    record.xpath('.//Titel[2]/text()').to_a.join(' | ')
   end
 
   # datierung
   def date
     record.xpath('.//Datierung/text()')
+  end
+
+  def date_range
+    d = date.to_s.strip
+
+    super(d)
   end
 
   # standort

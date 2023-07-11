@@ -1,10 +1,8 @@
 class PandoraController < ApplicationController
-
   include Util::Config
-  include Util::ActionAPI::Controller
+  include Util::ActionApi::Controller
 
   skip_before_action :login_required, except: [:start]
-  skip_before_action :store_location, except: [:about, :sitemap, :api]
 
   skip_before_action :verify_account_email
   skip_before_action :verify_account_active
@@ -12,12 +10,16 @@ class PandoraController < ApplicationController
   skip_before_action :verify_account_signup_complete
   skip_before_action :verify_account_terms_accepted
 
-
   def about
     respond_to do |format|
       format.html
       format.json do
         data = base_facts.merge(facts: Pandora::Facts.facts)
+
+        if Rails.env.test?
+          data['PM_TEST_VARIABLE'] = ENV['PM_TEST_VARIABLE']
+        end
+
         render json: data
       end
       format.xml do
@@ -62,12 +64,19 @@ class PandoraController < ApplicationController
     }
   }
 
-  def start
-    redirect_to default_location(:start)
+  def translations
+    simple = I18n::Backend::Simple.new
+    simple.load_translations
+    pandora = I18n::Backend::Pandora.cache
+    @translations = {
+      'rails' => simple.translations,
+      'legacy' => pandora
+    }
+    render json: @translations
   end
 
-  def back
-    redirect_back_or_default
+  def start
+    redirect_to default_location(:start)
   end
 
   def sitemap
@@ -98,10 +107,10 @@ class PandoraController < ApplicationController
       return
     end
 
-    if @feedback.valid?
-      AccountMailer.feedback(@feedback).deliver_now
+    if @feedback.valid? && @feedback.code.empty? && @feedback.send_by_email == '0'
+      AccountMailer.with(feedback: @feedback).feedback.deliver_now
       unless @feedback.email.blank?
-        AccountMailer.feedback_response(@feedback).deliver_now
+        AccountMailer.with(feedback: @feedback).feedback_response.deliver_now
       end
 
       flash[:notice] = 'Your feedback has been delivered. Thank you!'.t
@@ -148,8 +157,8 @@ class PandoraController < ApplicationController
     end
 
     if @signup.valid?
-      AccountMailer.conference_signup(@signup).deliver_now
-      AccountMailer.conference_signup_response(@signup).deliver_now
+      AccountMailer.with(signup: @signup).conference_signup.deliver_now
+      AccountMailer.with(signup: @signup).conference_signup_response.deliver_now
 
       flash[:notice] = 'Your registration was sucessful. Thank you!'.t
       redirect_to action: "conference_signup_confirmation"
@@ -162,19 +171,11 @@ class PandoraController < ApplicationController
 
   end
 
-  def internal_server_error
-    respond_to do |format|
-      format.html do
-        @no_submenu = true
-
-        render(
-          template: 'shared/misc/_internal_server_error',
-          status: 500
-        )
-      end
-      format.json{ render json: {message: 'internal server error'}, status: 500 }
-      format.xml{ render xml: {message: 'internal_server_error'}, status: 500 }
-    end
+  # test environment only: trigger arbitrary exceptions handling
+  def raise_exception
+    klass = params[:exception].constantize
+    test = params[:text]
+    raise klass, params[:text] || "raised as requested"
   end
 
 
@@ -205,7 +206,7 @@ class PandoraController < ApplicationController
     end
 
     def feedback_params
-      params.fetch(:feedback, {}).permit(:name, :email, :text)
+      params.fetch(:feedback, {}).permit(:name, :code, :send_by_email, :email, :message)
     end
 
 end

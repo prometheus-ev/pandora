@@ -1,6 +1,6 @@
 class ImagesController < ApplicationController
 
-  skip_before_action :store_location, :only => [:vote, :small, :medium, :large, :download]
+  # skip_before_action :store_location, :only => [:vote, :small, :medium, :large, :download]
 
   # this allows actions for open access sources; it does not check restrictions on non open access sources once dbuser is logged in
   # for full functionality this method must be supplemented by a source check for dbusers before calling allowed actions
@@ -23,23 +23,26 @@ class ImagesController < ApplicationController
 
   def list
     if params[:source].blank?
-      render_api_422 'source has to be specified'
+      unprocessable_entity 'source has to be specified'
       return
     end
 
     source = Source.find_by(name: params[:source])
     unless source
-      render_api_404 'source not found'
+      not_found 'source not found'
       return
     end
 
     if (!current_user || current_user.dbuser?) && !source.open_access?
-      render_api_403 'permission denied to read non-open access source'
+      forbidden 'permission denied to read non-open access source'
       return
     end
 
     ids = Pandora::Elastic.new.image_ids(source.name, page: page, per_page: per_page)
-    render_api 200, ids
+    respond_to do |format|
+      format.json{ render json: ids }
+      format.xml{ render xml: ids }
+    end
   end
 
   api_method :list, :get => {
@@ -71,7 +74,6 @@ class ImagesController < ApplicationController
       allowed(current_user, :write).
       includes(:owner, :viewers, :collaborators)
 
-
     if params[:box_id]
       render plain: render_to_string(
         partial: 'box',
@@ -87,11 +89,9 @@ class ImagesController < ApplicationController
     if @super_image.upload?
       # checks if current user has acess rights on upload
       unless current_user.allowed?(@super_image.image, :read)
-        permission_denied
+        forbidden
         return
       end
-
-      @display_fields = @super_image.display_fields - ['source_url', 'keyword_artigo']
 
       @location_fields = @super_image.location_fields
       @latest_location = @super_image.image.locations.order('updated_at DESC') if
@@ -102,10 +102,7 @@ class ImagesController < ApplicationController
         @zoom_level = 11
       end
     else # elastic record
-      # Request athene-search with ActiveResource custom REST method
-      # http://apidock.com/rails/v2.3.8/ActiveResource/CustomMethods
       return unless @super_image.image
-      @display_fields = @super_image.display_fields - ['source_url']
     end
 
     image_source_attributes = {"fulltitle" => ""}
@@ -118,51 +115,46 @@ class ImagesController < ApplicationController
 
     prepare_rating @super_image.image
 
-    # update_section(@super_image.image) {} and return
+    image_attributes = {}
+
+    if request.format.json? || request.format.xml?
+      image_attributes.merge!({"pid": @super_image.pid})
+      image_attributes.merge!({"score": @super_image.image.score})
+      image_attributes.merge!({"votes": @super_image.image.votes})
+      image_attributes.merge!({"rating": @super_image.image.rating})
+
+      Indexing::IndexFields.display.each do |field|
+        value = @super_image.display_field(field)
+
+        unless value.blank?
+          if field == 'rights_work' && value == ['rights_work_vgbk']
+            image_attributes.merge!({"#{field}": 'VG Bild-Kunst'})
+          elsif field == 'record_object_id_count'
+            image_attributes.merge!({"#{field}": value.to_s})
+          else
+            image_attributes.merge!({"#{field}": value.join(', ')})
+          end
+        end
+      end
+
+      image_attributes.merge!(
+        {"link": url_for(safe_params(:format => 'html', locale: I18n.locale, :only_path => false))})
+      image_attributes.merge!(
+        {"status_as_of": @super_image.updated_at})
+      image_attributes.merge!(
+        {"descriptive_title": @super_image.image.descriptive_title})
+      image_attributes.merge!(
+        {"source": image_source_attributes})
+    end
 
     respond_to do |format|
       format.html
-      format.xml {
-        if @super_image.upload?
-          # REWRITE: use the old implementation for now
-          render :xml => @super_image.image.legacy_to_xml(
-            # REWRITE: we need to specify the format and locale explicitly
-            # :link => url_for(safe_params(:format => nil, locale: nil, :only_path => false))
-            :link => url_for(safe_params(:format => 'html', locale: I18n.locale,
-              :only_path => false))
-          )
-        else
-          # REWRITE: use the framework imeplementation
-          # render xml: @image.to_xml(link: url_for(safe_params(format: nil, only_path: false)))
-          m = [:pid, :score, :votes, :print]
-          render xml: @super_image.image.to_xml(methods: m){|xml|
-            xml.link url_for(safe_params(format: nil, only_path: false))
-            xml.status_as_of @super_image.updated_at
-            xml.descriptive_title @super_image.image.descriptive_title
-            xml.source @super_image.image.source.fulltitle
-          }
-        end
-      }
-      format.json {
-          image_attributes = {}
-
-          image_attributes.merge!({"source" => image_source_attributes})
-          image_attributes.merge!({"pid" => @super_image.pid})
-          image_attributes.merge!(@super_image.image.display_fields_hash)
-          image_attributes.merge!({"rating" => @super_image.image.rating})
-
-          Indexing::IndexFields.display.each do |field|
-            unless (value = @super_image.display_field(field)).blank?
-              if field == 'rights_work' && value == ['rights_work_vgbk']
-                image_attributes.merge!({field => 'VG Bild-Kunst'})
-              else
-                image_attributes.merge!({field => value.join(', ')})
-              end
-            end
-          end
-
-          render json: image_attributes.compact.to_json
-      }
+      format.json do
+        render json: image_attributes.compact.to_json
+      end
+      format.xml do
+        render xml: image_attributes.to_xml(root: "image", dasherize: true)
+      end
     end
   end
 
@@ -223,13 +215,25 @@ class ImagesController < ApplicationController
         unless data.values_at(*required).any?(&:blank?)
           image_info = "#{@image.path} (#{@image.artist}: #{@image.title})"
 
-          AccountMailer.publication_inquiry(
-            @type, @status, @mode, data, image_info, @institution, @super_image.source.email
-          ).deliver_now
-          AccountMailer.publication_response(
-            @type, @status, @mode, data, image_info, @institution, data[:email],
-            current_user.anonymous? ? 'user'.t : current_user.fullname
-          ).deliver_now
+          AccountMailer.with(
+            type: @type,
+            status: @status,
+            mode: @mode,
+            data: data,
+            image_info: image_info,
+            institution: @institution,
+            email: @super_image.source.email
+          ).publication_inquiry.deliver_now
+          AccountMailer.with(
+            type: @type,
+            status: @status,
+            mode: @mode,
+            data: data,
+            image_info: image_info,
+            institution: @institution,
+            email: data[:email],
+            user: current_user.anonymous? ? 'user'.t : current_user.fullname
+          ).publication_response.deliver_now
 
           flash.now[:notice] = @type == 'scientific' ?
             'Your inquiry has been delivered. For further information read the e-mail you will receive shortly!'.t :
@@ -261,6 +265,8 @@ class ImagesController < ApplicationController
 
       saved = @image.save
     end
+
+    @super_image.index_doc
 
     if request.xhr?
       prepare_rating @image
@@ -315,7 +321,7 @@ class ImagesController < ApplicationController
 
     respond_to do |format|
       format.blob do
-        redirect_to @super_image.image_url(resolution)
+        redirect_to @super_image.image_url(resolution), allow_other_host: true
       end
     end
   end
@@ -369,19 +375,19 @@ class ImagesController < ApplicationController
 
       @image = @super_image.image
 
-      redirect_to Image.url_for(@image, size)
+      redirect_to Image.url_for(@image, size), allow_other_host: true
     end
 
     def check_db_user_source
       if current_user && current_user.dbuser?
         if (source = Source.find_by(name: params[:source]))
           if source.dbuser != current_user
-            permission_denied
+            forbidden
           end
         # elsif (image = Image.find(params[:id]))
         elsif (image = Pandora::SuperImage.find(params[:id]))
           if image.source.dbuser != current_user
-            permission_denied
+            forbidden
           end
         end
       end

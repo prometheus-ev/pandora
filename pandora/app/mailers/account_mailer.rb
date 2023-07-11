@@ -1,16 +1,11 @@
 class AccountMailer < ApplicationMailer
   include Util::ActiveMailer
 
-  # REWRITE: there is an interface for this now and we do this in
-  # ApplicationMailer
-  # def initialize(*args)
-  #   from "prometheus <#{SENDER_ADDRESS}>"
-  #   super
-  # end
+  skip_around_action :apply_user_locale, only: [:publication_response]
 
-  ### Welcome
+  def welcome
+    user = params[:user]
 
-  def welcome(user)
     welcome = !user.status?
     @welcome = welcome
 
@@ -34,7 +29,7 @@ class AccountMailer < ApplicationMailer
     @account_url = url_for(:controller => 'profile', :action => 'edit')
     @sitemap_url = url_for(:controller => 'pandora', :action => 'sitemap')
     @help_url = url_for(:controller => 'help', action: 'show')
-    @record_count = Pandora::Elastic.new.counts['total']['value'].localize
+    @record_count = Pandora::Elastic.new.counts['total']['records'].localize
     @source_count = Source.count_active
     @home_url = ENV['PM_HOME_URL']
     @rights_url = "#{ENV['PM_HOME_URL']}/copyright"
@@ -47,7 +42,11 @@ class AccountMailer < ApplicationMailer
 
   ### Usermail
 
-  def usermail(user, recipient, text)
+  def usermail
+    user = params[:user]
+    recipient = params[:recipient]
+    text = params[:text]
+
     @user = user
     @locale = recipient.locale
     @text = text
@@ -66,7 +65,11 @@ class AccountMailer < ApplicationMailer
 
   INVOICE_NOTICE_RECIPIENTS = [ENV['PM_INVOICE_NOTIFICATION_RECIPIENTS']]
 
-  def invoice_notice(user, address, discount_code = nil)
+  def invoice_notice
+    user = params[:user]
+    address = params[:address]
+    discount_code = params[:discount_code]
+
     @name = address.fullname
     @addressline = address.addressline
     @postalcode = address.postalcode
@@ -87,7 +90,10 @@ class AccountMailer < ApplicationMailer
 
   ### PayPal confirmation
 
-  def paypal_confirmation(user, success)
+  def paypal_confirmation
+    user = params[:user]
+    success = params[:success]
+
     @name = user.fullname
     @expires = user.expires_at
     @success = success
@@ -100,26 +106,19 @@ class AccountMailer < ApplicationMailer
 
   ### Collection/Presentation collaborators
 
-  def collaborator_changed(user, object, action = :added, what = :collaborator)
+  def collaborator_changed
+    user = params[:user]
+    object = params[:object]
+    action = params[:action] || :added
+    what = params[:what] || :collaborator
+
     klass, locale = object.class, user.locale
 
-    # recipients user.email
-    # subject    "[prometheus-#{klass}] " + localized_or_combined(locale) { "#{action.to_s.capitalize} as #{what}".t }
-    # body       :owner       => object.owner.fullname,
-    #            :profile_url => url_for(:controller => 'accounts', :action => 'show', :id => object.owner),
-    #            :type        => type = klass.controller_name,
-    #            :object      => object.title,
-    #            :object_url  => url_for(:controller => type, :action => 'edit', :id => object),
-    #            :locale      => locale,
-    #            :action      => action,
-    #            :what        => what
-    # headers    'Reply-To' => user.email unless user.email.blank?
-    
     @owner =  object.owner.fullname
     @profile_url =  url_for(:controller => 'accounts', :action => 'show', :id => object.owner)
     @type =  type = klass.controller_name
     @object =  object.title
-    @object_url =  url_for(:controller => type, :action => 'edit', :id => object)
+    @object_url =  url_for(controller: type, id: object)
     @locale =  locale
     @action =  action
     @what =  what
@@ -138,7 +137,11 @@ class AccountMailer < ApplicationMailer
 
   ### Notifications
 
-  def password_link(user, timestamp, token)
+  def password_link
+    user = params[:user]
+    timestamp = params[:timestamp]
+    token = params[:token]
+
     @name = user.fullname
     @link, @short_link = url_with_short_for(
       controller: 'profile',
@@ -156,7 +159,10 @@ class AccountMailer < ApplicationMailer
     )
   end
 
-  def password_changed(user, originator)
+  def password_changed
+    user = params[:user]
+    originator = params[:originator]
+
     @name = user.fullname
     @home_url = ENV['PM_HOME_URL']
     @originator = originator.fullname_with_email
@@ -168,7 +174,11 @@ class AccountMailer < ApplicationMailer
     )
   end
 
-  def email_confirmation(user, timestamp, token)
+  def email_confirmation
+    user = params[:user]
+    timestamp = params[:timestamp]
+    token = params[:token]
+
     @name = user.fullname
     @link = url_for(
       controller: 'signup',
@@ -195,7 +205,9 @@ class AccountMailer < ApplicationMailer
     )
   end
 
-  def activation_request(user)
+  def activation_request
+    user = params[:user]
+
     @name = user.fullname
     @login = user.login
     @email = user.email
@@ -203,13 +215,15 @@ class AccountMailer < ApplicationMailer
     @research_interest = user.research_interest
     @mode = user.mode
     mail(
-      to: INFO_ADDRESS,
+      to: ENV['PM_INFO_ADDRESS'],
       subject: "[pandora-Activation] #{user.login} (##{user.id})",
       reply_to: user.email.presence
     )
   end
 
-  def research_interest_check(user)
+  def research_interest_check
+    user = params[:user]
+
     @name = user.fullname
     @research_interest = user.research_interest
     @login = user.login
@@ -217,12 +231,16 @@ class AccountMailer < ApplicationMailer
     @account_url = url_for(:controller => 'accounts', :action => 'show', :id => user.login)
 
     mail(
-      to: INFO_ADDRESS,
+      to: ENV['PM_INFO_ADDRESS'],
       subject: "[pandora-ResearchInterestCheck] #{user.login} (##{user.id})"
     )
   end
 
-  def newsletter_subscription(user, timestamp, token)
+  def newsletter_subscription
+    user = params[:user]
+    timestamp = params[:timestamp]
+    token = params[:token]
+
     @link = url_for(
       controller: 'subscriptions',
       action: 'confirm_subscribe',
@@ -244,7 +262,11 @@ class AccountMailer < ApplicationMailer
     )
   end
 
-  def newsletter_unsubscription(user, timestamp, token)
+  def newsletter_unsubscription
+    user = params[:user]
+    timestamp = params[:timestamp]
+    token = params[:token]
+
     @link = url_for(
       controller: 'subscriptions',
       action: 'confirm_unsubscribe',
@@ -266,26 +288,32 @@ class AccountMailer < ApplicationMailer
     )
   end
 
-  def expiration_notification(user)
-    locale = user.locale
+  def expiration_notification
+    user = params[:user]
 
-    recipients user.email
-    subject    '[prometheus-Account] ' + localized_or_combined(locale) { 'Your account expires!'.t }
-    body       :expires     => user.expires_at,
-               :name        => user.fullname,
-               :institution => user.mode == 'institution' && user.institution.fulltitle,
-               :public_info => user.institution.public_info,
-               :guest       => user.mode == 'guest',
-               :admins      => user.active_admins,
-               :locale      => locale,
-               :url         => url_for(:controller => 'accounts', :action => 'license')
+    @user = user
+    @expires = user.expires_at
+    @name = user.fullname
+    @institution = user.mode == 'institution' && user.institution.fulltitle
+    @public_info = user.institution.public_info
+    @guest = user.mode == 'guest'
+    @admins = user.active_admins
+    @locale = user.locale
+    @url = url_for(locale: user.locale, controller: 'signup', action: 'license_form')
+
+    mail(
+      to: user.email,
+      subject: '[prometheus-Account] ' + localized_or_combined(user.locale) { 'Your account expires!'.t }
+    )
   end
 
-  def feedback(feedback)
+  def feedback
+    feedback = params[:feedback]
+
     @feedback = feedback
 
     opts = {
-      to: INFO_ADDRESS,
+      to: ENV['PM_INFO_ADDRESS'],
       subject: '[pandora-Feedback]'
     }
     opts[:reply_to] = @feedback.email unless @feedback.email.blank?
@@ -293,7 +321,9 @@ class AccountMailer < ApplicationMailer
     mail opts
   end
 
-  def feedback_response(feedback)
+  def feedback_response
+    feedback = params[:feedback]
+
     @feedback = feedback
 
     mail(
@@ -302,7 +332,11 @@ class AccountMailer < ApplicationMailer
     )
   end
 
-  def usermail_response(user, recipients, text)
+  def usermail_response
+    user = params[:user]
+    recipients = params[:recipients]
+    text = params[:text]
+
     @text = text
     @recipients = recipients.map { |recipient|
       [recipient, url_for(controller: 'accounts', action: 'show', id: recipient.login)]
@@ -316,7 +350,15 @@ class AccountMailer < ApplicationMailer
 
   ### Publication
 
-  def publication_inquiry(type, status, mode, data, image_info, institution, email)
+  def publication_inquiry
+    type = params[:type]
+    status = params[:status]
+    mode = params[:mode]
+    data = params[:data]
+    image_info = params[:image_info]
+    institution = params[:institution]
+    email = params[:email]
+
     @type = type
     @status = status
     @mode = mode
@@ -330,7 +372,16 @@ class AccountMailer < ApplicationMailer
     )
   end
 
-  def publication_response(type, status, mode, data, image_info, institution, email, user)
+  def publication_response
+    type = params[:type]
+    status = params[:status]
+    mode = params[:mode]
+    data = params[:data]
+    image_info = params[:image_info]
+    institution = params[:institution]
+    email = params[:email]
+    user = params[:user]
+
     @type = type
     @status = status
     @mode = mode
@@ -345,7 +396,9 @@ class AccountMailer < ApplicationMailer
     )
   end
 
-  def conference_signup(signup)
+  def conference_signup
+    signup = params[:signup]
+
     @signup = signup
 
     opts = {
@@ -357,12 +410,26 @@ class AccountMailer < ApplicationMailer
     mail(opts)
   end
 
-  def conference_signup_response(signup)
+  def conference_signup_response
+    signup = params[:signup]
+
     @signup = signup
 
     mail(
       to: @signup.email,
       subject: "Anmeldung zur Tagung: #{Pandora::ConferenceSignup::TITLE} (#{Pandora::ConferenceSignup::DATE})."
+    )
+  end
+
+  def klapsch_match
+    super_image = params[:super_image]
+    owner = super_image.upload.database.owner
+    @owner_name = (owner.is_a?(Account) ? owner.login : owner.name)
+    @url = url_for(controller: 'images', action: 'show', id: super_image.pid)
+
+    mail(
+      to: ENV['PM_INFO_ADDRESS'],
+      subject: 'User upload matches KLAPSCH filter'
     )
   end
 end

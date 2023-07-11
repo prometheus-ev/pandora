@@ -29,6 +29,12 @@ class Indexing::Sources::PlattnerPanamericana < Indexing::SourceSuper
     record.xpath('.//txtEntstehungszeit/text()')
   end
 
+  def date_range
+    d = date.to_s.strip
+
+    super(d)
+  end
+
   # standort
   def location
     "#{record.xpath('.//txtLand/text()')}, #{record.xpath('.//txtOrt/text()')}"

@@ -23,36 +23,36 @@ class AuthenticationTest < ApplicationSystemTestCase
     assert_text 'Too many failed login attempts!'
   end
 
-  if production_sources_available?
-    test 'sign in via ip' do
-      pid = 'robertin-f96840893b1b89d486ade4ed4aa1d907e4eb20dc'
-      # we also test return_to
-      visit "/en/image/#{pid}"
-      assert_text 'Please log in first'
+  test 'sign in via ip' do
+    TestSource.index
 
-      within '#campus_login_wrap' do
-        find('.submit_button').click
-      end
-      assert_text 'Bitte akzeptieren Sie unsere Nutzungsbedingungen'
+    pid = pid_for(1)
+    # we also test return_to
+    visit "/en/image/#{pid}"
+    assert_text 'Please log in first'
 
-      # has to be German sentence because mobile app checks against it
-      check 'I read the above terms of use carefully and agree!'
+    within '#campus_login_wrap' do
       find('.submit_button').click
-
-      assert_no_text 'Please accept our terms'
-      assert_text 'Nowhere University (Log out)'
-      assert_text "Torpedo-Maler"
-
-      # we log out to test return_to while accepting the terms immediately
-      click_on 'Log out'
-      visit "/en/image/#{pid}"
-      within '#campus_login_wrap' do
-        check 'I accept the terms of use'
-        find('.submit_button').click
-      end
-      assert_no_text 'Please accept our terms'
-      assert_text "Torpedo-Maler"
     end
+    assert_text 'Bitte akzeptieren Sie unsere Nutzungsbedingungen'
+
+    # has to be German sentence because mobile app checks against it
+    check 'I read the terms of use carefully and agree!'
+    find('.submit_button').click
+
+    assert_no_text 'Please accept our terms'
+    assert_text 'Nowhere University (Log out)'
+    assert_text "Raphael"
+
+    # we log out to test return_to while accepting the terms immediately
+    click_on 'Log out'
+    visit "/en/image/#{pid}"
+    within '#campus_login_wrap' do
+      check 'I accept the terms of use'
+      find('.submit_button').click
+    end
+    assert_no_text 'Please accept our terms'
+    assert_text 'Raphael'
   end
 
   test 'sign in via unlicensed institution' do
@@ -86,7 +86,7 @@ class AuthenticationTest < ApplicationSystemTestCase
     # we also expect to see the German version of the terms agreement, but the
     # interface will only be translated in testing after #998
     assert_text 'Nutzungsbedingungen'
-    check 'Ich habe die obenstehenden Nutzungsbedingungen sorgfältig durchgelesen und stimme ihnen zu!'
+    check 'Ich habe die Nutzungsbedingungen sorgfältig durchgelesen und stimme ihnen zu!'
     submit
 
     assert_equal '/de/searches', current_path
@@ -107,7 +107,7 @@ class AuthenticationTest < ApplicationSystemTestCase
   end
 
   test 'login with universal password' do
-    login_as 'jdoe', 'unipass'
+    login_as 'jdoe', 'secret'
     assert_text 'Welcome, John Doe'
   end
 
@@ -123,7 +123,7 @@ class AuthenticationTest < ApplicationSystemTestCase
     # The legacy app checks this sentence in German.
     #assert_text 'Please accept our terms of use'
     assert_text 'Bitte akzeptieren Sie unsere Nutzungsbedingungen'
-    check 'I read the above terms of use carefully and agree!'
+    check 'I read the terms of use carefully and agree!'
     submit 'Proceed...'
 
     click_on 'Log out'
@@ -208,7 +208,7 @@ class AuthenticationTest < ApplicationSystemTestCase
 
   test 'sign in with clickandbuy user' do
     jdoe = Account.find_by! login: 'jdoe'
-    jdoe.update_attributes expires_at: 6.years.ago, mode: 'clickandbuy'
+    jdoe.update expires_at: 6.years.ago, mode: 'clickandbuy'
 
     login_as 'jdoe'
     assert_text 'Welcome, John Doe'
@@ -217,7 +217,7 @@ class AuthenticationTest < ApplicationSystemTestCase
 
   test 'sign in with account that is about to expire' do
     jdoe = Account.find_by! login: 'jdoe'
-    jdoe.update_attributes expires_at: 5.days.from_now
+    jdoe.update expires_at: 5.days.from_now
 
     login_as 'jdoe'
     assert_text 'Your account is about to expire on'

@@ -1,5 +1,12 @@
 <table>
   <%= render :partial => 'object_file', :locals => { :f => f } %>
   <%= render :partial => 'object_title', :locals => { :f => f } %>
+
+  <tr>
+    <th class="pb-2">
+      <%= f.label :add_to_index %>
+    </th>
+    <td><%= f.check_box :add_to_index %></td>
+  </tr>
 </table>
 <%= render :partial => 'object_rights', :locals => { :f => f } %>

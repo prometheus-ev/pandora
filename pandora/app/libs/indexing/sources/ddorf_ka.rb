@@ -1,23 +1,23 @@
 class Indexing::Sources::DdorfKa < Indexing::SourceSuper
   def records
-    document.xpath('//objekt')
+    document.xpath('//bilder')
   end
 
   def record_id
-    record.xpath('.//id/text()')
+    record.xpath('.//prometheus_id/text()')
   end
 
   def path
-    record.xpath('.//filename/text()')
+    record.xpath('.//bild/files/file/original_filename/text()')
   end
 
   # künstler
   def artist
-    record.xpath('.//kuenstler/text()')
+    record.xpath('.//_nested__bilder__kuenstler/bilder__kuenstler/kuenstler/person/_standard/de-DE/text()')
   end
 
   def artist_normalized
-    an = record.xpath('.//kuenstler/text()').map { |a|
+    an = record.xpath('.//_nested__bilder__kuenstler/bilder__kuenstler/kuenstler/person/_standard/de-DE/text()').map { |a|
       a.to_s.split(', ').reverse.join(' ')
     }
     super(an)
@@ -30,12 +30,25 @@ class Indexing::Sources::DdorfKa < Indexing::SourceSuper
 
   # datierung
   def date
-    record.xpath('.//datierung/text()')
+    from = record.xpath('.//datierung_range/from/text()')
+    to = record.xpath('.//datierung_range/to/text()')
+
+    if "#{from}" == "#{to}"
+      "#{from}"
+    else
+      "#{from} - #{to}"
+    end
+  end
+
+  def date_range
+    d = date.to_s.strip
+
+    super(d)
   end
 
   # standort
   def location
-    record.xpath('.//ort/text()')
+    record.xpath('.//ort_id/ort/_standard/de-DE/text()')
   end
 
   # technik

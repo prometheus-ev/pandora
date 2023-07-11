@@ -7,7 +7,8 @@ class Upload < ApplicationRecord
   belongs_to :parent, class_name: 'Upload', optional: true
 
   has_many :children, :class_name => 'Upload', :foreign_key => 'parent_id'
-  has_and_belongs_to_many :keywords, :uniq => true, :order => 'title'
+  has_many :keyword_upload, dependent: :destroy
+  has_many :keywords, -> {distinct.order('title ASC')}, through: :keyword_upload
 
   validates_presence_of :file, :on => :create
   validates_presence_of :title
@@ -15,7 +16,7 @@ class Upload < ApplicationRecord
   validate :is_rights_work_completed?
 
   REQUIRED = %w[file title]
-  FILE_FORMATS = ['jpg', 'png', 'gif']
+  FILE_FORMATS = ['jpg', 'png', 'gif', 'mp4', 'pdf']
 
   validate on: :create do |u|
     if file.present?
@@ -34,10 +35,12 @@ class Upload < ApplicationRecord
   end
 
   before_validation :extract_file_info, on: :create
-  after_create :persist_file
+  after_save :persist_file
   after_create :ensure_image
-  after_validation :prepare_unaproval_handling
+  after_validation :auto_approve
+  after_validation :prepare_unapproval_handling
   after_save :ensure_collection_membership
+  after_destroy :remove_file
 
 
   #############################################################################
@@ -100,7 +103,11 @@ class Upload < ApplicationRecord
     when 'artist', 'title', 'location', 'description', 'inventory_no'
       where("LOWER(#{column}) LIKE LOWER(?) collate utf8_bin", "%#{value}%")
     when 'keywords'
-      includes(:keywords).references(:keywords).where('keywords.title LIKE ?', "%#{value}%")
+      column_name = (I18n.locale == :en ? 'title' : 'title_de')
+
+      includes(:keywords).
+        references(:keywords).
+        where("keywords.#{column_name} LIKE ?", "%#{value}%")
     when 'database'
       includes(:database).references(:database)
         .where('sources.title LIKE ?', "%#{value}%")
@@ -159,13 +166,11 @@ class Upload < ApplicationRecord
   end
 
   def keyword_list
-    keywords.map{|k| k.title}.join("\n")
+    Pandora::KeywordList.new(self).read
   end
 
   def keyword_list=(value)
-    unless value.nil?
-      self.keywords = Keyword.from_keyword_list(value)
-    end
+    Pandora::KeywordList.new(self).write(value)
   end
 
   def any_latitude(options = {})
@@ -193,6 +198,19 @@ class Upload < ApplicationRecord
   def institutional?
     database.owner_type == "Institution"
   end
+
+  def super_image
+    Pandora::SuperImage.from(self)
+  end
+
+  def index_doc
+    super_image.index_doc
+  end
+
+  def remove_index_doc
+    super_image.remove_index_doc
+  end
+
 
   private
 
@@ -227,17 +245,27 @@ class Upload < ApplicationRecord
 
     def persist_file
       if @file
+        # remove the previous file first
+        RackImages::Resizer.new.drop('upload', pid)
+
         FileUtils.mkpath(base_path) unless File.exist?(base_path)
         File.open(path, "wb") {|f| f.write(@file.read) }
         @file = nil
       end
     end
 
+    def remove_file
+      system 'rm', '-f', super_image.original_file_path
+
+      # remove resolutions
+      RackImages::Resizer.new.drop('upload', pid)
+    end
+
     def ensure_image
-      self.image = Image.new({
+      self.image = Image.new(
         pid: pid,
         source: database
-      }, without_protection: true)
+      )
 
       if self.image.save
         self.update_columns image_id: pid, latitude: image.latitude, longitude: image.longitude
@@ -246,10 +274,16 @@ class Upload < ApplicationRecord
       end
     end
 
+    def auto_approve
+      if database && database.auto_approve_records?
+        self.approved_record = true
+      end
+    end
+
     # since ensure_collection_membership runs after_save, the change tracking
     # information is lost so we record the relevant change in this
     # after_validation callback
-    def prepare_unaproval_handling
+    def prepare_unapproval_handling
       if approved_record_changed?
         @approved_record_changed = true
       end

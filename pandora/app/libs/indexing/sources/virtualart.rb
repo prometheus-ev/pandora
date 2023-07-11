@@ -7,13 +7,24 @@ class Indexing::Sources::Virtualart < Indexing::SourceSuper
     record.xpath('.//image_file/text()').to_s.gsub(/.*\//, '').gsub(/\..*/, '')
   end
 
+  def record_object_id
+    uid = record.at_xpath('ancestor::note/uid/text()').to_s
+
+    [name, Digest::SHA1.hexdigest(uid)].join('-')
+  end
+
+  def record_object_id_count
+    record.xpath('ancestor::note/images/images_single').count
+  end
+
   def path
     "#{record.xpath('.//image_file/text()')}".gsub(/.*fileadmin\//, '').sub(/.tif\z/, '.jpg')
   end
 
   def artist
-    record.xpath('.//ancestor::note/artist/text()') +
-    record.xpath('.//ancestor::note/artist_place/text()')
+    fields = record.xpath('.//ancestor::note/artist/text()') + record.xpath('.//ancestor::note/artist_place/text()')
+
+    fields.to_a.join(' | ')
   end
 
   def artist_normalized
@@ -31,6 +42,12 @@ class Indexing::Sources::Virtualart < Indexing::SourceSuper
 
   def date
     "#{record.xpath('.//ancestor::note/date/text()')}".gsub(/ - 0\z/, '')
+  end
+
+  def date_range
+    d = date.strip
+
+    super(d)
   end
 
   def literature

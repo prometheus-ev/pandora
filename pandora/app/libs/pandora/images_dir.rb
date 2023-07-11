@@ -3,7 +3,7 @@ class Pandora::ImagesDir
   def initialize
     yaml_file = "#{ENV['PM_ORIGINALS_YML_DIR']}/originals.yml"
 
-    unless File.exists?(yaml_file)
+    unless File.exist?(yaml_file)
       raise "#{yaml_file} doesn't exist"
     end
 
@@ -28,7 +28,7 @@ class Pandora::ImagesDir
       system "mkdir #{ENV['PM_IMAGES_DIR']}/#{name}"
 
       unless us
-        if File.exists?("#{source}/original")
+        if File.exist?("#{source}/original")
           system "ln -sfn #{source}/original #{ENV['PM_IMAGES_DIR']}/#{name}/original"
         end
       end

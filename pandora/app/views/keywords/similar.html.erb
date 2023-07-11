@@ -1,0 +1,60 @@
+<h1 class="page_title">
+  <%= 'Similar sounding keywords' %>
+</h1>
+
+<div class="search_query">
+  <label for="value" class="search_heading">
+    <%= "Search keywords".t %>:
+  </label>
+  <%= list_search_for Keyword %>
+</div>
+
+<%= form_tag nil, method: 'PATCH' do %>
+  <%= hidden_field_tag :other_ids %>
+
+  <p>
+    <%= 'Select keywords by clicking them and then select a merge target'.t %>
+  </p>
+
+  <p class="pm-merge-control" style="display: none">
+    <%= 'Merge selected keywords into' %>
+    <select name="merge_target_id"></select>
+    <%= link_to 'Deselect all'.t, nil, class: 'pm-deselect-keywords' %>
+  </p>
+<% end %>
+
+<%= label_tag 'show_controls', 'show controls'.t %>
+<%= check_box_tag 'show_controls', 'yes', false, class: 'pm-show-controls' %>
+
+<hr />
+
+<table class="keyword-list w-100">
+  <% @similar.each do |s| %>
+    <tr>
+      <td>
+        <div class="pm-title">
+          <%= 'Group "%s"' / s['sound'] %>:
+          (<%= pm_labelled_counter s['count'], '%d keyword', '%d keywords' %>)
+        </div>
+
+        <div class="d-flex flex-wrap mt-1">
+          <% (@by_soundex[s['sound']] || []).each do |keyword| %>
+            <div
+              class="pm-keyword"
+              data-id="<%= keyword.id %>"
+              data-title="<%= keyword.locale_title %>"
+            >
+              <%= keyword.locale_title.presence || '&nbsp;'.html_safe %>
+              <% if keyword.other_title.present? %>
+                <div class="text-small text-muted">t: <%= keyword.other_title %></div>
+              <% end %>
+
+              <%= link_to image_tag('icon/edit.gif'), edit_keyword_path(keyword) %>
+              <%= link_to image_tag('icon/delete.gif'), keyword_path(keyword), method: 'DELETE' %>
+            </div>
+          <% end %>
+        </div>
+      </td>
+    </tr>
+  <% end %>
+</table>

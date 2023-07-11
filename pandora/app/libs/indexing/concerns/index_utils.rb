@@ -156,15 +156,25 @@ module Indexing::Concerns::IndexUtils
         })
       end
 
-      result = index.client.search index: idx, body: {
-        explain: true,
-        query: {
+      if query == 'rights_work_vgbk'
+        query = {
+          term: {
+            rights_work: query
+          }
+        }
+      else
+        query = {
           bool: {
             must: {
               query_string: query_string
             }
           }
-        },
+        }
+      end
+
+      result = index.client.search index: idx, body: {
+        explain: true,
+        query: query,
         docvalue_fields: ["title.raw", "artist_normalized.raw"],
         from: from,
         size: size

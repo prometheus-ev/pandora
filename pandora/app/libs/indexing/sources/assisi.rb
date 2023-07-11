@@ -46,6 +46,10 @@ class Indexing::Sources::Assisi < Indexing::SourceSuper
     "#{record.xpath('.//Datierung/text()')}".gsub(/\Anull\z/, '')
   end
 
+  def date_range
+    super(date)
+  end
+
   # material
   def material
     "#{record.xpath('.//Farbe/text()')}".gsub(/\Anull\z/, '')

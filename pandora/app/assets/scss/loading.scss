@@ -1,0 +1,60 @@
+$lds-size: 40px;
+$lds-factor: $lds-size / 80px;
+
+// following code copied from https://loading.io/css/ with variables applied
+
+.lds-ellipsis {
+  display: inline-block;
+  position: relative;
+  width: $lds-size;
+  height: $lds-size;
+}
+.lds-ellipsis div {
+  position: absolute;
+  top: 33px * $lds-factor;
+  width: 13px * $lds-factor;
+  height: 13px * $lds-factor;
+  border-radius: 50%;
+  background: #fff;
+  animation-timing-function: cubic-bezier(0, 1, 1, 0);
+}
+.lds-ellipsis div:nth-child(1) {
+  left: 8px * $lds-factor;
+  animation: lds-ellipsis1 0.6s infinite;
+}
+.lds-ellipsis div:nth-child(2) {
+  left: 8px * $lds-factor;
+  animation: lds-ellipsis2 0.6s infinite;
+}
+.lds-ellipsis div:nth-child(3) {
+  left: 32px * $lds-factor;
+  animation: lds-ellipsis2 0.6s infinite;
+}
+.lds-ellipsis div:nth-child(4) {
+  left: 56px * $lds-factor;
+  animation: lds-ellipsis3 0.6s infinite;
+}
+@keyframes lds-ellipsis1 {
+  0% {
+    transform: scale(0);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+@keyframes lds-ellipsis3 {
+  0% {
+    transform: scale(1);
+  }
+  100% {
+    transform: scale(0);
+  }
+}
+@keyframes lds-ellipsis2 {
+  0% {
+    transform: translate(0, 0);
+  }
+  100% {
+    transform: translate(24px * $lds-factor, 0);
+  }
+}

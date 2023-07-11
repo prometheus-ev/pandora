@@ -1,0 +1,217 @@
+<live-search>
+  <input
+    id="{props.name}.label"
+    name="{props.name}.label"
+    class="form-control {state.value ? 'is-valid' : ''}"
+    type="text"
+    autocomplete="off"
+    onkeyup={onKeyUp}
+    onblur={nosuggest}
+    onfocus={onFocus}
+    value={state.label}
+    disabled={props.disabled}
+    placeholder={props.placeholder || "Start typing ..."}
+    spellcheck="false"
+  />
+  <input
+    name={props.name}
+    type="hidden"
+    value={state.value}
+  />
+  <ul
+    style="min-width: {offsetWidth()}; overflowY: {overflowY()}"
+    class="bg-dark list-unstyled {state.suggestions.length == 0 ? '' : 'show'}"
+    ontransitionend={event => setOverflow('auto')}
+  >
+    <li
+      each={i in Object.entries(state.suggestions)}
+      key={i[0]}
+      class={i[0] == state.selection ? 'selected' : ''}
+      onmousedown={preventClose}
+      onclick={applySelection}
+      onmouseenter={() => select(i[0])}
+      onmouseleave={noselect}
+    >
+      <template if={i[1].icon}><img src={i[1].icon}></template>
+      <raw html={renderSuggestion(i[1])} />
+    </li>
+  </ul>
+
+  <script>
+    import {clamp, delay} from '../lib/util'
+    import Raw from './raw.riot'
+
+    export default class {
+      static components = {
+        'raw': Raw
+      }
+
+      constructor() {
+        this.lookup = this.lookup.bind(this)
+        this.onKeyUp = this.onKeyUp.bind(this)
+        this.nosuggest = this.nosuggest.bind(this)
+        this.onFocus = this.onFocus.bind(this)
+        this.preventClose = this.preventClose.bind(this)
+        this.applySelection = this.applySelection.bind(this)
+        this.select = this.select.bind(this)
+        this.noselect = this.noselect.bind(this)
+
+        this.delayedLookup = delay(this.lookup, 500)
+      }
+
+      onBeforeMount(props) {
+        if (!props.lookup) {
+          throw "please provide a lookup function"
+        }
+
+        this.state = {
+          label: props.label || '',
+          value: props.value || '',
+          suggestions: [],
+          selection: -1,
+          currentLine: -1,
+          close: true,
+          currentTerm: ''
+        }
+      }
+
+      onChange(event) {
+        const label = event.target.value
+        this.update({
+          label: label,
+          value: ''
+        })
+        this.delayedLookup(label)
+      }
+
+      onKeyUp(event) {
+        switch (event.code) {
+          case 'ArrowDown':
+            this.select(this.state.selection + 1)
+            break;
+          case 'ArrowUp':
+            this.select(this.state.selection - 1)
+            break;
+          case 'Escape':
+            this.nosuggest()
+            break;
+          case 'Enter':
+            event.preventDefault()
+            this.applySelection()
+            break;
+          default:
+            this.onChange(event)
+            break;
+        }
+      }
+
+      onFocus(event) {
+        if (this.props.triggerOnFocus) {
+          const term = this.state.label
+          if (term || this.props.triggerIfEmpty) {
+            this.lookup(term)
+          }
+        }
+      }
+
+      preventClose() {
+        this.state.close = false
+      }
+
+      enableClose() {
+        this.state.close = true
+      }
+
+      applySelection(event) {
+        this.enableClose()
+
+        const selection = this.state.selection
+        if (selection != -1) {
+          const item = this.state.suggestions[selection]
+
+          this.update({
+            label: this.applySuggestToLabel(item),
+            value: item.value,
+            selection: -1,
+            suggestions: []
+          })
+        }
+      }
+
+      applySuggestToLabel(item) {
+        const def = item => item.value
+        const func = this.props.applySuggestToLabel || def
+        
+        return func(item)
+      }
+
+      renderSuggestion(item) {
+        const def = item => item.label
+        const func = this.props.renderSuggestion || def
+
+        return func(item)
+      }
+
+      select(item) {
+        const selection = this.state.selection
+        const count = this.state.suggestions.length
+        let newSelection = -1
+        if (count > 0) {
+          newSelection = clamp(item, 0, count - 1)
+        }
+        this.update({selection: newSelection})
+      }
+
+      noselect(event) {
+        this.update({selection: -1})
+      }
+
+      nosuggest(event) {
+        if (this.state.close == false) {return}
+
+        this.update({suggestions: [], selection: -1})
+      }
+
+      lookup(term) {
+        this.notify('onLoading')
+
+        if (this.state.stop) {return}
+        if (this.state.currentTerm == term) {
+          return
+        } else {
+          this.update({currentTerm: term})
+        }
+
+        this.props.lookup(term).then(data => {
+          this.update({suggestions: data})
+          this.notify('onLoadingComplete')
+        })
+      }
+
+      notify(handlerName) {
+        const handler = this.props[handlerName]
+        if (handler) {
+          handler()
+        }
+      }
+
+      setOverflow(value) {
+        this.update({overflowY: value})
+      }
+
+      input() {
+        this.root.querySelector(`input[name='${this.props.name}.label']`)
+      }
+
+      offsetWidth() {
+        if (this.input()) {
+          return this.input().offsetWidth
+        }
+      }
+
+      overflowY() {
+        return this.state.overflowY || 'hidden'
+      }
+    }
+  </script>
+</live-search>

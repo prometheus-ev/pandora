@@ -20,7 +20,7 @@ class Indexing::Sources::Robertin < Indexing::SourceSuper
   end
 
   def title
-    record.xpath(".//titel/text()")
+    record.xpath(".//titel/text()").to_a.join(' | ')
   end
 
   def date

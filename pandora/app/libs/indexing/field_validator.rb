@@ -9,9 +9,9 @@ class Indexing::FieldValidator
   def run
     @processed_fields.each do |key, value|
       if key == 'date_range' && value
-        validate(key, {'gte' => value.from_time, 'lt' => value.to_time})
         validate('date_range_from', value.from_time)
         validate('date_range_to', value.to_time)
+        validate(key, {'gte' => value.from_time, 'lt' => value.to_time})
       else
         validate(key, value)
       end
@@ -22,11 +22,14 @@ class Indexing::FieldValidator
 
   def validate(key, value = nil)
     validated_value = case key
+                      when 'artist_nested', 'title_nested', 'license_nested', 'location_nested', 'credits_nested', 'rights_reproduction_nested', 'person_nested'
+                        validated_value = validate_or_default(key, value, Array, [])
+                        validate_nested_field(key, validated_value)
                       when 'artist_normalized'
                         validate_or_default(key, value, Array, [])
                       when 'date_range_from', 'date_range_to'
                         validate_or_default(key, value, Time, nil)
-                      when 'rating_count', 'comment_count'
+                      when 'rating_count', 'comment_count', 'record_object_id_count'
                         validate_or_default(key, value, Integer, 0)
                       when 'rating_average'
                         validate_or_default(key, value, Float, 0.0)
@@ -37,8 +40,9 @@ class Indexing::FieldValidator
                         regex = /\A[\/]/
 
                         if regex.match?(value)
-                          message = "The #{key} '#{value}' does not match the regular expression '#{regex}'. " +
-                                    "There must not be a '/' at the beginning of the #{key}."
+                          message = "The #{key} '#{value}' does not match " +
+                            "the regular expression '#{regex}'. " +
+                            "There must not be a '/' at the beginning of the #{key}."
                           raise Pandora::Exception, message
                         else
                           value
@@ -67,6 +71,78 @@ class Indexing::FieldValidator
       message = "The value '#{value}' is not allowed for field '#{key}'. " +
                 "It should be of type #{type}. The default value is '#{default}'."
       raise Pandora::Exception, message
+    end
+  end
+
+  def validate_nested_field(name, nested_values)
+    type = String
+    default = nil
+
+    nested_values.each do |nested_value|
+      nested_value.each do |key, value|
+        value_message = "The value '#{value}' is not allowed for field #{name}['#{key}']. " +
+                        "It should be of type #{type}. The default value is '#{default}'."
+        key_message = "The key '#{key}' is not allowed for field #{name}. " +
+                      "If you need this key, please update the implementation."
+
+        if key == 'name'
+          if !value || value.is_a?(type)
+            true
+          else
+            raise Pandora::Exception, value_message
+          end
+        elsif key == 'dating'
+          if !value || value.is_a?(String)
+            true
+          else
+            raise Pandora::Exception, value_message
+          end
+        elsif key == 'wikidata'
+          if !value || value.is_a?(String)
+            true
+          else
+            raise Pandora::Exception, value_message
+          end
+        elsif key == 'license'
+          if !value || value.is_a?(String)
+            true
+          else
+            raise Pandora::Exception, value_message
+          end
+        elsif key == 'license_url'
+          if !value || value.is_a?(String)
+            true
+          else
+            raise Pandora::Exception, value_message
+          end
+        elsif key == 'link_text'
+          if !value || value.is_a?(String)
+            true
+          else
+            raise Pandora::Exception, value_message
+          end
+        elsif key == 'link_url'
+          if !value || value.is_a?(String)
+            true
+          else
+            raise Pandora::Exception, value_message
+          end
+        elsif key == 'gnd_url'
+          if !value || value.is_a?(String)
+            true
+          else
+            raise Pandora::Exception, value_message
+          end
+        elsif key == 'url'
+          if !value || value.is_a?(String)
+            true
+          else
+            raise Pandora::Exception, value_message
+          end
+        else
+          raise Pandora::Exception, key_message
+        end
+      end
     end
   end
 end

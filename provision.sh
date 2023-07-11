@@ -2,8 +2,8 @@
 
 # General configuration
 
-RUBY_VERSION=2.6.6
-ELASTICSEARCH_VERSION=7.12.1
+RUBY_VERSION=3.0.3
+ELASTICSEARCH_VERSION=7.17.1
 
 function debian_basics {
   apt-get update --allow-releaseinfo-change
@@ -11,17 +11,21 @@ function debian_basics {
     build-essential libxml2-dev libxslt-dev libssl-dev git-core \
     libreadline-dev zlib1g-dev mariadb-server default-libmysqlclient-dev \
     libmagickwand-dev libmagic-dev libpq-dev apt-transport-https curl htop \
-    default-jre net-tools chromium-driver imagemagick pwgen zip idn
+    default-jre net-tools chromium-driver imagemagick pwgen zip idn ffmpeg
 
   # https://www.elastic.co/guide/en/elasticsearch/reference/current/vm-max-map-count.html
   echo vm.max_map_count=262144 > /etc/sysctl.d/vm_max_map_count.conf
   sysctl --system
 
+  # fix imagemagick to allow PDF parsing
+  sed -i -E 's/^.*policy domain="coder" rights="none" pattern="PDF".*$//' /etc/ImageMagick-6/policy.xml
+
   # configure mysql to listen on all interfaces and allow connections
   sed -i -E "s/bind-address\s*=\s*127.0.0.1/#bind-address = 127.0.0.1/" /etc/mysql/mariadb.conf.d/50-server.cnf
   systemctl restart mariadb
-  mysql -e "UPDATE mysql.user SET Host='%', Plugin='', Password=PASSWORD('root') WHERE User LIKE 'root'"
-  mysql -e "FLUSH PRIVILEGES"
+  mysql -e "GRANT ALL PRIVILEGES ON *.* TO 'root'@'%' IDENTIFIED BY 'root'"
+  mysql -e "DROP USER 'root'@'localhost'"
+  mysql -u root -proot -e "FLUSH PRIVILEGES"
 
   # elasticsearch (development & test)
   useradd -m elasticsearch
@@ -33,14 +37,18 @@ function debian_basics {
   rm elastic.tar.gz
 
   mv elasticsearch development
+  echo -e '-Xms1g\n-Xmx1g' > development/config/jvm.options.d/memory.options
   sed -i -E "/^#\s*?node.name:.*$/a node.name: node-1" development/config/elasticsearch.yml
   sed -i -E "/^#\s*?network.host:.*$/a network.host: 0.0.0.0" development/config/elasticsearch.yml
   sed -i -E "/^#\s*?http.port:.*$/a transport.port: 9300-9349" development/config/elasticsearch.yml
   sed -i -E "/^#\s*?discovery.seed_hosts:.*$/a discovery.seed_hosts: [\"0.0.0.0:9300\"]" development/config/elasticsearch.yml
   sed -i -E "/^#\s*?cluster.initial_master_nodes:.*$/a cluster.initial_master_nodes: [\"node-1\"]" development/config/elasticsearch.yml
+  sed -i -E "/^#\s*?action.destructive_requires_name:.*$/a action.destructive_requires_name: false" development/config/elasticsearch.yml
+  sed -i -E "/^#\s.*configuring-stack-security.html.*$/a xpack.security.enabled: false" development/config/elasticsearch.yml
   chown -R elasticsearch. development
 
   cp -a development test
+  echo -e '-Xms1g\n-Xmx1g' > test/config/jvm.options.d/memory.options
   sed -i -E "/^#\s*?cluster.name:.*$/a cluster.name: test" test/config/elasticsearch.yml
   sed -i -E "/^#\s*?http.port:.*$/a http.port: 9201" test/config/elasticsearch.yml
   sed -i -E "s/^\s*?transport.port:.*$/transport.port: 9350-9400/" test/config/elasticsearch.yml
@@ -50,8 +58,6 @@ function debian_basics {
   cp /vagrant/deploy/elasticsearch-development.service /etc/systemd/system/
   cp /vagrant/deploy/elasticsearch-test.service /etc/systemd/system/
   systemctl daemon-reload
-
-  systemctl enable elasticsearch-development.service elasticsearch-test.service
 
   # unknown why this is needed
   rm -f /opt/elastic/development/config/elasticsearch.keystore.tmp
@@ -88,19 +94,6 @@ function centos_basics {
   sleep 5
   cp -a /vagrant/pandora/config/synonyms/ /var/lib/elasticsearch/elasticsearch/nodes/0/
   service elasticsearch restart
-
-  # headless testing
-  # cd /opt
-  # wget https://chromedriver.storage.googleapis.com/2.43/chromedriver_linux64.zip -O chromedriver.zip
-  # unzip chromedriver.zip
-  # rm chromedriver.zip
-  # ln -sfn /opt/chromedriver /usr/local/bin/chromedriver
-  # yum install -y xorg-x11-server-Xvfb firefox
-  # cd /opt
-  # wget https://github.com/mozilla/geckodriver/releases/download/v0.23.0/geckodriver-v0.23.0-linux64.tar.gz -O geckodriver.tar.gz
-  # tar xzf geckodriver.tar.gz
-  # rm geckodriver.tar.gz
-  # ln -sfn /opt/geckodriver /usr/local/bin/geckodriver
 }
 
 function install_rbenv {
@@ -134,7 +127,6 @@ function install_nvm {
 
 function prepare_for_pandora {
   cd /vagrant/pandora
-  cp config/database.yml.example config/database.yml
   cd public/docs
   ln -sfn sample.pdf terms_of_use.en.pdf
   ln -sfn sample.pdf terms_of_use.de.pdf
@@ -149,11 +141,6 @@ function prepare_for_pandora {
 function prepare_for_rack_images {
   cd /vagrant/rack-images
   bundle
-}
-
-function prepare_for_testing {
-  cd /vagrant/pandora
-  RAILS_ENV=test bundle exec rake pandora:index:load INDEX="robertin daumier"
 }
 
 $1

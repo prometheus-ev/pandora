@@ -1,14 +1,24 @@
-#!/bin/bash -ev
+#!/bin/bash -e
+
+if ! [ -d /vagrant ]; then
+  echo "called from outside vagrant vm, switching to vm"
+  vagrant ssh -c "/vagrant/test.sh"
+  exit 0
+fi
 
 TEST_ROOT="$( cd "$( dirname "$0" )" && pwd )"
 
-# rack-images
-cd $TEST_ROOT/rack-images
-touch tmp/restart.txt
-
 # pandora
+
 cd $TEST_ROOT/pandora
-touch tmp/restart.txt
+touch tmp/restart.txt # TODO: why are we doing this?
 rm -rf tmp/cache/active_cache/*
+rm -rf tmp/coverage/
+
+export COVERAGE=true
+export HEADLESS=true
+export PM_RETRY_TESTS=true
+
 bundle exec rails test -v test
-HEADLESS=true bundle exec rails test -v test/system
+sleep 5
+bundle exec rails test -v test/system

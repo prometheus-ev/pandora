@@ -2,7 +2,7 @@ class AnnouncementsController < ApplicationController
 
   include Util::Config
 
-  skip_before_action :store_location, :only => [:hide]
+  # skip_before_action :store_location, :only => [:hide]
   skip_before_action :login_required, :only => [:current, :hide, :index, :list]
 
   DEFAULT_ORDER     = 'date'.freeze
@@ -162,19 +162,15 @@ class AnnouncementsController < ApplicationController
   end
 
 
-  #############################################################################
-  private
-  #############################################################################
-
-  def announcement_params
-    params.fetch(:announcement, {}).permit(
-      :title_de, :title_en, :body_de, :body_en, :starts_at, :ends_at, :role,
-      :id
-    )
-  end
-
-###############################################################################
   initialize_me!
-###############################################################################
+
+  private
+
+    def announcement_params
+      params.fetch(:announcement, {}).permit(
+        :title_de, :title_en, :body_de, :body_en, :starts_at, :ends_at, :role,
+        :id
+      )
+    end
 
 end

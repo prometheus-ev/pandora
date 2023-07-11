@@ -10,4 +10,18 @@ class Indexing::Sources::BochumKgi < Indexing::Sources::Parents::Dilps
       rights_work_vgbk
     end
   end
+
+  def date_range
+    d = date.strip.chomp('.')
+
+    if d == '1896.'
+      d = '1896'
+    elsif d == '12170-75 (?)'
+      d = '1270-75 (?)'
+    elsif d == 'um 1240750'
+      d = 'um 1240'
+    end
+
+    super(d)
+  end
 end

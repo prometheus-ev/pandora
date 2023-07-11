@@ -53,7 +53,7 @@
         - <%= 'View our newsletter archive.'.t %>
       </li>
       <li>
-        <%= link_to 'Terms of use'.t, controller: 'terms', action: 'show' %>
+        <%= link_to 'Terms of use'.t, public_path_for("docs/terms_of_use#{Locale.ext(true)}.pdf"), { title: 'Terms of use'.t, target: '_blank' } %>
         - <%= 'Read our terms of use.'.t %>
       </li>
       <li>

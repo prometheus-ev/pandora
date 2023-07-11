@@ -21,6 +21,7 @@ class SourcesController < ApplicationController
       page,
       per_page
     )
+    @sources_counts = Pandora::Elastic.new.counts
 
     respond_to { |format|
       format.html
@@ -57,6 +58,7 @@ class SourcesController < ApplicationController
         page,
         per_page
       )
+      @sources_counts = Pandora::Elastic.new.counts
 
       respond_to { |format|
         format.html {
@@ -104,6 +106,7 @@ class SourcesController < ApplicationController
 
   def show
     @source = record(:read)
+    @source_counts = Pandora::Elastic.new.counts[@source.name]
 
     respond_to { |format|
       format.html
@@ -131,7 +134,7 @@ class SourcesController < ApplicationController
     @source = Source.new
     @source.name = source_params_permitted.delete(:name)
     @source.title = source_params_permitted.delete(:title)
-    
+
     if source_params_permitted[:type] == "upload"
       @source.owner = source_params_permitted[:institution]
     end
@@ -150,7 +153,7 @@ class SourcesController < ApplicationController
     @contact         = @source.contact
     @admins          = @source.source_admins
 
-    if @source.update_attributes(source_params_permitted)
+    if @source.update(source_params_permitted)
       flash[:notice] = "Source '%s' successfully created!" / @source
 
       redirect_to @source
@@ -175,107 +178,97 @@ class SourcesController < ApplicationController
 
     # Source state before update:
     @institution = @source.institution
-    original_keywords = @source.keywords.join(TEXTAREA_SEPARATOR)
     @contact = @source.contact
     @admins          = @source.source_admins
 
     source_params_permitted = prepare_source_params_for_update(source_params)
 
-    if @source.update_attributes(source_params_permitted)
+    if @source.update(source_params_permitted)
       flash[:notice] = "Source '%s' successfully updated!" / @source
 
       redirect_to @source
     else
+      unless @source.valid?(:keywords)
+        # restore previous errors
+        @source.valid?
+      end
+
       set_mandatory_fields
 
       render 'edit'
     end
   end
 
-  def suggest_keywords
-    @query = params[:q]
-    @keywords = Keyword.
-      search(@query).
-      distinct.
-      pageit(1, 10)
+  initialize_me!
 
-    render partial: 'suggest_keywords', layout: false
-  end
 
-  #############################################################################
   private
   #############################################################################
 
-  def source_params
-    params.fetch(:source, {}).permit(
-      :name, :title, :email, :url,
-      :institution, :kind, :type,
-      :keyword_list,
-      :contact, { admins: [] },
-      :open_access,
-      :can_exploit_rights,
-      :description, :technical_info,
-      :description_de, :technical_info_de,
-      :quota
-    )
-  end
-
-  def prepare_source_params_for_update(source_params_permitted)
-    institution = source_params_permitted.delete(:institution)
-    if institution.present?
-      source_params_permitted.merge!(institution: Institution.find(institution))
+    def source_params
+      params.fetch(:source, {}).permit(
+        :name, :title, :email, :url,
+        :institution, :kind, :type,
+        :keyword_list,
+        :contact, { admins: [] },
+        :open_access,
+        :can_exploit_rights,
+        :description, :technical_info,
+        :description_de, :technical_info_de,
+        :quota,
+        :auto_approve_records
+      )
     end
 
-    contact = source_params_permitted.delete(:contact)
-    if contact.present?
-      source_params_permitted.merge!(contact: Account.find(contact))
-    end
-
-    if admins = source_params_permitted.delete(:admins)
-      source_params_permitted.merge!(source_admins: Account.where(id: admins))
-
-    end
-
-    source_params_permitted
-  end
-
-  def records
-    Source.
-      allowed(current_user).
-      includes(:institution).
-      sorted(sort_column, sort_direction).
-      search(search_column, search_value)
-  end
-
-  def record(rw = :read)
-    record = Source.find_by_name(params[:id])
-
-    if record
-      if current_user
-        if current_user.allowed?(record, rw)
-          record
-        else
-          permission_denied and return
-        end
-      else
-        if Account.allowed?(record, rw)
-          record
-        else
-          permission_denied and return
-        end
+    def prepare_source_params_for_update(source_params_permitted)
+      institution = source_params_permitted.delete(:institution)
+      if institution.present?
+        source_params_permitted.merge!(institution: Institution.find(institution))
       end
-    else
-      flash[:notice] = "A source with name %s does not exist!" / params[:id]
-      redirect_back(fallback_location: locale_root_url)
+
+      contact = source_params_permitted.delete(:contact)
+      if contact.present?
+        source_params_permitted.merge!(contact: Account.find(contact))
+      end
+
+      if admins = source_params_permitted.delete(:admins)
+        source_params_permitted.merge!(source_admins: Account.where(id: admins))
+      end
+
+      source_params_permitted
     end
-  end
 
-  def sort_column_default
-    'title'
-  end
+    def records
+      Source.
+        allowed(current_user).
+        includes(:institution).
+        sorted(sort_column, sort_direction).
+        search(search_column, search_value)
+    end
 
-###############################################################################
-  initialize_me!
-###############################################################################
+    def record(rw = :read)
+      record = Source.find_by(name: params[:id])
+
+      if record.blank?
+        flash[:notice] = "A source with name %s does not exist!" / params[:id]
+        redirect_back(fallback_location: locale_root_url)
+        return
+      end
+
+      access =
+        (current_user && current_user.allowed?(record, rw)) ||
+        (!current_user && Account.allowed?(record, rw))
+
+      unless access
+        forbidden
+        return
+      end
+
+      record
+    end
+
+    def sort_column_default
+      'title'
+    end
 
 end

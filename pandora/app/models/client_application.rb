@@ -14,7 +14,7 @@ class ClientApplication < ApplicationRecord
   REQUIRED = %w[name url key secret]
 
   validates_presence_of   *REQUIRED
-  validates_uniqueness_of :name, :key
+  validates_uniqueness_of :name, :key, case_sensitive: true
 
   # REWRITE: added end anchor
   #URL_RE = %r{\Ahttps?://(?:\w+:?\w*@)?\S+(?::\d+)?(?:/|/[\w#!:.?+=&%@!\-/])?}i
@@ -28,7 +28,7 @@ class ClientApplication < ApplicationRecord
 
   attr_accessor :token_callback_url
 
-  OAUTH_SECRET = SECRETS['oauth_secret']
+  OAUTH_SECRET = ENV['PM_OAUTH_SECRET']
 
   encrypts :secret, :with => [:OAUTH_SECRET, :key]
 
@@ -103,10 +103,14 @@ class ClientApplication < ApplicationRecord
   end
 
   def invalidate_tokens(user, at = Time.now)
-    conds = OauthToken.
-      conditions_for_not_invalidated.
-      merge_conditions(['user_id = ? AND authorized_at < ?', user, at.utc])
-    Upgrade.conds_to_scopes(tokens).each(&:invalidate!)
+    scope = OauthToken.
+      where('invalidated_at IS NULL').
+      where('user_id = ?', user).
+      where('authorized_at < ?', at.utc)
+
+    scope.each do |t|
+      t.invalidate!
+    end
   end
 
   def token_for(user, invalidate = 1.day.ago)

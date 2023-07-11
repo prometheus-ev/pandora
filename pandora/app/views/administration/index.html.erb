@@ -89,3 +89,15 @@
     <%= link_to 'Approved'.t, controller: 'uploads', action: 'approved' %>
   </div>
 </div>
+
+<div class="pm-admin-section">
+  <h3><%= 'Keywords'.t %></h3>
+  <div class="pm-body">
+    <%= link_to 'Create'.t, controller: 'keywords', action: 'new' %><%= vbar %>
+    <%= link_to 'All'.t, controller: 'keywords', action: 'index' %><%= vbar %>
+    <%= link_to 'Similar'.t, controller: 'keywords', action: 'similar' %>
+    <div class="pm-search">
+      <%= list_search_for Keyword, controller: 'keywords', action: 'index' %>
+    </div>
+  </div>
+</div>

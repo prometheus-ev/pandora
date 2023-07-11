@@ -1,0 +1,84 @@
+<pm-ol-modal>
+  <div
+    is="pm-modal"
+    open={state.open}
+    close={() => close()}
+  >
+    <div class="d-flex flex-column justify-content-between p-4 border-box">
+      <p>{t('messages.offensive')}</p>
+
+      <div class="d-flex justify-content-end">
+        <button
+          class="ms-2 p-1"
+          onclick={event => close(event)}
+        >{cap(t('Cancel'))}</button>
+
+        <template if={!state.current}>
+          <button
+            class="ms-2 p-1"
+            onclick={event => toggle(true, event)}
+          >{cap(t('verbs.display'))}</button>
+          <button
+            class="ms-2 p-1"
+            onclick={event => toggleAll(true, event)}
+          >{cap(t('verbs.display_all'))}</button>
+        </template>
+
+        <template if={state.current}>
+          <button
+            class="ms-2 p-1"
+            onclick={event => toggle(false, event)}
+          >{cap(t('verbs.hide'))}</button>
+          <button
+            class="ms-2 p-1"
+            onclick={event => toggleAll(false, event)}
+          >{cap(t('verbs.hide_all'))}</button>
+        </template>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    import {locale} from '../lib/util.js'
+
+    export default class {
+      onBeforeMount() {
+        this.launch = this.launch.bind(this)
+
+        this.state = {
+          open: false
+        }
+
+        this.on('ol.modal', this.launch)
+      }
+
+      launch(event) {
+        this.update({
+          open: true,
+          toggle: event.data.toggle,
+          current: event.data.current
+        })
+      }
+
+      toggle(reveal, event) {
+        if (event) {event.preventDefault()}
+
+        this.state.toggle(reveal)
+        this.close()
+      }
+
+      toggleAll(reveal, event) {
+        if (event) {event.preventDefault()}
+
+        this.bus.emit('ol.toggle', {reveal})
+        this.close()
+      }
+
+      close(event) {
+        if (event) {event.preventDefault()}
+
+        this.update({open: false})
+      }
+    }
+  </script>
+</pm-ol-modal>

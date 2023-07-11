@@ -1,3 +1,0 @@
-class CollectionBox < Box
-end
-

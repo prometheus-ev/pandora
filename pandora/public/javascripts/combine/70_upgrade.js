@@ -337,11 +337,24 @@ jQuery(document).on('click', '.pm-pagination-go', function(event) {
 
 // jQuery(document).on('click', '.toggle_zoom a', function(event) {
 //   event.preventDefault();
-// 
+//
 //   var element = jQuery('div.zoom_link');
 //   element.toggleClass('disabled');
 //   element.toggleClass('enabled');
 // });
+
+// add image preloader vor image zoom versions (#1396)
+jQuery(document).ready(function(event) {
+  var images = document.querySelectorAll("img[_zoom_src]")
+  var urls = [...images].map(i => i.getAttribute('_zoom_src'))
+  var uniq = [...new Set(urls)]
+
+  var loader = document.createElement('div')
+  loader.style.backgroundImage = uniq.map(u => `url(${u})`).join(', ')
+
+  var body = document.querySelector('body')
+  body.append(loader)
+})
 
 jQuery(document).on('mouseover', '.image_list [_zoom_src]', function(event) {
   var img = jQuery(event.target);
@@ -360,6 +373,7 @@ jQuery(document).on('mouseover', '.image_list [_zoom_src]', function(event) {
       img.attr('_zoom_src', img.attr('src'));
       img.attr('src', tmp);
       img.addClass('pm-zoomed');
+      img.addClass('pm-detached');
     }
   }
 });
@@ -374,6 +388,12 @@ jQuery(document).on('mouseout', '.image_list [_zoom_src].pm-zoomed', function(ev
     img.attr('_zoom_src', img.attr('src'));
     img.attr('src', tmp);
     img.removeClass('pm-zoomed');
+
+    var events = 'transitionend webkitTransitionEnd oTransitionEnd otransitionend MSTransitionEnd'
+    img.one(events, function(event) {
+      img.removeClass('pm-detached');
+    });
+
   }
 });
 
@@ -463,7 +483,7 @@ jQuery(document).on('click', '.pm-submit .button_middle', function(event) {
   }
 })
 
-jQuery(document).on('click', '.row-adder-athene-search', function(event) {
+jQuery(document).on('click', '.row-adder', function(event) {
   window.ev = event;
   var target = jQuery(event.target);
   //var list = target.parents('table');
@@ -474,7 +494,7 @@ jQuery(document).on('click', '.row-adder-athene-search', function(event) {
     attr('id', 'search_value_' + i).
     attr('name', 'search_value[' + i + ']').
     attr('tabindex', i + 1);
-  row.find('.row-adder-athene-search').remove();
+  row.find('.row-adder').remove();
   row.after(clone);
   //Pandora.Behaviour.apply(false, added_row);
 })
@@ -493,7 +513,7 @@ jQuery(document).on('click', '.pm-section .pm-toggle', function(event) {
 /* uploads: multi edit */
 
 jQuery(document).on('click', '.pm-edit-selected .button_middle', function(event) {
-  var url = 
+  var url =
     Pandora.root_url + Upgrade.current_locale() + '/uploads/edit_selected';
 
   var params = jQuery(".image_list input[name='image[]']:checked").map(function(i, e) {
@@ -517,7 +537,7 @@ jQuery(document).on('click', '.pm-new-comment', function(event) {
   if (!target.hasClass('pm-new')) {
 
     target.addClass('pm-new');
-    
+
     if (!section.hasClass('pm-expanded')) {
       // the section can be expandend, so its not expanded
       section.addClass('pm-expanded');
@@ -669,7 +689,7 @@ class Boxes {
     var a = jQuery(event.currentTarget)
     var msg = a.data('pm-confirm')
     var id = a.data('id')
-    
+
     if (window.confirm(msg)) {
       this.destroy(id).then(this.render)
     }
@@ -796,6 +816,95 @@ jQuery(document).on('click', '.pm-ratings img', function(event) {
   })
 })
 
+
+// keyword admin
+
+class PmKeywordAdmin {
+  constructor() {
+    jQuery(document).on('click', '.pm-keyword', (event) => {
+      var element = jQuery(event.currentTarget)
+      element.toggleClass('selected')
+      this.updateOptions()
+    })
+
+    jQuery(document).on('click', '.pm-keyword a', (event) => {
+      event.stopPropagation()
+    })
+
+    jQuery(document).on('click', '.pm-deselect-keywords', (event) => {
+      event.preventDefault()
+      this.selected().removeClass('selected')
+      this.updateOptions()
+    })
+
+    jQuery(document).on('change', '.pm-merge-control select', (event) => {
+      this.submit()
+    })
+
+    jQuery(document).on('change', '.pm-show-controls', (event) => {
+      var val = jQuery(event.currentTarget).prop('checked')
+      if (val) {
+        jQuery('.keyword-list').addClass('pm-controls')
+      } else {
+        jQuery('.keyword-list').removeClass('pm-controls')
+      }
+    })
+  }
+
+  selected() {
+    return jQuery('.keyword-list .pm-keyword.selected')
+  }
+
+  anySelected() {
+    return this.selected().length > 0
+  }
+
+  mergeControl() {
+    return jQuery('.pm-merge-control')
+  }
+
+  mergeSelect() {
+    return this.mergeControl().find('select')
+  }
+
+  mergeForm() {
+    return this.mergeSelect().parents('form')
+  }
+
+  updateOptions() {
+    this.mergeSelect().empty()
+
+    if (this.anySelected()) {
+      this.mergeControl().show()
+      this.mergeSelect().append('<option selected>')
+      for (var e of this.selected()) {
+        var o = document.createElement('option')
+        o.innerHTML = e.getAttribute('data-title');
+        o.setAttribute('value', e.getAttribute('data-id'))
+        this.mergeSelect().append(o)
+      }
+    } else {
+      this.mergeControl().hide()
+    }
+  }
+
+  submit() {
+    var target_id = this.mergeSelect().val()
+    var url = '/' + Upgrade.current_locale() + '/keywords/' + target_id + '/merge'
+    var other_ids = []
+    for (var e of this.selected()) {
+      other_ids.push(e.getAttribute('data-id'))
+    }
+    // console.log(target_id, url, other_ids.join(','))
+    this.mergeForm().attr('action', url)
+    this.mergeForm().find('input[name=other_ids]').val(other_ids.join(','))
+    this.mergeForm().submit()
+  }
+}
+
+var keyword_admin = new PmKeywordAdmin()
+
+
 /* hide/unhide user database quota */
 jQuery(document).ready(function(){
   Upgrade.displaySourceQuota(jQuery("#source_kind"))
@@ -807,6 +916,22 @@ jQuery(document).ready(function(){
   boxes.init()
 });
 
+
+/* swap en/de keyword titles in keyword form */
+jQuery(document).ready(function(event) {
+  jQuery('a.pm-swap-keyword-titles').on('click', function(event) {
+    console.log('bal')
+    event.preventDefault()
+
+    const en_input = jQuery('#keyword_title')
+    const de_input = jQuery('#keyword_title_de')
+
+    const tmp = en_input.val()
+    en_input.val(de_input.val())
+    de_input.val(tmp)
+  });
+});
+
 /* restore store-in-collection button state on browser back navigation */
 jQuery(document).ready(function(){
   var checked_images = jQuery('input[type=checkbox]:checked')
@@ -814,3 +939,21 @@ jQuery(document).ready(function(){
     jQuery('.store_controls .popup_toggle').removeClass(['disable', 'disabled'])
   }
 })
+
+
+// toggle display of all artists (instead of only the first 2)
+function toggleAllArtists(event) {
+  event.preventDefault()
+
+  var a = event.currentTarget
+  var labels = a.querySelectorAll('span')
+  for (var label of labels) {
+    label.classList.toggle('d-none')
+  }
+
+  var nodes = a.parentElement.querySelectorAll('.artist')
+  artists = Array.from(nodes).slice(2)
+  for (var artist of artists) {
+    artist.classList.toggle('d-none')
+  }
+}

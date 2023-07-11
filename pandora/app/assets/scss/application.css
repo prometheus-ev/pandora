@@ -210,7 +210,6 @@ body.js div.sidebar_box .box_handle {
 
 #content {
   position:          relative;
-  line-height:       1.4em;
   padding-bottom:    5em;
   margin-top:        3px;
   background-color:  #262626;
@@ -263,6 +262,7 @@ input:-webkit-autofill {
 
 select {
   max-width:         200px;
+  min-height: 17px;
 }
 
 body.administration-controller.index-action select {
@@ -485,6 +485,14 @@ body.js input[type=text].prompt, body.js input[type=password].prompt {
   max-width:         none;
 }
 
+.edit-form input[type='checkbox'] {
+  margin-left: 0;
+}
+
+.edit-form label {
+  line-height: 1.5em;
+}
+
 body.account-controller.settings-action .edit-form input[type=text] {
   width:             240px;
 }
@@ -514,6 +522,15 @@ body.account-controller.settings-action .edit-form select {
 
 .login_form .submit_button_wrap {
   margin-top:        0.5em;
+}
+
+.gradient-border-input {
+  display: flex;
+  flex-direction: row;
+}
+
+.gradient-border-input > input {
+  flex-grow: 2;
 }
 
 #campus_login_wrap .campus_title {
@@ -1347,6 +1364,10 @@ body.image-controller.publish-action .list_row {
   border-bottom:     2px dotted #505050;
 }
 
+.title-field {
+  overflow-wrap: anywhere;
+}
+
 body.announcement-controller .metadata .title-line {
   padding-bottom:    0;
   border-bottom:     none;
@@ -1478,7 +1499,7 @@ div.slide.dragdrop div.slide-insert {
   background-color:  #FF9933;
 }
 
-div.row-adder, div.row-adder-athene-search {
+div.row-adder {
   background-image:  url(../images/misc/row-adder.gif);
   width:             30px;
   height:            28px;
@@ -1486,11 +1507,11 @@ div.row-adder, div.row-adder-athene-search {
   padding:           0;
 }
 
-div.row-adder:hover, div.row-adder-athene-search:hover {
+div.row-adder:hover {
   background-image:  url(../images/misc/row-adder_hover.gif);
 }
 
-div.row-adder:focus, div.row-adder-athene-search:focus, div.row-adder:active, div.row-adder-athene-search:active {
+div.row-adder:focus, div.row-adder:active {
   background-image:  url(../images/misc/row-adder_active.gif);
 }
 
@@ -1498,10 +1519,6 @@ div.row-adder:focus, div.row-adder-athene-search:focus, div.row-adder:active, di
   background:        none;
 }
   
-#query_form input.row-adder-athene-search {
-  background:        none;
-}
-
 .icon, .help_icon, div.image_check_box {
   display:           inline-block;
   margin-left:       3px;
@@ -1715,9 +1732,21 @@ body.js .thumbnail_select .checked + .thumbnail {
 }
 
 .institutional_database_select {
-  padding:           0 0 5px 0;
-  margin-bottom:     2px;
+  padding:           0px 0px 15px 0px;
+  margin-bottom:     5px;
   border-bottom:     2px dotted #505050;
+}
+
+.institutional_database_select h3 {
+  margin-top: 1em;
+}
+
+.institutional_database_select select {
+  padding: 5px 35px 5px 5px;
+  font-size: 16px;
+  border: 1px solid #666;
+  height: 34px;
+  max-width: 410px;
 }
 
 body.upload-controller .header-line .title-line {
@@ -2267,6 +2296,10 @@ body.administration-controller.index-action .section-links {
 .sort_links, .per_page {
   padding:           0px 7px;
   /*padding-top: 8px;*/
+}
+
+.sort_links select {
+  max-width: 100px;
 }
 
 .result_view {
@@ -2902,8 +2935,12 @@ body.pandora-controller.feedback-action td > input[type=text] {
   width:             98%;
 }
 
+body.help-controller #content {
+  padding: 5px 40px 20px 10px;
+}
+
 body.help-controller div#content > * {
-  width:             540px;
+  width: auto;
 }
 
 body.help-controller div#content > .icon_box {
@@ -3177,4 +3214,27 @@ a.pm-view-toggle, .toggle_results_zoom {
 /* more distance to next submenu element */
 .pm-edit-selected {
   margin-right: 5px;
+}
+
+.gallery-sort-value {
+  width: 200px;
+  text-overflow: ellipsis;
+}
+
+.sample-p {
+  width: 720px;
+  white-space: nowrap;
+  overflow: hidden;
+}
+
+.sample-image {
+  height: 60px;
+}
+
+.sample-link {
+  padding: 0px !important;
+}
+
+.aspect {
+  display: inline-block;
 }

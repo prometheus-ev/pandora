@@ -2,6 +2,8 @@ require 'test_helper'
 require 'rest-client'
 require 'json'
 require 'io/console'
+require 'test_sources/test_source'
+require 'test_sources/test_source_sorting'
 
 class ApiTest < ActionDispatch::IntegrationTest
 
@@ -15,7 +17,7 @@ class ApiTest < ActionDispatch::IntegrationTest
     # test wrong content type
     get '/en/pandora.wadl', headers: {'accept' => 'text/html'}
     assert_response :success
-    assert_equal "application/xml", response.content_type
+    assert_equal "application/xml", response.media_type
   end
 
   test 'upload listing' do
@@ -44,41 +46,47 @@ class ApiTest < ActionDispatch::IntegrationTest
     assert_match /\d+ Databases/, xml['pandora']['facts'][1]
   end
 
-  if production_sources_available?
-    test 'counts' do
-      get '/api/v1/json/search/hits', params: {term: 'tree'}
-      assert response.successful?
-      assert json['count'] > 0
+  test 'counts' do
+    TestSource.index
 
-      get '/api/v1/xml/search/hits', params: {term: 'tree'}
-      assert response.successful?
-      assert xml['hits']['count'] > 0
-    end
+    get '/api/v1/xml/search/hits'
+    assert response.successful?
+    assert xml['hits']['count'] > 0
 
-    test 'search' do
-      get '/api/json/search/search', params: {s: ['robertin'], term: 'baum'}
-      assert_equal 401, response.status
+    get '/api/v1/json/search/hits', params: {term: 'raphael'}
+    assert response.successful?
+    assert json['count'] > 0
 
-      get '/api/xml/search/search', params: {s: ['robertin'], term: 'baum'}
-      assert_equal 401, response.status
+    get '/api/v1/xml/search/hits', params: {term: 'raphael'}
+    assert response.successful?
+    assert xml['hits']['count'] > 0
+  end
 
-      get '/api/json/search/search', params: {s: ['robertin'], term: 'baum'}, headers: api_auth('jdoe')
-      assert response.successful?
-      assert json.size > 0
+  test 'search' do
+    TestSource.index
 
-      # see #398
-      get '/api/xml/search/search', params: {s: ['robertin'], term: 'baum'}, headers: api_auth('jdoe')
-      assert response.successful?
-      assert xml['objects'].size > 0
+    get '/api/json/search/search', params: {s: ['test_source'], term: 'raphael'}
+    assert_equal 401, response.status
 
-      # see #1233
-      jdoe = Account.find_by! login: 'jdoe'
-      jdoe.update_columns accepted_terms_of_use_revision: nil
-      get '/api/json/search/search', headers: api_auth('jdoe')
-      assert_match /Bitte akzeptieren Sie unsere Nutzungsbedingungen/, json['message']
-      get '/api/xml/search/search', headers: api_auth('jdoe')
-      assert_match /Bitte akzeptieren Sie unsere Nutzungsbedingungen/, xml['hash']['message']
-    end
+    get '/api/xml/search/search', params: {s: ['test_source'], term: 'raphael'}
+    assert_equal 401, response.status
+
+    get '/api/json/search/search', params: {s: ['test_source'], term: 'raphael'}, headers: api_auth('jdoe')
+    assert response.successful?
+    assert json.size > 0
+
+    # see #398
+    get '/api/xml/search/search', params: {s: ['test_source'], term: 'raphael'}, headers: api_auth('jdoe')
+    assert response.successful?
+    assert xml['objects'].size > 0
+
+    # see #1233
+    jdoe = Account.find_by! login: 'jdoe'
+    jdoe.update_columns accepted_terms_of_use_revision: nil
+    get '/api/json/search/search', headers: api_auth('jdoe')
+    assert_match /Bitte akzeptieren Sie unsere Nutzungsbedingungen/, json
+    get '/api/xml/search/search', headers: api_auth('jdoe')
+    assert_match /Bitte akzeptieren Sie unsere Nutzungsbedingungen/, xml['hash']['message']
   end
 
   test 'image data and metadata (blob, upload)' do
@@ -102,10 +110,10 @@ class ApiTest < ActionDispatch::IntegrationTest
       assert_match /r400/, response.location
 
       get '/api/blob/image/large', params: {id: id}, headers: api_auth('jdoe')
-      assert_equal 'image/jpeg', response.content_type
+      assert_equal 'image/jpeg', response.media_type
 
       get "/api/blob/image/large/#{id}", headers: api_auth('jdoe')
-      assert_equal 'image/jpeg', response.content_type
+      assert_equal 'image/jpeg', response.media_type
     end
   end
 
@@ -162,6 +170,13 @@ class ApiTest < ActionDispatch::IntegrationTest
     get "/api/xml/image/show/#{id}", headers: api_auth('jdoe')
     assert response.successful?
     assert_equal 'A upload', xml['image']['title']
+
+    assert_equal 0, xml['image']['score']
+    assert_equal 0, xml['image']['votes']
+    assert_equal 0.0, xml['image']['rating']
+
+    assert_equal "http://www.example.com/en/image/upload-356a192b7913b04c54574d18c28d46e6395428ab.html?api_version=v1", xml['image']['link']
+    assert_equal true, xml['image']['status_as_of'].is_a?(Time)
   end
 
   test 'image data and metadata (json, upload)' do
@@ -174,68 +189,99 @@ class ApiTest < ActionDispatch::IntegrationTest
     get "/api/json/image/show/#{id}", params: {id: id}, headers: api_auth('jdoe')
     assert response.successful?
     assert_equal 'A upload', json['title']
+
+    assert_equal 0, json['score']
+    assert_equal 0, json['votes']
+    assert_equal 0.0, json['rating']
+
+    assert_equal "http://www.example.com/en/image/upload-356a192b7913b04c54574d18c28d46e6395428ab.html?api_version=v1", json['link']
+    assert_equal true, json['status_as_of'].is_a?(String)
   end
 
-  if production_sources_available?
-    test 'image data and metadata (blob, non upload)' do
-      with_real_images do
-        id = 'robertin-d8f0b98afb49373f88c11a7736745a146ff5b910'
+  test 'image data and metadata (blob, non upload)' do
+    with_real_images do
+      TestSource.index
+      id = Pandora::SuperImage.pid_for('test_source', 1)
 
-        get '/api/blob/image/medium', params: {id: id}
-        assert_equal 401, response.status
+      get '/api/blob/image/medium', params: {id: id}
+      assert_equal 401, response.status
 
-        get '/api/blob/image/small', params: {id: id}, headers: api_auth('jdoe')
-        assert response.redirect?
-        assert_match /rack-images/, response.location
-        assert_match /r140/, response.location
+      get '/api/blob/image/small', params: {id: id}, headers: api_auth('jdoe')
+      assert response.redirect?
+      assert_match /rack-images/, response.location
+      assert_match /r140/, response.location
 
-        get '/api/blob/image/medium', params: {id: id}, headers: api_auth('jdoe')
-        assert response.redirect?
-        assert_match /rack-images/, response.location
-        assert_match /r400/, response.location
+      get '/api/blob/image/medium', params: {id: id}, headers: api_auth('jdoe')
+      assert response.redirect?
+      assert_match /rack-images/, response.location
+      assert_match /r400/, response.location
 
-        get '/api/blob/image/large', params: {id: id}, headers: api_auth('jdoe')
-        assert_equal 'image/jpeg', response.content_type
+      get '/api/blob/image/large', params: {id: id}, headers: api_auth('jdoe')
+      assert_equal 'image/jpeg', response.media_type
 
-        get "/api/blob/image/large/#{id}", headers: api_auth('jdoe')
-        assert_equal 'image/jpeg', response.content_type
-      end
+      get "/api/blob/image/large/#{id}", headers: api_auth('jdoe')
+      assert_equal 'image/jpeg', response.media_type
     end
+  end
 
-    test 'image data and metadata (xml, non upload)' do
-      id = 'robertin-1811fba6f39dfb273cad00155b6a9d87112a35dd'
+  test 'image data and metadata (xml, non upload)' do
+    TestSource.index
+    id = Pandora::SuperImage.pid_for('test_source', 1)
 
-      get '/api/xml/image/show', params: {id: id}, headers: api_auth('jdoe')
-      assert response.successful?
-      assert_equal 'Fragment eines Kraters, griechisch, Kriegerkopf (Halle/Saale ROBERTINUM', xml['image']['descriptive_title']
+    get '/api/xml/image/show', params: {id: id}, headers: api_auth('jdoe')
+    assert response.successful?
+    assert_equal 'Raphael: Katze auf Stuhl (Florenz)', xml['image']['descriptive_title']
 
-      get "/api/xml/image/show/#{id}", headers: api_auth('jdoe')
-      assert response.successful?
-      assert_equal 'Fragment eines Kraters, griechisch, Kriegerkopf (Halle/Saale ROBERTINUM', xml['image']['descriptive_title']
-    end
+    get "/api/xml/image/show/#{id}", headers: api_auth('jdoe')
+    assert response.successful?
+    assert_equal 'Raphael: Katze auf Stuhl (Florenz)', xml['image']['descriptive_title']
 
-    test 'image data and metadata (json, non upload)' do
-      id = 'robertin-1811fba6f39dfb273cad00155b6a9d87112a35dd'
+    assert_equal 0, xml['image']['score']
+    assert_equal 0, xml['image']['votes']
+    assert_equal 0.0, xml['image']['rating']
 
-      get '/api/json/image/show', params: {id: id}, headers: api_auth('jdoe')
-      assert response.successful?
-      assert_equal 'Fragment eines Kraters, griechisch, Kriegerkopf', json['title']
+    assert_equal "http://www.example.com/en/image/test_source-356a192b7913b04c54574d18c28d46e6395428ab.html?api_version=v1", xml['image']['link']
+    assert_equal true, xml['image']['status_as_of'].is_a?(Time)
+  end
 
-      get "/api/json/image/show/#{id}", params: {id: id}, headers: api_auth('jdoe')
-      assert response.successful?
-      assert_equal 'Fragment eines Kraters, griechisch, Kriegerkopf', json['title']
+  test 'image data and metadata (json, non upload)' do
+    TestSource.index
+    id = Pandora::SuperImage.pid_for('test_source', 1)
 
-      # JSON 404
-      id = 'some-1234'
-      get "/api/json/image/show/#{id}", params: {id: id}, headers: api_auth('jdoe')
-      assert_equal 404, response.status
-      assert_equal 'not found', json['message']
+    get '/api/json/image/show', params: {id: id}, headers: api_auth('jdoe')
+    assert response.successful?
+    assert_equal 'Katze auf Stuhl', json['title']
 
-      # XML 404
-      get "/api/xml/image/show/#{id}", params: {id: id}, headers: api_auth('jdoe')
-      assert_equal 404, response.status
-      assert_equal 'not found', xml['hash']['message']
-    end
+    get "/api/json/image/show/#{id}", params: {id: id}, headers: api_auth('jdoe')
+    assert response.successful?
+    assert_equal 'Katze auf Stuhl', json['title']
+
+    # JSON 404
+    id = 'some-1234'
+    get "/api/json/image/show/#{id}", params: {id: id}, headers: api_auth('jdoe')
+    assert_equal 404, response.status
+    assert_equal 'not found', json['message']
+
+    # XML 404
+    get "/api/xml/image/show/#{id}", params: {id: id}, headers: api_auth('jdoe')
+    assert_equal 404, response.status
+    assert_equal 'not found', xml['hash']['message']
+
+    TestSource.index
+    id = 'test_source-356a192b7913b04c54574d18c28d46e6395428ab'
+
+    get "/api/json/image/show/#{id}", params: {id: id}, headers: api_auth('jdoe')
+    assert response.successful?
+    assert_equal '2', json['record_object_id_count']
+
+    assert_equal 0, json['score']
+    assert_equal 0, json['votes']
+    assert_equal 0.0, json['rating']
+
+    assert_equal "http://www.example.com/en/image/test_source-356a192b7913b04c54574d18c28d46e6395428ab.html?api_version=v1", json['link']
+    assert_equal true, json['status_as_of'].is_a?(String)
+  ensure
+    Indexing::Index.delete("test*")
   end
 
   test 'create an upload' do
@@ -245,7 +291,7 @@ class ApiTest < ActionDispatch::IntegrationTest
         rights_work: 'some work rights',
         rights_reproduction: 'some rights',
         credits: 'some credits',
-        file: fixture_file_upload('files/mona_lisa.jpg','image/jpeg')
+        file: fixture_file_upload('mona_lisa.jpg','image/jpeg')
       }
     }
 
@@ -357,13 +403,11 @@ class ApiTest < ActionDispatch::IntegrationTest
   test 'GET /account/terms_of_use (json, xml -> html)' do
     get '/api/json/account/terms_of_use'
     assert response.successful?
-    assert_equal 'text/html', response.content_type
-    assert_match /General terms/, response.body
+    assert_equal 'application/pdf', response.media_type
 
     get '/api/xml/account/terms_of_use'
     assert response.successful?
-    assert_equal 'text/html', response.content_type
-    assert_match /General terms/, response.body
+    assert_equal 'application/pdf', response.media_type
   end
 
   test 'POST /account/terms_of_use (json, xml)' do
@@ -375,13 +419,13 @@ class ApiTest < ActionDispatch::IntegrationTest
     post '/api/xml/account/terms_of_use', params: {accepted: true}
     assert_equal 401, response.status
 
-    user.update({accepted_terms_of_use_revision: nil}, without_protection: true)
+    user.update(accepted_terms_of_use_revision: nil)
     post '/api/json/account/terms_of_use', params: {accepted: true}, headers: api_auth('jdoe')
     assert response.successful?
     assert_equal TERMS_OF_USE_REVISION, json['accepted_terms_of_use_revision']
     assert_equal TERMS_OF_USE_REVISION, user.reload.accepted_terms_of_use_revision
 
-    user.update({accepted_terms_of_use_revision: nil}, without_protection: true)
+    user.update(accepted_terms_of_use_revision: nil)
     post '/api/xml/account/terms_of_use', params: {accepted: true}, headers: api_auth('jdoe')
     assert response.successful?
     assert_equal TERMS_OF_USE_REVISION, xml['account']['accepted_terms_of_use_revision']
@@ -398,9 +442,6 @@ class ApiTest < ActionDispatch::IntegrationTest
     get '/api/xml/announcement/current'
     assert response.successful?
     assert_equal 0, xml['nil_classes'].size
-
-    # we don't verify the content because athene isn't part of pandora yet and
-    # therefore its difficult to ensure consistent test data
   end
 
   test 'POST /box/create' do
@@ -560,11 +601,11 @@ class ApiTest < ActionDispatch::IntegrationTest
   test 'GET /collection/number_of_pages' do
     jdoe = Account.find_by! login: 'jdoe'
     10.times do |i|
-      Collection.create!({
+      Collection.create!(
         title: "John's collection #{i}",
         description: 'only John can see it',
         owner: jdoe
-      }, without_protection: true)
+      )
     end
 
     get '/api/json/collection/number_of_pages', params: {type: 'shared'}
@@ -719,11 +760,11 @@ class ApiTest < ActionDispatch::IntegrationTest
 
   test 'GET /collection/writable' do
     mrossi = Account.find_by! login: 'mrossi'
-    Collection.create!({
+    Collection.create!(
       title: "Mario's private collection",
       description: 'only Mario can see it',
       owner: mrossi
-    }, without_protection: true)
+    )
 
     get '/api/json/collection/writable'
     assert_equal 401, response.status
@@ -819,42 +860,43 @@ class ApiTest < ActionDispatch::IntegrationTest
     assert_equal 3, xml['hash']['images'].size
   end
 
-  if production_sources_available?
-    test 'GET /image/list' do
-      # see #399
+  test 'GET /image/list' do
+    # see #399
 
-      get '/api/json/image/list'
-      assert_equal 422, response.status
-      assert_equal 'source has to be specified', json['message']
+    TestSourceSorting.index
 
-      get '/api/json/image/list', params: {source: 'xxx'}
-      assert_equal 404, response.status
-      assert_equal 'source not found', json['message']
+    get '/api/json/image/list'
+    assert_equal 422, response.status
+    assert_equal 'source has to be specified', json['message']
 
-      get '/api/json/image/list', params: {source: 'daumier'}
-      assert_equal 403, response.status
-      assert_equal 'permission denied to read non-open access source', json['message']
+    get '/api/json/image/list', params: {source: 'xxx'}
+    assert_equal 404, response.status
+    assert_equal 'source not found', json['message']
 
-      get '/api/json/image/list', params: {source: 'daumier'}, headers: api_auth('jdoe')
-      assert response.successful?
-      assert_equal 10, json.size
+    get '/api/json/image/list', params: {source: 'test_source_sorting'}
+    assert_equal 403, response.status
+    assert_equal 'permission denied to read non-open access source', json['message']
 
-      get '/api/json/image/list', params: {source: 'daumier', per_page: 20}, headers: api_auth('jdoe')
-      assert response.successful?
-      assert_equal 20, json.size
+    get '/api/json/image/list', params: {source: 'test_source_sorting'}, headers: api_auth('jdoe')
+    assert response.successful?
+    assert_equal 10, json.size
 
-      get '/api/xml/image/list', params: {source: 'daumier'}, headers: api_auth('jdoe')
-      assert response.successful?
-      assert_equal 10, xml['strings'].size
-    end
+    get '/api/json/image/list', params: {source: 'test_source_sorting', per_page: 20}, headers: api_auth('jdoe')
+    assert response.successful?
+    assert_equal 13, json.size
 
-    test 'the api is also available under /pandora' do
-      # we just test one call since the mechanism applies to all api routes
+    get '/api/xml/image/list', params: {source: 'test_source_sorting'}, headers: api_auth('jdoe')
+    assert response.successful?
+    assert_equal 10, xml['strings'].size
+  end
 
-      get '/pandora/api/json/image/list', params: {source: 'daumier'}, headers: api_auth('jdoe')
-      assert response.successful?
-      assert_equal 10, json.size
-    end
+  test 'the api is also available under /pandora' do
+    # we just test one call since the mechanism applies to all api routes
+    TestSource.index
+
+    get '/pandora/api/json/image/list', params: {source: 'test_source'}, headers: api_auth('jdoe')
+    assert response.successful?
+    assert_equal 10, json.size
   end
 
   test 'rate limiting' do

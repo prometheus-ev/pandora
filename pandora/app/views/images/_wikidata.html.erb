@@ -1,0 +1,10 @@
+<% wikidata_items.each do |wikidata_item| %>
+  <div>
+      <%= wikidata_item["label"] %>
+      <% unless wikidata_item["id"].blank? %>
+        | <%= link_to wikidata_item["id"], { controller: "searches", action: "advanced", "search_field[0]": "all", "search_value[0]": wikidata_item["id"] } %>
+        (<%= link_to "Wikidata", "https://www.wikidata.org/wiki/#{wikidata_item['id']}", target: "_blank" %>
+        <%= image_tag("/images/icon/arrow-up-right-from-square-solid.png", style: "vertical-align: baseline;") %>)
+      <% end %>
+  </div>
+<% end %>

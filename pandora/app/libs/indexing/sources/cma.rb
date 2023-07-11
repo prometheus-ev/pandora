@@ -9,8 +9,16 @@ class Indexing::Sources::Cma < Indexing::SourceSuper
 
   def path
     if record['images'] && record['images']['print']
-      record['images']['print']['url']
+      url = record['images']['print']['url']
+      url.gsub(/^https?:\/\/[^\/]+\//, '')
     end
+  end
+
+  def source_url
+    n = record['accession_number']
+    return if n.blank?
+
+    "https://www.clevelandart.org/art/#{n}"
   end
 
   def artist

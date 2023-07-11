@@ -1,13 +1,10 @@
 module Pandora
-
   module Version
-
-    MAJOR = 3
+    MAJOR = 4
     MINOR = 0
     TINY  = 0
 
     class << self
-
       # Returns array representation.
       def to_a
         [MAJOR, MINOR, TINY]
@@ -17,11 +14,6 @@ module Pandora
       def to_s
         to_a.join('.')
       end
-
     end
-
   end
-
-  VERSION = Version.to_s
-
 end

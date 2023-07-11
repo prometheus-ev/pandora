@@ -10,7 +10,8 @@ class Collection < ApplicationRecord
   belongs_to              :thumbnail, class_name: 'Image', optional: true
   has_many :collections_images, class_name: 'CollectionImage'
   has_many :images, through: :collections_images, after_remove: :content_changed, after_add: :content_changed
-  has_and_belongs_to_many :keywords, :uniq => true, :order => 'title'
+  has_many :collection_keyword, dependent: :destroy
+  has_many :keywords, -> {distinct.order('title ASC')}, through: :collection_keyword
   has_and_belongs_to_many(:viewers,
     class_name: 'Account',
     join_table: 'collections_viewers',
@@ -33,10 +34,10 @@ class Collection < ApplicationRecord
 
   REQUIRED = %w[title]
   validates_presence_of   *REQUIRED
-  validates_uniqueness_of :title, scope: :owner_id
+  validates_uniqueness_of :title, scope: :owner_id, case_sensitive: true
 
   validate(
-    :validate_viewers_and_collaborators, 
+    :validate_viewers_and_collaborators,
     :validate_no_unapproved_uploads
   )
 
@@ -78,46 +79,56 @@ class Collection < ApplicationRecord
   def collaborator_added(collaborator)
     @collaborator_added = true
   end
-  
+
   def new_viewers
     @new_viewers ||= []
   end
-  
+
   def new_collaborators
     @new_collaborators ||= []
   end
-  
+
   def removed_viewers
     @removed_viewers ||= []
   end
-  
+
   def removed_collaborators
     @removed_collaborators ||= []
   end
-  
+
   def record_new_viewer(sharee)
     new_viewers << sharee
   end
-  
+
   def record_new_collaborator(sharee)
     new_collaborators << sharee
   end
-  
+
   def record_removed_viewer(sharee)
     removed_viewers << sharee
   end
-  
+
   def record_removed_collaborator(sharee)
     removed_collaborators << sharee
   end
-  
+
   def notify_sharees
     new_collaborators.each do |collaborator|
-      AccountMailer.collaborator_changed(collaborator, self, :added, :collaborator).deliver_now
+      AccountMailer.with(
+        user: collaborator,
+        object: self,
+        action: :added,
+        what: :collaborator
+      ).collaborator_changed.deliver_now
     end
-    
+
     removed_collaborators.each do |collaborator|
-      AccountMailer.collaborator_changed(collaborator, self, :removed, :collaborator).deliver_now
+      AccountMailer.with(
+        user: collaborator,
+        object: self,
+        action: :removed,
+        what: :collaborator
+      ).collaborator_changed.deliver_now
     end
   end
 
@@ -245,9 +256,11 @@ class Collection < ApplicationRecord
     when 'title' then where('title like ?', "%#{value}%")
     when 'description' then where('description like ?', "%#{value}%")
     when 'keywords'
+      column_name = (I18n.locale == :en ? 'title' : 'title_de')
+
       joins('LEFT JOIN collections_keywords ck ON ck.collection_id = collections.id').
       joins('LEFT JOIN keywords k ON ck.keyword_id = k.id').
-      where('k.title like ?', "%#{value}%").
+      where("k.#{column_name} like ?", "%#{value}%").
       distinct
     when 'owner'
       includes(:owner).
@@ -447,13 +460,11 @@ class Collection < ApplicationRecord
   end
 
   def keyword_list
-    keywords.map{|k| k.title}.join("\n")
+    Pandora::KeywordList.new(self).read
   end
 
   def keyword_list=(value)
-    unless value.nil?
-      self.keywords = Keyword.from_keyword_list(value)
-    end
+    Pandora::KeywordList.new(self).write(value)
   end
 
   attr_accessor :image_list
@@ -515,16 +526,16 @@ class Collection < ApplicationRecord
         joins("left outer join uploads on images.pid = uploads.image_id").
         joins("left outer join sources on uploads.database_id = sources.id").
         joins("left outer join admins_sources on sources.id = admins_sources.source_id").
-        where("uploads.approved_record OR uploads.id IS NULL OR 
-        ((sources.owner_type like 'Account' AND sources.owner_id = #{user.id}) OR 
+        where("uploads.approved_record OR uploads.id IS NULL OR
+        ((sources.owner_type like 'Account' AND sources.owner_id = #{user.id}) OR
         (sources.owner_type like 'Institution' AND admins_sources.account_id = #{user.id}))")
     end
     visible_images
   end
 
   def visible_thumbnail(user)
-    if thumbnail && thumbnail.has_unapproved_upload_record? && 
-      (!user || thumbnail.upload_record.institutional? ? 
+    if thumbnail && thumbnail.has_unapproved_upload_record? &&
+      (!user || thumbnail.upload_record.institutional? ?
       !thumbnail.upload_record.database.source_admins.include?(user) : thumbnail.upload_record.database.owner != user)
       nil
     else

@@ -85,6 +85,8 @@ class Indexing::Sources::Smk < Indexing::SourceSuper
   # only records with image and reproduction in public domain
   # currently[2019-07-17] ca. 36501 records
   def records
+    # Specify the record node name as String for record object ID analysis.
+    @node_name = 'art'
     Indexing::XmlReaderNodeSet.new(document, "art", "//art[has-image=\"true\"][public-domain=\"true\"]")
   end
 
@@ -101,6 +103,10 @@ class Indexing::Sources::Smk < Indexing::SourceSuper
     else
       [name, Digest::SHA1.hexdigest(record.xpath('./object-number/text()').to_s)].join('-')
     end
+  end
+
+  def record_object_id_count
+    @record_object_id_count[record_object_id]
   end
 
   # e.g. https://iip.smk.dk/iiif/jp2/KKS14024-62.tif.jp2/full/full/0/native.jpg
@@ -198,7 +204,9 @@ class Indexing::Sources::Smk < Indexing::SourceSuper
   end
 
   def date_range
-    super(date.split(' | ').first)
+    d = date.split(' | ').first
+
+    super(d)
   end
 
   def literature 

@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<source>
+  <row>
+    <id>1</id>
+    <path>path1</path>
+    <artist>Artist 1</artist>
+    <title>Mona Lisa</title>
+    <location>Location 1</location>
+  </row>
+  <row>
+    <id>2</id>
+    <path>path2</path>
+    <artist>Artist 2</artist>
+    <title>La Joconde</title>
+    <location>Location 2</location>
+  </row>
+  <row>
+    <id>3</id>
+    <path>path3</path>
+    <artist>Artist 3</artist>
+    <title>La Gioconda</title>
+    <location>Location 3</location>
+  </row>
+  <row>
+    <id>4</id>
+    <path>path4</path>
+    <artist>Artist 4</artist>
+    <title>Ein Foto von Mona Lisa im Louvre</title>
+    <location>Location 4</location>
+  </row>
+  <row>
+    <id>5</id>
+    <path>path5</path>
+    <artist>Artist 5</artist>
+    <title>Das ist Mona und nicht Lisa, richtig?</title>
+    <location>Location 5</location>
+  </row>
+</source>

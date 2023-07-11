@@ -1,6 +1,6 @@
 <div id="help-footer">
   <p>
     <%= 'If you have any questions or comments please contact the %s office' / '<span class="prometheus">prometheus</span>' %>:
-    <%= mail_to INFO_ADDRESS %>
+    <%= mail_to ENV['PM_INFO_ADDRESS'] %>
   </p>
 </div>

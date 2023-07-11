@@ -1,0 +1,4 @@
+<% if !credits['link_text'].blank? && !credits['link_url'].blank? %>
+  <%= link_to(credits['link_text'], credits['link_url'], target: '_blank') %>
+  <%= image_tag('/images/icon/arrow-up-right-from-square-solid.png', style: 'vertical-align: baseline;') %>
+<% end %>

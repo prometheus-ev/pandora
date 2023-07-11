@@ -11,14 +11,14 @@ namespace :pandora do
       Indexing::IndexTasks.new(verbose: true).dump(index_arg)
     end
 
-    desc 'load one, several, or all backup indices into elasticsearch (e.g INDEX="daumier robertin", or INDEX="all"); update mapping (optional, e.g. UPDATE_MAPPING=true)'
+    desc 'load one, several, or all backup indices into elasticsearch (e.g INDEX="daumier robertin" or INDEX="all"); update mapping (optional, e.g. UPDATE_MAPPING=true)'
     task load: :environment do
       index_arg = (ENV['INDEX'] || '').downcase.split(/\s+/)
       update_mapping_arg = ENV['UPDATE_MAPPING'] == 'true' ? true : false
       Indexing::IndexTasks.new(verbose: true).load(index_arg, update_mapping_arg)
     end
 
-    desc 'drop one, several, or all indices (see dump task for selection)'
+    desc 'drop one, several, or all indices (e.g INDEX="daumier robertin" or INDEX="all")'
     task drop: :environment do
       index_arg = (ENV['INDEX'] || '').downcase.split(/\s+/)
       index_arg = :all if index_arg == ['all']
@@ -42,6 +42,11 @@ namespace :pandora do
     desc 'update VGBK artists'
     task update_vgbk_artists: :environment do
       Indexing::IndexTasks.new(verbose: true).update_vgbk_artists
+    end
+
+    desc 'write VGBK artist records as CSV'
+    task write_vgbk_artist_records_as_csv: :environment do
+      Indexing::IndexTasks.new(verbose: true).write_vgbk_artist_records_as_csv
     end
 
     desc 'update PKND artists'

@@ -29,9 +29,11 @@ class PandoraTest < ApplicationSystemTestCase
   end
 
   test 'terms of use' do
+    skip '#1573 We now link to the PDF file directly.'
+
     visit '/'
     click_on 'Terms of use'
-    assert_text 'General terms'
+    assert_text 'Please read the terms of use carefully!'
   end
 
   test 'api help page' do
@@ -104,5 +106,26 @@ class PandoraTest < ApplicationSystemTestCase
 
     login_as 'jdupont'
     assert_text 'Administration'
+  end
+
+  test 'env overrides' do
+    assert_equal 'data-0', ENV['PM_TEST_VARIABLE']
+
+    url = "http://#{Capybara.server_host}:#{Capybara.server_port}"
+    response = Faraday.get("#{url}/api/json/about")
+    data = JSON.parse(response.body)
+    assert_equal 'data-0', data['PM_TEST_VARIABLE']
+
+    with_env 'PM_TEST_VARIABLE' => 'data-1' do
+      assert_equal 'data-1', ENV['PM_TEST_VARIABLE']
+
+      response = Faraday.get("#{url}/api/json/about")
+      data = JSON.parse(response.body)
+      assert_equal 'data-1', data['PM_TEST_VARIABLE']
+    end
+
+    response = Faraday.get("#{url}/api/json/about")
+    data = JSON.parse(response.body)
+    assert_equal 'data-0', data['PM_TEST_VARIABLE']
   end
 end

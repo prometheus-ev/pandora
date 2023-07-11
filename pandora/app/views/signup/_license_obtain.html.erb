@@ -19,7 +19,7 @@
     <% if @user.accepted_terms_of_use_recently? -%>
       <%= hidden_field_tag :accepted, true %>
     <% else -%>
-      <%= render :partial => 'accounts/inline_terms_of_use' %>
+      <%= render :partial => 'accounts/accept_terms_of_use' %>
       <br />
       <br />
     <% end -%>

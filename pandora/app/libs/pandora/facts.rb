@@ -5,7 +5,7 @@ module Pandora
         elastic_counts = Pandora::Elastic.new.counts
 
         {
-          :images   => elastic_counts['total']['value'].to_s,
+          :images   => elastic_counts['total']['records'].to_s,
           :sources  => elastic_counts.count - 1,
           :licenses => License.count_institutional,
           :accounts => Account.count_active_users.to_s

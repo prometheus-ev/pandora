@@ -54,7 +54,7 @@ class SignupsTest < ApplicationSystemTestCase
     visit link
 
     click_on 'Edit'
-    select 'Activate', from: 'Expiration'
+    select '1 week', from: 'Expiration'
     submit
     assert_text "Account 'hmustermann' successfully updated"
 
@@ -164,6 +164,7 @@ class SignupsTest < ApplicationSystemTestCase
 
     # as superadmin: assume the received payment, so activate the new account
     login_as 'superadmin'
+    visit '/en/accounts'
 
     within 'form.search_form[action="/en/accounts"]' do
       find('select[name="field"]').select "Login"
@@ -393,7 +394,7 @@ class SignupsTest < ApplicationSystemTestCase
       click_on 'Hans Mustermann'
     end
 
-    Institution.create!({
+    Institution.create!(
       name: 'other',
       city: 'Other',
       title: 'Other University',
@@ -403,14 +404,13 @@ class SignupsTest < ApplicationSystemTestCase
       homepage: 'https://uni-otherwhere.om',
       addressline: '1 University Drive',
       email: 'info@example.com',
-      license: License.new({
+      license: License.new(
         license_type: LicenseType.find_by!(title: 'library'),
         valid_from: 1.month.ago,
         paid_from: 2.months.from_now.beginning_of_quarter,
         expires_at: 1.month.from_now
-      }, without_protection: true),
+      ),
       issuer: 'prometheus'
-      }, without_protection: true
     )
 
     click_on 'Obtain a new license or change your institution...'
@@ -650,7 +650,7 @@ class SignupsTest < ApplicationSystemTestCase
     answer_brain_buster
 
     submit
-    assert_equal("de", Account.find_by(login: "hmustermann").settings.locale)
+    assert_equal("de", Account.find_by(login: "hmustermann").locale)
 
     assert Account.find_by(login: "hmustermann").status.nil?
 

@@ -858,7 +858,7 @@ Pandora.ElementMethods = {
     // ...clearing any input fields and update attributes.
     $A(clone.getElementsByTagName('input')).each(function(i) {
       i.value = '';
-      if (clone_class == "added-row-athene-search") {
+      if (clone_class == "added-row") {
         number = i.readAttribute("tabindex");
         number = parseInt(number) + 1;
         i.writeAttribute("id", "search_value[" + number + "]");
@@ -870,7 +870,7 @@ Pandora.ElementMethods = {
     // ...and selected options
     $A(clone.getElementsByTagName('select')).each(function(i) {
       i.options[i.selectedIndex].selected = false;
-      if (clone_class == "added-row-athene-search") {
+      if (clone_class == "added-row") {
         id = i.readAttribute("id");
         if (id.substring(0, 23) == "boolean_fields_selected") {
           i.writeAttribute("id", "boolean_fields_selected[" + number + "]");
@@ -1722,26 +1722,6 @@ Pandora.StringMethods = {
   }
 
 };
-
-// function loadRecordImageWithRecordIdUrlIndexAndPath(record_id, url, index, path) {
-//   var xhr = new XMLHttpRequest();
-//   xhr.open("GET", url + "?index=" + index + "&path=" + path, true);
-//   xhr.responseType = 'blob';
-//   xhr.onload = function(e) {
-//     if (this.status !== 200) {
-//       $(record_id).writeAttribute("alt", "[" + locales_search_not_available + "]");
-//       $(record_id).writeAttribute("src", url + "?index=" + index + "&path=" + path);
-//     } else {
-//       var blob = this.response;
-//       var reader = new window.FileReader();
-//       reader.readAsDataURL(blob);
-//       reader.onloadend = function() {
-//         $(record_id).writeAttribute("src", reader.result);
-//       };
-//     }
-//   }
-//   xhr.send();
-// }
 
 Element.addMethods(Pandora.ElementMethods);
 Object.extend(String.prototype, Pandora.StringMethods);

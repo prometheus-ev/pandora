@@ -1,26 +1,68 @@
-<%= truncated(value.map { |v|
-  if !v.is_a?(String) && v.respond_to?(:to_s)
-    v = v.to_s
-  end
-  if v.include?(",http")
-    if v.include?("%")
-      arr = v.split("%")
-      str = ""
-      (0..(arr.count-1)).each do|index|
-        if !index.odd?
-          str << arr[index]
+<div class="artists">
+  <% value.each.with_index do |v, i| %>
+    <div class="artist <%= 'd-none' if i >= 2 %> ">
+      <% if wikidata_widget %>
+        <div class="dot">・</div>
+      <% end %>
+
+      <% v = v.to_s if !v.is_a?(String) && v.respond_to?(:to_s) %>
+
+      <% if wikidata_widget %>
+        <% wds = super_image.user_values_for('artist_wikidata', account: current_user) %>
+        <% wd = wds[i] %>
+
+        <% allow_edit = super_image.original_for('artist_wikidata', i).blank? %>
+        <div is="pm-wikidata-widget"
+          class="float-right"
+          field="artist_wikidata"
+          value="<%= wd %>"
+          position="<%= i %>"
+          pid="<%= super_image.pid %>"
+          allow-edit="<%= allow_edit %>"
+        ></div>
+      <% end %>
+
+      <%
+        str = ''
+
+        if v.include?(",http")
+          if v.include?("%")
+            arr = v.split("%")
+            (0..(arr.count-1)).each do|index|
+              if !index.odd?
+                str << arr[index].html_safe
+              else
+                str << link_to_links(arr[index]).html_safe
+              end
+            end
+          else
+            str << link_to_links(v)
+          end
         else
-          str << link_to_links(arr[index])
+          str << sanitize(v)
         end
-      end
-      str
-    else
-      link_to_links(v)
-    end
-  else
-    sanitize(v)
-  end
-}.join(" | ").html_safe, 280, :escape => false) %>
-<% unless (artist_normalized = super_image.docvalue_field('artist_normalized')).blank? %>
-  <%= image_tag('misc/info_form_field.gif', :class => 'dim', :title => "Indexed version".t + " (" + "normalized and synonyms if available".t + "): " + artist_normalized.join(', ')) %>
+      %>
+
+      <%= str.html_safe %>
+    </div>
+  <% end %>
+
+  <% if value.size > 2 %>
+    <a href="#" onclick="toggleAllArtists(event)">
+      <span><%= 'more'.t %></span>
+      <span class="d-none"><%= 'less'.t %></span>
+    </a>
+  <% end %>
+</div>
+
+<% artist_normalized = super_image.docvalue_field('artist_normalized') %>
+<% unless artist_normalized.blank? %>
+  <%= image_tag('misc/info_form_field.gif',
+    class: 'dim',
+    title:
+      "Indexed version".t +
+      " (" + "normalized and synonyms if available".t + "): " + 
+      artist_normalized.join(', ')
+    )
+  %>
 <% end %>

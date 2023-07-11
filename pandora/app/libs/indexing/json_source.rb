@@ -4,9 +4,11 @@ class Indexing::JsonSource
     @errors =  []
 
     begin
-      @records = JSON.parse(document)
+      @records = Array.wrap(JSON.parse(document))
     rescue JSON::ParserError => e
       @errors = [e.message]
+    rescue TypeError => e
+      @records = document
     end
   end
 

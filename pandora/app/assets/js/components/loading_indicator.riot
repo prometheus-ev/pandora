@@ -1,0 +1,25 @@
+<pm-loading-indicator>
+  <div class="lds-ellipsis {active() ? '' : 'd-none'}">
+    <div></div><div></div><div></div><div></div>
+  </div>
+
+  <script>
+    export default class {
+      onBeforeMount() {
+        this.onLoadingStateChange = this.onLoadingStateChange.bind(this)
+
+        this.state = {count: 0}
+
+        this.on('loading-state-change', this.onLoadingStateChange)
+      }
+
+      onLoadingStateChange(event) {
+        this.update({count: event.data.count})
+      }
+
+      active() {
+        return this.state.count > 0
+      }
+    }
+  </script>
+</pm-loading-indicator>

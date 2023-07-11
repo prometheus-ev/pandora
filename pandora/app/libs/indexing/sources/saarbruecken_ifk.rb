@@ -49,6 +49,16 @@ class Indexing::Sources::SaarbrueckenIfk < Indexing::SourceSuper
     record.xpath('ancestor::row/entity_datings/dating_string/text()')
   end
 
+  def date_range
+    d = date.to_s.strip
+
+    if d == '1966 bis 19671970'
+      d = '1966 bis 1970'
+    end
+
+    super(d)
+  end
+
   def location
     locations = record.xpath('ancestor::row/relationships/relations[id=25]')
     locations.map { |i|

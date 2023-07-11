@@ -18,13 +18,14 @@ class InstitutionalUploadsController < ApplicationController
 
   def new
     unless current_user && current_user.institutional_user_dbadmin?
-      permission_denied
+      forbidden
       return
     end
 
     @institutional_upload_database = current_user.admin_sources.where(type: "upload").find(params[:id])
 
     @upload = Upload.new(upload_params)
+    @upload.add_to_index = true if @upload.add_to_index.nil?
 
     @page_title = "Select a file and add the mandatory metadata".t
     set_mandatory_fields
@@ -32,7 +33,7 @@ class InstitutionalUploadsController < ApplicationController
 
   def create
     unless current_user && current_user.institutional_user_dbadmin?
-      permission_denied
+      forbidden
       return
     end
 
@@ -40,11 +41,13 @@ class InstitutionalUploadsController < ApplicationController
 
     @upload = Upload.new(upload_params)
     @upload.database = @institutional_upload_database
-    @upload.approved_record = true
+    @upload.approved_record = @institutional_upload_database.auto_approve_records?
 
     upload_latest = @institutional_upload_database.uploads.order('updated_at DESC').first
 
     if @upload.save
+      @upload.index_doc
+
       flash[:notice] = [
         'File successfully uploaded!'.t,
         translate_with_link(
@@ -93,11 +96,15 @@ class InstitutionalUploadsController < ApplicationController
         per_page
       )
 
-      set_list_title(@institutional_upload_database)
+      if @institutional_upload_database
+        @page_title = set_list_title(@institutional_upload_database)
+      else
+        @page_title = 'No institutional database available'
+      end
 
       store_neighbours_for(@uploads.items)
     else
-      permission_denied
+      forbidden
       return
     end
   end
@@ -110,7 +117,7 @@ class InstitutionalUploadsController < ApplicationController
     quota = number_to_human_size(database.quota.megabytes, precision: 2)
     space_used = number_to_human_size(space_used_in_bytes(database), precision: 2)
     space_used_percentage = number_to_percentage(space_used_in_bytes(database)/database.quota.megabytes*100, :precision => 2)
-    @page_title = 'Using %s of %s (about %s)'.t % [space_used, quota, space_used_percentage]
+    'Using %s of %s (about %s)'.t % [space_used, quota, space_used_percentage]
   end
 
   # overwrites generic ApplicationController#set_mandatory_fields
@@ -182,7 +189,8 @@ class InstitutionalUploadsController < ApplicationController
         :latitude, :longitude, :discoveryplace, :date, :artist, :genre,
         :keyword_list, :location, :addition, :annotation, :iconography,
         :institution, :inventory_no, :origin, :other_persons, :photographer,
-        :size, :subtitle, :text, :parent_id, :material, :description
+        :size, :subtitle, :text, :parent_id, :material, :description,
+        :add_to_index
       )
     end
   end

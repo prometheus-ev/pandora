@@ -43,6 +43,12 @@ class Indexing::Sources::Ethzuerich < Indexing::SourceSuper
     record.xpath('.//Datierung/text()')
   end
 
+  def date_range
+    d = date.to_s.strip
+
+    super(d)
+  end
+
   # schlagwoerter
   def keyword
     record.xpath('.//Sachkatalog/text()')

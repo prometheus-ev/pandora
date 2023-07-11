@@ -33,6 +33,22 @@ class Indexing::Sources::BerlinSpsg < Indexing::SourceSuper
     record.xpath('.//descriptiveMetadata/descriptionWrap/displayCreationDate/text()')
   end
 
+  def date_range
+    date = record.xpath('.//descriptiveMetadata/descriptionWrap/displayCreationDate/text()').to_s.strip
+
+    if date == '31.9.1931'
+      date = '30.9.1931'
+    elsif date == '1890-19421'
+      date = '1890-1942'
+    elsif date == '1927-19435'
+      date = '1927-1943'
+    elsif date == '1890-19420'
+      date = '1890-1942'
+    end
+
+    super(date)
+  end
+
   # standort
   def location
     record.xpath('.//descriptiveMetadata/identificationWrap/repositoryWrap/repositorySet/repositoryLocationName/text()')

@@ -35,6 +35,13 @@ class Indexing::Sources::Dmr < Indexing::SourceSuper
     "#{record.xpath('.//datierung_von/text()')} - #{record.xpath('.//datierung_bis/text()')} (#{record.xpath('.//bemerkg_datierung/text()')})".gsub(/0* - 0* /, '').gsub(/\([0\-]*\)/, "")
   end
 
+  def date_range
+    d = "#{record.xpath('.//datierung_von/text()')} - #{record.xpath('.//datierung_bis/text()')}"
+    d = d.strip.encode('iso-8859-1').encode('utf-8')
+
+    super(d)
+  end
+
   # standort
   def location
     record.xpath('.//standort/text()')

@@ -10,6 +10,8 @@ class CommentsController < ApplicationController
 
     if @comment.save
       flash[:notice] = 'Comment successfully saved!'.t
+
+      index_upload(@comment)
     else
       flash[:warning] = 'There were errors saving your comment!'.t
     end
@@ -21,12 +23,14 @@ class CommentsController < ApplicationController
     @comment = commentable.comments.find(params[:id])
 
     unless current_user.allowed?(@comment, :write)
-      permission_denied
+      forbidden
       return
     end
 
-    if @comment.update_attributes(comment_params)
+    if @comment.update(comment_params)
       flash[:notice] = 'Comment successfully edited!'.t
+
+      index_upload(@comment)
     else
       flash[:warning] = 'There were errors saving your comment!'.t
     end
@@ -38,11 +42,13 @@ class CommentsController < ApplicationController
     @comment = commentable.comments.find(params[:id])
 
     unless current_user.allowed?(@comment, :delete)
-      permission_denied
+      forbidden
       return
     end
 
     @comment.soft_delete!
+    
+    index_upload(@comment)
 
     flash[:notice] = 'Comment successfully deleted!'.t
     redirect_to commentable_url_options.merge(anchor: 'comments')
@@ -75,6 +81,13 @@ class CommentsController < ApplicationController
 
       if commentable.is_a?(Image)
         return {controller: 'images', action: 'show', id: commentable.id}
+      end
+    end
+
+    def index_upload(comment)
+      if comment.type == 'image'
+        si = comment.image.super_image
+        si.index_doc
       end
     end
 

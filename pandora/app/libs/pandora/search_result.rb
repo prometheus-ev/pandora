@@ -3,24 +3,19 @@ class Pandora::SearchResult
     @result = result
     @criteria = criteria
 
-    if result['type'] == :time && @criteria['search_value'] && any_results?
-      if @criteria['search_value']['0'] == @criteria['previous_search_value']
-        @slider_min_year = @criteria['slider_min_year']
-        @slider_max_year = @criteria['slider_max_year']
-      else
-        @slider_min_year = Date.parse(result['fields']['date_range']['aggregations']['date_range_from_stats']['min_as_string']).year
-        @slider_max_year = Date.parse(result['fields']['date_range']['aggregations']['date_range_to_stats']['max_as_string']).year
-      end
-    else
-      @slider_min_year = Date.today.year * -1
-      @slider_max_year = Date.today.year
+    #min_year = Date.parse(result['fields']['date_range']['aggregations']['date_range_from_stats']['min_as_string']).year
+    #max_year = Date.parse(result['fields']['date_range']['aggregations']['date_range_to_stats']['max_as_string']).year
+
+    if @criteria[:time] && @criteria['search_value']
+      @date_range_from = @criteria['date']['from']
+      @date_range_to = @criteria['date']['to']
     end
+
   end
 
   def result
     @result
   end
-
 
   # criteria accessors
 
@@ -30,6 +25,14 @@ class Pandora::SearchResult
 
   def sample
     @criteria[:sample]
+  end
+
+  def time
+    @criteria[:time]
+  end
+
+  def objects
+    @criteria[:objects]
   end
 
   def sample_size
@@ -42,14 +45,6 @@ class Pandora::SearchResult
 
   def date
     @criteria[:date]
-  end
-
-  def slider_min_year
-    @slider_min_year
-  end
-
-  def slider_max_year
-    @slider_max_year
   end
 
   def source_name
@@ -94,20 +89,16 @@ class Pandora::SearchResult
     hits.empty? ? 0 : result['result']['aggregations']['date_range_from_stats']['count']
   end
 
+  def object_count
+    hits.empty? ? 0 : result['result']['aggregations']['object_count']['value']
+  end
+
   def date_range_from
-    if (@criteria['search_value'] && (@criteria['search_value']['0'] == @criteria['previous_search_value']) && @criteria['date'])
-      @criteria['date']['from']
-    else
-      slider_min_year
-    end
+    @date_range_from
   end
 
   def date_range_to
-    if (@criteria['search_value'] && (@criteria['search_value']['0'] == @criteria['previous_search_value']) && @criteria['date'])
-      @criteria['date']['to']
-    else
-      slider_max_year
-    end
+    @date_range_to
   end
 
   def field_selected
@@ -166,7 +157,11 @@ class Pandora::SearchResult
       result = Hash.new
       indices_sorted.each do |key, value|
         value['source'].keywords.each do |keyword|
-          result[keyword.title] ? (result[keyword.title].push [key, value]) : (result[keyword.title] = Array.new.push [key, value])
+          if result[keyword.t]
+            result[keyword.t].push [key, value]
+          else
+            result[keyword.t] = Array.new.push [key, value]
+          end
         end
       end
     else
@@ -176,7 +171,7 @@ class Pandora::SearchResult
         when 'open_access'
           value['source'].open_access? ? 'Open Access' : 'Non Open Access'
         when 'kind'
-          value['source']['kind'] + 's'
+          value['source']['kind'].pluralize
         when 'title'
           value["source"][field].split(" - ").first.strip if !value["source"][field].blank?
         else

@@ -37,6 +37,14 @@ class Indexing::Sources::BerlinWinckelmann < Indexing::SourceSuper
     }.join(", ")
   end
 
+  def date_range
+    date = _label('DATIERUNG IN JAHRHUNDERTEN') { |label|
+      label.delete('"').split(%r{ / }).reverse.join(' ')
+    }.to_s
+
+    super(date)
+  end
+
   def epoch
     _label 'DATIERUNG IN EPOCHEN'
   end

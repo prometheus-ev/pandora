@@ -1,7 +1,7 @@
 class ShortUrl < ApplicationRecord
 
   validates_presence_of   :url, :token
-  validates_uniqueness_of :token
+  validates_uniqueness_of :token, case_sensitive: true
 
   before_validation :generate_token, on: :create
 
@@ -11,8 +11,6 @@ class ShortUrl < ApplicationRecord
   MAX_TRIES = 10_000
 
   def self.for(app, options)
-    # REWRITE: use new query interface
-    # find_or_create_by_url(app.url_for(
     find_or_create_by(url: app.url_for(
       options.is_a?(Hash) ? options.merge(only_path: true) : options
     ))

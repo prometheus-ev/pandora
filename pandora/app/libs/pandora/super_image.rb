@@ -1,3 +1,4 @@
+require 'digest/sha1'
 require 'rack_images'
 
 class Pandora::SuperImage
@@ -11,6 +12,8 @@ class Pandora::SuperImage
     @collection_counts_cache = options[:collection_counts]
     preload!
   end
+
+  attr_reader :pid
 
   def self.from(object, options = {})
     case object
@@ -31,6 +34,16 @@ class Pandora::SuperImage
     else
       raise Pandora::Exception, "unknown image object: #{object.inspect}"
     end
+  end
+
+  def self.from_upstream_id(source_id, upstream_id)
+    normalized_id = Array(upstream_id).join('|')
+    pid = "#{source_id}-#{Digest::SHA1.hexdigest(normalized_id)}"
+    new(pid)
+  end
+
+  def self.pid_for(source_id, id)
+    [source_id, Digest::SHA1.hexdigest(id.to_s)].join('-')
   end
 
   # tries to pull relevant objects from the objects already available
@@ -67,8 +80,6 @@ class Pandora::SuperImage
       @elastic_record ||= @elastic_record_image.elastic_record
     end
   end
-
-  attr_reader :pid
 
   def self.find(pid)
     si = new(pid)
@@ -127,7 +138,7 @@ class Pandora::SuperImage
 
   def elastic_record
     @elastic_record ||= begin
-      Pandora::Elastic.new.record(@pid)
+      Pandora::Elastic.new.record(index_record_id)
     end
   end
 
@@ -137,6 +148,22 @@ class Pandora::SuperImage
 
   def has_record?
     upload? ? image.has_record? : elastic_record_image.has_record?
+  end
+
+  def index_name
+    return source_id unless upload?
+
+    @index_name ||= (institutional? ? upload.database.name : 'uploads')
+  end
+
+  def institutional?
+    return false unless upload?
+
+    upload.institutional?
+  end
+
+  def index_record_id
+    upload? ? "#{index_name}-#{pid.split('-').last}" : pid
   end
 
   def source_id
@@ -178,7 +205,11 @@ class Pandora::SuperImage
   end
 
   def path
-    elastic? ? elastic_record_image.path : "#{image.upload.pid}.#{image.upload.filename_extension}"
+    if upload?
+      "#{pid}.#{upload.filename_extension}"
+    else
+      elastic_record_image.path
+    end
   end
 
   def to_s
@@ -230,7 +261,7 @@ class Pandora::SuperImage
   end
 
   def display_fields
-    upload? ? image.display_fields : elastic_record_image.display_fields
+    upload? ? Indexing::IndexFields.display_upload : Indexing::IndexFields.display
   end
 
   def relevance
@@ -325,12 +356,24 @@ class Pandora::SuperImage
     upload? ? upload.rights_reproduction : elastic_record['_source']['rights_reproduction']
   end
 
+  def keywords
+    return upload.keywords.map{|k| k.t} if upload?
+
+    elastic_record['_source']['keyword'] ||
+    elastic_record['_source']['keywords'] ||
+    []
+  end
+
   def record_object_id
     upload? ? nil : value_list(elastic_record['_source']['record_object_id'])
   end
 
   def updated_at
-    upload.updated_at if upload?
+    if upload?
+      upload.updated_at
+    else
+      source.updated_at
+    end
   end
 
   def created_at
@@ -410,12 +453,70 @@ class Pandora::SuperImage
       end
     else
       pobject_id = elastic_record_image.pobject_id || []
-      response = Pandora::Elastic.new.by_object_ids(pobject_id)
-      response['hits']['hits'].map do |hit|
+      response = Pandora::Elastic.new.by_object_ids(pobject_id, 100)
+      aspect_hits = response['hits']['hits'].reject do |hit|
+        hit['_id'] == pid
+      end
+      aspect_hits.map do |hit|
         self.class.new(hit['_id'], elastic_record: hit)
       end
     end
   end
+
+  # # returns the value as stored in elasticsearch
+  # def elastic_value_for(field, position: nil)
+  #   tl_field, sub_field = field.split('.')
+
+  #   if (sub_field) # 'nested' field
+  #     array = display_field(tl_field)
+  #     doc = array[position || 0] || {}
+  #     doc[sub_field]
+  #   else
+  #     display_field(tl_field)
+  #   end
+  # end
+
+  # def user_values_for(field, account: nil)
+
+  # end
+
+  def original_for(field, position = 0)
+    UserMetadata.original_for(pid, field, position)
+  end
+
+  def user_values_for(field, account: nil)
+    um = UserMetadata.where(pid: pid).first
+    updates = (um ? um.updates : [])
+    # nested = field.match?(/_nested$/)
+    account = nil if account.admin_or_superadmin?
+
+    elastic = begin
+      display_field(field)
+    rescue ActiveRecord::RecordNotFound => e
+      Rails.logger.error("Couldn't retrieve elastic record #{pid}")
+      []
+    end
+
+    elastic = UserMetadata.apply_updates_to(
+      elastic, pid, field, account: account
+    )
+    
+    elastic
+  end
+
+  # def user_value_for(field, account: nil, position: nil)
+  #   um = (
+  #     account.nil? ?
+  #     nil :
+  #     UserMetadata.value_for(pid,
+  #       field: field,
+  #       account: account.admin_or_superadmin? ? nil : account,
+  #       position: position
+  #     )
+  #   )
+
+  #   um || elastic_value_for(field, position: position)
+  # end
 
   def display_field(display_field)
     if upload?
@@ -440,8 +541,18 @@ class Pandora::SuperImage
     end
   end
 
+  def original_file_path
+    "#{ENV['PM_IMAGES_DIR']}/#{source_id}/original/#{path}"
+  end
+
   def image_path(resolution = :small)
     resolution = resolution_for(resolution)
+    sid = source_id
+
+    # uploads are index within the "uploads" source but the files are located
+    # within a dir called "upload". To make upload rendering also work through
+    # ImagesController, we force the directory sent to rack-images
+    sid = 'upload' if source_id == 'uploads'
 
     if path == 'miro'
       file = (I18n.locale == :en ? 'miro.png' : "miro.#{I18n.locale}.png")
@@ -453,7 +564,7 @@ class Pandora::SuperImage
       # base64-encode the string to avoid decoding issues during transfer
       base64 = RackImages::Resizer.encode64(path)
 
-      "/#{source_id}/#{resolution}/#{base64}"
+      "/#{sid}/#{resolution}/#{base64}"
     end
   end
 
@@ -468,6 +579,8 @@ class Pandora::SuperImage
     file = RackImages::Resizer.new.run(path_info)
     file.read
   rescue RackImages::Exception => e
+    # raise e unless Rails.env.production?
+
     if options[:dummy]
       file = "#{ENV['PM_ROOT']}/rack-images/public/no_image_available.png"
       File.read(file)
@@ -483,15 +596,12 @@ class Pandora::SuperImage
 
     path_info = image_path(resolution)
 
-    token = ::RackImages::Secret.token_for(path_info)
+    lifetime = ENV['PM_ASD_LIFETIME'].to_i.seconds
+    token = ::RackImages::Secret.token_for(path_info, Time.now + lifetime)
 
     connector = (path_info.match(/\?/) ? '&' : '?')
     "#{ENV['PM_RACK_IMAGES_BASE_URL']}#{path_info}#{connector}_asd=#{token}"
   end
-
-  # def base_url
-  #   @base_url ||= Image.pconfig[:base_url][Rails.env.to_s]
-  # end
 
   def resolution_for(label_or_number)
     case label_or_number
@@ -515,6 +625,12 @@ class Pandora::SuperImage
     nil
   end
 
+  def iframe_url
+    if array = elastic_record['_source']['iframe_url']
+      array.first
+    end
+  end
+
 
   # comparisons
 
@@ -524,5 +640,47 @@ class Pandora::SuperImage
 
   def hash
     pid.hash
+  end
+
+
+  # indexing
+
+  def index_doc
+    if upload?
+      if upload.approved_record? && upload.add_to_index?
+        Pandora::Elastic.new.index_upload(self)
+      else
+        Pandora::Elastic.new.remove_upload(self, raise_errors: false)
+      end
+    end
+  rescue Pandora::Exception => e
+    raise e unless Rails.env.production?
+
+    Rails.logger.info("Could not index doc for #{self.inspect}: #{e.message}")
+    nil
+  ensure
+    s = Source.find_by!(name: index_name)
+    s.update_column :record_count, count_uploads(index_name)
+  end
+
+  def remove_index_doc
+    if upload?
+      Pandora::Elastic.new.remove_upload(self, raise_errors: false)
+    end
+  rescue Pandora::Exception => e
+    raise e unless Rails.env.production?
+    
+    Rails.logger.info("Could not index doc for #{self.inspect}")
+    nil
+  ensure
+    s = Source.find_by!(name: index_name)
+    s.update_column :record_count, count_uploads(index_name)
+  end
+
+  def count_uploads(name)
+    data = Pandora::Elastic.new.counts[index_name]
+    return 0 unless data
+
+    data['records'] || 0
   end
 end

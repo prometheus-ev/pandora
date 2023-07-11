@@ -2,17 +2,16 @@
 <tr><td style="vertical-align:top; padding:10px;">
 <hr />
 Aktuelle Informationen erhalten Sie immer &uuml;ber unseren <%= link_to 'Blog'.t, 'http://prometheus-bildarchiv.de/blog', :style => "color:#DF7401;" %> und
-<%= link_to image_tag("#{HOME_URL}/files/icons/facebook.png"), 'http://facebook.com/prometheus.bildarchiv' %>
-<%= link_to image_tag("#{HOME_URL}/files/icons/twitter.png"), 'http://twitter.com/prometheus_eV' %>
-<%= link_to image_tag("#{HOME_URL}/files/icons/googleplus.png"), 'http://plus.google.com/103268334729481987839' %>
+<%= link_to image_tag("#{ENV['PM_HOME_URL']}/files/icons/facebook.png"), 'http://facebook.com/prometheus.bildarchiv' %>
+<%= link_to image_tag("#{ENV['PM_HOME_URL']}/files/icons/twitter.png"), 'http://twitter.com/prometheus_eV' %>
 
 <% if @user && @user.subscriber? -%>
 <%= 'Sign up for a full account'.t %>:<br/>
 <%= link_to nil, @signup_url, :style => "color:#DF7401;" %>
 <% end -%>
 <br />
-<%= 'Unsubscribe from this newsletter'.t %>:
-<%= link_to nil, @unsubscribe_url, :style => "color:#DF7401;" %>
+<%= 'If you want to unsubscribe from the newsletter click'.t %>
+<%= link_to 'here'.t, @unsubscribe_url, :style => "color:#DF7401;" %>.
 
 </td></tr>
 </table>

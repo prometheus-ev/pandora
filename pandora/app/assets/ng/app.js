@@ -1,7 +1,6 @@
-import React from 'react'
-import ReactDOM from 'react-dom'
+import * as riot from 'riot'
 
-import PmHeadline from './js/headline'
+import Spinner from './js/components/spinner.riot'
 
-const body = document.querySelector('#component-container')
-ReactDOM.render(<PmHeadline />, body)
+riot.register('pm-spinner', Spinner)
+riot.mount('pm-spinner')

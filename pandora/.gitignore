@@ -16,8 +16,11 @@
 
 # frontend
 /node_modules/
-/public/ng.styles.js
 /public/styles.js
+/public/ng.styles.js
+/public/ng.app.js.map
+/public/ng.styles.css.map
+/public/webfonts
 
 # yard
 /.yardoc

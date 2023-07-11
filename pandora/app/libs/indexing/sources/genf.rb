@@ -37,6 +37,20 @@ class Indexing::Sources::Genf < Indexing::SourceSuper
     record.xpath('.//DATATION/text()')
   end
 
+  def date_range
+    d = date.to_s.strip
+
+    if d == '1150 - 11660'
+      d = '1150 - 1160'
+    elsif d == '1836 -18463'
+      d = '1836 -1846'
+    end
+
+    d.chomp!('.')
+
+    super(d)
+  end
+
   # groesse
   def size
     record.xpath('.//FORMAT/text()')

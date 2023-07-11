@@ -216,7 +216,7 @@
     <%= section_heading 'De-registration of an administrator account', 'deregistration' %>
     <p>
       If you want to terminate your administrator status, please notify our office
-      (<%= mail_to INFO_ADDRESS %>) by e-mail. At the same time, the new administrator
+      (<%= mail_to ENV['PM_INFO_ADDRESS'] %>) by e-mail. At the same time, the new administrator
       should send his
       <%= link_to 'application form', home_url('license/instructions-for-administrators') %>
       to our office.

@@ -46,12 +46,6 @@ class Image < ApplicationRecord
 
   PID_SEPARATOR  = '-'.freeze
 
-  # Boost factor per source (0 < boost <= 200)
-  # SOURCE_BOOST = Hash.nest(0, 100).update(pconfig[:source_boost])
-
-  # Boost factor, normalized for Ferret::Document.new (0 < boost <= 2)
-  # BOOST_BY_SOURCE = Hash.nest { |source| SOURCE_BOOST[source] / 100.0 }
-
   # Secret string for Apache Secure Download
   # REWRITE: we pull this from .env now
   ASD_SECRET = ENV['PM_ASD_SECRET'].freeze
@@ -65,13 +59,6 @@ class Image < ApplicationRecord
 
   URI_UNSAFE_RE = Regexp.union(URI::UNSAFE, /[\[\]]/).freeze
 
-  MIRO_PIDS    = Set.new(load_cache(:miro_pids, [])).freeze
-  WARBURG_PIDS = Set.new(load_cache(:warburg_pids, [])).freeze
-
-  VGBK_LIST = Set.new(load_cache(:vgbk_list, []), &:downcase).freeze
-
-  BASE_URL = pconfig[:base_url][Rails.env.to_s].freeze
-
   # Enumeration characters
   ENUM_CHARS = Array.new(16**2) { |i| i.to_s(16).rjust(2, '0') }.freeze
 
@@ -80,10 +67,6 @@ class Image < ApplicationRecord
 
   def path=(path)
     @path = path
-  end
-
-  class << self
-    attr_accessor :check_duplicates, :include_index_terms
   end
 
   def self.search(field, value)
@@ -112,7 +95,7 @@ class Image < ApplicationRecord
     when 'comment_count'
       joins('LEFT JOIN comments cs ON cs.image_id = images.pid').
       group('images.pid').
-      order("count(DISTINCT cs.id) #{direction}")
+      order(Arel.sql("count(DISTINCT cs.id) #{direction}"))
     else
       raise Pandora::Exception, "unknown sort criteria for Image: #{column}"
     end
@@ -141,19 +124,13 @@ class Image < ApplicationRecord
     si.image_url(size)
   end
 
-  def self.dummy?(image)
-    [:miro, :png] if MIRO_PIDS.include?(image.pid)
-  end
-
-  def self.rights_warburg?(image)
-    WARBURG_PIDS.include?(image.pid)
+  def self.valid_fields
+    @valid_fields ||= all_fields.map{|f| [f, true]}.to_h
   end
 
   def self.valid_field?(field_or_name)
-    @valid_fields ||= all_fields.map{|f| [f, true]}.to_h
-
     k = field_or_name.to_sym
-    @valid_fields[k.to_s] || @valid_fields[field_from(k)]
+    valid_fields[k.to_s] || valid_fields[field_from(k)]
   end
 
   def self.static_field?(field)
@@ -183,19 +160,19 @@ class Image < ApplicationRecord
   end
 
   def self.search_fields
-    @search_fields ||= pconfig[:search_fields]
+    @search_fields ||= Indexing::IndexFields.search
   end
 
   def self.sort_fields
-    @sort_fields ||= pconfig[:sort_fields]
+    @sort_fields ||= Indexing::IndexFields.sort
   end
 
   def self.display_fields
-    @display_fields ||= (search_fields - %w[unspecified]) | pconfig[:display_fields]
+    @display_fields ||= Indexing::IndexFields.display
   end
 
   def self.display_fields_app
-    display_fields + %w[database]
+    Indexing::IndexFields.display_app
   end
 
   def self.display_fields_translated
@@ -207,7 +184,7 @@ class Image < ApplicationRecord
   end
 
   def self.location_fields
-    @location_fields ||= pconfig[:location_fields]
+    @location_fields ||= Indexing::IndexFields.location
   end
 
   def self.store_fields
@@ -239,6 +216,10 @@ class Image < ApplicationRecord
     elastic_record = er
     elastic_record_source = Source.find_by_name(id.split("-")[0])
     ElasticRecordImage.new(id, elastic_record, nil, elastic_record_source)
+  end
+
+  def super_image
+    Pandora::SuperImage.from(self)
   end
 
   def elastic_record_image
@@ -281,7 +262,7 @@ class Image < ApplicationRecord
     # )) { |xml|
     to_xml(options.reverse_merge(
       only:       [:pid, :votes, :score],
-      methods:    [:descriptive_title, *(display_fields - ['keywords'])],
+      methods:    [:descriptive_title] + Indexing::IndexFields.display - ['keywords', 'owner'],
       include:    ['keywords'],
       skip_nil:   true,
       skip_types: true

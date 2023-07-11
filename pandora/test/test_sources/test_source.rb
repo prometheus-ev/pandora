@@ -1,5 +1,6 @@
 class TestSource < Indexing::SourceSuper
   def records
+    @node_name = 'row'
     document.xpath('//row')
   end
 
@@ -8,10 +9,13 @@ class TestSource < Indexing::SourceSuper
   end
 
   def record_object_id
-    # @todo This ID calculation can be refactored by using #process_record_id in the Indexing::SourceParent class
-    # for all sources with objects.
-    # Currently: amsterdam_museum, amsterdam_rijksmuseum, dadaweb, daumier
-    [name, Digest::SHA1.hexdigest(record.xpath('.//object-id/text()').to_a.join('|'))].join('-')
+    unless (object_id = record.xpath('.//object-id/text()')).blank?
+      [name, Digest::SHA1.hexdigest(object_id.to_a.join('|'))].join('-')
+    end
+  end
+
+  def record_object_id_count
+    @record_object_id_count[record_object_id]
   end
 
   def path
@@ -48,5 +52,9 @@ class TestSource < Indexing::SourceSuper
 
   def rights_reproduction
     record.xpath(".//rights-reproduction/text()")
+  end
+
+  def source_url
+    'https://nothing.nowhere.com/images/#{record_id}'
   end
 end

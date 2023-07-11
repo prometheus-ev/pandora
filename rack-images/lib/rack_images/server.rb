@@ -28,7 +28,9 @@ class RackImages::Server
   def render_image
     resizer = RackImages::Resizer.new
     file = resizer.run(full_path_info)
-    [200, {'content-type' => 'image/jpeg'}, file]
+    content_type = resizer.content_type
+
+    [200, {'content-type' => content_type}, file]
   end
 
   def valid_token?

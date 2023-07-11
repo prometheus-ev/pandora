@@ -13,7 +13,7 @@
     elsif right_work == "rights_work_vgbk"
       link_to('VG Bild-Kunst', 'http://www.bildkunst.de', :target => '_blank')
     else
-      if right_work == 'In the public domain'
+      if right_work == 'In the public domain' || right_work == 'Unknown'
         h(right_work.t)
       else
         format_content(right_work, :escape => false)

@@ -33,6 +33,19 @@ class Indexing::Sources::BeeskowKunstarchiv < Indexing::SourceSuper
     record.xpath('.//Datierung/text()')
   end
 
+  def date_range
+    date = record.xpath('.//Datierung/text()').to_s
+    date.encode!('iso-8859-1').encode!('utf-8')
+
+    if date == '1976*'
+      date = '1976'
+    elsif date.start_with?('o. J.')
+      date = ''
+    end
+
+    super(date)
+  end
+
   # standort
   def location
     record.xpath('.//Standort/text()')

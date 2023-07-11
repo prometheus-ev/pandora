@@ -1,14 +1,23 @@
 <% unless @source.url.blank? -%>
-  <%= gogif %> <%= link_to 'Database homepage'.t, @source.url %>
+  <%= link_to 'Database homepage'.t, @source.url %>
+  <%= image_tag('/images/icon/arrow-up-right-from-square-solid.png', style: 'vertical-align: baseline;') %>
 <% end -%>
 <% unless @source.url.blank? -%>
   <%= vbar %>
 <% end -%>
 <strong class="nowrap">
-  <% if @source.record_count > 0 && (!current_user || !current_user.dbuser? || current_user.open_sources.include?(@source)) %>
-    <%= link_to (@source.record_count == 1 ? '%d image' : '%d images') / @source.record_count, :controller => 'searches', :action => 'index', :term => '*', :s => [@source.name] %>
-  <% end %>
+  <% c = (@source_counts ? @source_counts['records'] : 0) %>
+  <% record_count = pm_labelled_delimited_counter(c, '%s record', '%s records') %>
+  
+  <%= link_to(
+      record_count,
+      { controller: 'searches',
+        action: 'advanced',
+        'search_value[0]': '*',
+        #objects: 1,
+        indices: {"#{@source.name}": true} }) %>
 </strong>
+
 <% if @source.open_access? && !(current_user && current_user.dbuser? && current_user == @source.dbuser) -%>
   <%= vbar %>
   <strong class="nowrap">

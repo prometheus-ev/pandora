@@ -42,6 +42,18 @@ class Indexing::Sources::Dresden < Indexing::SourceSuper
     record.xpath(".//Datierung/text()")
   end
 
+  def date_range
+    d = date.to_s.strip
+
+    if d == '193419-36'
+      d = '1934-36'
+    elsif d == '1952-19253'
+      d = '1952-1953'
+    end
+
+    super(d)
+  end
+
   def location
     locations = (record.xpath(".//Ort/text()") + record.xpath(".//Aufbewahrungsort/text()")).to_a
     locations.reject!{ |location|

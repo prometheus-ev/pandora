@@ -8,7 +8,7 @@ Rails.application.routes.draw do
     get 'revoke', action: 'revoke'
   end
 
-  post 'payment/paypal_ipn', to: 'payment#paypal_ipn'
+  post '/payment/paypal_ipn', to: 'payment#paypal_ipn'
 
   # legacy redirect
   get '/image/show/:pid', to: redirect('/image/%{pid}')
@@ -30,8 +30,9 @@ Rails.application.routes.draw do
     get 'announcement/current', to: 'announcements#current'
 
     controller 'pandora' do
-      get 'about', action: 'about'
-      get 'facts', action: 'facts'
+      get 'about'
+      get 'facts'
+      get 'translations'
     end
 
     scope 'source', controller: 'sources', constraints: {id: /[a-z0-9_\-]+/} do
@@ -104,6 +105,10 @@ Rails.application.routes.draw do
       post 'remove', action: 'remove'
       get 'images/:id', action: 'images'
     end
+
+    scope 'user_metadata', controller: 'user_metadata' do
+      patch ':pid/:field/(:position)', action: 'update', constraints: {field: /[a-z0-9\._]+/}
+    end
   end
 
   # install *both* the normal route and a corresponding one with :locale prefix
@@ -119,6 +124,7 @@ Rails.application.routes.draw do
     controller 'payment' do
       get 'transaction', action: 'transaction'
       post 'paypal_ipn', action: 'paypal_ipn'
+      post 'payment/paypal_ipn', action: 'paypal_ipn'
     end
 
     controller 'pandora' do
@@ -141,14 +147,17 @@ Rails.application.routes.draw do
       scope constraints: {format: 'js'} do
         post 'update', action: 'toggle_news', constraints: {key: 'news_collapsed'}
       end
+
+      if Rails.env.test?
+        get :raise_exception
+      end
     end
 
-    get 'u/:token', to: 'short_urls#redirect'
+    get 'u(/:token)', to: 'short_urls#redirect'
 
     resources :searches, only: ['index'] do
       collection do
         get 'advanced'
-        get 'time(/:source_name)', action: 'time'
       end
     end
 
@@ -171,13 +180,13 @@ Rails.application.routes.draw do
         get 'unapproved'
         get 'edit_selected'
         post 'update_selected'
-        get 'suggest_keywords'
+        # get 'suggest_keywords'
       end
       member do
         get 'record_image_url'
         get 'disconnect'
         get 'associated'
-        post 'suggest_keywords'
+        # post 'suggest_keywords'
       end
     end
 
@@ -203,12 +212,12 @@ Rails.application.routes.draw do
     resources :sources do
       collection do
         get 'open_access'
-        match 'suggest_keywords', via: ['GET', 'POST']
+        # match 'suggest_keywords', via: ['GET', 'POST']
       end
       member do
         get 'ratings'
         get 'open_access', action: 'open_access_login'
-        post 'suggest_keywords'
+        # post 'suggest_keywords'
       end
     end
 
@@ -240,11 +249,12 @@ Rails.application.routes.draw do
 
     resources 'collections' do
       collection do
+        get :all
         get :sharing
         get :shared
         get :public
         match :store, via: ['POST', 'GET']
-        post :suggest_keywords
+        # post :suggest_keywords
         get :number_of_pages
       end
 
@@ -367,6 +377,19 @@ Rails.application.routes.draw do
     end
 
     resources 'oauth_clients', as: 'client_applications'
+
+    resources 'keywords', except: ['show'] do
+      collection do
+        get 'similar'
+        get 'untranslated'
+        match 'suggest', via: ['GET', 'POST']
+      end
+      member do
+        patch :merge
+      end
+    end
+
+    resources 'wikidata', only: ['index']
 
     scope path: 'help', controller: 'help' do
       get '(:section)', action: 'show', as: 'help'

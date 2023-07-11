@@ -87,32 +87,6 @@ class ApplicationRecord < ActiveRecord::Base
     end || default
   end
 
-  # def save_cache(path, cache, writable = false)
-  #   path = cache_path(path)
-
-  #   if !writable || File.writable?(path)
-  #     dumper = cache_map(path)
-  #     File.open(path, 'w') { |f| dumper.dump(cache, f) }
-  #   end
-
-  #   cache
-  # end
-
-  # def others(*exclude)
-  #   # REWRITE: use new ar glue code
-  #   # find(:all, :conditions =>
-  #   #   "NOT #{k = primary_key} IN (#{exclude.map(&k.to_sym).compact.join(',')})")
-  #   conds = {
-  #     :conditions => 
-  #       "NOT #{k = primary_key} IN (#{exclude.map(&k.to_sym).compact.join(',')})"
-  #   }
-  #   Upgrade.conds_to_scopes(self, conds)
-  # end
-    
-  # def cache_key
-  #   [self.class, id || 'new', updated_at].compact.cache_key
-  # end
-
   def pristine
     unless new_record?
       self.class.find(id).tap do |r|

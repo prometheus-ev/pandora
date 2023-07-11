@@ -9,6 +9,10 @@ class Pandora::Stats
     @requests = requests
   end
 
+  def self.empty
+    new([])
+  end
+
   def self.load(filename)
     new JSON.load(io_for filename)
   end

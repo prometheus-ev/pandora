@@ -50,8 +50,6 @@ module ApplicationHelper
     case action_name
       when 'show'
         verb = nil
-      when 'show_athene_search'
-        verb = nil
       when *%w[history license ratings recipients settings]
         verb = "#{verb} for"
       when *%w[email]
@@ -197,41 +195,13 @@ module ApplicationHelper
     end
   end
 
-  def link_to_vgbk(image = nil)
-    link_to('VG Bild-Kunst', 'http://www.bildkunst.de') unless image && image.vgbk.blank?
-  end
-
-  def link_to_warburg(image = nil)
-    link_to('The Warburg Institute, London', 'http://warburg.sas.ac.uk/archive/') if !image || Image.rights_warburg?(image)
-  end
-
-  def rights_representative(image, i = true)
-    link_to_warburg(image) || (i && !(e = image.rights_work).blank? && h(Upload.pconfig[:rights_work].include?(e) ? e.t : e)) || link_to_vgbk(image)
+  def link_to_vgbk
+    link_to('VG Bild-Kunst', 'http://www.bildkunst.de')
   end
 
   def external_image_tag(source, options = {}, external = action_name == 'js')
     image_tag(external ? "#{base_url}#{image_path(source)}" : source, options)
   end
-
-  # def asset_path_for(target, subtarget = nil, skip_base = false)
-  #   path = case target
-  #     when :controller
-  #       controller_name != 'institutional_uploads'? controller_name : 'uploads'
-  #     when :action
-  #       controller_name != 'institutional_uploads'? asset_path_for(controller_name, action_name, true) : asset_path_for('uploads', action_name, true)
-  #     else
-  #       File.join(target, subtarget)
-  #   end
-
-  #   # We like to keep our application-specific stylesheets and javascripts in
-  #   # a subdirectory named 'app'.
-  #   skip_base ? path : File.join('app', path)
-  # end
-
-  # def javascript_include_tag_for(target, subtarget = nil)
-  #   path = asset_path_for(target, subtarget)
-  #   javascript_include_tag(path) if File.exists?(Rails.root.join('public', 'javascripts', "#{path}.js"))
-  # end
 
   def apply_behaviour(*args)
     javascript_tag %Q{Pandora.Behaviour.apply(#{args.map(&:inspect).join(',')});} if request.xhr?
@@ -416,23 +386,6 @@ module ApplicationHelper
     )
   end
 
-  # def link_to_close_box(options, html_options = {}, remote = true)
-  #   text = '<div class="close"></div>'.html_safe
-
-  #   if remote
-  #     link_to(
-  #       text,
-  #       url_for(options),
-  #       data: html_options[:data],
-  #       remote: true,
-  #       method: 'DELETE',
-  #       title: 'Close'.t
-  #     )
-  #   else
-  #     link_to(text, options, html_options)
-  #   end
-  # end
-
   ## Toggle the visibility of the box (collapsed/expanded)
   def link_to_toggle_announcements(expanded, session_key, box_id = nil, expand_text = 'Expand'.t, collapse_text = 'Collapse'.t)
     link_to(
@@ -466,7 +419,7 @@ module ApplicationHelper
 
     # REWRITE: we have to ensure utc so that athene doesn't get confused
     if since_then.present?
-      since_then = since_then.to_s(:utc)
+      since_then = since_then.to_fs(:utc)
     end
 
     @current_announcements ||= Announcement.current.since(since_then).to_a
@@ -576,4 +529,22 @@ module ApplicationHelper
     end
   end
 
+  def link_to_delete(user)
+    return if !current_user.admin_or_superadmin? && !user.enabled?
+
+    action = (user.disabled? ? 'destroy' : 'disable')
+
+    link_to(image_tag(
+      # REWRITE: the title attribute should be on <a> not the <img>
+      # 'icon/delete.gif', :class => 'icon delete-icon', :title => action.humanize.t
+      'icon/delete.gif', :class => 'icon delete-icon'
+    ), {
+      :action => action, :id => user.login
+    }, {
+      :data => { confirm: "Are you sure to #{action} account: '%s'" / user },
+      :method => action == 'destroy' ? 'DELETE' : 'PATCH',
+      # REWRITE: see above
+      :title => action.humanize.t
+    })
+  end
 end

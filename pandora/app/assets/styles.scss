@@ -1,18 +1,27 @@
+@import 'scss/bootstrap.compat';
+
 @import 'scss/application';
 @import 'scss/responsive';
+
 @media print {
   @import 'scss/print';
 }
-@import 'scss/athene';
 
 @import 'scss/zoom';
 @import 'scss/source_list';
+@import 'scss/iframe';
 @import 'scss/general';
-
-@import 'scss/nouislider.min';
-@import 'scss/nouislider-custom';
 
 @import 'scss/mapquest';
 
 @import 'scss/jquery-ui/jquery-ui';
 @import 'scss/jquery-ui/jquery-ui.structure';
+
+@import 'scss/live_search';
+
+@import 'scss/loading';
+@import 'scss/components';
+
+.animate-width {
+  transition: width 0.5s ease-in;
+}

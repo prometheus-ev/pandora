@@ -1,6 +1,6 @@
 class InstitutionsController < ApplicationController
 
-  skip_before_action :store_location, :only => [:renew_license]
+  # skip_before_action :store_location, :only => [:renew_license]
   skip_before_action :login_required, :only => [:licensed]
 
   DEFAULT_ORDER = 'name'.freeze
@@ -116,7 +116,7 @@ class InstitutionsController < ApplicationController
   def update
     @institution = Institution.find_by!(name: params[:id])
 
-    if @institution.update_attributes(institution_params)
+    if @institution.update(institution_params)
       flash[:notice] = "Institution '%s' successfully updated!" / @institution.fulltitle
       redirect_to institution_path(@institution)
     else

@@ -53,7 +53,7 @@ jexpired = Account.create!(
   research_interest: 'PhD drop-out Goethe-Institut'
 )
 
-nowhere = Institution.create!({
+nowhere = Institution.create!(
   name: 'nowhere',
   city: 'Nowhere',
   title: 'Nowhere University',
@@ -67,14 +67,14 @@ nowhere = Institution.create!({
     '127.0.0.0/8',
     '10.0.0.0/8'
   ].join("\n"),
-  license: License.new({
+  license: License.new(
     license_type: LicenseType.find_by!(title: 'library'),
     valid_from: 1.month.ago,
     paid_from: 2.months.from_now.beginning_of_quarter,
     expires_at: 1.month.from_now
-  }, without_protection: true),
+  ),
   issuer: 'prometheus'
-}, without_protection: true)
+)
 nowhere.update_ipuser
 
 jdupont = Account.create!(
@@ -93,9 +93,9 @@ jdupont = Account.create!(
   roles: Role.where(title: ['user', 'useradmin']).to_a,
   research_interest: 'none - database administrator at Nowhere University'
 )
-nowhere.update!({admins: [jdupont]}, without_protection: true)
+nowhere.update!(admins: [jdupont])
 
-jnadie = Account.create!({
+jnadie = Account.create!(
   login: 'jnadie',
   password: 'jnadiejnadie',
   password_confirmation: 'jnadiejnadie',
@@ -110,75 +110,75 @@ jnadie = Account.create!({
   email_verified_at: Time.now,
   roles: [Role.find_by(title: 'admin')],
   research_interest: 'None, just maintaining the user base'
-}, without_protection: true)
+)
 
-Collection.create!({
+Collection.create!(
   title: "John's private collection",
   description: 'only John can see it',
   owner: jdoe,
-  keywords: [Keyword.new(title: 'Italy 1988')],
-}, without_protection: true)
+  keywords: [Keyword.new(title: 'Italy 1988', title_de: 'Italien 1988')],
+)
 
-Collection.create!({
+Collection.create!(
   title: "John's public collection",
   description: 'everybody can see it, only John can change it',
   public_access: 'read',
   owner: jdoe
-}, without_protection: true)
+)
 
-Collection.create!({
+Collection.create!(
   title: "John's collaboration collection",
   description: 'everybody can change it',
   public_access: 'write',
   owner: jdoe
-}, without_protection: true)
+)
 
-Collection.create!({
+Collection.create!(
   title: "John Expired's public collection",
   description: 'everybody can see it, even though John Expired expired',
   public_access: 'read',
   owner: jexpired
-}, without_protection: true)
+)
 
-Source.create!({
-  title: 'ROBERTIN-database',
-  name: 'robertin',
+Source.create!(
+  title: 'TEST-Source',
+  name: 'test_source',
   kind: 'Museum database',
-  keywords: [Keyword.new(title: 'Archaeology')],
-  owner: Account.new({
-    login: 'robertin_admin'
-  }, without_protection: true),
-  institution: Institution.create!({
-    name: 'robertin',
-    title: 'Martin-Luther-Universität, Institut für Klassische Altertumswissenschaften',
+  keywords: [Keyword.new(title: 'Archaeology', title_de: 'Archäologie')],
+  owner: Account.new(
+    login: 'test_source_admin'
+  ),
+  institution: Institution.create!(
+    name: 'uni_halle',
+    title: 'University of Halle',
     city: 'Halle',
     country: 'Germany'
-  }, without_protection: true),
-  record_count: 429,
-  description: 'Robertin',
-  url: 'http://robertin.altertum.uni-halle.de/',
-  email: 'robertin@example.com',
-}, without_protection: true)
+  ),
+  record_count: 12,
+  description: 'A test tource',
+  url: 'http://nothing.nowhere.com',
+  email: 'test_source@example.com',
+)
 
-Source.create!({
-  title: 'Daumier Register',
-  name: 'daumier',
+Source.create!(
+  title: 'TEST-Source (sorting)',
+  name: 'test_source_sorting',
   kind: 'Research database',
-  keywords: [Keyword.new({title: 'Art history'}, without_protection: true)],
-  owner: Account.new({
-    login: 'daumier_admin'
-  }, without_protection: true),
-  institution: Institution.create!({
-    name: 'daumier',
-    title: 'Daumier Register',
+  keywords: [Keyword.new(title: 'Art history', title_de: 'Kunstgeschichte')],
+  owner: Account.new(
+    login: 'test_source_sorting_admin'
+  ),
+  institution: Institution.create!(
+    name: 'uni_ascona',
+    title: 'University of Ascona',
     city: 'Ascona',
     country: 'Switzerland'
-  }, without_protection: true),
-  record_count: 6561,
-  description: 'Daumier',
-  url: 'http://www.daumier-register.org/login.php?startpage',
-  email: 'daumier@example.com'
-}, without_protection: true)
+  ),
+  record_count: 12,
+  description: 'Something else',
+  url: 'http://nothing.nowhere.com',
+  email: 'test_source_sorting@example.com',
+)
 
 database = Source.create_user_database(jdoe)
 
@@ -188,20 +188,21 @@ upload = Upload.create!(
   title: 'A upload',
   location: 'Köln',
   description: 'art',
-  keyword_list: "painting",
+  keywords: [Keyword.new(title: 'painting', title_de: 'Gemälde')],
   inventory_no: '12345',
   rights_reproduction: 'None, do not use!',
   rights_work: 'None, do not use!',
   file: Rack::Test::UploadedFile.new(
     "#{Rails.root}/test/fixtures/files/mona_lisa.jpg",
     'image/jpeg'
-  )
+  ),
+  add_to_index: true
 )
 
-ClientApplication.create!({
+ClientApplication.create!(
   name: 'Meta-Image',
   url: 'http://meta-image.de/',
   callback_url: 'oob',
   key: 'somekey',
   secret: 'somesecret'
-}, without_protection: true)
+)

@@ -1,21 +1,9 @@
 module Util
-
-  module ActionAPI
+  module ActionApi
 
     ###########################################################################
     protected
     ###########################################################################
-
-    def set_api_version
-      if request.api?
-        @api_version = request.path_parameters.delete(:api_version)
-        params.delete(:api_version)
-      end
-    end
-
-    def api_method?
-      self.class.api_method?(action_name)
-    end
 
     module Controller
 
@@ -116,7 +104,4 @@ module Util
     end
 
   end
-
-  ActionApi = ActionAPI
-
 end

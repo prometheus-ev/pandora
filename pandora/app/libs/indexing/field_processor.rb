@@ -26,11 +26,17 @@ class Indexing::FieldProcessor
           raise Pandora::Exception, "The source '#{@source}' could not provide its name for processing the field 'record_id'."
         end
 
-        process_record_id(value, name)
+        if value.is_a?(String) && value.start_with?(name)
+          value
+        else
+          process_record_id(value, name)
+        end
       when 'path'
         process_path(value)
       # Do not process the following fields.
-      when 'date_range', 'rating_count', 'rating_average', 'comment_count', 'user_comments'
+      when 'date_range', 'rating_count', 'rating_average', 'comment_count', 'user_comments', 'record_object_id_count'
+        value
+      when 'artist_nested', 'title_nested', 'license_nested', 'location_nested', 'credits_nested', 'rights_reproduction_nested', 'person_nested'
         value
       else
         process_node_set(value)
@@ -60,8 +66,7 @@ class Indexing::FieldProcessor
   end
 
   def process_path(path)
-    path = path.to_s.strip
-    URI.escape(path, Regexp.union(URI::UNSAFE, /[\[\]]/))
+    path.to_s.strip
   end
 
   def process_node_set(node_set)

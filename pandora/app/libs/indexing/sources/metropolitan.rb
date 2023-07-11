@@ -15,7 +15,13 @@ class Indexing::Sources::Metropolitan < Indexing::SourceSuper
   end
 
   def record_object_id
-    [name, Digest::SHA1.hexdigest(object.xpath('./objectID/text()').to_a.join('|'))].join('-')
+    if record_object_id_count > 1
+      [name, Digest::SHA1.hexdigest(object.xpath('./objectID/text()').to_s)].join('-')
+    end
+  end
+
+  def record_object_id_count
+    object.xpath('.//additionalImage').count + 1
   end
 
   def path
@@ -24,6 +30,12 @@ class Indexing::Sources::Metropolitan < Indexing::SourceSuper
 
   def date
     object.xpath('./objectDate/text()').to_s
+  end
+
+  def date_range
+    d = date.to_s.strip
+
+    super(d)
   end
 
   def artist

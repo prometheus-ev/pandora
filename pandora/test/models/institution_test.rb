@@ -13,6 +13,14 @@ class InstitutionTest < ActiveSupport::TestCase
     assert_not nowhere.authorizes_ip?('127.0.50.75')
   end
 
+  test 'hostname range inclusion with invalid hostname (DNS check)' do
+    nowhere = Institution.find_by! name: 'nowhere'
+    nowhere.ipranges = ""
+    nowhere.hostnames = "does.not.wor.k"
+
+    assert_not nowhere.authorizes_ip?('10.0.0.1')
+  end
+
   test 'validations' do
     institution = Institution.new
     institution.ipranges = "certainly.wrong.223.112"

@@ -1,5 +1,6 @@
 class Indexing::Sources::FfmConedakor < Indexing::SourceSuper
   def records
+    @node_name = 'work'
     Indexing::XmlReaderNodeSet.new(document, "work", "//mediums/medium")
   end
 
@@ -8,18 +9,31 @@ class Indexing::Sources::FfmConedakor < Indexing::SourceSuper
   end
 
   def record_object_id
-    if !record.xpath('.//ancestor::work/parts/part/id/text()').empty?
-      object_id = record.xpath('.//ancestor::work/parts/part/id/text()')
+    if record.name == @node_name
+      if !record.xpath('./parts/part/id/text()').empty?
+        object_id = record.xpath('./parts/part/id/text()')
+      else
+        object_id = record.xpath('./id/text()')
+      end
     else
-      object_id = record.xpath('.//ancestor::work/id/text()')
+      if !record.xpath('.//ancestor::work/parts/part/id/text()').empty?
+        object_id = record.xpath('.//ancestor::work/parts/part/id/text()')
+      else
+        object_id = record.xpath('.//ancestor::work/id/text()')
+      end
     end
+
     [name, Digest::SHA1.hexdigest((object_id).to_a.join('|'))].join('-')
+  end
+
+  def record_object_id_count
+    @record_object_id_count[record_object_id]
   end
 
   def path
     return miro if miro?
 
-    "#{record.xpath('.//imagePath/text()')}".sub(/https:\/\/kor.uni-frankfurt.de\/media\/download\/icon\//, '')
+    "#{record.xpath('.//imagePath/text()')}".sub(/https:\/\/kor.uni-frankfurt.de\/media\/images\/icon\//, '')
   end
 
   # künstler

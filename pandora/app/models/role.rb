@@ -5,7 +5,7 @@ class Role < ApplicationRecord
   validates_presence_of   :title
   validates_format_of     :title, :with => /\A#{LETTER_RE}/,
                           :message => 'must begin with a letter'
-  validates_uniqueness_of :title
+  validates_uniqueness_of :title, case_sensitive: true
 
   def self.allowed_roles_for(*roles)
     @roles_by_title ||= begin

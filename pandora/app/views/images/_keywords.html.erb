@@ -1,7 +1,11 @@
 <% if super_image.upload? %>
-  <% keywords.each do |keyword| %>
-    <%= list_search_links_for(:keywords, keyword.map { |k| [k.title, k.title] }, :controller => 'uploads', :action => 'index') %>
-  <% end %>
+  <% super_image.keywords.each.with_index do |str, i| %><!--
+ --><%= i == 0 ? '' : ', ' %><!--
+ --><%= link_to str, all_uploads_path(field: 'keywords', value: str) %><!--
+--><% end %>
 <% else %>
-  <%= keywords.join(', ') %>
+  <% super_image.keywords.each.with_index do |str, i| %><!--
+ --><%= i == 0 ? '' : ', ' %><!--
+ --><%= link_to str, search_with_keyword_path(str) %><!--
+--><% end %>
 <% end %>

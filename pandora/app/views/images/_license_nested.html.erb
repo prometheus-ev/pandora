@@ -1,0 +1,4 @@
+<% if !license['name'].blank? && !license['url'].blank? %>
+  <%= link_to(license['name'], license['url'], target: '_blank') %>
+  <%= image_tag('/images/icon/arrow-up-right-from-square-solid.png', style: 'vertical-align: baseline;') %>
+<% end %>

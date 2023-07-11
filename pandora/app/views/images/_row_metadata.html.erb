@@ -1,0 +1,180 @@
+<% aspects = nil unless local_assigns.has_key?(:aspects) -%>
+<% is_upload = false unless local_assigns.has_key?(:is_upload) %>
+
+<div class="metadata" style="<%= "height: 0px; width: 0px; display: none;" if view == "gallery" %>">
+<table>
+  <tr>
+    <th><%= 'Artist'.t %></th>
+    <td class="artist-field" colspan="2">
+      <% if super_image.no_longer_available? %>
+        <%= 'This record is no longer available'.t %>
+      <% else %>
+        <% if !artists_nested.blank? %>
+          <div class="artists">
+            <% v = super_image.user_values_for('artist_nested', account: current_user) %>
+            <% v.each.with_index do |artist, i| %>
+              <%= render partial: 'images/artist_nested', locals: {
+                artist: artist,
+                position: i,
+                super_image: super_image,
+                wikidata_widget: false
+              } %>
+            <% end %>
+          </div>
+        <% else %>
+          <%= render(
+            partial: 'images/artist',
+            locals: {
+              value: artists,
+              super_image: super_image,
+              wikidata_widget: false
+            }
+          ) %>
+        <% end %>
+      <% end %>
+    </td>
+  </tr>
+  <tr>
+    <th><%= 'Title'.t %></th>
+    <td class="title-field" colspan="2">
+      <% if !titles_nested.blank? %>
+        <% titles_nested.each.with_index do |title, i| %>
+          <%= render partial: 'images/title_nested', locals: { title: title, i: i, super_image: super_image } %>
+        <% end %>
+      <% else %>
+        <%= pm_titles_with_url(titles) %>
+      <% end %>
+    </td>
+  </tr>
+  <tr>
+    <th><%= 'Location'.t %></th>
+    <td class="location-field" colspan="2">
+      <% if !locations_nested.blank? %>
+        <% locations_nested.each_with_index do |location, i| %>
+          <%= render :partial => 'images/location_nested', :locals => {
+            location: location,
+            super_image: super_image,
+            index: i
+          } %>
+        <% end %>
+      <% else %>
+        <%= render partial: 'images/locations', locals: {locations: locations, source: source} %>
+      <% end %>
+    </td>
+  </tr>
+  <tr>
+    <th><%= 'Date'.t %></th>
+    <td class="date-field" colspan="2">
+      <%= format_content(date, :escape => false).html_safe %>
+    </td>
+  </tr>
+  <tr>
+    <th><%= 'Credits'.t %></th>
+    <td class="credits-field" colspan="2">
+      <% if !credits_nested.blank? %>
+        <% credits_nested.each do |credits| %>
+          <%= render :partial => 'images/credits_nested', :locals => { credits: credits } %>
+        <% end %>
+      <% else %>
+        <%= render partial: 'images/credits', locals: {credits: credits} %>
+      <% end %>
+    </td>
+  </tr>
+  <tr>
+    <th><%= 'Rights'.t %></th>
+    <td class="rights-field" colspan="2">
+      <span class="th"><%= 'Work'.t %>: </span>
+      <%= render partial: 'images/rights_work', locals: {rights_work: Array.wrap(rights_work)} %>
+      <span class="th">| <%= "Reproduction".t %>: </span>
+      <% if !rights_reproduction_nested.blank? %>
+        <% rights_reproduction_nested.each do |rights_reproduction| %>
+          <%= render :partial => 'images/rights_reproduction_nested', :locals => { rights_reproduction: rights_reproduction } %>
+        <% end %>
+      <% else %>
+        <%= render partial: 'images/rights_reproduction', locals: {rights_reproduction: Array.wrap(rights_reproduction)} %>
+      <% end %>
+    </td>
+  </tr>
+
+  <tr>
+    <th><%= 'Database'.t %></th>
+    <td class="source-field">
+      <%= source.fulltitle %>
+
+      <% if source.institution && source.institution.location %>
+        <%= link_to_google_maps(source.institution.location) %>
+      <% end %>
+
+      <span class="source_icons"><%= source_icons_for(source) %></span>
+    </td>
+  </tr>
+  
+  <% if super_image.upload? %>
+    <%= render :partial => 'uploads/show_dates', :locals => {:super_image => super_image} %>
+  <% end %>
+
+  <% if associated.size > 0 %>
+    <tr>
+      <th></th>
+      <td colspan="3">
+        <%= link_to controller: 'uploads', action: 'associated', id: super_image.upload.id do %>
+          <%= pm_labelled_counter associated.size, '%d associated image', '%d associated images' %><!--
+     --><% end %>
+
+        <% if parent.present? %>
+          <%= vbar %>
+          <%= link_to 'Parent object'.t, controller: 'images', action: 'show', id: record_id %>
+        <% end %>
+      </td>
+    </tr>
+  <% end %>
+
+  <% if super_image.collection_counts_any?(current_user) %>
+    <tr>
+      <td colspan="2" style="padding-left: 10px"><hr style="height: 1px; background-color: #3C3C3C; border: 0px;"></td>
+    </tr>
+    <tr class="dim">
+      <th><%= 'Collections'.t %></th>
+      <td class="collections-field">
+        <%= render partial: 'shared/collection_counts', locals: {super_image: super_image} %>
+      </td>
+    </tr>
+  <% end %>
+
+  <% if aspects.present? %>
+    <tr>
+      <td colspan="2" style="padding-left: 10px"><hr style="height: 1px; background-color: #3C3C3C; border: 0px;"></td>
+    </tr>
+    <tr>
+      <th>
+        <span><%= "Views".t %></span><br>
+      </th>
+      <td>
+        <a
+          href="<%= url_for(
+            only_path: true,
+            controller: 'searches',
+            action: 'advanced',
+            search_field: {'0': 'record_object_id'},
+            search_value: {'0': record_object_id.first}
+          ) %>"><%= 'Show all...'.t %></a>
+      </td>
+    </tr>
+    <tr>
+      <td class="object-field" colspan="2">
+        <div style="max-height: 80px; overflow: hidden; margin-left: 10px;">
+          <% aspects.each do |r| %>
+            <% si = Pandora::SuperImage.new(r['_id'], elastic_record: r) %>
+            <a href="<%= url_for only_path: true, controller: 'images', action: 'show', id: si.pid %>" style="display: inline-block">
+              <img
+                src="<%= si.image_url(:small) %>"
+                style="height: 80px; max-width: 200px; padding: 1px;"
+              />
+            </a>
+          <% end %>
+        </div>
+      </td>
+    </tr>
+  <% end %>
+</table>
+</div>

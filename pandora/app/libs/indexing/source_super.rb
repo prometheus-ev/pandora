@@ -4,7 +4,7 @@ class Indexing::SourceSuper < Indexing::SourceParent
   end
 
   def miro?
-    @miro_record_ids ||= Rails.configuration.x.athene_search_record_ids['miro'][name]
+    @miro_record_ids ||= Rails.configuration.x.indexing_warburg_and_miro_record_ids[:miro][name.to_sym]
 
     if @miro_record_ids.include?(process_record_id(record_id)) && !@create_institutional_uploads
       true
@@ -49,6 +49,17 @@ class Indexing::SourceSuper < Indexing::SourceParent
     nil
   end
 
+  def single_date_range(date)
+    # darmstadt_tu
+    d = date.sub('1880/19010', '1880/1910')
+
+    # ddorf
+    d = d.sub('7. Jh. v.Chr. / bis', '7. Jh. v.Chr.')
+    d = d.sub('ca. 13480', 'ca. 1380')
+
+    date_range(d)
+  end
+
   private
 
   # TODO Replace this method with a dating preprocessor class/lib.
@@ -57,7 +68,7 @@ class Indexing::SourceSuper < Indexing::SourceParent
     if date.include? 'bis'
       from_to = date.split('bis')
 
-      if from_to[1].include?('v. Chr.') && !from_to[0].include?('v. Chr.')
+      if from_to[1] && from_to[1].include?('v. Chr.') && !from_to[0].include?('v. Chr.')
         date.sub! 'bis', 'v. Chr. bis'
       end
     end
@@ -91,8 +102,8 @@ class Indexing::SourceSuper < Indexing::SourceParent
     date.sub! '19013', '1913'
 
     if date.strip == 'undatiert' ||
-       date.strip.blank? ||
-       (date.scan(/\D/).empty? && date.length > 4)
+        date.strip.blank? ||
+        (date.scan(/\D/).empty? && date.length > 4)
       date = nil
     end
 
@@ -133,30 +144,63 @@ class Indexing::SourceSuper < Indexing::SourceParent
   def init(record)
     self.record = record
 
+    @file_name = nil
     @date = nil
     @date_range = nil
     @_credits = nil # darmstadt_tu
   end
 
-  def date_range?
-    date_range
+  def is_object?
+    respond_to?('record_object_id')
   end
 
-  def artist_normalized(artist)
-    @artist_attributions ||= Rails.configuration.x.indexing_artist_attributions['attributions']
+  def total
+    @total ||= `zcat -f '#{@file_name}' | grep -io '<#{@node_name}>' | wc -l`.to_i
+  end
 
-    artist = artist.to_a
-    artist.map! { |a|
-      a = a.to_s.encode(Encoding::UTF_8)
+  def read
+    io = File.open(@file_name)
+    reader = Nokogiri::XML::Reader.from_io(io)
+    @enumerator = reader.lazy
 
-      @artist_attributions.each { |artist_attribution|
-        a.delete_prefix!(artist_attribution)
-        a.delete_suffix!(artist_attribution)
-        a.strip!
-      }
+    # filter irrelevant xml content
+    @enumerator = @enumerator.select do |node|
+      (@node_name == node.name) &&
+      (!@namespace_uri || node.namespace_uri == @namespace_uri) &&
+      (node.node_type == Nokogiri::XML::Reader::TYPE_ELEMENT)
+    end
 
-      a
-    }
+    @enumerator = @enumerator.map do |node|
+      Nokogiri::XML(node.outer_xml, nil, node.encoding).remove_namespaces!
+    end
+  end
+  
+  def preprocess_record_object_ids
+    @record_object_id_count = {}
+    preprocessed = 0
+
+    read
+
+    @enumerator.each do |doc|
+      self.record = doc.root
+      r_object_id = record_object_id
+
+      unless r_object_id.blank?
+        if @record_object_id_count.keys.include?(r_object_id)
+          @record_object_id_count[r_object_id] += 1
+        else
+          @record_object_id_count[r_object_id] = 1
+        end
+      end
+
+      preprocessed += 1
+      printf "#{name}: #{preprocessed}/#{total} (preprocessing...)\r" unless Rails.env.test?
+    end
+    puts unless Rails.env.test?
+  end
+
+  def date_range?
+    respond_to?(:date_range) && date_range != nil
   end
 
   def date_range(date)
@@ -176,28 +220,56 @@ class Indexing::SourceSuper < Indexing::SourceParent
 
     begin
       if @date_range
-        @date_ranges_count += 1
+        @date_ranges_count += 1 if @date_ranges_count
 
         if @date_range.is_a? HistoricalDating::Range
           @date_range
         else
           @date_range = HistoricalDating.parse(@date_range)
+
+          # TODO: Move to HistoricalDating.
+          if @date_range.from > @date_range.to
+            raise HistoricalDating::Error, 'Date range from date is newer then date range to date.'
+          end
+
+          # otherwise, still return @date_range
+          @date_range
         end
       else
         @date_range = nil
       end
-    rescue Parslet::ParseFailed, HistoricalDating::Error => e
-      @date_ranges_parse_failed << "#{date.inspect} (record ID: #{record_id})"
+    rescue Parslet::ParseFailed, HistoricalDating::Error, Date::Error => e
+      # Date::Error occurs for e.g. '31.9.1907'
 
-      @date_range = nil
+      if @date_ranges_parse_failed
+        @date_ranges_parse_failed << "#{date.inspect} (record ID: #{process_record_id(record_id)})"
+        @date_range = nil
+      end
     end
+  end
+
+  def artist_normalized(artist)
+    @artist_attributions ||= Rails.configuration.x.indexing_artist_attributions[:attributions]
+
+    artist = artist.to_a
+    artist.map! { |a|
+      a = a.to_s.encode(Encoding::UTF_8)
+
+      @artist_attributions.each { |artist_attribution|
+        a.delete_prefix!(artist_attribution)
+        a.delete_suffix!(artist_attribution)
+        a.strip!
+      }
+
+      a
+    }
   end
 
   # Check if the current record ID is included in the warburg record IDs.
   #
   # @return [Boolean] Is the current record ID included or not?
   def is_record_id_a_rights_work_warburg_record_id?
-    @warburg_record_ids_list ||= Rails.configuration.x.athene_search_record_ids['warburg']
+    @warburg_record_ids_list ||= Rails.configuration.x.indexing_warburg_and_miro_record_ids[:warburg]
 
     if @warburg_record_ids_list.include?(process_record_id(record_id))
       true
@@ -217,22 +289,19 @@ class Indexing::SourceSuper < Indexing::SourceParent
   #
   # @return [Boolean] Is any artist included or not?
   def is_any_artist_in_vgbk_artists_list?
-    @vgbk_artists_list ||= Rails.configuration.x.indexing_vgbk_artists['artists']
+    @vgbk_artists_list ||= Rails.configuration.x.indexing_vgbk_artists[:artists]
 
-    if respond_to?(:artist_normalized) && artist_normalized.to_a.any? { |a| @vgbk_artists_list.include?(a.to_s.downcase.encode(Encoding::UTF_8)) }
-      if respond_to?(:date_range) && date_range?
-        # See #181.
-        if date_range.to > (Time.now - 100.years)
-          true
-        else
-          false
-        end
-      else
-        true
-      end
-    else
-      false
-    end
+    is_in_list =
+      respond_to?(:artist_normalized) && 
+      artist_normalized.to_a.any? { |a|
+        @vgbk_artists_list.include?(a.to_s.downcase.encode(Encoding::UTF_8))
+      }
+
+    return false unless is_in_list
+    return true unless date_range?
+
+    # See #181.
+    date_range.to > (Time.now - 170.years)
   end
 
   # Rights work string indicating a VGBK artist.
@@ -241,5 +310,4 @@ class Indexing::SourceSuper < Indexing::SourceParent
   def rights_work_vgbk
     'rights_work_vgbk'
   end
-
 end

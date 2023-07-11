@@ -1,0 +1,47 @@
+<% if ENV['PM_MATOMO_URL'] %>
+<!-- Matomo -->
+<script>
+  // browser crypto.subtle is used to hash the username before seinding it to
+  // matomo
+
+  async function sha2(text) {
+    var encoder = new TextEncoder()
+    var data = encoder.encode(text)
+    var hash = await crypto.subtle.digest('SHA-256', data)
+    var hashArray = Array.from(new Uint8Array(hash))
+
+    return hashArray
+      .map(function(b) {return b.toString(16).padStart(2, '0')})
+      .join('')
+  }
+
+  async function doit() {
+    var login = document.querySelector("meta[name='pm-user-login']").getAttribute('value')
+    login = await sha2(login)
+    login = login.slice(0, 10)
+    var institution = document.querySelector("meta[name='pm-user-institution']").getAttribute('value')
+    var isPersonalized = document.querySelector("meta[name='pm-user-is-personalized']").getAttribute('value')
+
+    var _paq = window._paq = window._paq || [];
+    /* tracker methods like "setCustomDimension" should be called before "trackPageView" */
+    _paq.push(["setDomains", ["<%= ENV['PM_MATOMO_DOMAIN'] %>"]]);
+    _paq.push(["setDoNotTrack", true]);
+    _paq.push(['setUserId', login]);
+    _paq.push(['setCustomDimension', 1, institution]);
+    _paq.push(['setCustomDimension', 2, isPersonalized]);
+    _paq.push(['trackPageView']);
+    _paq.push(['enableLinkTracking']);
+    (function() {
+      var u="<%= ENV['PM_MATOMO_URL'] %>/";
+      _paq.push(['setTrackerUrl', u+'matomo.php']);
+      _paq.push(['setSiteId', '<%= ENV['PM_MATOMO_SITE_ID'] %>']);
+      var d=document, g=d.createElement('script'), s=d.getElementsByTagName('script')[0];
+      g.async=true; g.src=u+'matomo.js'; s.parentNode.insertBefore(g,s);
+    })();
+  }
+
+  doit()
+</script>
+<noscript><p><img src="<%= ENV['PM_MATOMO_URL'] %>/matomo.php?idsite=1&amp;rec=1" style="border:0;" alt="" /></p></noscript>
+<!-- End Matomo Code -->
+<% end %>

@@ -13,7 +13,7 @@
       <ul>
         <li>
           Recht am Werk:
-          <% representative = rights_representative(@image, false) -%>
+          <% representative = @image.rights_representative -%>
           <% if (rights_work = @image.rights_work).blank? -%>
             <span>Keine Informationen zur Verfügung gestellt</span>
             <p>
@@ -27,7 +27,7 @@
               Publikationsgenehmigung zu fragen.
             </p>
           <% else -%>
-          	<%= render partial: 'shared/rights_work', locals: {rights_work: rights_work} %>
+            <%= render partial: 'images/rights_work', locals: {rights_work: Array.wrap(rights_work)} %>
           	<% if representative -%>
             	<p>
                 Der Künstler bzw. die Künstlerin wird vertreten von: <%= representative %>.
@@ -55,7 +55,7 @@
             ist. Andernfalls überprüfen Sie den Bildnachweis (<strong>siehe 2.</strong>).
           </p>
         <% else -%>
-    <%= render partial: 'images/rights_reproduction', locals: {rights_reproduction: rights_reproduction} %>
+    <%= render partial: 'images/rights_reproduction', locals: {rights_reproduction: Array.wrap(rights_reproduction)} %>
           <p>
             Die Genehmigung, das Foto zu nutzen verlangt eine Autorisierung direkt
             vom Fotografen bzw. der Fotografin oder der jeweiligen Institution, die

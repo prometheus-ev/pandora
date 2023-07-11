@@ -1,5 +1,54 @@
 class Indexing::IndexFields
-  def self.indexing
+  # Custom mapping fields used in class IndexMappings.
+  # @see app/libs/indexing/index_mappings.rb 
+  def self.index_mapping
+    index -
+    ['record_id',
+     'record_object_id',
+     'record_object_id_count',
+     'artist_nested',
+     'artist_nested.dating',
+     'artist_nested.name',
+     'artist_nested.wikidata',
+     'artist',
+     'artist_normalized',
+     'artist_wikidata',
+     'title_nested',
+     'title_nested.name',
+     'title_nested.wikidata',
+     'title',
+     'license_nested',
+     'license_nested.name',
+     'license_nested.url',
+     'location_nested',
+     'location_nested.name',
+     'location_nested.wikidata',
+     'location',
+     'date',
+     'date_range',
+     'date_range_from',
+     'date_range_to',
+     'credits_nested',
+     'credits_nested.link_text',
+     'credits_nested.link_url',
+     'credits',
+     'rights_work',
+     'rights_reproduction_nested',
+     'rights_reproduction_nested.license',
+     'rights_reproduction_nested.license_url',
+     'rights_reproduction_nested.name',
+     'rights_reproduction_nested.wikidata',
+     'rights_reproduction',
+     'rating_average',
+     'description',
+     'person_nested',
+     'person_nested.dating',
+     'person_nested.name',
+     'person_nested.wikidata',
+     'authority_files',
+     'authority_files.label',
+     'authority_files.id',
+     'image_vector']
   end
 
   def self.sort
@@ -15,23 +64,10 @@ class Indexing::IndexFields
      'rating_count']
   end
 
-  # Fields used in class IndexMappings.
-  def self.index_mapping
-    ['location',
-     'discoveryplace',
-     'genre',
-     'material',
-     'keyword',
-     'credits',
-     'rights_work',
-     'rights_reproduction',
-     'rating_count',
-     'user_comments']
-  end
-
   # Search field select box fields.
   def self.search
     ['all',
+     'all_with_keyword_artigo',
      'artist',
      'title',
      'location',
@@ -54,21 +90,25 @@ class Indexing::IndexFields
   def self.search_mapping(field:)
     case field
     when 'all'
-      # Search in all index fields.
-      # Remove fields which do not have type 'text'.
-      # Remove fields which will be boosted.
-      all = index - ['comment_count', 'date_range', 'image_vector'] - ['artist', 'title']
-      # Prepend boost fields.
-      all.prepend('artist^2', 'title^2')
+      all
+    when 'all_with_keyword_artigo'
+      all + ['keyword_artigo']
     when 'artist'
       ['artist^2',
+       'artist_nested.dating',
+       'artist_nested.name',
+       'artist_nested.wikidata',
        'artist_normalized',
        'identity_artist']
     when 'title'
       ['title^2',
+       'title_nested.name',
+       'title_nested.wikidata',
        'subtitle']
     when 'location'
       ['location',
+       'location_nested.name',
+       'location_nested.wikidata',
        'institution']
     when 'discoveryplace'
       ['discoveryplace']
@@ -85,9 +125,15 @@ class Indexing::IndexFields
       ['date']
     when 'credits'
       ['credits',
+       'credits_nested.link_text',
+       'credits_nested.link_url',
        'rights_reproduction']
     when 'rights_reproduction'
-      ['rights_reproduction']
+      ['rights_reproduction',
+       'rights_reproduction_nested.license',
+       'rights_reproduction_nested.license_url',
+       'rights_reproduction_nested.name',
+       'rights_reproduction_nested.wikidata']
     when 'rights_work'
       ['rights_work']
     # Use the raw, unanalyzed string field to find exact matches.
@@ -102,8 +148,6 @@ class Indexing::IndexFields
     # Integer fields do not need to use raw.
     when 'rating_count'
       ['rating_count']
-    when 'comment_count'
-      ['comment_count']
     when 'user_comments'
       ['user_comments']
     else
@@ -114,32 +158,121 @@ class Indexing::IndexFields
   def self.display
     index - non_display
   end
+
+  def self.display_upload
+    display - non_display_upload
+  end
+
+  def self.display_app
+    display + ['database']
+  end
   
   def self.non_display
     ['artist_normalized',
+     # 'artist' is used as display field.
+     'artist_nested',
+     'artist_nested.dating',
+     'artist_nested.name',
+     'artist_nested.wikidata',
+     'artist_wikidata',
      'comment_count',
+     'credits_nested',
+     'credits_nested.link_text',
+     'credits_nested.link_url',
      'date_range',
+     'iframe_url',
      'image_vector',
-     'keyword_artigo',
+     'license_nested',
+     'license_nested.name',
+     'license_nested.url',
+     # 'location' is used as display field.
+     'location_nested',
+     'location_nested.name',
+     'location_nested.wikidata',
      'path',
+     'person_nested.dating',
+     'person_nested.name',
+     'person_nested.wikidata',
      'rating_average',
      'rating_count',
      'record_id',
      'record_id_original',
-     'record_object_id',
+     # 'rights_reproduction' is used as display field.
+     'rights_reproduction_nested',
+     'rights_reproduction_nested.license',
+     'rights_reproduction_nested.license_url',
+     'rights_reproduction_nested.name',
+     'rights_reproduction_nested.wikidata',
      'source_url',
-     'user_comments']
+     'user_comments',
+     # 'title' is used as display field.
+     'title_nested',
+     'title_nested.name',
+     'title_nested.wikidata']
   end
 
+  def self.non_display_upload
+    ['owner']
+  end
+
+  def self.all
+    # Remove fields which do not have type 'text'.
+    all = index - ['comment_count', 'date_range', 'image_vector']
+    # Remove fields which will be boosted.
+    all = all - ['artist', 'title']
+    # Remove keyword_artigo, see #1636.
+    all = all - ['keyword_artigo']
+    # Prepend boost fields.
+    all.prepend('artist^2', 'title^2')
+  end
+
+  def self.location
+    ['country',
+     'discoveryplace',
+     'geographic_coordinates',
+     'location',
+     'location_building',
+     'manufacture_place',
+     'manufacture_place_city',
+     'manufacture_place_grave',
+     'manufacture_place_region',
+     'place',
+     'place_of_issue',
+     'pictured_location',
+     'printing_place',
+     'production_place',
+     'publicationplace',
+     'venue']
+  end
+
+  # All index fields.
   def self.index
     # Show the search result list fields first.
     ['artist',
+     'artist_nested',
+     'artist_nested.dating',
+     'artist_nested.name',
+     'artist_nested.wikidata',
      'title',
+     'title_nested',
+     'title_nested.name',
+     'title_nested.wikidata',
      'location',
+     'location_nested',
+     'location_nested.name',
+     'location_nested.wikidata',
      'date',
      'credits',
+     'credits_nested',
+     'credits_nested.link_text',
+     'credits_nested.link_url',
      'rights_work',
      'rights_reproduction',
+     'rights_reproduction_nested',
+     'rights_reproduction_nested.license',
+     'rights_reproduction_nested.license_url',
+     'rights_reproduction_nested.name',
+     'rights_reproduction_nested.wikidata',
      # Ratings and comments.
      'rating_count',
      'rating_average',
@@ -155,11 +288,15 @@ class Indexing::IndexFields
      'archives',
      'artist_information',
      'artist_normalized',
+     'artist_wikidata',
      'authority_files',
+     'authority_files.label',
+     'authority_files.id',
      'authority_files_artist',
      'based_on',
      'beneficiary_of_charter',
      'biographical_data',
+     'building',
      'caption',
      'carrier_medium',
      'catalogue',
@@ -202,6 +339,7 @@ class Indexing::IndexFields
      'external_references',
      'footnote',
      'format_foto',
+     'former_location',
      'frame',
      'function',
      'further_context_of_publication',
@@ -215,6 +353,7 @@ class Indexing::IndexFields
      'iconclass',
      'iconclass_description',
      'iconography',
+     'iframe_url',
      'image_code',
      'image_information',
      'image_vector',
@@ -248,6 +387,9 @@ class Indexing::IndexFields
      'length',
      'library_origin',
      'license',
+     'license_nested',
+     'license_nested.name',
+     'license_nested.url',
      'links',
      'literature',
      'location_building',
@@ -276,10 +418,16 @@ class Indexing::IndexFields
      'path',
      'pattern',
      'person',
+     'person_nested',
+     'person_nested.dating',
+     'person_nested.name',
+     'person_nested.wikidata',
      'person_of_interest',
      'photoagency',
      'photographer',
      'photographed_location',
+     'photographic_context',
+     'photographic_type',
      'picture_variation',
      'pictured_location',
      'place',
@@ -304,9 +452,11 @@ class Indexing::IndexFields
      'record_id_original',
      'record_identifier',
      'record_object_id',
+     'record_object_id_count',
      'reference_master',
      'related_works',
      'restauration',
+     'restoration_history',
      'restriction',
      'scene',
      'sealing',
@@ -321,6 +471,7 @@ class Indexing::IndexFields
      'slide_creator',
      'sound',
      'source_url',
+     'source_type',
      'state',
      'status_record',
      'structural_element',

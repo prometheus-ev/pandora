@@ -73,7 +73,7 @@ module MoreHelpers
     def link_to_create(action = default = true)
       # REWRITE: override protected state for 'linkable_actions'
       # TODO: find better way
-      action = (controller.send(:linkable_actions) & CREATE_ACTIONS).first if default
+      action = (controller.send(:linkable_actions) & [:create, :new]).first if default
       if action && current_user && current_user.action_allowed?(controller_name, action)
         text_prefix = controller_name == 'upload' ? "New" : "Create a new"
         text = "#{text_prefix} #{(default ? controller_name.singularize : action).humanize}".t

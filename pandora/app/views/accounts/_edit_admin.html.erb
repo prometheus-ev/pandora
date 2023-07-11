@@ -9,7 +9,7 @@
       <th><label for="user_role_ids"><%= 'Roles'.t %></label></th>
       <td>
         <%= hidden_field_tag role_ids_name = 'user[role_ids][]' %>
-        <%= f.collection_select :role_ids, @roles, :id, :title, {}, options_for_field(:roles, :multiple => true, :name => role_ids_name) %>
+        <%= f.collection_select :role_ids, @roles, :id, :title, {}, options_for_field(:roles, :multiple => true, :name => role_ids_name).compact %>
       </td>
     </tr>
   <% end %>
@@ -33,7 +33,7 @@
     </tr>
   <% end %>
 
-  <% institutions = current_user.user_admin_institutions(@user) %>
+  <% institutions = current_user.user_admin_licensed_institutions(@user) %>
   <tr>
     <th><label for="user_institution"><%= 'Institution'.t %></label></th>
     <td><%= f.select(

@@ -3,11 +3,11 @@ module PandoraHelper
   def author_durations(durations)
     durations.map {|from, till|
       if from && till
-        "#{from.to_s(:coarse)} - #{till.to_s(:coarse)}"
+        "#{from.to_fs(:coarse)} - #{till.to_fs(:coarse)}"
       elsif from
-        'since %s' / from.to_s(:coarse)
+        'since %s' / from.to_fs(:coarse)
       elsif till
-        'until %s' / till.to_s(:coarse)
+        'until %s' / till.to_fs(:coarse)
       end
     }.join(', ')
   end

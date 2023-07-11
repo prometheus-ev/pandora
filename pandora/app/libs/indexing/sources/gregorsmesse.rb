@@ -37,6 +37,12 @@ class Indexing::Sources::Gregorsmesse < Indexing::SourceSuper
     record.xpath('.//pro_datierung/text()')
   end
 
+  def date_range
+    d = date.to_s.strip
+
+    super(d)
+  end
+
   # standort
   def location
     record.xpath('.//pro_standort/text()')

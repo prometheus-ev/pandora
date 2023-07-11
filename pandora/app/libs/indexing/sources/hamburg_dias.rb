@@ -4,15 +4,11 @@ class Indexing::Sources::HamburgDias < Indexing::SourceSuper
   end
 
   def record_id
-    record.xpath('.//files/file/eas-id/text()')
-  end
-
-  def record_object_id
-    [name, Digest::SHA1.hexdigest(record.xpath('ancestor::bilder/_id/text()').to_a.join('|'))].join('-')
+    record.xpath('./files/file/eas-id/text()')
   end
 
   def path
-    "#{record.at_xpath('.//files/file/versions/version[@name="full"]/url/text()')}".sub(/http:\/\/kultdokuhh.fbkultur.uni-hamburg.de\//, '').sub(/http:\/\/localhost\//, '').sub(/https:\/\/kultdokuhh4.fbkultur.uni-hamburg.de\//,'').sub(/http:\/\/kultdokuhh-4.fbkultur.uni-hamburg.de\//,'').sub(/https:\/\/kultdokuhh-4.fbkultur.uni-hamburg.de\//,'')
+    "#{record.at_xpath('.//files/file/versions/version[@name="original"]/url/text()')}".sub(/http:\/\/kultdokuhh.fbkultur.uni-hamburg.de\//, '').sub(/http:\/\/localhost\//, '').sub(/https:\/\/kultdokuhh4.fbkultur.uni-hamburg.de\//,'').sub(/http:\/\/kultdokuhh-4.fbkultur.uni-hamburg.de\//,'').sub(/https:\/\/kultdokuhh-4.fbkultur.uni-hamburg.de\//,'')
   end
 
   # titel

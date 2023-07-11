@@ -1,0 +1,11 @@
+<%= licenses.map { |license|
+  if license == 'None' || license == 'In the public domain'
+    h(license.t)
+  elsif Upload.pconfig[:licenses].keys.include?(license) && license != 'Other'
+    link_to(license.t, Upload.pconfig[:licenses][license], target: '_blank') +
+    ' ' +
+    image_tag('/images/icon/arrow-up-right-from-square-solid.png', style: 'vertical-align: baseline;')
+  else
+    format_content(license, :escape => false)
+  end
+}.join(" | ").html_safe %>

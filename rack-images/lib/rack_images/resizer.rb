@@ -3,8 +3,11 @@ require 'tmpdir'
 require 'cgi'
 
 class RackImages::Resizer
+  attr_reader :content_type
 
   def run(path)
+    @content_type = 'image/jpeg'
+
     if path.match(/\/not-available$/)
       fail_with 'the requested image was requested with path "not available", we will therefore not try to retrieve it'
     end
@@ -13,35 +16,109 @@ class RackImages::Resizer
     # they are created by pandora
     # for example: /robertin/r400x400/B130c.jpg
     # without decimal places
-    if m = path.match(/^\/([a-z_]+)\/([ropxm0-9\.]+)\/(.*)$/)
+    if m = path.match(/^\/([a-z0-9_]+)\/([ropxm0-9\.]+)\/(.*)$/)
       @db, @dimensions, @upstream_path = m.to_a[1..-1]
+      msg = "path '#{path}' parsed as db:#{@db}, dims:#{@dimensions}, upstream_path:#{@upstream_path}"
 
       # in order to avoid problems with urldecoding by web servers, we encode
       # the upstream path with base64 when generating image urls. Therefore, we
       # need to decode it here
       @upstream_path = self.class.try_decode64(@upstream_path)
 
-      generate unless File.exists?(cache_file)
+      # we also want to log the decoded path
+      msg += ", decoded:#{@upstream_path}"
+      self.class.info(msg)
+
+      unless File.exist?(cache_file)
+        self.class.info("no cached file found at #{cache_file}, generating ...")
+        generate
+      end
+
       File.open cache_file
-    elsif m = path.match(/^\/([a-z_]+)\/original\/(.*)$/)
+    elsif m = path.match(/^\/([a-z0-9_]+)\/original\/(.*)$/)
       @db, @upstream_path = m.to_a[1..-1]
+      msg = "path '#{path}' parsed as db:#{@db}, dims:<original>, upstream_path:#{@upstream_path}"
 
       # see above
       @upstream_path = self.class.try_decode64(@upstream_path)
 
+      # we also want to log the decoded path
+      msg += ", decoded:#{@upstream_path}"
+      self.class.info(msg)
+
       ensure_original
+      @content_type = content_type_for(original_file)
       File.open original_file
     else
       fail_with "'#{path}' does not match any of the recognized patterns"
     end
   end
 
+  # drop all resolution files for a given pid
+  def drop(db, pid)
+    original = "#{data_dir}/#{db}/original/#{pid}.jpg"
+    files = Dir["#{data_dir}/#{db}/*/#{pid}.jpg"] - [original]
+    system 'rm', '-f', *files
+  end
+
   def generate
     ensure_original
 
+    original = original_file
+
+    if is_video?(original_file)
+      self.class.info('video file')
+      system 'mkdir', '-p', File.dirname(frame_file)
+
+      unless File.exist?(frame_file)
+        self.class.info('frame not extracted yet, extracting ...')
+        extract_frame(original_file, frame_file)
+      end
+
+      original = frame_file
+    end
+
     system 'mkdir', '-p', File.dirname(cache_file)
 
-    cmd = ['convert', original_file]
+    resize_image(original, cache_file)
+  end
+
+  def is_video?(file)
+    cmd = ['file', '-i', '-b', file]
+
+    status, stdout, stderr = RackImages.run(cmd)
+
+    unless status == 0
+      fail_with "could not determine original mime type. Command used: #{cmd.inspect}, stderr: #{stderr}"
+    end
+
+    mime = stdout.split(' ')[0]
+    !!mime.match?(/^video\/.*/)
+  end
+
+  def is_pdf?(file)
+    content_type = content_type_for(file)
+    !!content_type.match?(/^application\/pdf.*/)
+  end
+
+  def content_type_for(file)
+    cmd = ['file', '--mime-type', '-b', file]
+
+    status, stdout, stderr = RackImages.run(cmd)
+
+    unless status == 0
+      fail_with "could not determine original mime type. Command used: #{cmd.inspect}, stderr: #{stderr}"
+    end
+
+    stdout.strip
+  end
+
+  def resize_image(original_file, target_file)
+    cmd = ['convert']
+    if is_pdf?(original_file)
+      cmd << '-flatten'
+    end
+    cmd << "#{original_file}[0]"
     if r = directives[:crop]
       cmd += ['-crop', "#{r[:geometry]}"]
     end
@@ -54,6 +131,21 @@ class RackImages::Resizer
 
     unless status == 0
       fail_with "image could not be converted. Command used: #{cmd.inspect}, stderr: #{stderr}"
+    end
+  end
+
+  def extract_frame(original_file, target_file, frame=0)
+    cmd = [
+      'ffmpeg', '-i',
+      original_file,
+      '-vf', "select=eq(n\\,#{frame})", '-vframes', '1',
+      target_file
+    ]
+
+    status, stdout, stderr = RackImages.run(cmd)
+
+    unless status == 0
+      fail_with "frame could not be extracted from video. Command used: #{cmd.inspect}, stderr: #{stderr}"
     end
   end
 
@@ -91,12 +183,10 @@ class RackImages::Resizer
   end
 
   def ensure_original
-    if File.exists?(original_file)
+    if File.exist?(original_file)
       return
     else
-      RackImages::Server.logger.info(
-        "no original found at '#{original_file}', trying to download from upstream"
-      )
+      self.class.info("no original found at '#{original_file}', trying to download from upstream")
     end
 
     remote = original_sources[@db]
@@ -105,15 +195,15 @@ class RackImages::Resizer
       # since the remote is missing, we will try to find a directory with
       # originals and symlink it to the images directory (unless the symlink
       # already exists)
-      unless File.exists?(original_dir)
+      unless File.exist?(original_dir)
         candidate = "#{ENV['PM_ORIGINALS_DIR']}/#{@db}/original"
 
-        if File.exists?(candidate)
+        if File.exist?(candidate)
           system 'mkdir', '-p', "#{data_dir}/#{@db}"
           system 'ln', '-sfn', candidate, "#{data_dir}/#{@db}"
 
           # now, we try again
-          return if File.exists?(original_file)
+          return if File.exist?(original_file)
         end
       end
 
@@ -185,6 +275,10 @@ class RackImages::Resizer
     "#{data_dir}/#{@db}/#{@dimensions}"
   end
 
+  def frame_file
+    "#{data_dir}/#{@db}/frames/#{upstream_base_path}.jpg"
+  end
+
   def data_dir
     ENV['PM_IMAGES_DIR']
   end
@@ -196,6 +290,10 @@ class RackImages::Resizer
   def proxy
     result = ENV['PM_IMAGE_PROXY']
     result && result != '' ? result : nil
+  end
+
+  def self.info(msg)
+    RackImages::Server.logger.info msg
   end
 
   def fail_with(message)

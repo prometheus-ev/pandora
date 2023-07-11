@@ -73,11 +73,11 @@ class Indexing::Sources::Bern < Indexing::SourceSuper
 
   def date_range
     # Preprocess date.
-    pd = date.strip
+    d = date.strip
     non_dates = ['ca.', 'um', 'nicht datiert', 'keine Angaben', 'ohne Datierung', 'unbekannt', 'x', '-']
 
-    if !non_dates.include?(pd)
-      super(date.to_s)
+    if !non_dates.include?(d)
+      super(d)
     end
   end
 

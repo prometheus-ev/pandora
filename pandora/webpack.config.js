@@ -8,6 +8,7 @@ module.exports = (env, options) => {
   return {
     mode: mode,
     entry: {
+      'app': './app/assets/app.js',
       'styles': './app/assets/styles.scss',
       'ng.app': './app/assets/ng/app.js',
       'ng.styles': './app/assets/ng/styles.scss'
@@ -15,13 +16,23 @@ module.exports = (env, options) => {
     module: {
       rules: [
         {
-          test: /\.js/,
-          loader: 'babel-loader',
-          options: {
-            presets: ['@babel/preset-react']
-          }
-        },
-        {
+          test: /\.riot$/,
+          exclude: /node_modules/,
+          use: [
+            {
+              loader: 'babel-loader',
+              options: {
+                presets: ['@babel/preset-env']
+              },
+            },{
+              loader: '@riotjs/webpack-loader',
+              options: {
+                // hot: true, // set it to true if you are using hmr
+                // add here all the other @riotjs/compiler options riot.js.org/compiler
+                // template: 'pug' for example
+            }
+          }]
+        },{
           test: /\.scss/,
           use: [
             MiniCssExtractPlugin.loader,

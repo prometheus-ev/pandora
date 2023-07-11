@@ -1,5 +1,6 @@
 class Indexing::Sources::Dadaweb < Indexing::SourceSuper
   def records
+    @node_name = 'ROW'
     document.xpath('//ROW')
   end
 
@@ -8,7 +9,13 @@ class Indexing::Sources::Dadaweb < Indexing::SourceSuper
   end
 
   def record_object_id
-    [name, Digest::SHA1.hexdigest(record.xpath('.//zzzID_G/text()').to_a.join('|'))].join('-')
+    if !(object_id = record.xpath('.//zzzID_G/text()')).blank?
+      [name, Digest::SHA1.hexdigest(object_id.to_a.join('|'))].join('-')
+    end
+  end
+
+  def record_object_id_count
+    @record_object_id_count[record_object_id]
   end
 
   def s_location

@@ -9,10 +9,6 @@ if [[ "$TARGET" == "" && "$BRANCH" == "production" ]]; then
   TARGET=production
 fi
 
-if [[ "$TARGET" == "" && "$BRANCH" == "staging" ]]; then
-  TARGET=staging
-fi
-
 # fail if branch or target aren't specified
 if [[ "$TARGET" == "" || "$BRANCH" == "" ]]; then
   echo "please provide a branch and a deploy target"

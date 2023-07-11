@@ -15,13 +15,16 @@
   <% end -%>
   <%= page_form do -%>
     <%= hidden_field_tags_for(safe_params.except(*%w[order direction page])) %>
-    <%= select_tag(
-      :order,
-      options_for_select(
-        options_for_order_select(args),
-        sort_column
-      ),
-      :class => 'autoselect'
-    ) %>
+
+    <% if local_assigns[:args] %>
+      <%= select_tag(
+        :order,
+        options_for_select(
+          options_for_order_select(args),
+          sort_column
+        ),
+        :class => 'autoselect'
+      ) %>
+    <% end %>
   <% end -%>
 </div>

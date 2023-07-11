@@ -1,5 +1,7 @@
 class Indexing::Sources::BonnMaya < Indexing::SourceSuper
   def records
+    # Specify the record node name as String for record object ID analysis.
+    @node_name = 'medium'
     document.xpath('//medium')
   end
 
@@ -8,12 +10,21 @@ class Indexing::Sources::BonnMaya < Indexing::SourceSuper
   end
 
   def record_object_id
-    [name, Digest::SHA1.hexdigest(record.xpath('.//relationships/artefact-is-depicted-by-medium/from/artefact/entity/id/text()').to_a.join('|'))].join('-')
+    if !(entity_id = record.xpath('./relationships/artefact-is-depicted-by-medium/from/artefact/entity/id/text()')).empty?
+      [name, Digest::SHA1.hexdigest(entity_id.to_s)].join('-')
+    end
   end
 
+  def record_object_id_count
+    @record_object_id_count[record_object_id]
+  end
 
   def path
-    "#{record.at_xpath('.//entity/image-path[@style="original"]/text()')}".gsub(/https:\/\/classicmayan.kor.de.dariah.eu\/media\/download\/original\//,'media/maximize/')
+    orig = "#{record.at_xpath('.//entity/image-path[@style="normal"]/text()')}"
+    id = orig.split('/').last
+    str = "%09d" % id
+    part = str.scan(/.{3}/).first(3).join("/")
+    "media/download/normal/#{part}/image.jpg"
   end
 
   # titel
@@ -35,6 +46,12 @@ class Indexing::Sources::BonnMaya < Indexing::SourceSuper
   # datierung
   def date
     "#{record.xpath('.//relationships/artefact-is-depicted-by-medium/from/artefact/entity/fields/field[@name="date"]/text()')} | Fotografie: #{record.xpath('.//entity/datings/dating/text()')}".gsub(/\A \| /,'').gsub(/Fotografie: \z/,'')
+  end
+
+  def date_range
+    date = "#{record.xpath('.//relationships/artefact-is-depicted-by-medium/from/artefact/entity/fields/field[@name="date"]/text()')}"
+
+    super(date)
   end
 
   def photographer

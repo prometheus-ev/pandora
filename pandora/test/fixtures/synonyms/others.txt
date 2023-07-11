@@ -1,2 +1,3 @@
-rights_work_vgbk,VGBK,VG Bild Kunst,Verwertungsgesellschaft Bild Kunst
-rights_work_warburg,The Warburg Institute,Warburg Institute
+rights_work_vgbk,vgbk,vg bild kunst,verwertungsgesellschaft bild kunst
+rights_work_warburg,the warburg institute,warburg institute
+mona lisa,la joconde,la gioconda

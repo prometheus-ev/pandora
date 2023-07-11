@@ -9,6 +9,18 @@ class RedirectController < ApplicationController
   # handles the complex locale defaults
   def locale_redirect
     old_path = request.path.gsub(/\/$/, '')
-    redirect_to "/#{default_locale}#{old_path}"
+    redirect_to new_url(old_path)
   end
+
+
+  protected
+
+    def new_url(path)
+      candidate = "#{root_url(locale: nil)}#{default_locale}#{path}"
+      URI(candidate.to_s)
+
+      candidate
+    rescue URI::InvalidURIError
+      locale_root_url
+    end
 end

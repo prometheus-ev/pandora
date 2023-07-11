@@ -66,4 +66,21 @@ class IpRangeTest < ActiveSupport::TestCase
     )
     assert_equal expected, parsed
   end
+
+  test 'matcher' do
+    parser = Pandora::IpRange
+
+    range = parser.parse('193.206.186')
+    assert range.matches?('193.206.186.1')
+    assert range.matches?('193.206.186.255')
+    assert range.matches?('193.206.186.12')
+    assert_not range.matches?('193.207.186.255')
+    assert_not range.matches?('193.206.187.255')
+
+    range = parser.parse('46.18.24-27')
+    assert range.matches?('46.18.24.12')
+    assert range.matches?('46.18.27.12')
+    assert range.matches?('46.18.25.12')
+    assert_not range.matches?('46.18.23.12')
+  end
 end

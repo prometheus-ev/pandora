@@ -3,25 +3,37 @@
 <%= error_messages_for :feedback, :header_message => '', :message => '' %>
 
 <%= form_for @feedback, as: :feedback, url: {action: 'feedback'} do |f| -%>
-  <table>
-    <caption><%= render :partial => 'feedback_caption' %></caption>
-    <tr>
-      <th><%= f.label :name, 'Your name'.t + ' (' + 'optional'.t + ')' %></th>
-      <td><%= f.text_field :name %></td>
-    </tr>
-    <tr>
-      <th><%= f.label :email, 'Your e-mail address'.t + ' (' + 'optional'.t + ')' %></th>
-      <td><%= f.text_field :email %></td>
-    </tr>
-    <tr>
-      <td colspan="2">
-        <%= f.label :text, 'Your message'.t %>
-        <br /><br class="vspace1" />
-        <%= f.text_area :text, size: '59x10', class: 'mandatory' %>
-        <br /><br class="vspace1" />
-        <%= render :partial => 'shared/misc/captcha' %>
-        <%= submit_button 'Submit feedback'.t, :float => :right %>
-      </td>
-    </tr>
-  </table>
+  <p>
+    <%= render :partial => 'feedback_caption' %>
+  </p>
+  <p>
+    <%= f.label :name, 'Your name'.t + ' (' + 'optional'.t + ')' %>
+    <br>
+    <%= f.text_field :name %>
+  </p>
+  <p style="display: none;">
+    <%= f.label :code %>
+    <br>
+    <%= f.text_field :code %>
+    <br>
+    <%= f.label :send_by_email %>
+    <br>
+    <%= f.check_box :send_by_email %>
+  </p>
+  <p>
+    <%= f.label :email, 'Your e-mail address'.t + ' (' + 'optional'.t + ')' %>
+    <br>
+    <%= f.text_field :email %>
+  </p>
+  <p>
+    <%= f.label :message, 'Your message'.t %>
+    <br>
+    <%= f.text_area :message, size: '59x10', class: 'mandatory' %>
+  </p>
+  <p>
+    <%= render :partial => 'shared/misc/captcha' %>
+  </p>
+  <p>
+    <%= submit_button 'Submit feedback'.t, :float => :right %>
+  </p>
 <% end -%>

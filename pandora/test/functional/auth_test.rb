@@ -5,7 +5,7 @@ class AuthTest < ActionDispatch::IntegrationTest
     # this case is probably triggered by expired sessions with remaining open
     # browser tabs
     get '/en/image/dresden-c80ee9bef01fcb83601cafec66bf8a3fb15f0433?box_id=sidebar_box-15348', xhr: true
-    assert_equal 'text/javascript', response.content_type
+    assert_equal 'text/javascript', response.media_type
     assert_match /location.href/, response.body
   end
 

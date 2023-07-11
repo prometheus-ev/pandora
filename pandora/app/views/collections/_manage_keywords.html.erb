@@ -1,7 +1,19 @@
 <tr>
   <th><label for="collection_keyword_list"><%= 'Keywords'.t %></label><br /><small>(<%= 'One per line'.t %>)</small></th>
   <td>
-    <%= f.text_area :keyword_list, options_for_field(:keywords, :rows => 5, :value => @collection.keyword_list) %>
-    <%= suggest_keywords_for 'collection', :keyword_list %>
+    <%= f.text_area :keyword_list, rows: 5 %>
+    <div id="keyword_suggestions" class="suggestions"></div>
+      <script>
+        new Ajax.Autocompleter(
+          'collection_keyword_list',
+          'keyword_suggestions',
+          '<%= suggest_keywords_path %>',
+          {
+            paramName: 'value',
+            suggest: true,
+            parameters: 'type=collection'
+          }
+        )
+      </script>
   </td>
 </tr>

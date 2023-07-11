@@ -1,7 +1,7 @@
 <% text = capture do -%>
 <%= @feedback.name.blank? ? 'ANONYMOUS' : "#{@feedback.name} <#{@feedback.email}>" %> submitted the following feedback:
 
-<%= @feedback.text %>
+<%= @feedback.message %>
 <% end -%>
 
 <%= text.word_wrap(72) %>

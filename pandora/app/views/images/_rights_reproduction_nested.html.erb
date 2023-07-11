@@ -1,0 +1,14 @@
+<%= rights_reproduction['name'] -%>
+<% unless rights_reproduction['wikidata'].blank? %>
+  | <%= link_to rights_reproduction['wikidata'], { controller: 'searches', action: 'advanced', 'search_field[0]': 'all', 'search_value[0]': rights_reproduction['wikidata'] } %>
+  (<%= link_to 'Wikidata', "https://www.wikidata.org/wiki/#{rights_reproduction['wikidata']}", target: '_blank' %>
+  <%= image_tag('/images/icon/arrow-up-right-from-square-solid.png', style: 'vertical-align: baseline;') %>)
+<% end %>
+<% unless rights_reproduction['license'].blank? %>
+  <% if rights_reproduction['license_url'].blank? %>
+    | <i><%= rights_reproduction['license'] %></i>
+  <% else %>
+    | <%= link_to rights_reproduction['license'], rights_reproduction['license_url'], target: '_blank' %>
+    <%= image_tag('/images/icon/arrow-up-right-from-square-solid.png', style: 'vertical-align: baseline;') %>
+  <% end %>
+<% end %>

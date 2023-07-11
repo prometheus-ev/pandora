@@ -61,6 +61,12 @@ class Indexing::Sources::LueneburgOppermann < Indexing::SourceSuper
     _value('date', 'de')
   end
 
+  def date_range
+    d = date.to_s.strip
+
+    super(d)
+  end
+
   # standort
   def location
     refs = (record.xpath('.//annotation/line/link/@ref')).map(&:to_s)

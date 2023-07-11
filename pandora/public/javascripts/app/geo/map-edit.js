@@ -3,7 +3,9 @@ var marker = null;
 
 document.observe("dom:loaded", function() {
   // https://developer.mapquest.com/documentation/mapquest-js/v1.3/
-  L.mapquest.key = '6cGTYTOCsUvGsEtmAr07AQbHE3mxeTAQ';
+  L.mapquest.key = 'FILL-ME-IN';
+
+  if (L.mapquest.key == 'FILL-ME-IN') return
 
   map = L.mapquest.map('map', {
     center: [lat, lng],
@@ -128,49 +130,93 @@ function request_location_with(name) {
   if (timeout) {
     clearTimeout(timeout);
   }
+  var ul = document.querySelector('#upload-location-search-result')
   timeout = setTimeout(function() {
-    $('upload-location-search-result').update();
+    ul.innerHTML = ''
+
     if ( name && name.length > 2 ) {
-      // https://open.mapquestapi.com
       // http://prometheus-app.uni-koeln.de/redmine/projects/prometheus/wiki/API_Accounts
-      new Ajax.Request('https://open.mapquestapi.com/nominatim/v1/search.php?key=6cGTYTOCsUvGsEtmAr07AQbHE3mxeTAQ&format=json&q=' + name, {
+      // https://developer.mapquest.com/documentation/geocoding-api/address/get/
+      var url =
+        'https://www.mapquestapi.com/geocoding/v1/address?' +
+        'key=6cGTYTOCsUvGsEtmAr07AQbHE3mxeTAQ&' +
+        'location=' + name
+
+      new Ajax.Request(url, {
         method: 'get',
         onSuccess: function(response) {
           var json = response.responseText.evalJSON();
-          if (json.length > 0) {
-            json.each(function(result) {
-              $('upload-location-search-result').insert('<li onmouseover="show_location(' + result.lat + ', ' + result.lon + ');" onclick="select_location(' + result.lat + ', ' + result.lon + ', \'' + result.display_name + '\');">' + result.display_name + '</li>');
-            });
-            $('upload-location-search-result').show();
-          } else {
-            $('upload-location-search-result').hide();
+          var locations = json.results[0].locations
+
+          if (locations.length == 0) {
+            ul.style.display = 'none'
+            return
           }
+
+          locations.each(location => {
+            var li = locationToListItem(location)
+            ul.append(li)
+          });
+
+          ul.style.display = 'block'
         },
         onFailure: function() {
           console.log('Something went wrong...');
-          $('upload-location-search-result').hide();
+          ul.style.display = 'none'
         }
         });
     }
   }, 500);
 }
 
-function request_location_by(lat, lon) {
-  // https://open.mapquestapi.com
+function request_location_by(lat, lng) {
   // http://prometheus-app.uni-koeln.de/redmine/projects/prometheus/wiki/API_Accounts
-  new Ajax.Request('https://open.mapquestapi.com/nominatim/v1/reverse.php?key=6cGTYTOCsUvGsEtmAr07AQbHE3mxeTAQ&format=json&lat=' + lat + '&lon=' + lon, {
-      method: 'get',
-      onSuccess: function(response) {
-        var result = response.responseText.evalJSON();
-        $('upload-location-search-result').update();
-        $('upload-location-search-result').insert('<li onmouseover="show_location(' + result.lat + ', ' + result.lon + ');" onclick="select_location(' + result.lat + ', ' + result.lon + ', \'' + result.display_name + '\');">' + result.display_name + '</li>');
-        $('upload-location-search-result').show();
-      },
-      onFailure: function() {
-        console.log('Something went wrong...');
-        $('upload-location-search-result').hide();
-      }
-      });
+  // https://developer.mapquest.com/documentation/geocoding-api/reverse/get/
+  var url =
+    'https://www.mapquestapi.com/geocoding/v1/reverse?' +
+    'key=6cGTYTOCsUvGsEtmAr07AQbHE3mxeTAQ&' +
+    'location=' + lat + ',' + lng
+
+  new Ajax.Request(url, {
+    method: 'get',
+    onSuccess: function(response) {
+      var json = response.responseText.evalJSON()
+      var locations = json.results[0].locations
+
+      var ul = document.querySelector('#upload-location-search-result')
+      ul.innerHTML = ''
+      locations.each(location => {
+        var li = locationToListItem(location)
+        ul.append(li)
+      })
+
+      ul.style.display = 'block'
+    },
+    onFailure: function() {
+      console.log('Something went wrong...');
+      ul.style.display = 'none'
+    }
+  });
+}
+
+function locationToListItem(location) {
+  var scope =
+    Object.keys(location).
+    filter(k => k.match(/^adminArea\d$/)).
+    sort().
+    reverse().
+    filter(k => !!location[k]).
+    map(k => location[k])
+  var name = [...new Set(scope)].join(', ')
+
+  var li = document.createElement('li')
+  li.textContent = name
+  var lat = location.latLng.lat
+  var lng = location.latLng.lng
+  li.addEventListener('mouseover', event => show_location(lat, lng))
+  li.addEventListener('click', event => select_location(lat, lng, name))
+
+  return li
 }
 
 function show_location(lat, lon) {

@@ -19,7 +19,6 @@ class SubscriptionsController < ApplicationController
       return
     end
 
-    # user = ensure_params(:user) or return
     email = user_params[:email]
 
     if Account.subscribed?(email)
@@ -35,7 +34,11 @@ class SubscriptionsController < ApplicationController
 
     if @user.save
       timestamp, token = @user.token_auth
-      AccountMailer.newsletter_subscription(@user, timestamp, token).deliver_now
+      AccountMailer.with(
+        user: @user,
+        timestamp: timestamp,
+        token: token
+      ).newsletter_subscription.deliver_now
 
       render action: 'subscription_sent'
     else
@@ -53,7 +56,7 @@ class SubscriptionsController < ApplicationController
       if user.newsletter?
         flash[:notice] = 'You are already subscribed to our newsletter.'.t
       else
-        user.update_attribute(:newsletter, true)
+        user.update(newsletter: true, email_verified_at: Time.now)
         flash[:notice] = 'You successfully subscribed to our newsletter.'.t
       end
     else
@@ -65,7 +68,12 @@ class SubscriptionsController < ApplicationController
   end
 
   def unsubscribe_form
-    user = current_user
+    if immediate_unsubscribe
+      flash[:notice] = 'You successfully unsubscribed from our newsletter.'.t
+      redirect_to action: 'subscribe_form'
+    else
+      @user = Account.new(email: params[:email])
+    end
   end
 
   def unsubscribe
@@ -76,10 +84,14 @@ class SubscriptionsController < ApplicationController
 
     email = user_params[:email]
 
-    if user = Account.find_by(email: email)
-      if user.newsletter?
-        timestamp, token = user.token_auth
-        AccountMailer.newsletter_unsubscription(user, timestamp, token).deliver_now
+    if @user = Account.find_by(email: email)
+      if @user.newsletter?
+        timestamp, token = @user.token_auth
+        AccountMailer.with(
+          user: @user,
+          timestamp: timestamp,
+          token: token
+        ).newsletter_unsubscription.deliver_now
 
         render :action => 'unsubscription_sent'
         return
@@ -94,16 +106,16 @@ class SubscriptionsController < ApplicationController
   end
 
   def confirm_unsubscribe
-    user = Account.authenticate_from_token(params[:login], params[:timestamp], params[:token]) do |user, link_expired, matching_token|
+    @user = Account.authenticate_from_token(params[:login], params[:timestamp], params[:token]) do |user, link_expired, matching_token|
       authenticate_from_token_warnings(user, link_expired, matching_token)
     end
 
-    if user
-      if user.newsletter?
-        if user.subscriber?
-          user.destroy
+    if @user
+      if @user.newsletter?
+        if @user.subscriber?
+          @user.destroy
         else
-          user.update_attribute(:newsletter, false)
+          @user.update_attribute(:newsletter, false)
         end
 
         flash.now[:notice] = 'You successfully unsubscribed from our newsletter.'.t
@@ -125,6 +137,24 @@ class SubscriptionsController < ApplicationController
 
     def user_params
       params.require(:user).permit(:email)
+    end
+
+    def immediate_unsubscribe
+      if params[:email] && params[:token]
+        if RackImages::Secret.valid?(params[:token], params[:email])
+          account = Account.find_by!(email: params[:email])
+
+          if account.subscriber?
+            account.destroy
+          else
+            account.update_attribute(:newsletter, false)
+          end
+          
+          return true
+        end
+      end
+
+      false
     end
 
 end

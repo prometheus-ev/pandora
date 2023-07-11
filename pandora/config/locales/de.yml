@@ -2,6 +2,37 @@ de:
   en: englisch
   de: deutsch
 
+  messages:
+    offensive: |
+      Da Datensätze mit historischen Werktiteln und Beschreibungen
+      diskriminierende Begriffe enthalten können, haben wir uns entschieden,
+      diese Begriffe in entsprechenden Fällen auszublenden. Für Ihre Forschung
+      kann es aber notwendig sein, sich diese anzusehen, weshalb eine
+      Einblendung als Option weiterhin möglich ist.
+    wikidata_editor: |
+      Verwenden Sie das nachfolgende Textfeld, um die Wikidata-Datenbank zu
+      durchsuchen. Die Suche erfolgt automatisch während der Eingabe. Um einen
+      Eintrag zu verknüpfen, wählen Sie ihn aus der Liste der Vorschläge aus und
+      klicken Sie auf „Speichern”.
+
+  prompts:
+    sure: Sind Sie sicher?
+
+  verbs:
+    hide_all: alle ausblenden
+    hide: ausblenden
+    display: anzeigen
+    display_all: alle anzeigen
+    add_a_wikidata_id: Wikidata ID hinzufügen
+    edit: bearbeiten
+    save: speichern
+    search_in_prometheus: in prometheus suchen
+    delete: entfernen
+    cancel: abbrechen
+
+  start_typing: starten Sie Ihre Eingabe …
+  to_wikidata_item: zum Wikidata-Eintrag
+
   activerecord:
     attributes:
       account:
@@ -13,6 +44,10 @@ de:
         password_confirmation: Passwortwiederholung
         research_interest: Forschungsinteresse
         email: E-Mail
+      source:
+        auto_approve_records: "Uploads automatisch freigeben (nur institutionelle Uploads)"
+      upload:
+        add_to_index: Diesen Upload in der Suche anzeigen (für alle Nutzer*innen)
     errors:
       messages:
         record_invalid: "Gültigkeitsprüfung ist fehlgeschlagen: %{errors}"
@@ -289,3 +324,9 @@ de:
   translation_English_to_German: "Übersetzungen von Englisch nach Deutsch"
   # accounts
   has_user_database: "Dieser Nutzer hat eine Upload Datenbank"
+  # Objects and records
+  '%s_records_dative': "%s Datensätzen"
+  '%s_objects_dative': "%s Objekten"
+  'objects_dative': "Objekten"
+  'records_dative': "Datensätzen"
+  "All with keyword artigo": "Alle inkl. ARTigo-Tags"

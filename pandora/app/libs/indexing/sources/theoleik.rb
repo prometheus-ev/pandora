@@ -40,6 +40,12 @@ class Indexing::Sources::Theoleik < Indexing::SourceSuper
     record.xpath('.//datierung/text()')
   end
 
+  def date_range
+    d = date.to_s.strip
+
+    super(d)
+  end
+
   # material
   def material
     record.xpath('.//material/text()')

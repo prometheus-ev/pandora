@@ -109,30 +109,4 @@ module Upgrade
       hash[field] = Date.parse(str)
     end
   end
-
-  # Translates the old style finder options to the new relation syntax
-  def self.conds_to_scopes(base, opts = {})
-    handled = [
-      :conditions, :joins, :distinct, :select, :order, :offset, :limit,
-      :include, :readonly, :references
-    ]
-    if !(other_opts = (opts.keys - handled)).empty?
-      raise "REWRITE: Unhandled options: #{other_opts.inspect}"
-    end
-
-    base = base.where(opts[:conditions]) if opts[:conditions]
-    base = base.joins(opts[:joins]) if opts[:joins]
-    base = base.includes(opts[:include]) if opts[:include]
-    base = base.references(opts[:references]) if opts[:references]
-    base = base.distinct(opts[:distinct]) if opts[:distinct]
-    base = base.order(opts[:order]) if opts[:order]
-    base = base.offset(opts[:offset]) if opts[:offset]
-    base = base.limit(opts[:limit]) if opts[:limit]
-    base = base.select(opts[:select]) if opts[:select]
-    base = base.readonly if opts[:readonly]
-
-    base
-  rescue => e
-    x = 12
-  end
 end

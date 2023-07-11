@@ -40,6 +40,12 @@ class Indexing::Sources::Wbarchiv < Indexing::SourceSuper
     record.xpath('.//datierung/text()')
   end
 
+  def date_range
+    d = date.to_s.strip
+
+    super(d)
+  end
+
   # bildnachweis
   def credits
     "#{record.xpath('.//bildquelle/text()')} (#{record.xpath('.//datenbank/text()')})".gsub(/ \(\)/, '')

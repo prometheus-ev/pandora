@@ -1,5 +1,10 @@
 require "test_helper"
 
+if ENV['PM_RETRY_TESTS']
+  require 'minitest/retry'
+  Minitest::Retry.use!
+end
+
 require 'webdrivers/chromedriver'
 
 Capybara.register_driver :headless_chrome do |app|
@@ -12,15 +17,24 @@ Capybara.register_driver :headless_chrome do |app|
   ].each{|a| options.add_argument(a)}
 
   # set download path
-  path = Rails.root.join('tmp', 'test_downloads')
+  path = Rails.root.join('tmp', 'test_downloads').to_s
   system "mkdir -p '#{path}'"
-  options.add_preference 'download.default_directory', path
+  options.add_preference(:download, {
+    prompt_for_download: false, 
+    default_directory: path
+  })
 
   Capybara::Selenium::Driver.new(app, browser: :chrome, options: options)
 end
 
-Capybara.server_port = 47001
 Selenium::WebDriver.logger.level = :error
+
+Capybara.configure do |c|
+  c.server_port = 47001
+
+  # see https://github.com/teamcapybara/capybara/issues/2419
+  c.default_set_options = {clear: :backspace}
+end
 
 class ApplicationSystemTestCase < ActionDispatch::SystemTestCase
   if ENV['HEADLESS']
@@ -29,12 +43,13 @@ class ApplicationSystemTestCase < ActionDispatch::SystemTestCase
     driven_by :selenium, using: :chrome, screen_size: [1400, 1400]
   end
 
-  def setup
+  setup do
+    ActionMailer::Base.deliveries.clear
     ActionController::Base.allow_forgery_protection = true
     close_other_tabs
   end
 
-  def teardown
+  teardown do
     ActionController::Base.allow_forgery_protection = false
   end
 end

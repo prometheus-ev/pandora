@@ -147,37 +147,19 @@ class CsvStats
           dates.first.at_beginning_of_month,
           dates.last.at_end_of_month
         ).
-        where(issuer: options[:issuer], campus_id: nil).
+        roots.
+        where(issuer: options[:issuer]).
         order(:name)
     )
 
     receiver << headers
 
     institutions.each do |institution|
-      # summary
-      if institution.departments.any?
-        dates.each do |date|
-          ids = [institution.id] + institution.departments.map{|d| d.id}
-          scope = SumStats.
-            where(institution_id: ids).
-            where(year: date.year, month: date.month)
-          receiver << [
-            date.strftime('%Y_%m'),
-            institution.name,
-            "#{institution.title} - #{'Summary'.t}",
-            scope.total_sessions,
-            scope.total_searches,
-            scope.total_downloads
-          ]
-        end
-      end
-
-      # umbrella / single institution
       dates.each do |date|
+        ids = [institution.id] + institution.departments.map{|d| d.id}
         scope = SumStats.
-          where(institution_id: institution.id).
+          where(institution_id: ids).
           where(year: date.year, month: date.month)
-
         receiver << [
           date.strftime('%Y_%m'),
           institution.name,
@@ -186,27 +168,6 @@ class CsvStats
           scope.total_searches,
           scope.total_downloads
         ]
-      end
-
-
-      # sub institution
-      if institution.departments.any?
-        institution.departments.order(:name).each do |department|
-          dates.each do |date|
-            scope = SumStats.
-              where(institution_id: department.id).
-              where(year: date.year, month: date.month)
-            
-            receiver << [
-              date.strftime('%Y_%m'),
-              department.name,
-              department.title,
-              scope.total_sessions,
-              scope.total_searches,
-              scope.total_downloads
-            ]
-          end
-        end
       end
     end
 

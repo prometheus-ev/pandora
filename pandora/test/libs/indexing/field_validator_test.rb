@@ -1,12 +1,6 @@
 require 'test_helper'
 
 class FieldValidatorTest < ActiveSupport::TestCase
-  setup do
-  end
-
-  def teardown
-  end
-
   test 'path validation' do
     field_validator = Indexing::FieldValidator.new
 

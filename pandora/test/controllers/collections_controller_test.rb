@@ -12,10 +12,13 @@ class CollectionsControllerTest < ActionDispatch::IntegrationTest
   end
 
   test 'dbuser: redirect to login' do
-    source = Source.find_by!(name: 'robertin')
-    source.update_attributes open_access: true
+    TestSource.index
+    TestSourceSorting.index
 
-    db_login 'robertin'
+    source = Source.find_by!(name: 'test_source')
+    source.update open_access: true
+
+    db_login 'test_source'
 
     get '/en/collections'
     assert_redirected_to login_path(return_to: collections_url)
@@ -38,6 +41,8 @@ class CollectionsControllerTest < ActionDispatch::IntegrationTest
   end
 
   test 'user: view and download publicly readable' do
+    TestSource.index
+
     pub = Collection.find_by! title: "John's public collection"
 
     login_as 'mrossi'
@@ -54,7 +59,7 @@ class CollectionsControllerTest < ActionDispatch::IntegrationTest
     delete collection_path(pub)
     assert_redirected_to login_path
 
-    pid = 'robertin-f96840893b1b89d486ade4ed4aa1d907e4eb20dc'
+    pid = pid_for(1)
     post store_collections_path(id: pub.id), params: {image: [pid]}
     assert_redirected_to login_path
 
@@ -62,43 +67,42 @@ class CollectionsControllerTest < ActionDispatch::IntegrationTest
     assert_redirected_to login_path
   end
 
-  if production_sources_available?
-    test 'user: view, download, store, remove for publicly writable' do
-      pub = Collection.find_by! title: "John's collaboration collection"
+  test 'user: view, download, store, remove for publicly writable' do
+    TestSource.index
+    pub = Collection.find_by! title: "John's collaboration collection"
 
-      login_as 'mrossi'
+    login_as 'mrossi'
 
-      get collection_path(pub)
-      assert_response :success
+    get collection_path(pub)
+    assert_response :success
 
-      get download_collection_path(pub)
-      assert_response :success
+    get download_collection_path(pub)
+    assert_response :success
 
-      patch collection_path(pub), params: {collection: {
-        title: 'new title',
-        thumbnail_id: 15,
-        public_access: 'read',
-        collaborator_list: 'mrossi'
-      }}
-      assert_redirected_to collection_path(pub)
-      # should work but the title and thumbnail shouldn't be changeable (see #796)
-      assert_equal "John's collaboration collection", pub.reload.title
-      assert_nil pub.reload.thumbnail_id
-      assert_equal 'write', pub.reload.public_access
-      assert_equal '', pub.reload.collaborator_list
+    patch collection_path(pub), params: {collection: {
+      title: 'new title',
+      thumbnail_id: 15,
+      public_access: 'read',
+      collaborator_list: 'mrossi'
+    }}
+    assert_redirected_to collection_path(pub)
+    # should work but the title and thumbnail shouldn't be changeable (see #796)
+    assert_equal "John's collaboration collection", pub.reload.title
+    assert_nil pub.reload.thumbnail_id
+    assert_equal 'write', pub.reload.public_access
+    assert_equal '', pub.reload.collaborator_list
 
-      delete collection_path(pub)
-      assert_redirected_to login_path
+    delete collection_path(pub)
+    assert_redirected_to login_path
 
-      pid = 'robertin-f96840893b1b89d486ade4ed4aa1d907e4eb20dc'
-      post store_collections_path(id: pub.id), params: {image: [pid]}
-      assert_redirected_to searches_path
-      assert_equal 1, pub.reload.images.count
+    pid = pid_for(1)
+    post store_collections_path(id: pub.id), params: {image: [pid]}
+    assert_redirected_to searches_path
+    assert_equal 1, pub.reload.images.count
 
-      post remove_collection_path(pub), params: {image: [pid]}
-      assert_redirected_to collection_path(pub)
-      assert_equal 0, pub.reload.images.count
-    end
+    post remove_collection_path(pub), params: {image: [pid]}
+    assert_redirected_to collection_path(pub)
+    assert_equal 0, pub.reload.images.count
   end
 
   test "admin: redirect to login for non-owned" do
@@ -113,6 +117,8 @@ class CollectionsControllerTest < ActionDispatch::IntegrationTest
   end
 
   test 'viewer: view and download' do
+    TestSource.index
+
     mrossi = Account.find_by! login: 'mrossi'
     priv = Collection.find_by! title: "John's private collection"
     priv.viewers << mrossi
@@ -131,7 +137,7 @@ class CollectionsControllerTest < ActionDispatch::IntegrationTest
     delete collection_path(priv)
     assert_redirected_to login_path
 
-    pid = 'robertin-f96840893b1b89d486ade4ed4aa1d907e4eb20dc'
+    pid = pid_for(1)
     post store_collections_path(id: priv.id), params: {image: [pid]}
     assert_redirected_to login_path
 
@@ -139,45 +145,45 @@ class CollectionsControllerTest < ActionDispatch::IntegrationTest
     assert_redirected_to login_path
   end
 
-  if production_sources_available?
-    test 'collaborator: view, download, store, remove' do
-      mrossi = Account.find_by! login: 'mrossi'
-      priv = Collection.find_by! title: "John's private collection"
-      priv.collaborators << mrossi
+  test 'collaborator: view, download, store, remove' do
+    TestSource.index
 
-      login_as 'mrossi'
+    mrossi = Account.find_by! login: 'mrossi'
+    priv = Collection.find_by! title: "John's private collection"
+    priv.collaborators << mrossi
 
-      get collection_path(priv)
-      assert_response :success
+    login_as 'mrossi'
 
-      get download_collection_path(priv)
-      assert_response :success
+    get collection_path(priv)
+    assert_response :success
 
-      patch collection_path(priv), params: {collection: {
-        title: 'new title',
-        thumbnail_id: 15,
-        public_access: 'read',
-        viewer_list: 'mrossi'
-      }}
-      assert_redirected_to collection_path(priv)
-      # should work but the title and thumbnail shouldn't be changeable (see #796)
-      assert_equal "John's private collection", priv.reload.title
-      assert_nil priv.reload.thumbnail_id
-      assert_nil priv.reload.public_access
-      assert_equal '', priv.reload.viewer_list
+    get download_collection_path(priv)
+    assert_response :success
 
-      delete collection_path(priv)
-      assert_redirected_to login_path
+    patch collection_path(priv), params: {collection: {
+      title: 'new title',
+      thumbnail_id: 15,
+      public_access: 'read',
+      viewer_list: 'mrossi'
+    }}
+    assert_redirected_to collection_path(priv)
+    # should work but the title and thumbnail shouldn't be changeable (see #796)
+    assert_equal "John's private collection", priv.reload.title
+    assert_nil priv.reload.thumbnail_id
+    assert_nil priv.reload.public_access
+    assert_equal '', priv.reload.viewer_list
 
-      pid = 'robertin-f96840893b1b89d486ade4ed4aa1d907e4eb20dc'
-      post store_collections_path(id: priv.id), params: {image: [pid]}
-      assert_redirected_to searches_path
-      assert_equal 1, priv.reload.images.count
+    delete collection_path(priv)
+    assert_redirected_to login_path
 
-      post remove_collection_path(priv), params: {image: [pid]}
-      assert_redirected_to collection_path(priv)
-      assert_equal 0, priv.reload.images.count
-    end
+    pid = pid_for(1)
+    post store_collections_path(id: priv.id), params: {image: [pid]}
+    assert_redirected_to searches_path
+    assert_equal 1, priv.reload.images.count
+
+    post remove_collection_path(priv), params: {image: [pid]}
+    assert_redirected_to collection_path(priv)
+    assert_equal 0, priv.reload.images.count
   end
 
   test 'user: share own' do
@@ -204,7 +210,7 @@ class CollectionsControllerTest < ActionDispatch::IntegrationTest
     pub = Collection.find_by! title: "John's public collection"
     collab = Collection.find_by! title: "John's collaboration collection"
     upload = Upload.first
-    upload.update_attributes approved_record: false
+    upload.update approved_record: false
     pid = Upload.first.image.pid
 
     login_as 'jdoe'
@@ -270,13 +276,12 @@ class CollectionsControllerTest < ActionDispatch::IntegrationTest
     assert_equal 2, css_select('table.list > tr').count
   end
 
-  test 'suggest unused keyword' do
-    login_as 'jdoe'
+  test 'access forbidden collection (edit form)' do
+    login_as 'mrossi'
 
-    Keyword.create! title: 'cold'
-
-    post '/en/collections/suggest_keywords', params: {terms: 'old'}
-    assert response.successful?
+    priv = Collection.find_by! title: "John's private collection"
+    get "/en/collections/#{priv.id}/edit"
+    assert_redirected_to login_path
   end
 
   # test 'user: share own with self'

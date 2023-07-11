@@ -34,6 +34,12 @@ class Indexing::Sources::Requiem < Indexing::SourceSuper
     "#{record.xpath('.//Datierung/text()')} - #{record.xpath('.//Datierung2/text()')}".gsub(/ - 0000-00-00/, '').gsub(/-00-00/, '').gsub(/0000/, '')
   end
 
+  def date_range
+    d = date.strip
+
+    super(d)
+  end
+
   # bildnachweis
   def credits
     record.xpath('.//Abbildungsnachweis/text()')

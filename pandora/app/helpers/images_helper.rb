@@ -9,8 +9,6 @@ module ImagesHelper
   def submenu_extra
     if action_name == 'show'
       render :partial => 'images/submenu_extra'
-    elsif action_name == 'show_athene_search'
-      render :partial => 'image_navigation'
     end
   end
 

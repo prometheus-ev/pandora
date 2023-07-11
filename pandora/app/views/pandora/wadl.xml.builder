@@ -75,12 +75,12 @@ xml.application :xmlns => 'http://wadl.dev.java.net/2009/02',
                 end
               end
 
-              # REWRITE: probably .each{|k, v| ...} did cast the subject to a hash
-              # in earlier ruby versions
-              # skip.each(&act)
-              # xml.resource(:path => controller) { acts.each(&act) } unless acts.empty?
-              skip.to_h.each(&act)
-              xml.resource(:path => controller) { acts.to_h.each(&act) } unless acts.empty?
+              skip.to_h.each{|k, v| act.call(k, v)}
+              unless acts.empty?
+                xml.resource(:path => controller) do
+                  acts.to_h.each{|k, v| act.call(k, v)}
+                end 
+              end
             end
           end
         end

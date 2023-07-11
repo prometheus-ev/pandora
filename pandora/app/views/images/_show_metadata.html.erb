@@ -1,0 +1,177 @@
+<div class="metadata undim">
+  <table>
+    <% for field in super_image.display_fields do %>
+      <% unless (value = super_image.display_field(field)).blank? %>
+        <tr>
+          <th style="vertical-align: top;">
+            <% if field == 'record_object_id_count' %>
+              <%= 'No. of Record Object Images'.t %>
+            <% elsif field == 'keyword_artigo' %>
+              <%= ("Keywords from").t %>
+              <%= link_to "Artigo", "http://artigo.org/", :target => "_blank" %>
+            <%# elsif field.end_with?('_nested') %>
+              <%#= field.delete_suffix('_nested').humanize.titleize.t %>
+            <% else %>
+              <%= field.humanize.titleize.t %>
+            <% end %>
+          </th>
+          <td class="<%= field %>-field">
+            <% if field == 'artist' %>
+              <% artists = super_image.user_values_for('artist_nested', account: current_user) %>
+              <% if artists.present? %>
+                <div class="artists">
+                  <% artists.each_with_index do |artist, i| %>
+                    <%= render partial: 'artist_nested', locals: {
+                      artist: artist,
+                      position: i,
+                      super_image: super_image,
+                      wikidata_widget: true
+                    } %>
+                  <% end %>
+                </div>
+              <% else %>
+                <%= render(
+                  partial: 'artist',
+                  locals: {
+                    value: value,
+                    super_image: super_image,
+                    wikidata_widget: true
+                  }
+                ) %>
+              <% end %>
+            <% elsif field == 'title' %>
+              <% if !(titles = super_image.display_field('title_nested')).blank? %>
+                <% titles.each do |title| %>
+                  <%= render :partial => 'title_nested', :locals => { title: title } %>
+                <% end %>
+              <% else %>
+                <%= render :partial => 'title', :locals => { titles: value } %>
+              <% end %>
+            <% elsif field == 'credits' %>
+              <% if !(credits_nested = super_image.display_field('credits_nested')).blank? %>
+                <% credits_nested.each do |credits| %>
+                  <%= render :partial => 'credits_nested', :locals => { credits: credits } %>
+                <% end %>
+              <% else %>
+                <%= render partial: 'credits', locals: {credits: value} %>
+              <% end %>
+            <% elsif field == 'rights_work' %>
+              <%= render partial: 'rights_work', locals: {rights_work: Array.wrap(value)} %>
+            <% elsif field == 'rights_reproduction' %>
+              <% if !(rights_reproduction_nested = super_image.display_field('rights_reproduction_nested')).blank? %>
+                <% rights_reproduction_nested.each do |rights_reproduction| %>
+                  <%= render :partial => 'rights_reproduction_nested', :locals => { rights_reproduction: rights_reproduction } %>
+                <% end %>
+              <% else %>
+                <%= render partial: 'rights_reproduction', locals: {rights_reproduction: Array.wrap(value)} %>
+              <% end %>
+            <% elsif field == 'record_object_id' %>
+              <%= render partial: 'record_object_id', locals: {record_object_id: value.join(',')} %>
+            <% elsif field == 'keywords' || field == 'keyword' %>
+              <%= render(
+                partial: 'keywords',
+                locals: {super_image: super_image}
+              ) %>
+            <% elsif field == 'keyword_artigo' %>
+              <% value.each do |v| %>
+                <% keyword = v.split(",") %>
+                <% grey = 90 * keyword[2].to_i %>
+                <div style="display: inline-block; font-size: <%= 100 + 3 * keyword[2].to_i %>%; color: rgb(<%= grey %>,<%= grey %>,<%= grey %>); padding: 0.2em;"><%= keyword[0] %></div>
+              <% end %>
+            <% elsif field == 'license' %>
+              <% if !(license_nested = super_image.display_field('license_nested')).blank? %>
+                <% license_nested.each do |license| %>
+                  <%= render :partial => 'license_nested', :locals => { license: license } %>
+                <% end %>
+              <% else %>
+                <%= render partial: 'license', locals: {licenses: Array.wrap(value)} %>
+              <% end %>
+            <% elsif field == 'iconclass' %>
+              <%= value.map { |term| iconclass = term.delete('&');
+                link_to CGI.unescape(iconclass), "http://iconclass.org/rkd/#{iconclass.delete(' ')}", :target => "_blank"
+              }.join(" | ").html_safe %>
+            <% elsif field == 'related_works' %>
+              <%= value.map { |v|
+                related_work = v.split(",")
+                count = related_work.count
+                link_to related_work[0..(count-2)].join(", "), :controller => 'searches', :action => 'advanced', "search_field[0]" => "record_object_id", "search_value[0]" => related_work.last
+              }.join(" | ").html_safe %>
+            <% elsif field == 'person_nested' %>
+              <% value.each do |person| %>
+                <%= render :partial => 'person_nested', :locals => { person: person } %>
+              <% end %>
+            <% elsif Indexing::IndexFields.location.include?(field) %>
+              <% if field == 'location' && !(locations = super_image.display_field('location_nested')).blank? %>
+                <% locations.each do |location| %>
+                  <%= render :partial => 'images/location_nested', :locals => { location: location } %>
+                <% end %>
+              <% else %>
+                <%= render partial: 'locations', locals: {locations: Array.wrap(value), source: super_image.source} %>
+              <% end %>
+            <% elsif field == 'size' %>
+              <% parsed = Pandora::SizeParser.new.safe_parse(value) || {} %>
+              <div
+                is="pm-size-indicator"
+                ref-height="175"
+                max="550"
+                image-selector=".large-image .image img"
+                art-width="<%= parsed['width'] %>"
+                art-height="<%= parsed['height'] %>"
+                unparsed="<%= value.is_a?(Array) ? value[0] : value %>"
+              ></div>
+            <% elsif field == 'authority_files' %>
+              <%= render partial: 'images/authority_files', locals: {authority_files: value} %>
+            <% else %>
+              <% if value.is_a?(Array) %>
+                <%= truncated(value.map { |v|
+                  if !v.is_a?(String) && v.respond_to?(:to_s)
+                    v = v.to_s
+                  end
+                  if v.include?(",http")
+                    if v.include?("%")
+                      arr = v.split("%")
+                      str = ""
+                      (0..(arr.count-1)).each do|index|
+                        if !index.odd?
+                          str << arr[index]
+                        else
+                          str << link_to_links(arr[index])
+                        end
+                      end
+                      str
+                    else
+                      link_to_links(v)
+                    end
+                  else
+                    sanitize(v)
+                  end
+                }.join(" | ").html_safe, 280, :escape => false) %>
+              <% else %>
+                  <%= truncated(sanitize(value.to_s).html_safe, 280, :escape => false) %>
+                  <br />
+              <% end %>
+            <% end %>
+          </td>
+        </tr>
+      <% end %>
+    <% end %>
+
+    <%= render :partial => 'shared/elastic/database_table_row', :locals => { :source => super_image.source, :is_upload => super_image.upload? } %>
+
+    <% if @super_image.upload? %>
+      <%= render :partial => 'uploads/show_dates', :locals => {:super_image => @super_image} %>
+    <% end %>
+
+    <% if super_image.collection_counts_any?(current_user) %>
+      <tr>
+        <td colspan="2" style="padding-left: 10px"><hr style="height: 1px; background-color: #3C3C3C; border: 0px;"></td>
+      </tr>
+      <tr class="dim">
+        <th><%= 'Collections'.t %></th>
+        <td class="collections-field">
+          <%= render partial: 'shared/collection_counts', locals: {super_image: super_image} %>
+        </td>
+      </tr>
+    <% end %>
+  </table>
+</div>

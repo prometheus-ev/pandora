@@ -32,7 +32,7 @@ class LocaleRoutingTest < ActionDispatch::IntegrationTest
 
   test 'redirect /* to respective locale prefix (logged in as jdoe)' do
     jdoe = Account.find_by! login: 'jdoe'
-    jdoe.settings.update_column :locale, 'de'
+    jdoe.account_settings.update_column :locale, 'de'
     
     # this is just to login and set the cookie
     get '/de', headers: api_auth('jdoe')

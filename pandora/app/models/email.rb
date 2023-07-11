@@ -1,33 +1,27 @@
+require 'pandora/validation/email_validator'
+require 'pandora/validation/emails_validator'
+
 class Email < ApplicationRecord
 
   include Util::Config
 
-  # REWRITE: we just use the current locale (which is always set)
   translates :subject, :body, :body_html
 
   NOT_REQUIRED               = %w[body_html body_html_de]
-  # REWRITE: not clear what these do exactly, yet. DbTranslate indicates that
-  # globalize_facets simply yields the translatable attributes from above, so
-  # replacing with static values for now
   REQUIRED                   = %w[from to body]
   REQUIRED_UNLESS_NEWSLETTER = %w[subject_de body_de subject]
 
   validates_presence_of *REQUIRED
   validates_presence_of *REQUIRED_UNLESS_NEWSLETTER.dup.push(:unless => :newsletter?)
 
-  SPECIAL_RECIPIENTS   = Role.all.map { |r| r.title.pluralize } + %w[newsletter activesinglelicenseusers inactivesubscribers]
-  SPECIAL_RECIPIENT_RE = %r{\A#(.+)}
-
-  SENDER_ADDRESS = "prometheus <#{::SENDER_ADDRESS}>".freeze
-  SENDER_ADDRESS_NEWSLETTER = "prometheus <#{::SENDER_ADDRESS_NEWSLETTER}>".freeze
+  SENDER_ADDRESS = "prometheus <#{ENV['PM_INFO_ADDRESS']}>".freeze
+  SENDER_ADDRESS_NEWSLETTER = "prometheus <#{ENV['PM_NEWSLETTER_SENDER']}>".freeze
 
   validates_format_of :from, :with => %r{\A#{Regexp.escape(SENDER_ADDRESS)}|#{Regexp.escape(SENDER_ADDRESS_NEWSLETTER)}\z}
-  validates_as_email  :from
-  validates_as_email  :reply_to, :allow_blank => true
-  validates_as_emails :to,
-                      :except => SPECIAL_RECIPIENTS, :except_re => SPECIAL_RECIPIENT_RE
-  validates_as_emails :cc, :bcc, :allow_blank => true,
-                      :except => SPECIAL_RECIPIENTS, :except_re => SPECIAL_RECIPIENT_RE
+  validates :from, :'pandora/validation/email' => true
+  validates :reply_to, :'pandora/validation/email' => true, allow_blank: true
+  validates :to, :'pandora/validation/emails' => true
+  validates :cc, :'pandora/validation/emails' => true, allow_blank: true
 
   RECIPIENT_FIELDS = %w[to cc bcc].freeze
   RECIPIENT_FIELDS.each { |field| serialize field, Array }
@@ -101,31 +95,34 @@ class Email < ApplicationRecord
     }
   end
 
-  def deliver(by = nil)
-    raise DoubleSendError if delivered?
-
+  def deliver_now(by)
     recipients = {
       :to  => expanded_to,
       :cc  => expanded_cc,
       :bcc => expanded_bcc
     }
 
-    by, map = sender(by), recipients_by_address
-
-    if individual?
-      recipients.each { |field, addresses|
-        addresses.each { |address|
-          # REWRITE: because delivery can be handled and configured with 
-          # ActiveJob, we use MassMailer directly
-          MassMailer.email(self, { field => address }, map[address], by).deliver_later
-        }
-      }
-    else
-      # REWRITE: see above
-      MassMailer.email(self, recipients, nil, by).deliver_later
+    recipients.each do |field, accounts|
+      accounts.each do |account|
+        MassMailer.with(
+          email: self,
+          to: {field => account.email},
+          user: account,
+          by: by.fullname_with_email
+        ).email.deliver_later
+      end
     end
+  end
 
-    delivered!(by)
+  # Enqueue a job to deliver a newsletter. The method returns immediately after
+  # setting the 'delivered' flag. The individual delivery jobs are then enqueued
+  # by the background job.
+  def deliver_later(by)
+    raise DoubleSendError if delivered?
+
+    DeliverNewsletterJob.perform_later(id, by.id)
+
+    delivered!(by.fullname_with_email)
   end
 
   def delivered!(by = nil)
@@ -244,54 +241,9 @@ class Email < ApplicationRecord
       when 'newsletter'
         Account.
           email_verified.
-          where(newsletter: true).
-          pluck(:email)
+          where(newsletter: true)
       end
-
-      # case recipients
-      #   when Array
-      #     # REWRITE: using tap instead
-      #     # returning(recipients.map { |r| recipients_for(r) }) { |r|
-      #     #   r.flatten!; r.compact!; r.uniq!; r.reject!(&:empty?)
-      #     # }
-      #     recipients.map{ |r| recipients_for(r) }.tap do |r|
-      #       r.flatten!; r.compact!; r.uniq!; r.reject!(&:empty?)
-      #     end
-      #   when *SPECIAL_RECIPIENTS
-      #     map = recipients_by_address
-
-      #     if role = Role.find_by(title: recipient = recipients.singularize)
-      #       # REWRITE: use new ar query interface
-      #       # role.accounts.find(:all, account_conditions)
-      #       Upgrade.conds_to_scopes(role.accounts, account_conditions)
-      #     elsif Account.has_column?(recipient)
-      #       # REWRITE: use new ar query interface
-      #       # Account.find(:all, account_conditions.merge_conditions(
-      #       #   ["#{recipient} = ?", true]
-      #       # ))
-      #       # conds = account_conditions.merge_conditions(
-      #       #   ["#{recipient} = ?", true]
-      #       # )
-      #       # Upgrade.conds_to_scopes(Account, conds)
-
-      #       Account.email_verified.where(newsletter: true)
-      #     else
-      #       []
-      #     end.map { |user| map[address = user.email] = user; address }
-      #   when SPECIAL_RECIPIENT_RE
-      #     if user = Account.find_by_id($1, account_conditions)
-      #       recipients_by_address[address = user.email]; address
-      #     end
-      #   else
-      #     recipients.to_s
-      # end
     end
-
-    # def account_conditions
-    #   @account_conditions ||= Account.conditions_for_email_verified.merge(
-    #     :include => [:roles, :account_settings]
-    #   )
-    # end
 
     class DoubleSendError < StandardError; end
 

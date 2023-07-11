@@ -6,18 +6,26 @@ class AccountMailerTest < ActionMailer::TestCase
 
     user = Account.where(login: 'prometheus').first
     token = SecureRandom.hex(10)
-    AccountMailer.email_confirmation(user, Time.now, token).deliver_now
+    AccountMailer.with(
+      user: user,
+      timestamp: Time.now,
+      token: token
+    ).email_confirmation.deliver_now
 
     assert_equal 1, ActionMailer::Base.deliveries.count
     link = ActionMailer::Base.deliveries.first.body.to_s.scan(/http[^\n ]+/)[0]
     assert_match /^http:\/\/localhost\//, link
+
+    # grab the last 1200 characters from the rails log
+    log = File.read("#{Rails.root}/log/test.log")[-1200..-1]
+    assert_match /#{ShortUrl.last.token}/, log
   end
 
   test "activation request" do
     AccountMailer.default_url_options = {host: 'localhost', locale: 'en'}
 
     user = Account.where(login: 'jdoe').first
-    AccountMailer.activation_request(user).deliver_now
+    AccountMailer.with(user: user).activation_request.deliver_now
 
     assert_equal 1, ActionMailer::Base.deliveries.count
     mail = ActionMailer::Base.deliveries.first
@@ -35,7 +43,7 @@ class AccountMailerTest < ActionMailer::TestCase
       city: 'Berlin',
       country: 'de'
     )
-    AccountMailer.invoice_notice(user, address).deliver_now
+    AccountMailer.with(user: user, address: address).invoice_notice.deliver_now
 
     assert_equal 1, ActionMailer::Base.deliveries.count
     mail = ActionMailer::Base.deliveries.first
@@ -47,7 +55,10 @@ class AccountMailerTest < ActionMailer::TestCase
 
     user = Account.find_by!(login: 'jdoe')
     admin = Account.find_by!(login: 'superadmin')
-    AccountMailer.password_changed(user, admin).deliver_now
+    AccountMailer.with(
+      user: user,
+      originator: admin
+    ).password_changed.deliver_now
 
     assert_equal 1, ActionMailer::Base.deliveries.count
     mail = ActionMailer::Base.deliveries.first
@@ -62,7 +73,7 @@ class AccountMailerTest < ActionMailer::TestCase
     AccountMailer.default_url_options = {host: 'localhost', locale: 'en'}
 
     user = Account.where(login: 'jdoe').first
-    AccountMailer.activation_request(user).deliver_now
+    AccountMailer.with(user: user).activation_request.deliver_now
 
     mail = ActionMailer::Base.deliveries.first
     assert_equal [address], mail.to

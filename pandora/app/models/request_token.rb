@@ -3,7 +3,7 @@ class RequestToken < OauthToken
   attr_accessor :provided_oauth_verifier
 
   def authorize!(user)
-    authorized? ? false : update_attributes(
+    authorized? ? false : update(
       :user          => user,
       :authorized_at => Time.now.utc,
       :verifier      => generate_oauth_key(20)

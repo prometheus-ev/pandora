@@ -26,7 +26,11 @@ class NewslettersTest < ApplicationSystemTestCase
     assert_equal 'someone@example.com', Account.last.email
     assert Account.last.newsletter?
 
-    click_on 'Sitemap'
+    # we delete the session so that the brain buster cookie isn't remembered
+    # from above
+    Capybara.reset_sessions!
+
+    visit '/en/sitemap'
     click_on 'Newsletters'
     click_on 'Unsubscribe'
     fill_in 'Your e-mail address', with: 'wrong@example.com'
@@ -34,7 +38,6 @@ class NewslettersTest < ApplicationSystemTestCase
     submit 'Unsubscribe'
     assert_text 'No subscription by that e-mail address found!'
     fill_in 'Your e-mail address', with: 'someone@example.com'
-    answer_brain_buster
     submit 'Unsubscribe'
     assert_text 'An e-mail with a link'
     assert_text 'has been sent to you'
@@ -104,7 +107,8 @@ class NewslettersTest < ApplicationSystemTestCase
     end
     assert_text 'successfully delivered'
 
-    assert_equal 2, ActionMailer::Base.deliveries.count
+    mails = ActionMailer::Base.deliveries
+    assert_equal 2, mails.count
     recipients = ActionMailer::Base.deliveries.map{|m| m.to}.flatten
     assert_includes recipients, 'mrossi@prometheus-bildarchiv.de'
     assert_includes recipients, 'jdupont@example.com'
@@ -270,5 +274,88 @@ class NewslettersTest < ApplicationSystemTestCase
     assert_match 'Message from user John Doe', mails.first.subject
     assert_equal ['jdoe@prometheus-bildarchiv.de'], mails.last.to
     assert_match 'Your message', mails.last.subject
+  end
+
+  test 'send newsletter to individual recipients' do
+    stats_data
+
+    Account.find_by!(login: 'mrossi').update newsletter: true
+    # create subscriber and simulate email confirmation
+    Account.subscriber_for('horst@example.com').update_columns(
+      newsletter: true,
+      email_verified_at: Time.now
+    )
+
+    login_as 'superadmin'
+
+    click_on 'Administration'
+    within_admin_section 'Newsletter' do
+      click_on 'Create'
+    end
+    
+    click_on 'Create a new newsletter'
+    assert_text "Create newsletter '#{Time.now.year} / 01'"
+
+    fill_in 'email[_translations][en][subject]', with: 'Prometheus news!'
+    fill_in 'email[_translations][en][body]', with: 'really interesting'
+    fill_in 'email[_translations][en][body_html]', with: '<strong>really</strong> interesting'
+    fill_in 'email[_translations][de][subject]', with: 'Neues von Prometheus'
+    fill_in 'email[_translations][de][body]', with: 'sehr interessant'
+    fill_in 'email[_translations][de][body_html]', with: '<strong>sehr</strong> interessant'
+    submit 'Save'
+    assert_text 'successfully created'
+
+    accept_confirm do
+      click_on 'Send!'
+    end
+    assert_text 'successfully delivered'
+
+    mails = ActionMailer::Base.deliveries
+    assert_equal 2, mails.count
+    recipients = ActionMailer::Base.deliveries.map{|m| m.to}.flatten
+    assert_includes recipients, 'mrossi@prometheus-bildarchiv.de'
+    assert_includes recipients, 'horst@example.com'
+
+    click_submenu 'Pending'
+    assert_no_text 'Prometheus news'
+    click_submenu 'All'
+    assert_text 'Prometheus news'
+
+    # given the received newsletter, we unsubscribe with minimal interaction
+    # (#1414)
+
+    link = links_from_email(mails.first)[-2]
+    visit link
+    assert_text 'successfully unsubscribed'
+    assert_equal 1, Account.where(newsletter: true).count
+
+    link = links_from_email(mails.last)[-2]
+    visit link
+    assert_text 'successfully unsubscribed'
+    assert_equal 0, Account.where(newsletter: true).count
+    assert_equal 0, Account.subscribers.count
+  end
+
+  test 'subscribers are not scrubbed by cleanup (and they receive the newsletter)' do
+    visit '/en/subscribe'
+    fill_in 'Your e-mail address', with: 'subscribe-me@example.com'
+    answer_brain_buster
+    submit 'Subscribe'
+    assert_text 'An e-mail with a link'
+
+    mails = ActionMailer::Base.deliveries
+    assert_equal 1, mails.count
+    assert_equal ['subscribe-me@example.com'], mails.first.to
+    link = link_from_email(mails.first)
+    visit link
+
+    recipients = Email.new.send(:recipients_for, 'newsletter').pluck(:email)
+    assert_equal ['subscribe-me@example.com'], recipients
+
+    travel_to 2.months.from_now do
+      Pandora::Cleanup.new.all
+
+      assert Account.exists?(email: 'subscribe-me@example.com')
+    end
   end
 end

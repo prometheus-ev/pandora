@@ -1,10 +1,6 @@
 require 'test_helper'
 
 class StatsGeneralTest < ActiveSupport::TestCase
-  setup do
-    system(ENV['PM_STATS_DIR'])
-  end
-
   test 'parse search the test log file' do
     file = Rails.root.join('test/fixtures/files/production.log.gz')
     requests = Pandora::LogParser.parse(file, progress: false)

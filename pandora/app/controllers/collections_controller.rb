@@ -2,7 +2,7 @@ class CollectionsController < ApplicationController
 
   # include Util::Resourceful::Controller
 
-  skip_before_action :store_location, :only => [:store, :remove]
+  # skip_before_action :store_location, :only => [:store, :remove]
 
   def self.initialize_me!
     control_access [:user] => :ALL
@@ -13,7 +13,7 @@ class CollectionsController < ApplicationController
   helper_method :owner?
 
   def self.list_returns
-    { 
+    {
       :xml => { :root => 'collections', :hints => { 'collection' => true } },
       :json => { :object => '[{&lt;collection fields&gt;},...]' }
     }
@@ -44,6 +44,24 @@ class CollectionsController < ApplicationController
         :doc => 'Query term.'
       }
     }
+  end
+
+  def all
+    items = records.allowed(current_user, :read)
+
+    @collections = Pandora::Collection.new(
+      items.pageit(page, per_page),
+      items.count,
+      page,
+      per_page
+    )
+
+    # view compatibility
+    @count = items.count
+    @order = sort_column
+    @direction = sort_direction
+    @page = page
+    @per_page = per_page
   end
 
   def index
@@ -173,7 +191,7 @@ class CollectionsController < ApplicationController
     @collection = Collection.find(params[:id])
 
     unless current_user.allowed?(@collection, :read)
-      permission_denied
+      forbidden
       return
     end
 
@@ -192,7 +210,7 @@ class CollectionsController < ApplicationController
     @collections = Collection.
       allowed(current_user, :write).
       includes(:owner, :viewers, :collaborators)
-    @keywords = @collection.keywords
+    # @keywords = @collection.keywords
     @links = @collection.links
     @references = @collection.references
     @viewers = @collection.viewers
@@ -249,7 +267,7 @@ class CollectionsController < ApplicationController
     @collection = Collection.find(params[:id])
 
     unless current_user.allowed?(@collection, :write)
-      permission_denied
+      forbidden
       return
     end
   end
@@ -258,7 +276,7 @@ class CollectionsController < ApplicationController
     @collection = Collection.find(params[:id])
 
     unless current_user.allowed?(@collection, :write)
-      permission_denied
+      forbidden
       return
     end
 
@@ -271,7 +289,7 @@ class CollectionsController < ApplicationController
       return
     end
 
-    if @collection.update_attributes(collection_params)
+    if @collection.update(collection_params)
       @collection.notify_sharees
 
       flash[:notice] = "Collection '%s' successfully updated!".t / @collection.title
@@ -285,7 +303,7 @@ class CollectionsController < ApplicationController
     @collection = Collection.find(params[:id])
 
     unless owner?
-      permission_denied
+      forbidden
       return
     end
 
@@ -306,15 +324,6 @@ class CollectionsController < ApplicationController
     :expects => { :id => { :type => 'string', :required => true, :doc => 'The id of the collection.' } },
     :returns => { :xml => { :root => 'collection' }, :json => {} }
   }
-
-  def suggest_keywords
-    @query = params[:q]
-    @keywords = Keyword.
-      search(@query).
-      pageit(1, 10)
-
-    render layout: false
-  end
 
   # api compatibility
   def number_of_pages
@@ -422,7 +431,7 @@ class CollectionsController < ApplicationController
     @collection = records.find(params[:id])
 
     unless current_user.allowed?(@collection, :write)
-      permission_denied
+      forbidden
       return
     end
 
@@ -501,7 +510,7 @@ class CollectionsController < ApplicationController
     @collection = Collection.find(params[:id])
 
     unless current_user.allowed?(@collection, :write)
-      permission_denied
+      forbidden
       return
     end
 
@@ -539,7 +548,7 @@ class CollectionsController < ApplicationController
     @collection = records.find(params[:id])
 
     unless current_user.allowed?(@collection, :read)
-      permission_denied
+      forbidden
       return
     end
 

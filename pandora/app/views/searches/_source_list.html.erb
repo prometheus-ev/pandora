@@ -29,10 +29,9 @@
     </div>
 
     <div class="pm-check">
-      <%= check_box_tag "all", true, true, :id => "all", class: 'pm-db-all-toggle' %>
-      <%= label "all", "Search in all databases".t, "Search in all databases".t %>
-      <!-- REWRITE: signature has changed -->
-      (<%= number_with_delimiter(@search.number_of["total"]["value"], delimiter: ".").to_s + " " + "records".t %>)
+      <%= check_box_tag 'all', true, true, :id => 'all', class: 'pm-db-all-toggle' %>
+      <% label_text = 'Search in all databases'.t + ' (' + number_with_delimiter(@search.number_of['total']['records'], delimiter: ".").to_s + ' ' + 'records'.t + ')' %>
+      <%= label "all", label_text, label_text %>
     </div>
 
     <ul class="pm-groups">
@@ -41,8 +40,10 @@
           <div class="pm-header">
             <div class="pm-toggle">
               <a href="#">
-                <%= image_tag('misc/group_expand.gif', class: 'pm-show') %>
-                <%= image_tag('misc/group_collapse.gif', class: 'pm-hide') %>
+                <% unless group == 'User uploads' %>
+                  <%= image_tag('misc/group_expand.gif', class: 'pm-show') %>
+                  <%= image_tag('misc/group_collapse.gif', class: 'pm-hide') %>
+                <% end %>
               </a>
             </div>
             <div class="pm-check">
@@ -51,7 +52,17 @@
               ) %>
             </div>
             <div class="pm-text">
-              <%= @search.db_group != "title" ? group.titleize.t : group %>
+              <%=
+                case @search.db_group
+                when 'kind', 'open_access'
+                  group == 'User uploads' ?
+                  'Uploads by prometheus users'.t :
+                  group.titleize.t
+                when 'keyword' then group # already translated in controller
+                else group
+                end
+              %>
+
               <span class="pm-amount"></span>
             </div>
           </div>
@@ -69,14 +80,14 @@
                   <small>
                     <%= data['source']['kind'].t %>,
                     <%= data['source'].city %>,
-                    <%= data['source'].keywords.map {|keyword| keyword.title.t}.join(", ") %>
+                    <%= data['source'].keywords.map {|keyword| keyword.t}.join(", ") %>
                   </small>
                 </div>
                 <div class="pm-amount">
-                  <%= number_with_delimiter(
-                    @search.image_count(name),  delimiter: "."
-                  ) %>
-                  <%= "images".t %>
+                  <%= pm_labelled_delimited_counter(
+                    @search.number_of[name]['records'],
+                    '%s record',
+                    '%s records') %>
                 </div>
                 <div class="pm-links">
                   <% if !data['source']['url'].blank? %>

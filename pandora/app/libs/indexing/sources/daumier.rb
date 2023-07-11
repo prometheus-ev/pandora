@@ -1,10 +1,11 @@
 class Indexing::Sources::Daumier < Indexing::SourceSuper
   def records
+    @node_name = 'sammlungen'
     document.xpath('//sammlungen')
   end
 
   def record_id
-    if "#{record.xpath('.//Abbildung/text()')}" == "1"
+    if "#{record.xpath('./Abbildung/text()')}" == "1"
       dr_nr = record.xpath('.//DRNr/text()').to_s
       if dr_nr.length < 4
         dr_nr = "0" * (4 - dr_nr.length) + dr_nr
@@ -14,7 +15,13 @@ class Indexing::Sources::Daumier < Indexing::SourceSuper
   end
 
   def record_object_id
-    [name, Digest::SHA1.hexdigest(record.xpath('.//DRNr/text()').to_a.join('|'))].join('-')
+    if "#{record.xpath('./Abbildung/text()')}" == "1"
+      [name, Digest::SHA1.hexdigest(record.xpath('./DRNr/text()').to_a.join('|'))].join('-')
+    end
+  end
+
+  def record_object_id_count
+    @record_object_id_count[record_object_id]
   end
 
   def path

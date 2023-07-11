@@ -4,8 +4,8 @@
 prometheus - Das verteilte digitale Bildarchiv f&uuml;r Forschung &amp; Lehre<br/>
 c/o Kunsthistorisches Institut der Universit&auml;t zu K&ouml;ln<br/>
 Albertus-Magnus-Platz, D-50923 K&ouml;ln<br/>
-Tel.: +49 (0)221 470-4476, E-Mail: <%= mail_to INFO_ADDRESS %><br/>
-<%= link_to HOME_URL, HOME_URL %>
+Tel.: +49 (0)221 470-4476, E-Mail: <%= mail_to ENV['PM_INFO_ADDRESS'] %><br/>
+<%= link_to ENV['PM_HOME_URL'], ENV['PM_HOME_URL'] %>
 </td></tr>
 </table>
 </td></tr>

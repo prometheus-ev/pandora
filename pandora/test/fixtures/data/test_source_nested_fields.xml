@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<source>
+  <row>
+    <id>1</id>
+    <path>path1</path>
+    <artists>
+      <artist dating="1435-1488" wikidata="Q183458">Andrea del Verrocchio</artist>
+      <artist dating="1452-1519" wikidata="Q762">Leonardo da Vinci</artist>
+      <artist>Raphael</artist>
+    </artists>
+    <title>The Baptism of Christ</title>
+    <locations>
+      <location wikidata="Q2044">Florence</location>
+      <location wikidata="Q641">Venice</location>
+    </locations>
+    <date>1474–75</date>
+    <credits>Credit 1</credits>
+    <rights-work>Public Domain</rights-work>
+    <rights-reproduction>Some Photographer</rights-reproduction>
+  </row>
+</source>

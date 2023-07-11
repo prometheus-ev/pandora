@@ -1,6 +1,6 @@
 # Class representing an Elasticsearch record with pandora dependencies.
 class ElasticRecordImage
-  attr_accessor :id, :pid, :pobject_id, :artist, :title, :location, :date,
+  attr_accessor :id, :pid, :pobject_id, :artist, :artist_nested, :title, :location, :date,
     :credits, :rights_work, :rights_reproduction, :path, :rating, :votes,
     :source_id, :source, :elastic_record
 
@@ -13,6 +13,7 @@ class ElasticRecordImage
     # Object#object_id is reserved in newer ruby versions
     @pobject_id = elastic_record['_source']['record_object_id']
     @artist = elastic_record['_source']['artist']
+    @artist_nested = elastic_record['_source']['artist_nested']
     @title = elastic_record['_source']['title']
     @location = elastic_record['_source']['location']
     @date = elastic_record['_source']['date']
@@ -102,12 +103,14 @@ class ElasticRecordImage
 
   def to_txt(options = {})
     txt = []
-    for field in display_fields - ['path', 'record_id', 'record_object_id', 'date_range'] do
+    for field in Indexing::IndexFields.display do
       unless (value = elastic_record['_source'][field]).blank?
         # REWRITE: Array#to_s used to concat
         # txt << field.humanize.titleize.t + ": " + value.to_s
         v = if value.is_a?(String)
               value
+            elsif value.is_a?(Integer)
+              value.to_s
             else
               value.join
             end
@@ -133,10 +136,6 @@ class ElasticRecordImage
     # REWRITE: we need one string here, the newlines are already there
     # txt
     txt.join
-  end
-
-  def display_fields
-    @display_fields ||= Indexing::IndexFields.display
   end
 
   def display_field(display_field)

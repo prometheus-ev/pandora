@@ -73,7 +73,8 @@ function deploy_code {
   TMPDIR=$TMPROOT/`pwgen 20 1`
   local "mkdir -p $TMPROOT"
   local "git clone $REPO $TMPDIR"
-  local "cd $TMPDIR && git checkout $COMMIT && rm -rf $TMPDIR/.git"
+  local "cd $TMPDIR && git checkout $COMMIT"
+  local "rm -rf $TMPDIR/.git"
 
   local "tar czf deploy.tar.gz -C $TMPDIR ."
   local "rm -rf $TMPDIR"

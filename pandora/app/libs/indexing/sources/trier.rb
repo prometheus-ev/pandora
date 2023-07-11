@@ -48,6 +48,20 @@ class Indexing::Sources::Trier < Indexing::SourceSuper
     record.xpath('.//datierung/text()')
   end
 
+  def date_range
+    d = date.to_s.strip
+
+    if d == '1819.'
+      d = '1819'
+    elsif d == '1100/11150'
+      d = '1100/1150'
+    elsif d == '18808-18'
+      d = '1808-18'
+    end
+
+    super(d)
+  end
+
   # standort
   def location
     "#{record.xpath('.//stadt/text()')}, #{record.xpath('.//institution/text()')}".gsub(/^, /, '').gsub(/, $/, '')

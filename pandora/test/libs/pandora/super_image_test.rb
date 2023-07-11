@@ -15,44 +15,47 @@ class SuperImageTest < ActiveSupport::TestCase
     end
   end
 
-  if production_sources_available?
-    test 'it should work for a elastic image' do
-      with_real_images do
-        pid = 'daumier-8d04e65ebf6a7b73fb71a40d5b9fc226ee5dd3f6'
-        si = Pandora::SuperImage.new('daumier-8d04e65ebf6a7b73fb71a40d5b9fc226ee5dd3f6')
+  test 'it should work for a elastic image' do
+    TestSource.index
 
-        assert_equal 'Honoré Victorin Daumier: Don Qichotte lisant --- Don Quichotte --- Don', si.to_s
-        assert_equal 'image/jpeg', si.mime_type.to_s
-        assert_equal 'jpg', si.extension
-        assert_match /img\/DR7194_557(_a)?\.jpg/, si.path
-        assert_match /^Honore_Victorin_Daumier_Don_Qichotte_lisant_Don_Quichotte_Don_[a-f0-9]+\.jpg/, si.filename
-        assert_equal 'daumier', si.source_id
-        assert_instance_of Source, si.source
-        assert_match /^http:\/\/localhost:47001\/rack-images\/daumier\/r140\/[a-zA-Z0-9\+\/]+\?_asd=[a-f0-9]+$/, si.image_url
-      end
+    with_real_images do
+      pid = Pandora::SuperImage.pid_for('test_source', 1)
+      si = Pandora::SuperImage.new(pid)
+
+      assert_equal 'Raphael: Katze auf Stuhl (Florenz)', si.to_s
+      assert_equal 'image/jpeg', si.mime_type.to_s
+      assert_equal 'jpg', si.extension
+      assert_match /path1.jpg/, si.path
+      assert_match /^Raphael_Katze_auf_Stuhl_Florenz_395428ab.jpg$/, si.filename
+      assert_equal 'test_source', si.source_id
+      assert_instance_of Source, si.source
+      assert_match /^http:\/\/localhost:47001\/rack-images\/test_source\/r140\/[a-zA-Z0-9\+\/]+\?_asd=[a-f0-9]+$/, si.image_url
+    end
+  end
+
+  test 'it should ensure an image record' do
+    TestSource.index
+
+    upload = Upload.first
+    si = Pandora::SuperImage.new(upload.pid)
+    assert_equal si.image, upload.image
+    assert_match /^user_database_/, si.image.source.name
+
+    si = Pandora::SuperImage.new('noexist-8d04e65ebf6a7b73fb71a40d5b9fc226ee5dd3f6')
+    assert_raises ActiveRecord::RecordNotFound do
+      si.image
     end
 
-    test 'it should ensure an image record' do
-      upload = Upload.first
-      si = Pandora::SuperImage.new(upload.pid)
-      assert_equal si.image, upload.image
-      assert_match /^user_database_/, si.image.source.name
+    pid = Pandora::SuperImage.pid_for('test_source', 1)
+    si = Pandora::SuperImage.new(pid)
+    assert_instance_of Image, si.image
+    assert_equal 'test_source', si.image.source.name
 
-      si = Pandora::SuperImage.new('noexist-8d04e65ebf6a7b73fb71a40d5b9fc226ee5dd3f6')
-      assert_raises ActiveRecord::RecordNotFound do
-        si.image
-      end
-
-      si = Pandora::SuperImage.new('daumier-8d04e65ebf6a7b73fb71a40d5b9fc226ee5dd3f6')
-      assert_instance_of Image, si.image
-      assert_equal 'daumier', si.image.source.name
-
-      # simulate missing source
-      si.image.update_column :source_id, nil
-      si = Pandora::SuperImage.new('daumier-8d04e65ebf6a7b73fb71a40d5b9fc226ee5dd3f6')
-      assert_instance_of Image, si.image
-      assert_equal 'daumier', si.image.source.name
-    end
+    # simulate missing source
+    si.image.update_column :source_id, nil
+    si = Pandora::SuperImage.new(pid)
+    assert_instance_of Image, si.image
+    assert_equal 'test_source', si.image.source.name
   end
 
   test 'exif extraction' do
@@ -66,43 +69,69 @@ class SuperImageTest < ActiveSupport::TestCase
     end
   end
 
-  if production_sources_available?
-    test 'it should ensure an image record avoiding race condition' do
-      # we add a delay after Image.find_by to provoke a race condition which is
-      # now handled by explicit locking
+  test 'it should ensure an image record avoiding race condition' do
+    TestSource.index
+    # we add a delay after Image.find_by to provoke a race condition which is
+    # now handled by explicit locking
 
-      original = Image.method(:find_by)
-      test_implementation = lambda do |*args|
-        result = original.call(*args)
-        sleep 0.1
-        result
-      end
-
-      Image.stub :find_by, test_implementation do
-        a = Pandora::SuperImage.new('daumier-8d04e65ebf6a7b73fb71a40d5b9fc226ee5dd3f6')
-        b = Pandora::SuperImage.new('daumier-8d04e65ebf6a7b73fb71a40d5b9fc226ee5dd3f6')
-
-        t1 = Thread.new { a.image }
-        t2 = Thread.new { b.image }
-
-        t1.join
-        t2.join
-
-        assert_equal t1.value, t2.value
-      end
+    original = Image.method(:find_by)
+    test_implementation = lambda do |*args|
+      result = original.call(*args)
+      sleep 0.1
+      result
     end
 
-    test 'it should return a txt representation of an image' do
-      si = Pandora::SuperImage.new(
-        'daumier-8d04e65ebf6a7b73fb71a40d5b9fc226ee5dd3f6'
-      )
-      text = "Artist: Honoré Victorin Daumier\n\nTitle: Don Qichotte lisant"
-      assert_match text, si.to_txt
+    Image.stub :find_by, test_implementation do
+      pid = Pandora::SuperImage.pid_for('test_source', 1)
+      a = Pandora::SuperImage.new(pid)
+      b = Pandora::SuperImage.new(pid)
 
-      upload = Upload.first
-      si = Pandora::SuperImage.new(upload.pid)
-      text = "Pid: upload-356a192b7913b04c54574d18c28d46e6395428ab\n\nVotes: 0"
-      assert_match text, si.to_txt
+      t1 = Thread.new { a.image }
+      t2 = Thread.new { b.image }
+
+      t1.join
+      t2.join
+
+      assert_equal t1.value, t2.value
+    end
+  end
+
+  test 'it should return a txt representation of an image' do
+    TestSource.index
+
+    pid = Pandora::SuperImage.pid_for('test_source', 1)
+    si = Pandora::SuperImage.new(pid)
+    text = "Artist: Raphael\n\nTitle: Katze auf Stuhl\n\nLocation: Florenz"
+    assert_match text, si.to_txt
+
+    upload = Upload.first
+    si = Pandora::SuperImage.new(upload.pid)
+    text = "Pid: upload-356a192b7913b04c54574d18c28d46e6395428ab\n\nVotes: 0"
+    assert_match text, si.to_txt
+  end
+
+  test 'returns correct source and pid for institutional uploads' do
+    jdoe = Account.find_by(login: "jdoe")
+    jdoe.roles << Role.find_by(title: 'dbadmin')
+    source = institutional_upload_source([jdoe])
+    upload = institutional_upload(source, 'galette')
+
+    si = Pandora::SuperImage.from(upload)
+    assert_equal upload.database, si.source
+    assert_equal 'upload', si.source_id
+    assert_equal 'prometheus', si.index_name
+    assert_match /^upload-[a-f0-9]{40}/, si.pid
+    assert_match /^prometheus-[a-f0-9]{40}/, si.index_record_id
+  end
+
+  test 'fails gracefully when indexing singular uploads' do
+    upload = Upload.first
+    upload.remove_index_doc
+
+    assert_not upload.super_image.elastic_record['found']
+
+    assert_nothing_raised do
+      upload.super_image.remove_index_doc
     end
   end
 end

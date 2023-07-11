@@ -12,13 +12,12 @@
     </tr>
     <tr>
       <td colspan="2">
-        <% help_link = link_to(
-              'search help'.t,
+        <%= link_to(
+              'Search help'.t,
               help_url(section: 'search', host: request.host, anchor: nil),
               {title: 'Search help'.t}
             )
         %>
-        <%= "See %s for details and examples." / help_link %>
       </td>
     </tr>
   </table>
@@ -32,5 +31,5 @@
   </p>
 <% end %>
 
-<%= render :partial => 'athene_search_results_none' %>
-<%= render :partial => 'athene_search_results' %>
+<%= render :partial => 'no_results' %>
+<%= render :partial => 'results' %>

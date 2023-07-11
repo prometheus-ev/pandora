@@ -1,0 +1,173 @@
+<pm-wd-modal onkeydown={event => onKeyDown(event)}>
+  <div
+    is="pm-modal"
+    open={state.open}
+    close={() => close()}
+  >
+    <div class="d-flex flex-column justify-content-between p-4 border-box">
+      {t('messages.wikidata_editor')}
+
+      <div class="d-flex">
+        <pm-live-search
+          if={state.open}
+          class="mt-3 my-3"
+          label={state.value}
+          value={state.value}
+          lookup={lookup}
+          name="wikidata_id"
+          render-suggestion={renderSuggestion}
+          placeholder={t('messages.start_typing')}
+        />
+        
+        <pm-loading-indicator />
+      </div>
+
+
+      <div class="d-flex justify-content-end">
+        <button
+          class="ms-2 p-1"
+          onclick={event => save(event)}
+        >{cap(t('verbs.save'))}</button>
+
+        <button
+          class="ms-2 p-1"
+          onclick={event => remove(event)}
+        >{cap(t('verbs.delete'))}</button>
+
+        <button
+          class="ms-2 p-1"
+          onclick={event => close(event)}
+        >{cap(t('verbs.cancel'))}</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    import {request} from '../lib/util'
+
+    export default class {
+      onBeforeMount() {
+        this.launch = this.launch.bind(this)
+        this.lookup = this.lookup.bind(this)
+
+        this.state = {
+          open: false
+        }
+
+        this.on('wd.modal', this.launch)
+      }
+
+      launch(event) {
+        console.log(event)
+
+        this.update({
+          open: true,
+          ...event.data
+        })
+      }
+
+      lookup(term) {
+        this.update({active: true})
+        const url = `/en/wikidata?term=${term}`
+
+        return request(url).then(data => {
+          console.log(data)
+
+          const results = []
+          for (const r of data.search) {
+            if (!r.display || !r.display.label) {
+              console.log('wikidata entry has no label:', r)
+              continue
+            }
+
+            const item = {
+              label: r.display.label.value,
+              value: r.id,
+              data: r
+            }
+
+            if (r.display.description) {
+              item['description'] = r.display.description.value
+            }
+
+            results.push(item)
+          }
+
+          this.update({active: false})
+          return results
+        })
+      }
+
+      save(event) {
+        event.preventDefault()
+
+        const newValue = this.root.querySelector('input').value
+        const url = [
+          '/api/json/user_metadata',
+          this.state.pid,
+          this.state.field
+        ].join('/')
+
+        if (!newValue || newValue.match(/^\s*$/)) {
+          return
+        }
+
+        const promise = request(url, {
+          method: 'PATCH',
+          body: JSON.stringify({
+            value: newValue,
+            position: this.state.position
+          })
+        })
+
+        promise.then((data) => {
+          const n = this.state.notifyNewValue
+          if (n) n(newValue)
+
+          this.close()
+        })
+      }
+
+      remove(event) {
+        event.preventDefault()
+
+        const url = [
+          '/api/json/user_metadata',
+          this.state.pid,
+          this.state.field
+        ].join('/')
+
+        const promise = request(url, {
+          method: 'PATCH',
+          body: JSON.stringify({
+            value: null,
+            position: this.state.position
+          })
+        })
+
+        promise.then((data) => {
+          const n = this.state.notifyNewValue
+          if (n) n(null)
+
+          this.close()
+        })
+      }
+
+      renderSuggestion(item) {
+        return `${item.label}<small class="d-block fw-normal">${item.description || ''}</small>`
+      }
+
+      onKeyDown(event) {
+        if (event.key == 'Escape') {
+          this.close()
+        }
+      }
+
+      close(event) {
+        if (event) event.preventDefault()
+
+        this.update({open: false})
+      }
+    }
+  </script>
+</pm-wd-modal>

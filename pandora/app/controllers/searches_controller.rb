@@ -19,7 +19,11 @@ class SearchesController < ApplicationController
   ###############################################################################
 
   def index
-    @search = ::Pandora::Query.new(current_user, search_params).run
+    if search_params[:mode] == 'similar'
+      @search = ::Pandora::Query.new(current_user, search_params).similar
+    else
+      @search = ::Pandora::Query.new(current_user, search_params).run
+    end
     flash[:warning] = @search.flash[:warning].html_safe if @search.flash[:warning]
 
     # view compatibility
@@ -73,41 +77,18 @@ class SearchesController < ApplicationController
     end
   end
 
-  def time
-    @search = ::Pandora::Query.new(current_user, search_params).run(:time)
-
-    # view compatibility
-    @controller_title = "Time search".t unless @controller_title
-    @page_size_selection = pconfig[:results_per_page] | [per_page]
-    @page_size_selection.sort!
-    @collections = Collection.allowed(current_user, :write)
-
-    set_neighbours(@search.hits.map{|h| h['_id']})
-    set_neighbourhood
-
-    respond_to do |format|
-      format.html do
-         @db_group = search_params["db_group"]
-         @expand_list = params["expand_list"]
-      end
-      format.json do
-        render :json => api_data(@search), :layout => false
-      end
-      format.xml do
-        render :xml => api_data(@search), :layout => false
-      end
-    end
-  end
-
   # api compatibility
   def hits
     account = Account.find_by!(login: 'superadmin')
     @search = Pandora::Query.new(account, search_params).run
 
+    fields = search_params[:search_field] || {'0' => ''}
+    values = search_params[:search_value] || {'0' => ''}
+
     @data = {
       query: {
-        field: search_params[:search_field]['0'],
-        term: search_params[:search_value]['0']
+        field: fields['0'],
+        term: values['0']
       },
       count: @search.total
     }
@@ -130,7 +111,7 @@ class SearchesController < ApplicationController
   def self.search_fields
     return [
       'all',
-      *Image.pconfig[:search_fields],
+      *Indexing::IndexFields.search,
       'associated',
       'related'
     ]
@@ -324,11 +305,12 @@ class SearchesController < ApplicationController
       }
 
       params.permit(
-        :slider_min_year,
-        :slider_max_year,
         :source_name,
         :previous_search_value,
         :sample,
+        :time,
+        :objects,
+        :mode,
         boolean_fields_selected: {},
         search_field: {},
         search_value: {},

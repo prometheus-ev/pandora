@@ -40,6 +40,16 @@ class Indexing::Sources::KoelnRbaKoer < Indexing::SourceSuper
     record.xpath('.//ancestor::Block[@Type="obj"]/Field[@Type="5060"]/Field[@Type="5064"]/@Value')
   end
 
+  def date_range
+    d = date.to_s.strip
+
+    if d == '200519652005.12.21'
+      d = '2005.12.21'
+    end
+
+    super(d)
+  end
+
   def location
     "#{record.xpath('.//ancestor::Block[@Type="obj"]/Field[@Type="ob26"]/Field[@Type="2664"]/@Value')}, #{record.xpath('.//ancestor::Block[@Type="obj"]/Field[@Type="ob26"]/Field[@Type="2662"]/@Value')}, #{record.xpath('.//ancestor::Block[@Type="obj"]/Field[@Type="ob26"]/Field[@Type="2660"]/@Value')}, #{record.xpath('.//ancestor::Block[@Type="obj"]/Field[@Type="ob26"]/Field[@Type="2661"]/@Value')} (#{record.xpath('.//ancestor::Block[@Type="obj"]/Field[@Type="ob26"]/Field[@Type="266f"]/@Value')} #{record.xpath('.//ancestor::Block[@Type="obj"]/Field[@Type="ob26"]/Field[@Type="266h"]/@Value')})".gsub(/, , /, '').gsub(/\A, /, '').gsub(/\(\)/, "")
   end

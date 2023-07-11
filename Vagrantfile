@@ -1,7 +1,12 @@
 # -*- mode: ruby -*-
 # vi: set ft=ruby :
 
-require __dir__ + '/dotenv.rb'
+begin
+  require __dir__ + '/dotenv.rb'
+rescue LoadError => e
+  puts e.message
+  puts "WARNING: dotenv could not be loaded as a vagrant plugin"
+end
 
 Vagrant.configure("2") do |a|
   a.vagrant.plugins = ['vagrant-vbguest', 'dotenv']
@@ -22,7 +27,7 @@ Vagrant.configure("2") do |a|
 
   a.vm.provider :virtualbox do |vb|
     vb.name = 'prometheus'
-    vb.memory = 4048
+    vb.memory = 4 * 1024
     vb.cpus = 2
   end
 
@@ -33,8 +38,8 @@ Vagrant.configure("2") do |a|
   )
 
   a.vm.define vm_name, primary: true do |c|
-    c.vm.box = 'generic/debian10'
-    c.vm.box_version = '1.9.20'
+    c.vm.box = 'generic/debian11'
+    c.vm.box_version = '3.5.4'
 
     c.vm.provider :virtualbox do |vb|
       vb.name = "prometheus.#{vm_name}"
@@ -45,9 +50,9 @@ Vagrant.configure("2") do |a|
     c.vm.provision :shell, path: 'provision.sh', args: 'install_nvm', privileged: false
     c.vm.provision :shell, path: 'provision.sh', args: 'prepare_for_pandora', privileged: false
     c.vm.provision :shell, path: 'provision.sh', args: 'prepare_for_rack_images', privileged: false
-    c.vm.provision :shell, path: 'provision.sh', args: 'prepare_for_testing', privileged: false
 
     # bind-mount node_modules directory in VM
+    # start elasticsearch ensuring /vagrant is mounted
     c.trigger.after :up do |trigger|
       cmds = "
         mkdir -p /home/vagrant/node_modules
@@ -55,6 +60,8 @@ Vagrant.configure("2") do |a|
         mkdir -p /vagrant/pandora/node_modules
         chown vagrant:vagrant /vagrant/pandora/node_modules 
         sudo mount --bind /home/vagrant/node_modules /vagrant/pandora/node_modules
+
+        sudo systemctl start elasticsearch-development.service elasticsearch-test.service
       "
       trigger.run_remote = {inline: cmds}
     end
@@ -78,6 +85,5 @@ Vagrant.configure("2") do |a|
     c.vm.provision :shell, path: 'provision.sh', args: 'install_nvm', privileged: false
     c.vm.provision :shell, path: 'provision.sh', args: 'prepare_for_pandora', privileged: false
     c.vm.provision :shell, path: 'provision.sh', args: 'prepare_for_rack_images', privileged: false
-    c.vm.provision :shell, path: 'provision.sh', args: 'prepare_for_testing', privileged: false
   end
 end

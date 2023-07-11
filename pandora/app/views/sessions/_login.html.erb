@@ -7,14 +7,19 @@
       <%= link_to_help title: 'Help'.t, label: help_icon, section: 'login' %>
     </legend>
 
-    <label for="login"><%= 'User name or e-mail address'.t %></label><br />
-    <%= text_field_tag 'login', params[:login], :size => 32, :tabindex => 1 %><br />
+    <label for="login"><%= 'User name or e-mail address'.t %></label>
+    <div class="gradient-border-input">
+      <%= text_field_tag 'login', params[:login], :size => 32, :tabindex => 1 %>
+    </div>
 
     <br class="vspace1" />
 
-    <label for="password"><%= 'Password'.t %></label>
-    <small>(<%= link_to 'Forgotten?'.t, { :controller => 'signup', :action => 'password', :host => request.base_url }, { :id => 'forgot_password', :title => 'Reset password'.t } %></small>)<br />
-    <%= text_field_tag 'password', nil, :type => 'password', :size => 32, :tabindex => 2 %><br />
+      <label for="password"><%= 'Password'.t %></label>
+      <small>(<%= link_to 'Forgotten?'.t, { :controller => 'signup', :action => 'password', :host => request.base_url }, { :id => 'forgot_password', :title => 'Reset password'.t } %>)</small>
+    <div class="gradient-border-input">
+      <%= text_field_tag 'password', nil, :type => 'password', :size => 32, :tabindex => 2 %>
+    </div>
+
 
     <br class="vspace1" />
 
@@ -27,6 +32,6 @@
     <br class="vspace1" />
     <br />
 
-    <%= 'No account yet?'.t %> <big><%= link_to 'Sign up!'.t, signup_url %></big>
+    <%= 'No account yet?'.t %> <%= link_to 'Sign up!'.t, signup_url %>
   </fieldset>
 <% end -%>

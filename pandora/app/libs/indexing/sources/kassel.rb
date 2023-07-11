@@ -48,6 +48,12 @@ class Indexing::Sources::Kassel < Indexing::SourceSuper
     record.xpath(".//datierung/text()")
   end
 
+  def date_range
+    d = date.to_s.strip
+
+    super(d)
+  end
+
   def source_url
     "http://217.7.90.92:8080/dfg/MuseumKasselController?action=show&objid=#{record.xpath(".//objekt_id/text()")}"
   end

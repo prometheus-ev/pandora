@@ -1,0 +1,331 @@
+[
+  {
+    "id": 74539,
+    "accession_number": "2015.449",
+    "share_license_status": "CC0",
+    "tombstone": "A Miller's Carriage, c. 1895. Albert-Charles Lebourg (French, 1849-1928). Black and white chalk with stumping on beige wove paper; sheet: 33.2 x 49.7 cm (13 1/16 x 19 9/16 in.). The Cleveland Museum of Art, Bequest of Muriel Butkin 2015.449",
+    "current_location": null,
+    "title": "A Miller's Carriage",
+    "title_in_original_language": null,
+    "series": null,
+    "series_in_original_language": null,
+    "creation_date": "c. 1895",
+    "creation_date_earliest": 1890,
+    "creation_date_latest": 1900,
+    "creators": [
+      {
+        "id": 53727,
+        "description": "Albert-Charles Lebourg (French, 1849-1928)",
+        "extent": null,
+        "qualifier": null,
+        "role": "artist",
+        "biography": null,
+        "name_in_original_language": null,
+        "birth_year": "1849",
+        "death_year": "1928"
+      }
+    ],
+    "culture": [
+      "France, 19th-20th century"
+    ],
+    "technique": "black and white chalk with stumping on beige wove paper",
+    "support_materials": [
+      {
+        "description": "beige laid paper",
+        "watermarks": []
+      }
+    ],
+    "department": "Drawings",
+    "collection": "DR - French",
+    "type": "Drawing",
+    "measurements": "Sheet: 33.2 x 49.7 cm (13 1/16 x 19 9/16 in.)",
+    "dimensions": {
+      "sheet": {
+        "height": 0.332,
+        "width": 0.497
+      }
+    },
+    "state_of_the_work": null,
+    "edition_of_the_work": null,
+    "creditline": "Bequest of Muriel Butkin",
+    "copyright": null,
+    "inscriptions": [
+      {
+        "inscription": "Verso: upper right in green ink: 80355 / circular estate stamp (Lugt 1664b) ",
+        "inscription_translation": null,
+        "inscription_remark": null
+      }
+    ],
+    "exhibitions": {
+      "current": [],
+      "legacy": [
+        "<em>Exposition de Lebourg.</em> Mus\u00e9e de Rouen (1932)."
+      ]
+    },
+    "provenance": [
+      {
+        "description": "(Shepherd Gallery, New York, sold to Mrs. Muriel Butkin)",
+        "citations": [],
+        "footnotes": null,
+        "date": "1977"
+      },
+      {
+        "description": "Mrs. Muriel Butkin, Shaker Heights, OH",
+        "citations": [],
+        "footnotes": null,
+        "date": "1977-2008"
+      },
+      {
+        "description": "estate of Mrs. Muriel Butkin, by bequest to the Cleveland Museum of Art",
+        "citations": [],
+        "footnotes": null,
+        "date": "2008-2015"
+      },
+      {
+        "description": "Cleveland Museum of Art, Cleveland, OH",
+        "citations": [],
+        "footnotes": null,
+        "date": "2015-"
+      }
+    ],
+    "find_spot": null,
+    "related_works": [],
+    "former_accession_numbers": [],
+    "fun_fact": "Albert Lebourg was the leader of an artistic movement called the Rouen School for the fact that they worked independently and outside the Parisian art scene.",
+    "digital_description": "Albert Rouen was known for his work in charcoal, the medium used for this drawing. It likely depicts a scene from his native Rouen, a port city in northern France. He examined the city and provincial life around it frequently in his works. Here, four horses pull a carriage before a bridge, likely along the banks of the Seine River.",
+    "wall_description": null,
+    "external_resources": {
+      "wikidata": [],
+      "internet_archive": [
+        "https://archive.org/details/clevelandart-2015.449-a-miller-s-carriage"
+      ]
+    },
+    "citations": [],
+    "catalogue_raisonne": null,
+    "url": "https://clevelandart.org/art/2015.449",
+    "images": {
+      "web": {
+        "url": "https://openaccess-cdn.clevelandart.org/2015.449/2015.449_web.jpg",
+        "width": "900",
+        "height": "596",
+        "filename": "2015.449_web.jpg",
+        "filesize": "242505"
+      },
+      "print": {
+        "url": "https://openaccess-cdn.clevelandart.org/2015.449/2015.449_print.jpg",
+        "width": "3400",
+        "height": "2250",
+        "filename": "2015.449_print.jpg",
+        "filesize": "3525079"
+      },
+      "full": {
+        "url": "https://openaccess-cdn.clevelandart.org/2015.449/2015.449_full.tif",
+        "width": "7449",
+        "height": "4929",
+        "filename": "2015.449_full.tif",
+        "filesize": "110178788"
+      }
+    },
+    "updated_at": "2022-03-19 09:00:05.141000"
+  },
+  {
+    "id": 74540,
+    "accession_number": "2015.451",
+    "share_license_status": "CC0",
+    "tombstone": "Leda and the Swan. Adolphe Yvon (French, 1817-1893). Charcoal and gouache with touches of pastel ; sheet: 39.7 x 54.5 cm (15 5/8 x 21 7/16 in.). The Cleveland Museum of Art, Bequest of Muriel Butkin 2015.451",
+    "current_location": null,
+    "title": "Leda and the Swan",
+    "title_in_original_language": null,
+    "series": null,
+    "series_in_original_language": null,
+    "creation_date": null,
+    "creation_date_earliest": null,
+    "creation_date_latest": null,
+    "creators": [
+      {
+        "id": 53730,
+        "description": "Adolphe Yvon (French, 1817-1893)",
+        "extent": null,
+        "qualifier": null,
+        "role": "artist",
+        "biography": "student of Paul Delaroche",
+        "name_in_original_language": null,
+        "birth_year": "1817",
+        "death_year": "1893"
+      }
+    ],
+    "culture": [
+      "France, 19th century"
+    ],
+    "technique": "Charcoal and gouache with touches of pastel ",
+    "support_materials": [
+      {
+        "description": "brown wove paper",
+        "watermarks": []
+      }
+    ],
+    "department": "Drawings",
+    "collection": "DR - French",
+    "type": "Drawing",
+    "measurements": "Sheet: 39.7 x 54.5 cm (15 5/8 x 21 7/16 in.)",
+    "dimensions": {
+      "sheet": {
+        "height": 0.397,
+        "width": 0.545
+      }
+    },
+    "state_of_the_work": null,
+    "edition_of_the_work": null,
+    "creditline": "Bequest of Muriel Butkin",
+    "copyright": null,
+    "inscriptions": [
+      {
+        "inscription": "lower right, in brown gouache: Ad. Yvon",
+        "inscription_translation": null,
+        "inscription_remark": null
+      }
+    ],
+    "exhibitions": {
+      "current": [],
+      "legacy": []
+    },
+    "provenance": [],
+    "find_spot": null,
+    "related_works": [],
+    "former_accession_numbers": [],
+    "fun_fact": null,
+    "digital_description": "In the late 1520s Michelangelo made a painting depicting Leda and the swan, a mythological story in which Zeus assumes the form of a swan to seduce the mortal woman Leda, producing two children with her. Michelangelo\u2019s version was undeniably more erotic and sensuous than most previous treatments of the subject, as well as more famous. Although the original was lost, several copies of the composition were made from a cartoon (full-scale drawing) that was taken to France by one of Michelangelo\u2019s pupils in the 1530s. This drawing by Adolphe Yvon suggests that Michelangelo\u2019s distinctive sensual rendering of the subject persisted into the 1800s.",
+    "wall_description": null,
+    "external_resources": {
+      "wikidata": [],
+      "internet_archive": []
+    },
+    "citations": [],
+    "catalogue_raisonne": null,
+    "url": "https://clevelandart.org/art/2015.451",
+    "images": {
+      "web": {
+        "url": "https://openaccess-cdn.clevelandart.org/2015.451/2015.451_web.jpg",
+        "filename": "2015.451_web.jpg",
+        "filesize": "223864",
+        "width": "900",
+        "height": "647"
+      },
+      "print": {
+        "url": "https://openaccess-cdn.clevelandart.org/2015.451/2015.451_print.jpg",
+        "filename": "2015.451_print.jpg",
+        "filesize": "2859968",
+        "width": "3400",
+        "height": "2445"
+      },
+      "full": {
+        "url": "https://openaccess-cdn.clevelandart.org/2015.451/2015.451_full.tif",
+        "filename": "2015.451_full.tif",
+        "filesize": "113052792",
+        "width": "7238",
+        "height": "5205"
+      }
+    },
+    "updated_at": "2022-01-04 14:31:20.967000"
+  },
+  {
+    "id": 74554,
+    "accession_number": "2015.447",
+    "share_license_status": "CC0",
+    "tombstone": "Un Borreau (An Executioner), c. 1848. Auguste Raffet (French, 1804-1860). Watercolor, gouache and black chalk ; sheet: 32.8 x 25 cm (12 15/16 x 9 13/16 in.). The Cleveland Museum of Art, Bequest of Muriel Butkin 2015.447",
+    "current_location": null,
+    "title": "Un Borreau (An Executioner)",
+    "title_in_original_language": null,
+    "series": null,
+    "series_in_original_language": null,
+    "creation_date": "c. 1848",
+    "creation_date_earliest": 1843,
+    "creation_date_latest": 1853,
+    "creators": [
+      {
+        "id": 13913,
+        "description": "Auguste Raffet (French, 1804-1860)",
+        "extent": null,
+        "qualifier": null,
+        "role": "artist",
+        "biography": null,
+        "name_in_original_language": null,
+        "birth_year": "1804",
+        "death_year": "1860"
+      }
+    ],
+    "culture": [
+      "France, 19th century"
+    ],
+    "technique": "Watercolor, gouache and black chalk ",
+    "support_materials": [
+      {
+        "description": "laid paper",
+        "watermarks": []
+      }
+    ],
+    "department": "Drawings",
+    "collection": "DR - French",
+    "type": "Drawing",
+    "measurements": "Sheet: 32.8 x 25 cm (12 15/16 x 9 13/16 in.)",
+    "dimensions": {
+      "sheet": {
+        "height": 0.328,
+        "width": 0.25
+      }
+    },
+    "state_of_the_work": null,
+    "edition_of_the_work": null,
+    "creditline": "Bequest of Muriel Butkin",
+    "copyright": null,
+    "inscriptions": [
+      {
+        "inscription": "lower right, in brown ink: a mon ami Giacomelli / Raffet \r\n",
+        "inscription_translation": null,
+        "inscription_remark": null
+      }
+    ],
+    "exhibitions": {
+      "current": [],
+      "legacy": []
+    },
+    "provenance": [],
+    "find_spot": null,
+    "related_works": [],
+    "former_accession_numbers": [],
+    "fun_fact": null,
+    "digital_description": null,
+    "wall_description": null,
+    "external_resources": {
+      "wikidata": [],
+      "internet_archive": []
+    },
+    "citations": [],
+    "catalogue_raisonne": null,
+    "url": "https://clevelandart.org/art/2015.447",
+    "images": {
+      "web": {
+        "url": "https://openaccess-cdn.clevelandart.org/2015.447/2015.447_web.jpg",
+        "filename": "2015.447_web.jpg",
+        "filesize": "214462",
+        "width": "680",
+        "height": "900"
+      },
+      "print": {
+        "url": "https://openaccess-cdn.clevelandart.org/2015.447/2015.447_print.jpg",
+        "filename": "2015.447_print.jpg",
+        "filesize": "2846330",
+        "width": "2568",
+        "height": "3400"
+      },
+      "full": {
+        "url": "https://openaccess-cdn.clevelandart.org/2015.447/2015.447_full.tif",
+        "filename": "2015.447_full.tif",
+        "filesize": "107488836",
+        "width": "5201",
+        "height": "6887"
+      }
+    },
+    "updated_at": "2022-01-04 14:31:21.487000"
+  }
+]

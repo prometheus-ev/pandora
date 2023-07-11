@@ -43,11 +43,13 @@
         <% if @image.upload_record? %>
           <%= link_to('Show all...'.t, :controller => 'uploads', :action => 'associated', :id => @image.upload.id) %>
         <% else %>
-          <%= link_to('Show all...'.t, :controller => 'search', :action => 'advanced_search', :f => ['associated'], :v => [@image.oid], :hide_associated_link => true) %>
+          <%= link_to('Show all...'.t, :controller => 'search', :action => 'advanced_search', :f => ['associated'], :v => [@image.oid]) %>
         <% end %>
       </span>
     <% elsif section == 'related_images' -%>
       <span><%= link_to_find_more 'related', @image %></span>
+    <% elsif section == 'object_obligatory' -%>
+      <% # do nothing %>
     <% elsif section == 'details' && ((object.is_a?(Source) || object.is_a?(Account) || object.is_a?(Collection))) -%>
       <% # do nothing %>
     <% else -%>

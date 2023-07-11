@@ -66,7 +66,9 @@ class Indexing::Sources::KielDigicult < Indexing::SourceSuper
   end
 
   def date_range
-    super(date.delete_suffix(' ?').strip)
+    d = date.delete_suffix(' ?').strip
+
+    super(d)
   end
 
   # standort

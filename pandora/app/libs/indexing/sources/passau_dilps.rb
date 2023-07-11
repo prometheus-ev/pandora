@@ -42,6 +42,20 @@ class Indexing::Sources::PassauDilps < Indexing::SourceSuper
     record.xpath('.//oldDate/text()')
   end
 
+  def date_range
+    d = date.to_s.strip
+
+    if d == 'um 1653755'
+      d = 'um 1653/55'
+    elsif d == 'um 1625730'
+      d = 'um 1625/30'
+    elsif d == '1564-15667'
+      d = '1564-1566'
+    end
+
+    super(d)
+  end
+
     # künstler
   def artist
     record.xpath('.//Urheber/text()')

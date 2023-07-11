@@ -1,0 +1,72 @@
+<wikidata-widget
+  class="ms-5 {state.editing ? 'editing' : ''} {props.class}"
+>
+  <template if={!state.editing}>
+    <template if={state.value}>
+      <a
+        href={advancedSearchUrl()}
+        title={t('verbs.search_in_prometheus')}
+      >{state.value}</a>
+      (<a
+        href="https://www.wikidata.org/wiki/{state.value}"
+        title={t('to_wikidata_item')}
+        target="_blank"
+        rel="noopener"
+      ><!--
+     -->Wikidata
+        <img src="/images/icon/arrow-up-right-from-square-solid.png" />
+      </a>)
+      <a
+        if={props.allowEdit == 'true'}
+        href="#"
+        onclick={event => edit(event)}
+        title={t('verbs.edit')}
+      >
+        <img if={state.value} src="/images/icon/edit.gif" />
+      </a>
+    </template>
+    <template if={!state.value}>
+      <a
+        if={props.allowEdit == 'true'}
+        href="#"
+        onclick={event => edit(event)}
+        title={t('verbs.edit')}
+      >
+        {t('verbs.add_a_wikidata_id')}
+        <img class="d-inline-block ms-1" src="/images/icon/edit.gif" />
+      </a>
+    </template>
+  </template>
+
+  <script>
+    import {locale} from '../lib/util.js'
+
+    export default class {
+      onBeforeMount(props, state) {
+        // console.log(props)
+
+        this.state = {
+          value: props.value,
+          editing: false
+        }
+      }
+
+      edit(event) {
+        if (event) event.preventDefault()
+
+        this.bus.emit('wd.modal', {
+          pid: this.props.pid,
+          field: this.props.field,
+          position: this.props.position,
+          value: this.state.value,
+          notifyNewValue: (newValue) => this.update({value: newValue})
+        })
+      }
+
+      advancedSearchUrl() {
+        const base = `/${locale()}/searches/advanced`
+        return `${base}?search_field[0]=all&search_value[0]=${this.state.value}`
+      }
+    }
+  </script>
+</wikidata-widget>

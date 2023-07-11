@@ -1,0 +1,26 @@
+<ul>
+  <% @keywords.each do |keyword| %>
+    <li><!--
+   --><%= highlight(keyword.t, h(@value)) %>
+<!--
+   --><% if params[:type] == 'upload' && keyword.uploads.count > 0 %><!--
+     --><span class="informal"><!--
+       --><br /><!--
+       --><small><%= keyword.uploads.first.title %></small><!--
+     --></span><!--
+   --><% end %><!--
+   --><% if params[:type] == 'source' && keyword.sources.count > 0 %><!--
+     --><span class="informal"><!--
+       --><br /><!--
+       --><small><%= keyword.sources.first.title %></small><!--
+     --></span><!--
+   --><% end %><!--
+   --><% if params[:type] == 'collection' && keyword.collections.count > 0 %><!--
+     --><span class="informal"><!--
+       --><br /><!--
+       --><small><%= keyword.collections.first.title %></small><!--
+     --></span><!--
+   --><% end %><!--
+ --></li>
+  <% end %>
+</ul>

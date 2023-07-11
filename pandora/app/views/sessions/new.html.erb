@@ -8,7 +8,7 @@
 <% end -%>
 
 <p>
-  <%= gogif %> <%= 'No account yet?'.t %> <big><%= link_to 'Sign up!'.t, signup_url %></big>
+  <%= gogif %> <%= 'No account yet?'.t %> <%= link_to 'Sign up!'.t, signup_url %>
   <%= image_tag("misc/sticker_1week#{Locale.ext(true)}.png", :title => 'One week free trial!'.t, :id => 'sticker') %>
 </p>
 
@@ -17,7 +17,7 @@
   <%= (
     (
       'You can also explore our %(freely accessible databases)% (%s).' / 
-      lambda { |a| '<big>' + link_to(a, :controller => 'sources', :action => 'open_access') + '</big>'}
+      lambda { |a| link_to(a, :controller => 'sources', :action => 'open_access')}
     ) % 
     link_to(t = 'Open access'.t, "http://#{I18n.locale}.wikipedia.org/wiki/#{t}")
   ).html_safe %>

@@ -37,6 +37,12 @@ class Indexing::Sources::EssenKuwi < Indexing::SourceSuper
     end
   end
 
+  def date_range
+    d = date.to_s.strip
+
+    super(d)
+  end
+
   # groesse
   def size
     record.xpath('.//Zusatzinformationen/Groesse/text()')

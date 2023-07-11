@@ -14,7 +14,7 @@ class UploadTest < ActiveSupport::TestCase
     path = "#{Rails.root}/test/fixtures/files/skull.jpg"
     file = Rack::Test::UploadedFile.new(path, 'image/jpeg')
     upload = Upload.new(file: file)
-    
+
     assert_not upload.valid?
     assert_equal 75292, upload.file_size
     assert_equal 'jpg', upload.filename_extension
@@ -38,7 +38,7 @@ class UploadTest < ActiveSupport::TestCase
       end
       super_image
     end
-    Pandora::SuperImage.stub :new, ti do 
+    Pandora::SuperImage.stub :new, ti do
       assert upload.save
       assert upload.image
     end
@@ -51,7 +51,7 @@ class UploadTest < ActiveSupport::TestCase
 
     # updating the record should not create another image (so this should not
     # throw a Mysql2::Error: Duplicate entry)
-    upload.update_attributes title: 'Pretty Skull'
+    upload.update title: 'Pretty Skull'
   end
 
   test 'not accepted content type' do
@@ -74,21 +74,64 @@ class UploadTest < ActiveSupport::TestCase
     upload = Upload.new
 
     upload.keyword_list = "some\nthing\nnew"
-    assert_equal ['some', 'thing', 'new'], upload.keywords.map{|k| k.title}
+    assert_equal 3, upload.keywords.size
+    assert_equal "some\nthing\nnew", upload.keyword_list
 
     upload.keyword_list = "dark\nmatter"
-    assert_equal ['dark', 'matter'], upload.keywords.map{|k| k.title}
+    assert_equal 2, upload.keywords.size
+    assert_equal "dark\nmatter", upload.keyword_list
 
     upload.keywords = [
       Keyword.find_or_create_by!(title: 'clear'),
       Keyword.find_or_create_by!(title: 'skies'),
     ]
-    assert_equal ['clear', 'skies'], upload.keywords.map{|k| k.title}
+    assert_equal "clear\nskies", upload.keyword_list
+  end
 
-    upload.keyword_list = nil
-    assert_equal ['clear', 'skies'], upload.keywords.map{|k| k.title}
+  test 'create keywords in current locale' do
+    upload = Upload.new
 
-    upload.keyword_list = []
-    assert_equal [], upload.keywords.map{|k| k.title}
+    upload.assign_attributes keyword_list: 'sun, sky'
+    assert_equal 'sun', upload.keywords[0].title
+    assert upload.keywords[0].title_de.blank?
+    assert_equal 'sky', upload.keywords[1].title
+    assert upload.keywords[1].title_de.blank?
+
+    with_locale :de do
+      upload.assign_attributes keyword_list: 'sonne, himmel'
+      assert upload.keywords[0].title.blank?
+      assert_equal 'sonne', upload.keywords[0].title_de
+      assert upload.keywords[1].title.blank?
+      assert_equal 'himmel', upload.keywords[1].title_de
+    end
+  end
+
+  test 'file overwrite and delete' do
+    with_env 'PM_USE_TEST_IMAGE' => 'false' do
+      upload = create_upload('mona_lisa')
+
+      # created
+      si = Pandora::SuperImage.from(upload)
+      assert File.exist?(si.original_file_path)
+      assert_equal 71658, File.size(si.original_file_path)
+      initial_size = si.image_data(:small).size
+      small = "#{ENV['PM_IMAGES_DIR']}/upload/r140/#{si.pid}.jpg"
+      assert File.exist?(small)
+
+      # updated
+      file = Rack::Test::UploadedFile.new(
+        "#{Rails.root}/test/fixtures/files/galette.jpg",
+        'image/jpeg'
+      )
+      si.upload.update file: file
+      assert_equal 128637, File.size(si.original_file_path) # => not 71658, so different file
+      assert_not_equal initial_size, si.image_data(:small).size # => not 4136, so different file
+      assert File.exist?(small)
+
+      # destroyed
+      si.upload.destroy
+      assert_not File.exist?(si.original_file_path)
+      assert_not File.exist?(small)
+    end
   end
 end

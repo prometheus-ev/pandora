@@ -14,11 +14,7 @@
   <div class="icon-line dim">
   <span class="gap"></span>
   <%= link_to icon('edit'), {action: 'edit'}, title: 'Edit'.t %>
-  <%= link_to(
-    icon('delete'),
-    {action: 'disable'},
-    method: 'PATCH', title: 'Disable'.t 
-  ) %>
+  <%= link_to_delete(@user) %>
   </div>
 </div>
 

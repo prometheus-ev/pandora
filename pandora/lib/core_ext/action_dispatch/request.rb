@@ -1,16 +1,5 @@
 module ActionDispatch
-
   class Request
-
-    ### api/bot
-
-    def api?
-      defined?(@_api) ? @_api : @_api = path_parameters.has_key?(:api_version) || oauth?
-    end
-
-    def bot?
-      defined?(@_bot) ? @_bot : @_bot = Util::Bot.bot?(user_agent)
-    end
 
     ### auth
 
@@ -52,22 +41,5 @@ module ActionDispatch
       Base64.decode64(auth_credentials).split(':', 2) if basic_auth?
     end
 
-    def oauth?
-      auth_scheme == 'oauth'
-    end
-
-    def oauth_params
-      return {} unless oauth?
-
-      # parse the header into a Hash
-      oauth_params = OAuth::Helper.parse_header(auth_header)
-
-      # remove non-OAuth parameters
-      oauth_params.reject! { |k, _| k !~ /\Aoauth_/ }
-
-      oauth_params
-    end
-
   end
-
 end

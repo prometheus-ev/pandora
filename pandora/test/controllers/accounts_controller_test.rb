@@ -27,9 +27,9 @@ class AccountsControllerTest < ActionDispatch::IntegrationTest
         controller: 'accounts',
         action: 'show',
         locale: 'en',
-        id: 'weird stuff ß'
+        id: 'weird stuff ß'.force_encoding('ASCII-8BIT')
       },
-      URI.escape('/en/accounts/weird stuff ß')
+      "/en/accounts/weird%20stuff%20%C3%9F"
     )
   end
 

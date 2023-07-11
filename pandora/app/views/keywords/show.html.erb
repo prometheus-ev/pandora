@@ -1,0 +1,19 @@
+<div class="header-line clear-padding">
+  <h2><%= 'Keyword'.t %>: <span id="keyword_title"><span></h2>
+
+  <% if current_user.allowed?(row) -%>
+    <div class="icon-line">
+      <%= link_to image_tag('icon/edit.gif', :class => 'icon edit-icon', :title => 'Edit'.t), { :action => 'edit', :id => @keyword.id }, { :title => 'Edit'.t } %>
+      <%= link_to image_tag('icon/delete.gif', :class => 'icon delete-icon', :title => 'Delete'.t), { :action => 'destroy', :id => @keyword.id }, { :title => 'Delete'.t, :data => { confirm: "Are you sure to delete keyword: %s".t / @keyword.to_s }, :method => 'delete' } %>
+    </div>
+  <%end %>
+</div>
+
+<br class="clear-float" />
+
+<table>
+  <tr>
+    <th><%= 'Title'.t %>:</th>
+    <td id="keyword_title"><%= @keyword.title %></td>
+  </tr>
+</table>

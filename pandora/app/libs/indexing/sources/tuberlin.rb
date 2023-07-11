@@ -43,6 +43,16 @@ class Indexing::Sources::Tuberlin < Indexing::SourceSuper
     record.xpath('.//datierung/text()')
   end
 
+  def date_range
+    d = date.to_s.strip.encode('iso-8859-1').encode('utf-8')
+
+    if d == '1000-12000'
+      d = '1000-1200'
+    end
+
+    super(d)
+  end
+
   # standort
   def location
     record.xpath('.//standort/text()')

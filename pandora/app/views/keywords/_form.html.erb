@@ -1,0 +1,22 @@
+<%= error_messages_for :keyword %>
+
+<%= form_for @keyword, html: {class: 'edit-form'} do |f| %>
+  <table>
+    <tr>
+      <th><%= f.label :title, 'Title (en)'.t %></th>
+      <td><%= f.text_field :title, class: 'mandatory' %></td>
+    </tr>
+
+    <tr>
+      <th><%= f.label :title_de, 'Title (de)'.t %></th>
+      <td><%= f.text_field :title_de %></td>
+    </tr>
+
+    <tr>
+      <td></td>
+      <td><%= link_to 'swap'.t, '#', class: 'pm-swap-keyword-titles' %></td>
+    </tr>
+
+    <%= form_controls %>
+  </table>
+<% end %>

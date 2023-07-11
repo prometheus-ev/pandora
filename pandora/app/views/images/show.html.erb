@@ -9,7 +9,13 @@
         } %>
       </td>
       <td class="image">
-        <%= link_to(('<img src="' + @super_image.image_url(:medium) + '"' + 'alt="[' + 'Not available'.t + ']">').html_safe, { :controller => 'images', :action => :large, :id => @super_image.pid }) %>
+        <% if @super_image.iframe_url.present? %>
+          <iframe src="<%= @super_image.iframe_url %>"></iframe>
+        <% else %>
+          <%= link_to @super_image.image_url(:original) do %>
+            <%= image_tag @super_image.image_url(:medium), title: 'View original'.t, alt: 'Not available'.t %>
+          <% end %>
+        <% end %>
       </td>
       <% if @super_image.upload? %>
         <td class="icons dim">
@@ -37,7 +43,7 @@
     </div>
   </div>
   <div class="section">
-    <%= render :partial => 'show_elastic_metadata', :locals => {:super_image => @super_image} %>
+    <%= render partial: 'show_metadata', locals: {super_image: @super_image} %>
   </div>
 </div>
 
@@ -53,7 +59,7 @@
       </div>
     </div>
     <div class="section">
-      <%= render :partial => 'geographic', :locals => { :super_image => @super_image, :display_fields => @display_fields } %>
+      <%= render :partial => 'geographic', :locals => { :super_image => @super_image } %>
     </div>
   </div>
 <% end %>
@@ -66,7 +72,7 @@
     </div>
     <div class="section_header">
       <div class="section_heading">
-        <%= "Aspects".t %>
+        <%= "Views".t %>
       </div>
       <span class="section float-left dim">
         <span>
@@ -103,14 +109,14 @@
 <% end %>
 
 <% unless @super_image.aspects.empty? %>
-  <div id="associated_images-section" class="section_wrap clear-padding undim">
+  <div id="associated_images-section" class="section_wrap clear-padding">
     <a name="associated_images"></a>
     <div class="scriptonly section_toggle">
       <div class="collapse"></div>
     </div>
     <div class="section_header">
       <div class="section_heading">
-        <%= "Aspects".t %>
+        <%= "Views".t %>
       </div>
       <span class="section float-left dim">
         <span>
@@ -118,37 +124,28 @@
             "Show all...".t,
             controller: 'searches', action: 'index',
             "search_field[one]" => 'record_object_id',
-            'search_value[one]' => @super_image.elastic_record_image.pobject_id.first,
-            :hide_associated_link => 'true'
+            'search_value[one]' => @super_image.elastic_record_image.pobject_id.first
           ) %>
         </span>
       </span>
     </div>
     <div class="section">
       <div class="images">
-        <table>
-          <tr>
-            <% @super_image.aspects.each do |aspect| %>
-              <td class="image">
-                <%= link_to_image_record(aspect) %>
-              </td>
-            <% end %>
-          </tr>
-          <tr>
-            <% @super_image.aspects.each do |aspect| %>
-              <td class="dim">
-                <%= render partial: 'ratings/show', locals: {super_image: aspect, light: true} %>
-              </td>
-            <% end %>
-          </tr>
-        </table>
+        <% @super_image.aspects.each do |aspect| %>
+          <div class="aspect">
+            <div class="image">
+              <%= link_to_image_record(aspect) %>
+            </div>
+            <%= render partial: 'ratings/show', locals: {super_image: aspect, light: true} %>
+          </div>
+        <% end %>
       </div>
     </div>
   </div>
 <% end %>
 
 <% if @super_image.elastic_record.dig('_source', 'image_vector') %>
-  <div id="similar_images-section" class="section_wrap clear-padding undim">
+  <div id="similar_images-section" class="section_wrap clear-padding">
     <a name="similar_images"></a>
     <div class="scriptonly section_toggle">
       <div class="collapse"></div>
@@ -156,9 +153,22 @@
     <div class="section_header">
       <div class="section_heading">
         <%= "Similar images".t %>
+        <span class="dim">
+        <%= link_to image_tag('misc/info_form_field.gif', style: 'vertical-align: text-bottom;', title: "Similarity search uses image vectors computed by the self-supervised learning algorithm SwAV. For more information, see our help pages.".t), help_url(section: 'full_record', host: request.host, anchor: 'similarity') %>
+        </span>
+        <span class="dim">
+        <%= link_to(
+          "Show all...".t,
+          controller: 'searches',
+          action: 'index',
+          'search_field[0]' => 'record_id',
+          'search_value[0]' => @super_image.pid,
+          mode: 'similar'
+        ) %>
+        </span>
       </div>
     </div>
-    <div class="section">
+    <div class="section undim">
       <div class="images">
         <% similars = Pandora::Elastic.new.image_vector_query(record_id: @super_image.pid)['hits']['hits'].drop(1) %>
         <table>
@@ -182,7 +192,7 @@
   </div>
 <% end %>
 
-<% unless @super_image.related.empty? %>
+<% unless true #@super_image.related.empty? # Disabled, see #1225. %>
   <div id="related_images-section" class="section_wrap clear-padding undim">
     <a name="related_images"></a>
     <div class="scriptonly section_toggle">

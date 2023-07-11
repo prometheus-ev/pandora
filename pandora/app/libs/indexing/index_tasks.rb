@@ -5,7 +5,7 @@ class Indexing::IndexTasks
 
   def status
     results = get_status
-    headers = [:name, :pandora, :athene, :dump, :alias, :indices]
+    headers = [:name, :pandora, :dump, :alias, :indices]
     paddings = [30, 7, 6, 4, 5, 0]
 
     results = results.values.sort_by!{|r| r[:name]}
@@ -42,15 +42,26 @@ class Indexing::IndexTasks
 
       # retrieve the records
       records = []
-      new_records = elastic.scan(index, 25000)
-      scroll_id = new_records['_scroll_id']
-      start_progress(index, new_records['hits']['total']['value'])
-      while current_progress < new_records['hits']['total']['value']
-        records += new_records['hits']['hits'].map{|hit| Indexing::Attachments.strip(hit)}
-        progress(new_records['hits']['hits'].size)
-        new_records = elastic.continue(scroll_id)
-        scroll_id = new_records['_scroll_id']
+
+      start_progress(index, elastic.total(index))
+      elastic.each_doc index, batch_size: 25000 do |hit|
+        hit['_source'] = Indexing::Attachments.strip(hit['_source'])
+        records << hit
+
+        progress
       end
+
+      # new_records = elastic.scan(index, 25000)
+      # scroll_id = new_records['_scroll_id']
+      # start_progress(index, new_records['hits']['total']['value'])
+      # while current_progress < new_records['hits']['total']['value']
+      #   records += new_records['hits']['hits'].map do |hit|
+      #     hit.merge('_source' => Indexing::Attachments.strip(hit['_source']))
+      #   end
+      #   progress(new_records['hits']['hits'].size)
+      #   new_records = elastic.continue(scroll_id)
+      #   scroll_id = new_records['_scroll_id']
+      # end
 
       # dump the data to a file
       write file(index), JSON.dump(
@@ -93,23 +104,19 @@ class Indexing::IndexTasks
 
       # bulk import the records
       start_progress("importing #{alias_name}", data['records'].size)
-      bulk = []
 
       data['records'].each do |record|
-        pid = record['_id']
-        record = attachments.enrich(record)
-        bulk += [
+        record['_source'] = attachments.enrich(record['_source'])
+
+        elastic.bulk([
           {'create' => {'_index' => new_index_name, '_id' => record['_id']} },
           record['_source']
-        ]
-        if bulk.size >= 500
-          elastic.bulk bulk
-          bulk = []
-        end
+        ], batch_size: 500)
+
         progress
       end
 
-      elastic.bulk bulk
+      elastic.bulk_commit refresh: true
       elastic.add_alias_to(index_name: new_index_name)
       elastic.cleanup_backups_of(alias_name: alias_name)
 
@@ -121,7 +128,7 @@ class Indexing::IndexTasks
 
   def drop(index)
     case index
-    when :all then drop(elastic.aliases.keys)
+    when :all then drop(elastic.aliases)
     when Array
       if index.empty?
         puts "no indices selected"
@@ -196,7 +203,7 @@ class Indexing::IndexTasks
     # https://ruby-doc.org/stdlib-2.5.3/libdoc/csv/rdoc/CSV.html
     printf "Reading " + csv_filename + "... \r"
     # col_sep \t represents a tab. Now a ';' is used.
-    csv_content = CSV.read(csv_filename, {headers: true, encoding: "ISO-8859-1:UTF-8", col_sep: ";", liberal_parsing: true})
+    csv_content = CSV.read(csv_filename, headers: true, encoding: "ISO-8859-1:UTF-8", col_sep: ";", liberal_parsing: true)
     printf "Reading " + csv_filename + "... finished!\n"
 
     printf "Writing #{yml_filename}... \r"
@@ -215,6 +222,50 @@ class Indexing::IndexTasks
       }
     }
     printf "Writing #{yml_filename}... finished!\n"
+  end
+
+  def write_vgbk_artist_records_as_csv
+    elastic = Pandora::Elastic.new
+    query = {
+      term: {
+        rights_work: 'rights_work_vgbk'
+      }
+    }
+    file = "#{Rails.root}/tmp/vgbk_artist_records.csv"
+    headers = ['Link to prometheus record', 'Artist', 'Title']
+    encoding = 'UTF-8'
+
+    csv = CSV.generate(col_sep: ';', quote_char: '"', encoding: encoding, write_headers: true, headers: headers) do |writer|
+      elastic.pit
+
+      while (records = elastic.pit_search_after(query: query)['hits']['hits']).size > 0
+        records.each do |record|
+          link = "#{ENV['PM_BASE_URL']}/de/image/#{record["_source"]["record_id"]}"
+          artist = ''
+          title = ''
+
+          if artist_normalized = record["_source"]["artist_normalized"]
+            artist = if artist_normalized.is_a? Array
+                       artist_normalized.join(' | ')
+                     else
+                       artist_normalized
+                     end
+          end
+
+          if title = record["_source"]["title"]
+            if title.is_a? Array
+              title = title.join(' | ')
+            end
+          end
+
+          writer << [link, artist, title]
+        end
+      end
+
+      elastic.pit_delete
+    end
+
+    File.write(file, csv)
   end
 
   def update_pknd_artists
@@ -330,15 +381,17 @@ class Indexing::IndexTasks
       settings['index'].delete('uuid')
       settings['index'].delete('version')
 
-      de_en = "#{ENV['PM_SYNONYMS_DIR']}/de_en.txt"
-      pknd = "#{ENV['PM_SYNONYMS_DIR']}/pknd.txt"
+      ['search_analyzer', 'artist_normalized_search_analyzer'].each do |file|
+        filter = settings['index']['analysis']['filter']
+        new_path = "#{ENV['PM_SYNONYMS_DIR']}/#{file}.txt"
 
-      if settings['index']['analysis']['filter']['synonym_de_en']
-        settings['index']['analysis']['filter']['synonym_de_en']['synonyms_path'] = de_en
-        settings['index']['analysis']['filter']['synonym_pknd']['synonyms_path'] = pknd
-      else
-        settings['index']['analysis']['filter']['synonym_graph_de_en']['synonyms_path'] = de_en
-        settings['index']['analysis']['filter']['synonym_graph_pknd']['synonyms_path'] = pknd
+        if filter["synonym_#{file}"]
+          filter["synonym_#{file}"]['synonyms_path'] = new_path
+        elsif filter["synonym_graph_#{file}"]
+          filter["synonym_graph_#{file}"]['synonyms_path'] = new_path
+        else
+          puts "A filter for synonyms file \"#{file}\" is not available in the index. Please update the index pack."
+        end
       end
 
       settings
@@ -410,12 +463,11 @@ class Indexing::IndexTasks
     end
 
     def read(file)
-      raise "#{file} doesn't exist" unless File.exists?(file)
+      raise "#{file} doesn't exist" unless File.exist?(file)
       `gunzip -c #{file}`
     end
 
     def elastic
       @elastic ||= Pandora::Elastic.new
     end
-
 end

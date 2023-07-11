@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<source>
+  <row>
+    <id>1</id>
+    <path>path1</path>
+    <artist>Svenja Maler</artist>
+    <title>Ein Mohr im Hemd</title>
+    <description>
+      Der Mohr im Hemd ist eine österreichische Süßspeise. Sie besteht
+      hauptsächlich aus Schokolade, Butter, Semmelbröseln (Paniermehl), Zucker,
+      Eidotter, geriebenen Mandeln oder Walnusskernen und Rotwein und hat die
+      Form eines kleinen Gugelhupfs.
+    </description>
+  </row>
+  <row>
+    <id>2</id>
+    <path>path2</path>
+    <artist>Heinz Maler</artist>
+    <title>Der Zigeunerwagen</title>
+    <description>
+      Die Herkunft des Wortes Zigeuner (vergleiche auch französisch Tziganes)
+      ist umstritten. Es ist möglicherweise eine Variante der griechischen
+      Bezeichnung der Sekte der Athingani[3] oder Athinganen (griechisch 
+      Ἀθίγγανοι Athínganoi „die Unberührbaren“, mittelgriechische Aussprache
+      etwa [aˈθiŋgany], mit – im Mittelgriechischen regelhafter – Prokope
+      [ˈθiŋgany]), die im 9. Jahrhundert im früheren Phrygien lebten.
+    </description>
+  </row>
+  <row>
+    <id>3</id>
+    <path>path3</path>
+    <artist>Sara Maler</artist>
+    <title>Drei Negerinnen</title>
+    <description>
+      Nach dem Etymologischen Wörterbuch der deutschen Sprache hat das Wort
+      Neger die Ausgangsbedeutung „Schwarzer“[1] (wie sie etwa 1879 von Wilhelm
+      Busch[2] synonym verwendet wurde und wie sie auch der Duden von 1929 noch
+      angab[3]) und ist ein Lehnwort nach dem französischen nègre, das wiederum
+      vom spanischen negro, der Nachfolgeform des lateinischen niger
+      („schwarz“), abgeleitet ist.
+    </description>
+  </row>
+</source>

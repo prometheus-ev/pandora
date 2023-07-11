@@ -17,6 +17,13 @@ class Indexing::Sources::DarmstadtTu < Indexing::Sources::Parents::Dilps
     _credits.blank? ? "Dia-Lehrsammlung Wella" : _credits
   end
 
+  def date_range
+    d = date
+    d = d.sub('1880/19010', '1880/1910')
+
+    super(d)
+  end
+
   def rights_reproduction
     "unbekannt" if _credits.blank?
   end

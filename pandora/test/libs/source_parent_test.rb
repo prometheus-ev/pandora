@@ -2,10 +2,6 @@ require 'test_helper'
 Dir["./test/test_sources/*.rb"].each {|file| require file }
 
 class SourceParentTest < ActionDispatch::IntegrationTest
-  teardown do
-    Indexing::Index.delete("test*")
-  end
-
   def test_sourceModel_indexTestSourceWithTwoDumpFiles_returnsTwoRecords
     records_count = TestSourceWithTwoDumpFiles.index
 
@@ -27,13 +23,13 @@ class SourceParentTest < ActionDispatch::IntegrationTest
   def test_sourceModel_indexTestSourceRecordsCount_threeRecords
     records_count = TestSource.index
 
-    assert_equal(3, records_count)
+    assert_equal(12, records_count)
   end
 
   def test_sourceModel_documentTestSourceRecordsCount_threeRecords
     records_count = TestSource.new.records.count
 
-    assert_equal(3, records_count)
+    assert_equal(12, records_count)
   end
 
   def test_sourceModel_indexTestSourceWithErrors_returnsZeroRecords

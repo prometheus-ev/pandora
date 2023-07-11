@@ -26,6 +26,12 @@ class Indexing::Sources::GoettingenArch < Indexing::SourceSuper
     record.xpath('.//datierung/text()')
   end
 
+  def date_range
+    d = date.to_s.strip
+
+    super(d)
+  end
+
   # standort
   def location
     record.xpath('.//standort/text()')

@@ -9,3 +9,8 @@ The prometheus digital image archive software is the driving force behind the
 prometheus image archive.  It's being developed since late fall of 2006, on top
 of the Ruby on Rails framework. It is Free Software, released under the terms of
 the GNU Affero General Public License.
+
+## Other Licenses
+
+* https://commons.wikimedia.org/wiki/File:Wikipedia20_animated_Plane.gif
+* https://pixabay.com/videos/fall-trees-yellow-grand-mesa-28746/

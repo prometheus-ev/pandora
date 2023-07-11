@@ -1,0 +1,20 @@
+<%= titles.map { |title|
+  if title.include?(",http")
+    if title.include?("%")
+      arr = title.split("%")
+      str = ""
+      (0..(arr.count-1)).each do |index|
+        if !index.odd?
+          str << arr[index]
+        else
+          str << link_to_links(arr[index])
+        end
+      end
+      str
+    else
+      link_to_links(title)
+    end
+  else
+    format_content(title, :escape => false)
+  end
+}.join(" | ").html_safe %>

@@ -55,6 +55,14 @@
       padding-left: $padding / 2;
       background-image: url("/images/misc/source_group_master.gif");
       font-weight: bold;
+
+      & > .pm-check {
+        margin-right: 5px;
+      }
+
+      & .pm-toggle {
+        width: 30px;
+      }
     }
 
     .pm-databases {
@@ -90,6 +98,10 @@
           margin-right: 30px;
           text-align: right;
           white-space: nowrap;
+
+          span {
+            display: block;
+          }
         }
 
         .pm-links {

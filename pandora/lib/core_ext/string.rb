@@ -28,10 +28,6 @@ class String
     self
   end
 
-  def del(re)
-    gsub(re, '')
-  end
-
   def to_filename(ext = nil)
     ext = case ext
       when nil        then ''

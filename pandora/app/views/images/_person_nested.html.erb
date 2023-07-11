@@ -1,0 +1,11 @@
+<div>
+  <%= person['name'] %>
+  <% unless person['dating'].blank? %>
+    (<i><%= person['dating'] %></i>)
+  <% end %>
+  <% unless person['wikidata'].blank? %>
+    | <%= link_to person['wikidata'], { controller: 'searches', action: 'advanced', 'search_field[0]': 'all', 'search_value[0]': person['wikidata'] } %>
+    (<%= link_to 'Wikidata', "https://www.wikidata.org/wiki/#{person['wikidata']}", target: '_blank' %>
+    <%= image_tag('/images/icon/arrow-up-right-from-square-solid.png', style: 'vertical-align: baseline;') %>)
+  <% end %>
+</div>

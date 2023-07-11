@@ -35,6 +35,12 @@ class Indexing::Sources::LvrRoidkin < Indexing::SourceSuper
     record.xpath('.//Datierung/text()')
   end
 
+  def date_range
+    d = date.to_s.strip
+
+    super(d)
+  end
+
   # bildnachweis
   def credits
     record.xpath('.//Bildnachweis/text()')

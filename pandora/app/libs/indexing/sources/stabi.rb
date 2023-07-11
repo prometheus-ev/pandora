@@ -89,6 +89,12 @@ class Indexing::Sources::Stabi < Indexing::SourceSuper
     record.xpath('.//erschJahr/text()')
   end
 
+  def date_range
+    d = date.to_s.strip.encode('iso-8859-1').encode('utf-8')
+
+    super(d)
+  end
+
   # format
   def format
     record.xpath('.//format/text()')
