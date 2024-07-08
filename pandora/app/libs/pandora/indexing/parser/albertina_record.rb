@@ -3,6 +3,10 @@ class Pandora::Indexing::Parser::AlbertinaRecord < Pandora::Indexing::Parser::Re
     extract(record, '//oai:header/oai:identifier').first
   end
 
+  def inventory_no
+    extract(pc, 'dc:identifier[2]').first
+  end
+
   def path
     result = extract(ore, 'edm:object').first
     result.gsub /400$/, '1920'
@@ -20,6 +24,14 @@ class Pandora::Indexing::Parser::AlbertinaRecord < Pandora::Indexing::Parser::Re
     extract(pc, 'dcterms:temporal').first
   end
 
+  def date_range
+    return @date_range if @date_range
+
+    if !date.blank?
+      @date_range = @date_parser.date_range(date)
+    end
+  end
+
   def collection
     extract(pc, 'dc:type').first
   end
@@ -29,14 +41,19 @@ class Pandora::Indexing::Parser::AlbertinaRecord < Pandora::Indexing::Parser::Re
   end
 
   def rights_work
-    extract(pc, 'dc:rights')
+    'gemeinfrei'
+    # extract(pc, 'dc:rights')
   end
 
   def rights_reproduction
     extract(ore, 'edm:rights')
   end
 
-  def material
+  # def material
+  #   extract(pc, 'dcterms:medium')
+  # end
+
+  def material_technique
     extract(pc, 'dcterms:medium')
   end
 
@@ -52,30 +69,37 @@ class Pandora::Indexing::Parser::AlbertinaRecord < Pandora::Indexing::Parser::Re
     extract(pc, 'oai:inscriptions')
   end
 
-  def dimensions
-    extract(pc, 'dcterms:extent')
-  end
+  # def publisher
+  #   extract(pc, 'dc:publisher')
+  # end
 
-  def publisher
-    extract(pc, 'dc:publisher')
+  # def dimensions
+  #   extract(pc, 'dcterms:extent')
+  # end
+
+  def size
+    extract(pc, 'dcterms:extent')
   end
 
   def title
     extract(pc, 'dc:title')
   end
 
-  def place
-    extract(pc, 'dc:coverage_spatial')
-  end
+  # def place
+  #   extract(pc, 'dc:coverage_spatial')
+  # end
 
   def credits
     "Albertina, Wien, Österreich"
   end
 
-  def location
-    "Albertina, Wien, Österreich" + (collection ? ", #{collection}" : '')
-  end
+  # def location
+  #   "Albertina, Wien, Österreich" + (collection ? ", #{collection}" : '')
+  # end
 
+  def location
+    "Albertina, Wien, Österreich"
+  end
 
   protected
 
@@ -97,7 +121,7 @@ class Pandora::Indexing::Parser::AlbertinaRecord < Pandora::Indexing::Parser::Re
 end
 
 # example xml record:
-# 
+#
 # <record>
 #   <header>
 #     <identifier>Albertina_tms_10003</identifier>

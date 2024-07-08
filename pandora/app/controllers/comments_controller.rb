@@ -1,5 +1,4 @@
 class CommentsController < ApplicationController
-
   def self.initialize_me!
     control_access [:superadmin, :user] => :ALL
   end
@@ -47,7 +46,7 @@ class CommentsController < ApplicationController
     end
 
     @comment.soft_delete!
-    
+
     index_upload(@comment)
 
     flash[:notice] = 'Comment successfully deleted!'.t
@@ -91,7 +90,5 @@ class CommentsController < ApplicationController
       end
     end
 
-
-  initialize_me!
-
+    initialize_me!
 end

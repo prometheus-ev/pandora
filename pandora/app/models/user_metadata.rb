@@ -4,7 +4,7 @@ class UserMetadata < ApplicationRecord
   attr_accessor :position
   attr_accessor :value
 
-  serialize :updates, JSON
+  serialize :updates, code: JSON
 
   validates :pid, presence: true
   validates :field, presence: true, inclusion: [
@@ -176,7 +176,7 @@ class UserMetadata < ApplicationRecord
 
     source = pid.split('-')[0]
     self.class.elastic.update(source, pid, attribs)
-    self.class.elastic.require_ok!
+    self.class.elastic.require_ok!(pass: [200..299, 404])
 
     unless Rails.env.production?
       self.class.elastic.refresh

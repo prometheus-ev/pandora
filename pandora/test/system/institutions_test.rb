@@ -4,41 +4,39 @@ class InstitutionsTest < ApplicationSystemTestCase
   # Deleting institutions is not supported. Instead their license simply
   # expires
 
-  if ENV['PM_BRITTLE'] == 'true'
-    test 'edit an institution' do
-      # we change the institution's name to include a special character to ensure
-      # the routes are working properly
-      institution = Institution.find_by!(name: 'prometheus')
-      institution.update_column :name, 'prometheus äüößéáóíúè'
+  test 'edit an institution @brittle' do
+    # we change the institution's name to include a special character to ensure
+    # the routes are working properly
+    institution = Institution.find_by!(name: 'prometheus')
+    institution.update_column :name, 'prometheus äüößéáóíúè'
 
-      login_as 'superadmin'
+    login_as 'superadmin'
 
-      click_on 'Administration'
-      section = find('h3', text: 'Institution').find(:xpath, 'following-sibling::*[1]')
-      section.click_on 'List'
+    click_on 'Administration'
+    section = find('h3', text: 'Institution').find(:xpath, 'following-sibling::*[1]')
+    section.click_on 'List'
 
-      within '.list_row', text: 'Köln, prometheus' do
-        click_on 'Edit'
-      end
-      assert_text "Edit institution 'prometheus - Das verteilte"
-
-      fill_in 'Title', with: 'Some new title'
-      select 'school (250)', from: 'License'
-
-      submit
-      assert_text 'successfully updated'
-      assert_equal 1, License.where(institution_id: institution.id).count
-
-      # we also edit it again to test if an existing license works when updating
-      click_on 'List'
-      within '.list_row', text: 'Köln, prometheus' do
-        click_on 'Edit'
-      end
-      select 'Albania', from: 'Country'
-      submit
-      assert_text 'successfully updated'
-      assert_equal 'AL', Institution.find_by!(title: 'Some new title').country
+    within '.list_row', text: 'Köln, prometheus' do
+      click_on 'Edit'
     end
+    assert_text "Edit institution 'prometheus - Das verteilte"
+
+    fill_in 'Title', with: 'Some new title'
+    select 'school (250)', from: 'License'
+
+    submit
+    assert_text 'successfully updated'
+    assert_equal 1, License.where(institution_id: institution.id).count
+
+    # we also edit it again to test if an existing license works when updating
+    click_on 'List'
+    within '.list_row', text: 'Köln, prometheus' do
+      click_on 'Edit'
+    end
+    select 'Albania', from: 'Country'
+    submit
+    assert_text 'successfully updated'
+    assert_equal 'AL', Institution.find_by!(title: 'Some new title').country
   end
 
   test 'create an institution' do

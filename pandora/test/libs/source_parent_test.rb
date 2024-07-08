@@ -1,5 +1,5 @@
 require 'test_helper'
-Dir["./test/test_sources/*.rb"].each {|file| require file }
+Dir["./test/test_sources/*.rb"].each{|file| require file}
 
 class SourceParentTest < ActionDispatch::IntegrationTest
   def test_sourceModel_indexTestSourceWithTwoDumpFiles_returnsTwoRecords
@@ -49,7 +49,7 @@ class SourceParentTest < ActionDispatch::IntegrationTest
 
     assert_equal(1, records_count)
 
-    get '/api/json/image/show', params: { id: 'test_source_artigo-356a192b7913b04c54574d18c28d46e6395428ab' }, headers: api_auth('jdoe')
+    get '/api/json/image/show', params: {id: 'test_source_artigo-356a192b7913b04c54574d18c28d46e6395428ab'}, headers: api_auth('jdoe')
 
     assert response.successful?
     assert_equal(37, json["keyword_artigo"].split(', ').size)

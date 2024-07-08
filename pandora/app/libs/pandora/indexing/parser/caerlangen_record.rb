@@ -1,12 +1,4 @@
 class Pandora::Indexing::Parser::CaerlangenRecord < Pandora::Indexing::Parser::Parents::ErlangenRecord
-  def s_location
-    [record.xpath('.//Standort/text()'), record.xpath('.//Fundort/text()'), record.xpath('.//Land/text()')]
-  end
-
-  def s_unspecified
-    [record.xpath('.//Ikonographie/text()'), record.xpath('.//Kommentar/text()')]
-  end
-
   def artist_normalized
     return @artist_normalized if @artist_normalized
 

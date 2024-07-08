@@ -9,26 +9,6 @@ class Pandora::Indexing::Parser::BpkRecord < Pandora::Indexing::Parser::Record
     record.at_xpath('.//FILENAME/text()')
   end
 
-  def s_artist
-    [record.xpath('.//ARTIST/@relation/text()'), record.xpath('.//ARTIST/FUNCTION/text()'), record.xpath('.//ARTIST/LIFE/text()'), record.xpath('.//ARTIST/NAME_andere_Schreibweise/text()'), record.xpath('.//ARTIST/NAME_Eigentlicher_Name/text()'), record.xpath('.//ARTIST/NAME_Eventuelle_Identität/text()'), record.xpath('.//ARTIST/NAME_Irrtümlicher_Name/text()'), record.xpath('.//ARTIST/NAME_Pseudonym/text()'), record.xpath('.//ARTIST/NAME_Sortierung/text()'), record.xpath('.//ARTIST/NAME_Standard/text()'), record.xpath('.//ARTIST/NAME_WeitererName/text()'), record.xpath('.//ARTIST/NAME_Zweitname/text()'), record.xpath('.//ARTIST/NAME_Akl-Name/text()'), record.xpath('.//ARTIST/NAME_Thieme-Becker-Name/text()'), record.xpath('.//ARTIST/NAME_Vollmer-Name/text()'), record.xpath('.//ARTIST/NAME_Geburtsname/text()'), record.xpath('.//ARTIST/NAME_Abkürzung/text()')]
-  end
-
-  def s_title
-    [record.xpath('.//TITLE_Abweichender_Titel/text()'), record.xpath('.//TITLE_Übersetzung_engl/text()'), record.xpath('.//TITLE_bpk/text()'), record.xpath('.//TITLE_Museum/text()'), record.xpath('.//TITLE_Originaltitel/text()'), record.xpath('.//TITLE_RaO/text()'), record.xpath('.//TITLE_Zuordnung_RuB/text()'), record.xpath('.//TITLE_Zusatztitel/text()'), record.xpath('.//TITLE_Bearbeitertitel/text()'), record.xpath('.//TITLE_Übersetzung/text()')]
-  end
-
-  def s_location
-    [record.xpath('.//INSTITUTION/text()'), record.xpath('.//GEOREL_Archipel/text()'), record.xpath('.//GEOREL_Atoll/text()'), record.xpath('.//GEOREL_Dorf/text()'), record.xpath('.//GEOREL_Inselgruppe/text()'), record.xpath('.//GEOREL_Kloster/text()'), record.xpath('.//GEOREL_Kolonie/text()'), record.xpath('.//GEOREL_Oase/text()'), record.xpath('.//GEOREL_Ortsteil/text()'), record.xpath('.//GEOREL_Provinz/text()'), record.xpath('.//GEOREL_Reservation/text()'), record.xpath('.//GEOREL_Schauplatz/text()'), record.xpath('.//GEOREL_Schauplatz_Ort/text()'), record.xpath('.//GEOREL_Schauplatz_Stadt/text()'), record.xpath('.//GEOREL_Stamm/text()'), record.xpath('.//GEOREL_Station/text()'), record.xpath('.//GEOREL_Territorium/text()'), record.xpath('.//GEOREL_Verwendungsort/text()'), record.xpath('.//GEOREL_Verwendungsort/text()'), record.xpath('.//GEOREL_Werkstatt/text()'), record.xpath('.//GEOREL_Archäologische_Region/text()'), record.xpath('.//GEOREL_Aufnahmeort/text()'), record.xpath('.//GEOREL_Bundesstaat/text()'), record.xpath('.//GEOREL_Entstehungsort_stilistisch/text()'), record.xpath('.//GEOREL_Ethnie/text()'), record.xpath('.//GEOREL_ETHNIE/text()'), record.xpath('.//GEOREL_Fluss/text()'), record.xpath('.//GEOREL_Insel/text()'), record.xpath('.//GEOREL_Königreich/text()'), record.xpath('.//GEOREL_Kontinent/text()'), record.xpath('.//GEOREL_Kultur/text()'), record.xpath('.//GEOREL_Land/text()'), record.xpath('.//GEOREL_Land_Region/text()'), record.xpath('.//GEOREL_Ort/text()'), record.xpath('.//GEOREL_Region/text()'), record.xpath('.//GEOREL_Stadt/text()'), record.xpath('.//GEOREL_Stadt_oder_Gemeinde/text()'), record.xpath('.//GEOREL_Stadtteil/text()'), record.xpath('.//GEOREL_Station/text()'), record.xpath('.//GEOREL_Tempel/text()')]
-  end
-
-  def s_credits
-    [record.xpath('.//LITERATURE/text()'), record.xpath('.//RESTRICTION/text()'), record.xpath('.//COPYRIGHT/text()'), record.xpath('.//PHOTOGRAPHER/text()')]
-  end
-
-  def s_discoveryplace
-    [record.xpath('.//GEOREL_Fundort/text()'), record.xpath('.//GEOREL_Fundort_Grab/text()'), record.xpath('.//GEOREL_Fundort_Landschaft/text()'), record.xpath('.//GEOREL_Fundort_Stadt/text()'), record.xpath('.//GEOREL_Fundort_Tempel/text()'), record.xpath('.//GEOREL_Fundort_Department/text()'), record.xpath('.//GEOREL_Fundort_Land_Region/text()'), record.xpath('.//GEOREL_Fundort_Ort/text()'), record.xpath('.//GEOREL_Fundort_Region/text()')]
-  end
-
   def artist
     ["#{record.xpath('.//ARTIST/NAME_Standard/text()')} (#{record.xpath('.//ARTIST/@relation/text()')}) #{record.xpath('.//ARTIST/LIFE/text()')}".gsub(/ \(\)/, '')]
   end
@@ -95,7 +75,7 @@ class Pandora::Indexing::Parser::BpkRecord < Pandora::Indexing::Parser::Record
      "#{record.xpath('.//GEOREL_Stadt/text()')}, ".gsub(/\A, /, '') +
      "#{record.xpath('.//GEOREL_Stadt_oder_Gemeinde/text()')}, ".gsub(/\A, /, '') +
      "#{record.xpath('.//GEOREL_Stadtteil/text()')}, ".gsub(/\A, /, '') +
-     "#{record.xpath('.//GEOREL_Station/text()')}, ".gsub(/\A, /, '')  +
+     "#{record.xpath('.//GEOREL_Station/text()')}, ".gsub(/\A, /, '') +
      "#{record.xpath('.//GEOREL_Tempel/text()')}").gsub(/, \z/, '')
   end
 

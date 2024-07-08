@@ -1,0 +1,209 @@
+inherit_from: .rubocop_todo.yml
+
+# The behavior of RuboCop can be controlled via the .rubocop.yml
+# configuration file. It makes it possible to enable/disable
+# certain cops (checks) and to alter their behavior if they accept
+# any parameters. The file can be placed either in your home
+# directory or in some project directory.
+#
+# RuboCop will start looking for the configuration file in the directory
+# where the inspected file is and continue its way up to the root directory.
+#
+# See https://docs.rubocop.org/rubocop/configuration
+
+AllCops:
+  TargetRubyVersion: 3.2.2
+  NewCops: enable
+  Exclude: 
+    - 'db/schema.rb'
+    - 'node_modules/**/*'
+    - 'test/fixtures/originals/**/*'
+    - 'tmp/**/*'
+    - 'vendor/**/*'
+
+# Configuration parameters: DebuggerMethods.
+Lint/Debugger:
+  # Enabled: false
+  Exclude:
+    - 'app/libs/pandora/log_parser.rb'
+    - 'lib/tasks/harvest_smk_dk_data.rake'
+    - 'lib/tasks/import_digirom_data.rake'
+    - 'lib/tasks/pandora/stats.rake'
+
+Lint/NonDeterministicRequireOrder:
+  Enabled: false
+
+# This cop supports safe autocorrection (--autocorrect).
+# Configuration parameters: Strict, AllowedNumbers, AllowedPatterns.
+Style/NumericLiterals:
+  Enabled: false
+
+# This cop supports safe autocorrection (--autocorrect).
+# Configuration parameters: EnforcedStyle, IndentOneStep, IndentationWidth.
+# SupportedStyles: case, end
+Layout/CaseIndentation:
+  EnforcedStyle: end
+
+# This cop supports safe autocorrection (--autocorrect).
+# Configuration parameters: EnforcedStyle.
+# SupportedStyles: leading, trailing
+Layout/DotPosition:
+  EnforcedStyle: trailing
+
+# This cop supports safe autocorrection (--autocorrect).
+# Seems to respect EnforcedStyleAlignWith from cop Layout/EndAlignment
+# Layout/ElseAlignment:
+#   Enabled: false
+
+# This cop supports safe autocorrection (--autocorrect).
+# Configuration parameters: EnforcedStyleAlignWith, Severity.
+# SupportedStylesAlignWith: keyword, variable, start_of_line
+Layout/EndAlignment:
+  EnforcedStyleAlignWith: start_of_line
+
+# This cop supports safe autocorrection (--autocorrect).
+Layout/EmptyLines:
+  Enabled: false
+  
+# This cop supports safe autocorrection (--autocorrect).
+# Configuration parameters: EnforcedStyle, IndentationWidth.
+# SupportedStyles: consistent, consistent_relative_to_receiver, special_for_inner_method_call, special_for_inner_method_call_in_parentheses
+Layout/FirstArgumentIndentation:
+  EnforcedStyle: consistent
+
+  # This cop supports safe autocorrection (--autocorrect).
+# Configuration parameters: IndentationWidth.
+# SupportedStyles: special_inside_parentheses, consistent, align_brackets
+Layout/FirstArrayElementIndentation:
+  EnforcedStyle: consistent
+
+# This cop supports safe autocorrection (--autocorrect).
+# Configuration parameters: EnforcedStyle, IndentationWidth.
+# SupportedStyles: special_inside_parentheses, consistent, align_braces
+Layout/FirstHashElementIndentation:
+  EnforcedStyle: consistent
+
+# This cop supports safe autocorrection (--autocorrect).
+# Configuration parameters: AllowMultipleStyles, EnforcedHashRocketStyle, EnforcedColonStyle, EnforcedLastArgumentHashStyle.
+# SupportedHashRocketStyles: key, separator, table
+# SupportedColonStyles: key, separator, table
+# SupportedLastArgumentHashStyles: always_inspect, always_ignore, ignore_implicit, ignore_explicit
+Layout/HashAlignment:
+  EnforcedHashRocketStyle: key
+  EnforcedColonStyle: key
+
+# This cop supports safe autocorrection (--autocorrect).
+Layout/HeredocIndentation:
+  Exclude:
+    # embeds html that would include additional white space if indented
+    # propertly
+    - 'app/helpers/more_helpers/button_helper.rb'
+
+# This cop supports safe autocorrection (--autocorrect).
+# Configuration parameters: EnforcedStyle.
+# SupportedStyles: normal, indented_internal_methods
+Layout/IndentationConsistency:
+  EnforcedStyle: indented_internal_methods
+
+# This cop supports safe autocorrection (--autocorrect).
+# Configuration parameters: EnforcedStyle, IndentationWidth.
+# SupportedStyles: aligned, indented, indented_relative_to_receiver
+Layout/MultilineMethodCallIndentation:
+  EnforcedStyle: indented
+
+# This cop supports safe autocorrection (--autocorrect).
+# Configuration parameters: EnforcedStyle, IndentationWidth.
+# SupportedStyles: aligned, indented
+Layout/MultilineOperationIndentation:
+  Enabled: false
+
+# This cop supports safe autocorrection (--autocorrect).
+# Configuration parameters: EnforcedStyle, EnforcedStyleForEmptyBraces.
+# SupportedStyles: space, no_space
+# SupportedStylesForEmptyBraces: space, no_space
+Layout/SpaceBeforeBlockBraces:
+  EnforcedStyle: no_space
+  EnforcedStyleForEmptyBraces: no_space
+
+# This cop supports safe autocorrection (--autocorrect).
+# Configuration parameters: EnforcedStyle, EnforcedStyleForEmptyBrackets.
+# SupportedStyles: space, no_space, compact
+# SupportedStylesForEmptyBrackets: space, no_space
+Layout/SpaceInsideArrayLiteralBrackets:
+  EnforcedStyle: no_space
+  EnforcedStyleForEmptyBrackets: no_space
+
+# This cop supports safe autocorrection (--autocorrect).
+# Configuration parameters: EnforcedStyle, EnforcedStyleForEmptyBraces, SpaceBeforeBlockParameters.
+# SupportedStyles: space, no_space
+# SupportedStylesForEmptyBraces: space, no_space
+Layout/SpaceInsideBlockBraces:
+  EnforcedStyle: no_space
+  EnforcedStyleForEmptyBraces: no_space
+  SpaceBeforeBlockParameters: false
+
+# This cop supports safe autocorrection (--autocorrect).
+# Configuration parameters: EnforcedStyle, EnforcedStyleForEmptyBraces.
+# SupportedStyles: space, no_space, compact
+# SupportedStylesForEmptyBraces: space, no_space
+Layout/SpaceInsideHashLiteralBraces:
+  EnforcedStyle: no_space
+  EnforcedStyleForEmptyBraces: no_space
+
+# https://docs.rubocop.org/rubocop/cops_naming.html#namingblockforwarding
+Naming/BlockForwarding:
+  EnforcedStyle: explicit
+
+Metrics/MethodLength:
+  Exclude:
+    - 'app/libs/pandora/query.rb'
+
+# This cop supports safe autocorrection (--autocorrect).
+Lint/AmbiguousOperator:
+  Enabled: false
+
+# This cop supports safe autocorrection (--autocorrect).
+Lint/AmbiguousOperatorPrecedence:
+  Enabled: false
+
+# This cop supports safe autocorrection (--autocorrect).
+Lint/AmbiguousRegexpLiteral:
+  Enabled: false
+
+# This cop supports unsafe autocorrection (--autocorrect-all).
+# Configuration parameters: AllowSafeAssignment.
+Lint/AssignmentInCondition:
+  Enabled: false
+
+# Configuration parameters: AllowedMethods.
+# AllowedMethods: enums
+Lint/ConstantDefinitionInBlock:
+  Enabled: false
+
+# Configuration parameters: IgnoreLiteralBranches, IgnoreConstantBranches.
+Lint/DuplicateBranch:
+  Exclude:
+    - 'app/libs/pandora/query.rb'
+
+Style/RedundantParentheses:
+  Enabled: false
+  
+# Configuration parameters: EnforcedStyle, MaxUnannotatedPlaceholdersAllowed, AllowedMethods, AllowedPatterns.
+# SupportedStyles: annotated, template, unannotated
+Style/FormatStringToken:
+  Enabled: false
+
+Style/SelectByRegexp:
+  Enabled: false
+
+# This cop supports unsafe autocorrection (--autocorrect-all).
+Style/LineEndConcatenation:
+  Enabled: false
+
+Lint/FloatComparison:
+  Exclude:
+    - 'app/helpers/more_helpers/rating_helper.rb'
+
+Lint/NoReturnInBeginEndBlocks:
+  Exclude:
+    - 'app/libs/pandora/super_image.rb'

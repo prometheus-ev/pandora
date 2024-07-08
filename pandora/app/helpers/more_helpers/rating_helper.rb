@@ -1,27 +1,25 @@
 module MoreHelpers
-
   module RatingHelper
-
     def stars(rating, options = {}, html_options = {})
-      out, counter = '', { :i => 0 }
+      out, counter = '', {:i => 0}
 
       if rating
         rating = rating.to_f
-        full  = rating.round_hd
+        full  = round_hd(rating)
         half  = rating % -1 > -0.5 ? 0 : 1
         empty = MAX_RATING - full - half
 
-        full.times  { out << star(:full,  options, html_options, counter) }
-        half.times  { out << star(:half,  options, html_options, counter) }
-        empty.times { out << star(:empty, options, html_options, counter) }
+        full.times{out << star(:full,  options, html_options, counter)}
+        half.times{out << star(:half,  options, html_options, counter)}
+        empty.times{out << star(:empty, options, html_options, counter)}
       else
-        MAX_RATING.times { out << star(:inactive, options, html_options, counter) }
+        MAX_RATING.times{out << star(:inactive, options, html_options, counter)}
       end
 
       out.html_safe
     end
 
-    def star(which = :full, options = {}, html_options = {}, counter = { :i => 0 })
+    def star(which = :full, options = {}, html_options = {}, counter = {:i => 0})
       counter = counter[:i] += 1
 
       if options.blank?
@@ -30,19 +28,19 @@ module MoreHelpers
       else
         img = image_tag(
           star_path(which),
-          :_hover_src     => image_path(star_path(:full)),
+          :_hover_src => image_path(star_path(:full)),
           :_alt_hover_src => image_path(star_path(:inactive))
         )
 
         title = case title = html_options[:title]
-          when /%d/
-            title % counter
-          when /%s/
-            title % rating_to_human(counter, :image)
-          when String
-            title
-          else
-            counter
+        when /%d/
+          title % counter
+        when /%s/
+          title % rating_to_human(counter, :image)
+        when String
+          title
+        else
+          counter
         end
 
         if url = options[:url]
@@ -68,12 +66,10 @@ module MoreHelpers
       if rating
         style = 'strong' if style == true
 
-        (
-          "#{style ? "<#{style}>%s</#{style[/\S+/]}>" : '%s'} – %s" % [
-            "",
-            "#{image.rating} in #{image.votes}"
-          ]
-        ).html_safe
+        tpl = style ? "<#{style}>%s</#{style[/\S+/]}>" : '%s'
+        tpl = "#{tpl} – %s"
+        result = tpl % ["", "#{image.rating} in #{image.votes}"]
+        result.html_safe
       else
         'No ratings yet'.t
       end
@@ -97,13 +93,15 @@ module MoreHelpers
       link_to(stars(image.rating), options.merge(:controller => 'images', :action => 'show', :id => si.pid, :anchor => 'rating'), html_options.reverse_merge(:title => rating_title_for(image)))
     end
 
-    def rewarded_stars(ratings, *args)
-      return star(:empty, *args) if ratings.zero?
+    def rewarded_stars(ratings, ...)
+      return star(:empty, ...) if ratings.zero?
 
-      stars = star(:full, *args) * (ratings / 100.0).round_hd
-      ratings % -100 > -50 ? stars.html_safe : (stars << star(:half, *args)).html_safe
+      stars = star(:full, ...) * round_hd(ratings / 100.0)
+      ratings % -100 > -50 ? stars.html_safe : (stars << star(:half, ...)).html_safe
     end
 
+    def round_hd(float)
+      float % 1 == 0.5 ? float.floor : float.round
+    end
   end
-
 end

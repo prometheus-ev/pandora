@@ -1,6 +1,12 @@
 #!/bin/bash -e
 
 function deploy {
+  if [[ "$DEPLOYER" == "" ]]; then
+    echo "DEPLOYER is unset, please fill it in with something like your name in"
+    echo "'deploy/config.sh'."
+    exit 1
+  fi
+
   OLD_COMMIT=$(ssh -p $PORT $HOST "cat $LINKED_CURRENT_PATH/BRANCH") || :
 
   if [[ "$OLD_COMMIT" != "$COMMIT" ]]; then
@@ -50,7 +56,7 @@ function deploy {
   remote "touch $CURRENT_PATH/rack-images/tmp/restart.txt"
 
   remote "echo '$COMMIT' > $CURRENT_PATH/BRANCH"
-  remote "echo 'Revision: $REVISION ($COMMIT)' | mail -s 'deployed $DEPLOY_TARGET' $NOTIFY" || :
+  remote "echo 'Revision: $REVISION ($COMMIT)' | mail -s '$DEPLOYER deployed $DEPLOY_TARGET' $NOTIFY" || :
 
   finalize
 }

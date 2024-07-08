@@ -1,7 +1,6 @@
 <h2><%= 'Administration help'.t %></h2>
 
 <% with_toc do -%>
-
   <%= section_heading 'Managing your personal account', 'personal_account' %>
   <p>
     To change your personal account information click your name in the upper right corner. Click
@@ -50,7 +49,6 @@
   </dl>
 
   <% restrict_to :superadmin, :admin, :useradmin do -%>
-
     <%= section_heading 'Administrator management', 'management' %>
     <p>
       As an administrator you are authorized to create personal accounts for members of your
@@ -225,9 +223,7 @@
     <p>
       Your account will remain activated except for the administrator status.
     </p>
-
   <% end -%>
-
 <% end -%>
 
 <%= render :partial => 'footer' %>

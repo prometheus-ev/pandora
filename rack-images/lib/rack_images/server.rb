@@ -1,3 +1,5 @@
+require 'ipaddr'
+
 class RackImages::Server
   def self.call(env)
     new.call(env)
@@ -20,6 +22,8 @@ class RackImages::Server
   end
 
   def verify_access
+    return if trusted_client?
+
     unless valid_token?
       raise RackImages::Exception, "access denied"
     end
@@ -33,6 +37,18 @@ class RackImages::Server
     [200, {'content-type' => content_type}, file]
   end
 
+  def trusted_client?
+    if trusted = ENV['PM_TRUSTED_HOSTS']
+      request_ip = IPAddr.new(request.ip)
+      trusted.split(/\s+/).each do |t|
+        ip = IPAddr.new(t)
+        return true if ip.include?(request_ip)
+      end
+    end
+
+    false
+  end
+
   def valid_token?
     token = request.params['_asd']
     RackImages::Secret.valid?(token, full_path_info)
@@ -40,9 +56,19 @@ class RackImages::Server
   
   # returns the full path info including the query string but without _asd=...
   def full_path_info
-    request.url.
-      gsub(ENV['PM_RACK_IMAGES_BASE_URL'], '').
-      gsub(/[\?\&]_asd=[a-z0-9]+$/, '')
+    result = request.url
+
+    patterns = [
+      ENV['PM_RACK_IMAGES_BASE_URL'],
+      ENV['PM_RACK_IMAGES_UPLOADS_BASE_URL'],
+      /[\?\&]_asd=[a-z0-9]+$/
+    ].compact
+
+    patterns.each do |pattern|
+      result.gsub! pattern, ''
+    end
+
+    result
   end
 
   def render_not_available

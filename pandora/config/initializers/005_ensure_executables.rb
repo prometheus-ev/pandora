@@ -2,7 +2,7 @@
 
 executables = [
   'convert', 'curl', 'gzip', 'rsync', 'ln', 'mkdir', 'rm', 'zip', 'cat', 'zcat',
-  'wc', 'gunzip', 'idn', 'grep'
+  'wc', 'gunzip', 'idn', 'grep', 'file'
 ]
 
 executables.each do |e|

@@ -1,0 +1,225 @@
+<indexing-page class="m-5">
+  <div is="pm-loading-indicator" />
+
+  <h1>{t('pages.indexing_status')}</h1>
+
+
+  <h2>{t('Sources')}</h2>
+
+  <table if={loaded()}>
+    <thead>
+      <tr>
+        <th colspan="4" class="text-center border-bottom pe-0">{cap(t('activerecord.models.source.one'))}</th>
+        <th colspan="1" class="text-center border-bottom pe-0">{cap(t('elasticsearch'))}</th>
+        <th colspan="1" class="text-center border-bottom pe-0">{cap(t('indexer'))}</th>
+        <th colspan="1" class="text-center border-bottom pe-0">{cap(t('rack_images'))}</th>
+      </tr>
+      <tr>
+        <th>{cap(t('activerecord.attributes.source.name'))}</th>
+        <th>{cap(t('activerecord.attributes.source.kind'))}</th>
+        <th>{cap(t('activerecord.attributes.source.open_access'))}</th>
+        <th class="text-end pe-0">{cap(t('activerecord.attributes.source.record_count'))}</th>
+        <th class="ps-1">{cap(t('activerecord.attributes.source.counts'))}</th>
+        <th>{cap(t('activerecord.attributes.source.indexings'))}</th>
+        <th>{cap(t('activerecord.attributes.source.samples'))}</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr each={source in state.sources}>
+        <td>
+          <a
+            href="/{locale()}/sources/{source.name}"
+            target="_blank"
+          >{source.name}</a>
+        </td>
+        <td>{formatKind(source.kind)}</td>
+        <td>{formatOa(source.open_access)}</td>
+        <td class="text-end pe-0">
+          {source.record_count}
+        </td>
+        <td class="ps-1">
+          <div class="elastic-counts text-nowrap {countClassesFor(source)}">
+            <template if={countsFor(source.name)}>
+              records:
+              <a
+                href="/{locale()}/searches/advanced?indices[{source.name}]=true&search_field[]=all&search_value[]=*"
+                target="_blank"
+              >{countsFor(source.name)['records']}</a>,
+              objects: {countsFor(source.name)['objects']}
+            </template>
+            <template if={!countsFor(source.name)}>
+              no index
+            </template>
+          </div>
+        </td>
+        <td class="text-nowrap">
+          <div each={result in resultsFor(source.name)} class="result">
+            <a href="#" onclick={event => openResult(source, result, event)}>
+              {formatTs(result.started_at)}
+            </a>
+          </div>
+        </td>
+        <td>
+          <div class="samples">
+            <img
+              each={sample in samplesFor(source.name)}
+              src={state.imageUrls[sample.pid]}
+            />
+          </div>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div is="ir-modal" />
+
+  <script>
+    import strftime from 'strftime'
+    import {request, locale} from '../lib/util'
+    import ResultModal from './indexing/result_modal.riot'
+
+    let tmpResults = []
+
+    export default class {
+      static components = {'ir-modal': ResultModal}
+
+      constructor() {
+        this.locale = locale
+        this.fetchSamples = this.fetchSamples.bind(this)
+      }
+
+      onBeforeMount(props, state) {
+        state['imageUrls'] = {}
+
+        request('/api/json/source/list?per_page=max', ).then(data => {
+          // console.log(data)
+          this.update({sources: data})
+        })
+
+        request('/api/json/indexing/results').then(data => {
+          // console.log(data)
+          this.update({results: data})
+        })
+
+        request('/api/json/indexing/counts').then(data => {
+          // console.log(data)
+          this.update({counts: data})
+        })
+
+        this.fetchSamples()
+      }
+
+      fetchSamples(page = 1) {
+        const params = [
+          'search_field[0]=all',
+          'search_value[0]=*',
+          'sample=1',
+          'sample_size=5',
+          'per_page=max',
+          `page=${page}`
+        ].join('&')
+
+        return request(`/api/json/search/advanced_search?${params}`).then(data => {
+          // console.log(data)
+
+          tmpResults = tmpResults.concat(data)
+
+          if (data.length > 0) {
+            this.fetchSamples(page + 1)
+          } else {
+            // console.log(tmpResults, 'XXX')
+            let samples = {}
+            for (const sample of tmpResults) {
+              const name = sample.pid.split('-')[0]
+              samples[name] = samples[name] || []
+              samples[name].push(sample)
+            }
+
+            const params = [
+              `pids=${tmpResults.map(s => s.pid).join(',')}`
+            ].join('&')
+
+            const p = {
+              pids: tmpResults.map(s => s.pid)
+            }
+            request(`/api/json/indexing/image_urls`, {method: 'POST', body: p}).then(data => {
+              // console.log(data)
+
+              this.update({imageUrls: data})
+            })
+
+            tmpResults = []
+            this.update({samples})
+          }
+        })
+      }
+
+      openResult(source, result, event) {
+        event.preventDefault()
+
+        this.bus.emit('i.modal', {source, result})
+      }
+
+      resultsFor(name) {
+        const results = this.state['results'] || {}
+
+        return results[name] || []
+      }
+
+      countsFor(name) {
+        const counts = this.state['counts'] || {}
+
+        return counts[name]
+      }
+
+      samplesFor(name) {
+        const samples = this.state['samples'] || {}
+
+        return samples[name]
+      }
+
+      countClassesFor(source) {
+        const counts = this.countsFor(source.name)
+
+        if (!counts) return 'error'
+        if (counts['records'] != source.record_count) return 'warn'
+
+        return ''
+      }
+
+      formatCounts(counts) {
+        if (!counts) return 'no index'
+
+        return `records: ${counts['records']}, objects: ${counts['objects']}`
+      }
+
+      formatTs(ts) {
+        const date = new Date(ts * 1000)
+        return strftime('%Y-%m-%d %H:%H:%S', date)
+      }
+
+      formatOa(value) {
+        const map = {
+          'Open access': 'yes',
+          'Non-Open access': 'no'
+        }
+
+        return map[value] || value
+      }
+
+      formatKind(value) {
+        return value.split(' ')[0].toLowerCase()
+      }
+
+      loaded() {
+        return(
+          !!this.state['sources'] &&
+          !!this.state['results'] &&
+          !!this.state['counts'] &&
+          !!this.state['imageUrls'] &&
+          !!this.state['samples']
+        )
+      }
+    }
+  </script>
+</indexing-page>

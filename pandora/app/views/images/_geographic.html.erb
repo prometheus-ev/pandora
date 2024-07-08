@@ -1,13 +1,13 @@
+<% content_for :head do %>
+  <%= javascript_include_tag 'app/geo/map.js' %>
+<% end %>
+
 <script>
 // http://leafletjs.com/reference.html
 var lat = <%= @lat %>;
 var lng = <%= @lng %>;
 var zoom_level = <%= @zoom_level %>;
 </script>
-
-<% content_for :head do %>
-  <%= javascript_include_tag 'app/geo/map.js' %>
-<% end %>
 
 <% parent = section_id('details') %>
 

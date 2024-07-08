@@ -36,11 +36,11 @@ class Pandora::Cleanup
     timestamp = 1.month.ago
     stale = Account.stale_signups(timestamp)
 
-    silent_log "found #{stale.count} stale signup(s):"
+    Pandora.puts "found #{stale.count} stale signup(s):"
 
     stale.each do |a|
       a.destroy
-      silent_log "  deleted #{a.login} <#{a.email}>"
+      Pandora.puts "  deleted #{a.login} <#{a.email}>"
     end
   end
 
@@ -53,7 +53,7 @@ class Pandora::Cleanup
       WHERE c.id IS NULL OR i.pid IS NULL
     ")
 
-    silent_log "deleted #{num} invalid collection <-> image connections"
+    Pandora.puts "deleted #{num} invalid collection <-> image connections"
   end
 
   def account_role
@@ -65,7 +65,7 @@ class Pandora::Cleanup
       WHERE a.id IS NULL OR r.id IS NULL
     ")
 
-    silent_log "deleted #{num} invalid account <-> role connections"
+    Pandora.puts "deleted #{num} invalid account <-> role connections"
   end
 
   def settings
@@ -74,7 +74,7 @@ class Pandora::Cleanup
       where('accounts.id IS NULL')
 
     num = Settings.delete(stale)
-    silent_log "deleted #{num} invalid settings records"
+    Pandora.puts "deleted #{num} invalid settings records"
   end
 
 
@@ -85,13 +85,6 @@ class Pandora::Cleanup
       sql = "DELETE FROM #{name} WHERE #{column} <= '#{date}'"
       num = ActiveRecord::Base.connection.delete(sql)
 
-      silent_log "table #{name}: deleted #{num} entries older than #{date} (#{column})"
+      Pandora.puts "table #{name}: deleted #{num} entries older than #{date} (#{column})"
     end
-
-    def silent_log(msg = nil)
-      if ENV['PM_SILENT'] != 'true'
-        puts msg
-      end
-    end
-
 end

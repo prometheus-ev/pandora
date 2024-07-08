@@ -23,4 +23,3 @@ class ClientApplicationTest < ActiveSupport::TestCase
     assert_equal @application.secret, @application.credentials.secret
   end
 end
-

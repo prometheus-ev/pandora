@@ -144,7 +144,7 @@
   </div>
 <% end %>
 
-<% if @super_image.elastic_record.dig('_source', 'image_vector') %>
+<% if @similarity %>
   <div id="similar_images-section" class="section_wrap clear-padding">
     <a name="similar_images"></a>
     <div class="scriptonly section_toggle">
@@ -170,19 +170,18 @@
     </div>
     <div class="section undim">
       <div class="images">
-        <% similars = Pandora::Elastic.new.image_vector_query(record_id: @super_image.pid)['hits']['hits'].drop(1) %>
         <table>
           <tr>
-            <% similars.each do |similar| %>
+            <% @similar_images.each do |similar_image| %>
               <td class="image">
-                <%= link_to_image_tag(Pandora::SuperImage.new(similar['_id'], elastic_record: similar)) %>
+                <%= link_to_image_tag(Pandora::SuperImage.new(similar_image['_id'], elastic_record: similar_image)) %>
               </td>
             <% end %>
           </tr>
           <tr>
-            <% similars.each do |similar| %>
+            <% @similar_images.each do |similar_image| %>
               <td class="dim">
-                <%= render partial: 'ratings/show', locals: {super_image: Pandora::SuperImage.new(similar['_id'], elastic_record: similar), light: true} %>
+                <%= render partial: 'ratings/show', locals: {super_image: Pandora::SuperImage.new(similar_image['_id'], elastic_record: similar_image), light: true} %>
               </td>
             <% end %>
           </tr>

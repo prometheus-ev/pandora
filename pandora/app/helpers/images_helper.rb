@@ -1,5 +1,4 @@
 module ImagesHelper
-
   def segments_for_controller_title
     segments = super
     segments[1] = 'Copyright and publishing information for' if action_name == 'publish'
@@ -23,6 +22,6 @@ module ImagesHelper
       link_to_links(credit)
     else
       format_content(credit, :escape => false)
-    end    
+    end
   end
 end

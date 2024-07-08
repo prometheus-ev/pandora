@@ -3,22 +3,22 @@ namespace :pandora do
   def options_from_env(env = ARGV[1..-1])
     options = {}
 
-    env.each { |string|
+    env.each {|string|
       key, value = string.split('=', 2)
 
       next unless value
 
       options[key.downcase.to_sym] = case value
-        when 'true'
-          true
-        when 'false', ''
-          false
-        when /\A[+-]?\d+\z/
-          value.to_i
-        when /\A[+-]?\d+\.\d+\z/
-          value.to_f
-        else
-          value
+      when 'true'
+        true
+      when 'false', ''
+        false
+      when /\A[+-]?\d+\z/
+        value.to_i
+      when /\A[+-]?\d+\.\d+\z/
+        value.to_f
+      else
+        value
       end
     } if env
 

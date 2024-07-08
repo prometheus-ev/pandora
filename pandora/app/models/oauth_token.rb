@@ -1,5 +1,4 @@
 class OauthToken < ApplicationRecord
-
   belongs_to :client_application
   belongs_to :user, :class_name => 'Account', optional: true
 
@@ -36,5 +35,4 @@ class OauthToken < ApplicationRecord
     def generate_keys
       self.token, self.secret = generate_oauth_key, generate_oauth_key
     end
-
 end

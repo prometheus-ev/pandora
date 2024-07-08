@@ -121,7 +121,7 @@ class AuthenticationTest < ApplicationSystemTestCase
     login_as 'jdoe'
     # TODO Remove German version of flash notice after the prometheus app has been updated for prometheus-ng.
     # The legacy app checks this sentence in German.
-    #assert_text 'Please accept our terms of use'
+    # assert_text 'Please accept our terms of use'
     assert_text 'Bitte akzeptieren Sie unsere Nutzungsbedingungen'
     check 'I read the terms of use carefully and agree!'
     submit 'Proceed...'
@@ -140,7 +140,7 @@ class AuthenticationTest < ApplicationSystemTestCase
 
     # remove the actual session cookie (simulates browser close)
     manage.delete_cookie '_pandora_session'
-    
+
     visit '/'
     assert_text 'Please log in first'
 

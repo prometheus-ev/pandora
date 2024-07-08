@@ -1,5 +1,4 @@
 class OauthNonce < ApplicationRecord
-
   validates_presence_of   :nonce, :timestamp
   validates_uniqueness_of :nonce, scope: :timestamp, case_sensitive: true
 
@@ -9,5 +8,4 @@ class OauthNonce < ApplicationRecord
     oauth_nonce = create(:nonce => nonce, :timestamp => timestamp)
     oauth_nonce.new_record? ? false : oauth_nonce
   end
-
 end

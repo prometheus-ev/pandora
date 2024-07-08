@@ -1,8 +1,10 @@
 # Class representing an Elasticsearch record with pandora dependencies.
 class ElasticRecordImage
-  attr_accessor :id, :pid, :pobject_id, :artist, :artist_nested, :title, :location, :date,
+  attr_accessor(
+    :id, :pid, :pobject_id, :artist, :artist_nested, :title, :location, :date,
     :credits, :rights_work, :rights_reproduction, :path, :rating, :votes,
     :source_id, :source, :elastic_record
+  )
 
   def initialize(id, elastic_record, super_image, elastic_record_source)
     @id = id
@@ -81,13 +83,13 @@ class ElasticRecordImage
 
   def vgbk
     if rights_work
-      rights_work.map { |right_work|
+      rights_work.map do |right_work|
         if right_work == "rights_work_vgbk"
           return right_work
         else
           return ""
         end
-      }
+      end
     else
       ""
     end
@@ -108,12 +110,12 @@ class ElasticRecordImage
         # REWRITE: Array#to_s used to concat
         # txt << field.humanize.titleize.t + ": " + value.to_s
         v = if value.is_a?(String)
-              value
-            elsif value.is_a?(Integer)
-              value.to_s
-            else
-              value.join
-            end
+          value
+        elsif value.is_a?(Integer)
+          value.to_s
+        else
+          value.join
+        end
 
         txt << field.humanize.titleize.t + ": " + v
         txt << "\n\n"
@@ -131,7 +133,7 @@ class ElasticRecordImage
     txt << "\n\n"
     txt << "Source".t + ": " + source.fulltitle
     txt << "\n\n"
-    txt << Time.now.utc
+    txt << Time.now.utc.to_fs
 
     # REWRITE: we need one string here, the newlines are already there
     # txt
@@ -162,11 +164,11 @@ class ElasticRecordImage
     @descriptive_title ||= begin
       t = []
 
-      [[artist, title], [location]].each { |i|
+      [[artist, title], [location]].each do |i|
         j = []
-        i.each { |k| j << k if k && !(k = k.to_s.gsub(/\s+/, ' ').strip).empty? }
+        i.each{|k| j << k if k && !(k = k.to_s.gsub(/\s+/, ' ').strip).empty?}
         t << (t.empty? ? j : j.parenthesize) unless (j = j.join(': ')).empty?
-      }
+      end
 
       t.empty? ? path.gsub(/.*?\/|\.[^.]*\z/, '') : t.join(' ')
     end
@@ -179,8 +181,7 @@ class ElasticRecordImage
       words = chars[0, length].split(/(\s+)/)
 
       title = words[0..-3].join.sub(/\W+\z/, '')
-      title.empty? && words.find { |word| !word.blank? } || title
+      title.empty? && words.find{|word| !word.blank?} || title
     end
   end
-
 end

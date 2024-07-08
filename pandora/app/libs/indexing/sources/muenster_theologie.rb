@@ -30,7 +30,7 @@ class Indexing::Sources::MuensterTheologie < Indexing::SourceSuper
   end
 
   def artist_normalized
-    an = record.xpath('.//name_autor/text()').map { |a|
+    an = record.xpath('.//name_autor/text()').map {|a|
       a.to_s.split(', ').reverse.join(' ')
     }
     super(an)

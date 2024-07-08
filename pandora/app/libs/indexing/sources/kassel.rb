@@ -16,7 +16,7 @@ class Indexing::Sources::Kassel < Indexing::SourceSuper
   end
 
   def artist_normalized
-    an = record.xpath(".//kuenstler/text()").map { |a|
+    an = record.xpath(".//kuenstler/text()").map {|a|
       a.to_s.sub(/ \(.*/, '').split(', ').reverse.join(' ')
     }
     super(an)

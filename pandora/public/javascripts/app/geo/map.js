@@ -1,14 +1,20 @@
 document.observe("dom:loaded", function() {
-  // https://developer.mapquest.com/documentation/mapquest-js/v1.3/
-  L.mapquest.key = '6cGTYTOCsUvGsEtmAr07AQbHE3mxeTAQ';
-
-  map = L.mapquest.map('map', {
+  // http://leafletjs.com/reference.html
+  map = L.map('map', {
     center: [lat, lng],
-    layers: L.mapquest.tileLayer('map'),
     zoom: zoom_level
   });
 
-  // http://leafletjs.com/reference.html
+  L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    attribution: '<a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+  }).addTo(map);
+
+  var markerIcon = L.icon({
+    iconUrl: '/images/icon/google_maps.png',
+    iconSize: [32, 32],
+  });
+
   marker = L.marker([lat, lng], {
+    icon: markerIcon
   }).addTo(map);
 });

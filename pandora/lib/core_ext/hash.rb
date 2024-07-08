@@ -1,6 +1,5 @@
 class Hash
-
-  OPERATORS = Hash.new { |h, k| h[k] = k.to_s.upcase }.merge(
+  OPERATORS = Hash.new{|h, k| h[k] = k.to_s.upcase}.merge(
     :and => 'AND', :or => 'OR', :not => 'AND NOT'
   )
 
@@ -29,11 +28,10 @@ class Hash
   alias_method :update_html_options, :merge_html_options!
 
   def sort_by_key
-    block_given? ? sort_by { |key, _| yield(key) } : sort_by { |key, _| key }
+    block_given? ? sort_by{|key, _| yield(key)} : sort_by{|key, _| key}
   end
 
   def hash
-    inject(size) { |h, (k, v)| h ^ k.hash ^ v.hash }
+    inject(size){|h, (k, v)| h ^ k.hash ^ v.hash}
   end
-
 end

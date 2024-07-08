@@ -108,11 +108,12 @@ class Indexing::Sources::Mka < Indexing::SourceSuper
     "https://stiftung-imai.de/videos/katalog/medium/#{i_n}"
   end
 
+
   private
 
-  def artist_names
-    artist_nested.map { |artist|
-      artist['name']
-    }
-  end
+    def artist_names
+      artist_nested.map {|artist|
+        artist['name']
+      }
+    end
 end

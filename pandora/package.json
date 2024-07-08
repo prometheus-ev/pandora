@@ -19,6 +19,7 @@
     "node-sass": "^7.0.0",
     "riot": "^7.0.5",
     "sass-loader": "^10.1.0",
+    "strftime": "^0.10.3",
     "uglify-js": "^3.12.3",
     "webpack": "^5.11.0",
     "webpack-cli": "^4.3.0",

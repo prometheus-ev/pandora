@@ -44,11 +44,14 @@
     </tr>
 
     <% restrict_to :superadmin, :admin, :useradmin do -%>
-
       <% for column in current_user.admin_or_superadmin? ? Institution.display_columns : Institution.display_columns_for_user -%>
         <tr>
           <th><%= column.human_name.tn(controller_name) %></th>
-          <td><%=h @institution.send(column.name) %></td>
+          <td>
+            <% v = @institution.send(column.name) %>
+            <% v = v.to_fs if v.is_a?(ActiveSupport::TimeWithZone) %>
+            <%=h v %>
+          </td>
         </tr>
       <% end -%>
 
@@ -96,7 +99,7 @@
 <% if @databases.size > 0 %>
   <%= pm_section('databases', title: pm_labelled_counter(@databases.size, '%d database', '%d databases')) do %>
     <table class="list">
-      <%= render :partial => 'sources/row', :collection => @databases, :locals => { :cycle_name => 'sources' } %>
+      <%= render partial: "sources/row", collection: @databases, locals: {cycle_name: "sources", sources_counts: @sources_counts} %>
     </table>
   <% end %>
 <% end %>

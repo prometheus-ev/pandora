@@ -3,7 +3,6 @@ class Object
 end
 
 class ClientApplication < ApplicationRecord
-
   include Util::Config
   include Util::ActiveCrypter
 
@@ -17,8 +16,8 @@ class ClientApplication < ApplicationRecord
   validates_uniqueness_of :name, :key, case_sensitive: true
 
   # REWRITE: added end anchor
-  #URL_RE = %r{\Ahttps?://(?:\w+:?\w*@)?\S+(?::\d+)?(?:/|/[\w#!:.?+=&%@!\-/])?}i
-  URL_RE = %r{\Ahttps?://(?:\w+:?\w*@)?\S+(?::\d+)?(?:/|/[\w#!:.?+=&%@!\-/])?\z}i
+  # URL_RE = %r{\Ahttps?://(?:\w+:?\w*@)?\S+(?::\d+)?(?:/|/[\w#!:.?+=&%@!\-/])?}i
+  URL_RE = %r{\Ahttps?://(?:\w+:?\w*@)?\S+(?::\d+)?(?:/|/[\w#!:.?+=&%@\-/])?\z}i
 
   validates_format_of :url,          :with => URL_RE
   validates_format_of :support_url,  :with => URL_RE, :allow_blank => true
@@ -32,10 +31,7 @@ class ClientApplication < ApplicationRecord
 
   encrypts :secret, :with => [:OAUTH_SECRET, :key]
 
-###############################################################################
   class << self
-###############################################################################
-
     def find_token(token_key)
       # REWRITE: use new ar interface
       # token = OauthToken.find_by_token(token_key, :include => :client_application)
@@ -48,28 +44,26 @@ class ClientApplication < ApplicationRecord
       # which requires the request object to reflect this in request.url which
       # uses its @fullpath instance variable. We make sure the slash is (re)added:
       if request.env['REQUEST_URI'].match(/\/(\?|$)/)
-        fp = request.instance_variable_get('@fullpath')
-        request.instance_variable_set('@fullpath', fp.gsub(/\/?(\?|$)/, '/\1'))
+        fp = request.fullpath.gsub(/\/?(\?|$)/, '/\1')
+        request.instance_variable_set('@fullpath', fp)
       end
 
       request_proxy = request_proxy_for(request, options)
       return false unless supported_request?(request_proxy)
 
-      signature = begin
-        OAuth::Signature.build(request_proxy, options, &block)
-      rescue OAuth::Signature::UnknownSignatureMethod => err
-        logger.info "ERROR #{err}"
-        return false
-      end
+      signature = OAuth::Signature.build(request_proxy, options, &block)
 
       if OauthNonce.remember(signature.request.nonce, signature.request.timestamp)
         signature.verify
       else
         false
       end
+    rescue OAuth::Signature::UnknownSignatureMethod => err
+      logger.info "ERROR #{err}"
+      false
     end
 
-    
+
     private
 
       def supported_request?(request, options = {})
@@ -83,7 +77,6 @@ class ClientApplication < ApplicationRecord
         # returns +request+ if it's already a proxy
         OAuth::RequestProxy.proxy(request, options)
       end
-
   end
 
   def to_s
@@ -120,14 +113,9 @@ class ClientApplication < ApplicationRecord
     token if token.authorize!(user)
   end
 
-  
+
   protected
 
-    # REWRITE: it seems that this is not the intended behavior. This callback
-    # overwrites any values for key and secret (on create)
-    # def generate_keys
-    #   self.key, self.secret = generate_oauth_key, generate_oauth_key
-    # end
     def generate_keys
       if self[:key].blank?
         self.key = generate_oauth_key
@@ -136,5 +124,4 @@ class ClientApplication < ApplicationRecord
         self.secret = generate_oauth_key
       end
     end
-
 end

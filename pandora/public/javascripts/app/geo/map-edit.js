@@ -2,19 +2,23 @@ var map = null;
 var marker = null;
 
 document.observe("dom:loaded", function() {
-  // https://developer.mapquest.com/documentation/mapquest-js/v1.3/
-  L.mapquest.key = 'FILL-ME-IN';
-
-  if (L.mapquest.key == 'FILL-ME-IN') return
-
-  map = L.mapquest.map('map', {
+  // http://leafletjs.com/reference.html
+  map = L.map('map', {
     center: [lat, lng],
-    layers: L.mapquest.tileLayer('map'),
     zoom: zoom_level
   });
 
-  // http://leafletjs.com/reference.html
+  L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    attribution: '<a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+  }).addTo(map);
+
+  var markerIcon = L.icon({
+    iconUrl: '/images/icon/google_maps.png',
+    iconSize: [32, 32],
+  });
+
   marker = L.marker([lat, lng], {
+    icon: markerIcon,
     draggable: true
   }).addTo(map);
 
@@ -67,7 +71,7 @@ document.observe("dom:loaded", function() {
         break;
       default:
         $('upload-location-search-result').hide();
-        request_location_with($('upload_location').value);
+        //request_location_with($('upload_location').value);
         i = i_default;
         break;
     }
@@ -88,7 +92,7 @@ document.observe("dom:loaded", function() {
 
   Element.observe('upload_location', 'click', function(event) {
     $('upload-location-search-result').hide();
-    request_location_with($('upload_location').value);
+    //request_location_with($('upload_location').value);
     i = i_default;
   });
 
@@ -104,7 +108,7 @@ document.observe("dom:loaded", function() {
 
   marker.on('dragend', function(e) {
     lat_lng = marker.getLatLng();
-    request_location_by(lat_lng.lat.toFixed(5), lat_lng.lng.toFixed(5));
+    //request_location_by(lat_lng.lat.toFixed(5), lat_lng.lng.toFixed(5));
     zoom_level = map.getZoom();
   });
 
@@ -118,7 +122,7 @@ document.observe("dom:loaded", function() {
     lat_lng = marker.getLatLng();
     $('upload_latitude').value = lat_lng.lat.toFixed(5);
     $('upload_longitude').value = lat_lng.lng.toFixed(5);
-    request_location_by(lat_lng.lat.toFixed(5), lat_lng.lng.toFixed(5));
+    //request_location_by(lat_lng.lat.toFixed(5), lat_lng.lng.toFixed(5));
     zoom_level = map.getZoom();
   });
 
@@ -135,7 +139,7 @@ function request_location_with(name) {
     ul.innerHTML = ''
 
     if ( name && name.length > 2 ) {
-      // http://prometheus-app.uni-koeln.de/redmine/projects/prometheus/wiki/API_Accounts
+      // [[API_Accounts]]
       // https://developer.mapquest.com/documentation/geocoding-api/address/get/
       var url =
         'https://www.mapquestapi.com/geocoding/v1/address?' +
@@ -170,7 +174,7 @@ function request_location_with(name) {
 }
 
 function request_location_by(lat, lng) {
-  // http://prometheus-app.uni-koeln.de/redmine/projects/prometheus/wiki/API_Accounts
+  // [[API_Accounts]]
   // https://developer.mapquest.com/documentation/geocoding-api/reverse/get/
   var url =
     'https://www.mapquestapi.com/geocoding/v1/reverse?' +

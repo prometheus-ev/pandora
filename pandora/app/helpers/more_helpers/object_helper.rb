@@ -1,7 +1,5 @@
 module MoreHelpers
-
   module ObjectHelper
-
     def link_to_object(object, name = nil, options = {})
       if object.is_a?(Account) && object.anonymous?
         if object.ipuser?
@@ -13,10 +11,10 @@ module MoreHelpers
 
       link_to(h(name || object), {
         :controller => object.class.controller_name,
-        :action     => 'show',
+        :action => 'show',
         # REWRITE: this has to be an id now
         # :id         => object
-        :id         => object.is_a?(Account) ? object.login : object.id
+        :id => object.is_a?(Account) ? object.login : object.id
       }.merge(options))
     end
 
@@ -27,7 +25,7 @@ module MoreHelpers
     end
 
     def link_to_dbuser(object = current_user, name = nil, options = {})
-      object.open_sources.map { |source|
+      object.open_sources.map {|source|
         link_to(h(name || source.title), {
           :controller => 'sources', :action => 'show', :id => source
         }.merge(options))
@@ -72,10 +70,10 @@ module MoreHelpers
 
     def access_status_to_human(status, public_view = false)
       case status
-        when :readable, 'read'  then public_view ? 'Readable' : 'Publicly readable'
-        when :writable, 'write' then public_view ? 'Writable' : 'Publicly writable'
-        when :private,  ''      then               'Private'
-        else                                       status.humanize
+      when :readable, 'read'  then public_view ? 'Readable' : 'Publicly readable'
+      when :writable, 'write' then public_view ? 'Writable' : 'Publicly writable'
+      when :private,  ''      then               'Private'
+      else                                       status.humanize
       end
     end
 
@@ -114,7 +112,5 @@ module MoreHelpers
 
       %Q{<span class="nowrap">#{summary}</span>}.html_safe
     end
-
   end
-
 end

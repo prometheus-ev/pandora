@@ -1,7 +1,5 @@
 module MoreHelpers
-
   module NavigationHelper
-
     # def navigation_default_for(key)
     #   target = NAVIGATION_DEFAULT[key]
 
@@ -66,10 +64,10 @@ module MoreHelpers
     # end
 
     def submenu_link_to(name, options, html_options = {})
-      current = options.all? { |param, value| value.nil? || params[param] == value.to_s }
+      current = options.all?{|param, value| value.nil? || params[param] == value.to_s}
       text = %Q{<div class="menu_link #{current ? 'active' : 'inactive'}">#{name}</div>}
 
-      text = %w[left right].map { |pos|
+      text = %w[left right].map {|pos|
         %Q{<div class="menu_link_border #{pos}"></div>}
       }.join(text) if current
 
@@ -80,7 +78,7 @@ module MoreHelpers
       # REWRITE: override protected state for 'linkable_actions'
       # TODO: find better way
       actions = controller.send(:linkable_actions) - [:create, :new]
-      allowed_actions_for_current_user(actions).map { |action|
+      allowed_actions_for_current_user(actions).map {|action|
         submenu_link_to(action.humanize, :action => action)
       }.join.html_safe
     end
@@ -91,7 +89,7 @@ module MoreHelpers
 
     # renders a link to a help page, the page
     # @param [Hash] options the options with which to create the link
-    # @option options [String] :label ('Help'.t) the link text, also an icon 
+    # @option options [String] :label ('Help'.t) the link text, also an icon
     #   works
     # @option options [String] :title (same as :label) the title attribute
     # @option options [String] :class (nil) css classes to apply
@@ -114,8 +112,5 @@ module MoreHelpers
     def help_icon
       image_tag('misc/help.gif', host: request.host)
     end
-
-
   end
-
 end

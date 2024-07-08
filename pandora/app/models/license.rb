@@ -1,5 +1,4 @@
 class License < ApplicationRecord
-
   belongs_to :license_type
   belongs_to :account, optional: true
   belongs_to :institution, optional: true
@@ -10,7 +9,7 @@ class License < ApplicationRecord
   before_validation on: :create do
     self.valid_from ||= Time.now.utc
     self.paid_from ||= valid_from.utc.beginning_of_quarter
-    self.expires_at ||= [valid_from, paid_from].max.utc.at_end_of_year
+    self.expires_at ||= [valid_from, paid_from].max.at_end_of_year
   end
 
   def self.count_institutional(at = Time.now)
@@ -49,7 +48,7 @@ class License < ApplicationRecord
     institution_id ? institution : account
   end
 
-  def duration  # years
+  def duration # years
     months = expires_at.month - paid_from.month + (expires_at.year - paid_from.year) * 12
     months != 0 ? months / 12.0 : (expires_at - paid_from) / 1.year
   end
@@ -71,6 +70,7 @@ class License < ApplicationRecord
 
   def license_type=(license_type)
     raise 'not a new record' unless new_record?
+
     _original_license_type_setter(license_type)
   end
 

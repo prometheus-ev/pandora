@@ -13,9 +13,8 @@ class Indexing::Sources::Parents::Rba < Indexing::SourceSuper
       [name, Digest::SHA1.hexdigest(record.xpath('.//../../a5000/text()').to_a.join('|'))].join('-')
     else
       [name, Digest::SHA1.hexdigest(record.xpath('.//ancestor::obj[2]/a5000/text()').to_a.join('|'))].join('-')
-    end 
+    end
   end
-
 
   def path
     "#{record.at_xpath('.//text()')}.jpg"
@@ -24,13 +23,13 @@ class Indexing::Sources::Parents::Rba < Indexing::SourceSuper
   # künstler
   def artist
     number = record.xpath('count(../../aob30)')
-    (1..(number.to_i)).map{ |index|
+    (1..(number.to_i)).map{|index|
       "#{record.xpath(".//../../aob30[#{index}]/a3100/text()")} (#{record.xpath(".//../../aob30[#{index}]/a3475/text()")})".gsub(/\(\)/, "")
     }
   end
 
   def artist_normalized
-    an = record.xpath('.//../../aob30/a3100/text()').map { |a|
+    an = record.xpath('.//../../aob30/a3100/text()').map {|a|
       a.to_s.split(', ').reverse.join(' ')
     }
     super(an)
@@ -44,38 +43,38 @@ class Indexing::Sources::Parents::Rba < Indexing::SourceSuper
   # datierung
   def date
     if (date = "#{record.xpath('.//../../a5060/a5064/text()')}").blank?
-      "#{record.xpath('.//../../a5060/a5071/text()')} - #{record.xpath('.//../../a5060/a5077/text()')}".gsub(/\A - /,'')
+      "#{record.xpath('.//../../a5060/a5071/text()')} - #{record.xpath('.//../../a5060/a5077/text()')}".gsub(/\A - /, '')
     else
       date
     end
   end
 
   def location
-    standort="#{record.xpath('.//../../aob26[text()="Standort"]/a2664/text()')}, #{record.xpath('.//../../aob26[text()="Standort"]/a2662/text()')}, #{record.xpath('.//../../aob26[text()="Standort"]/a2660/text()')}, #{record.xpath('.//../../aob26[text()="Standort"]/a2661/text()')} (#{record.xpath('.//../../aob26[text()="Standort"]/a266f/text()')} #{record.xpath('.//../../aob26[text()="Standort"]/a266h/text()')})".gsub(/, , /, '').gsub(/\A, /, '').gsub(/\( \)/, "")
+    standort = "#{record.xpath('.//../../aob26[text()="Standort"]/a2664/text()')}, #{record.xpath('.//../../aob26[text()="Standort"]/a2662/text()')}, #{record.xpath('.//../../aob26[text()="Standort"]/a2660/text()')}, #{record.xpath('.//../../aob26[text()="Standort"]/a2661/text()')} (#{record.xpath('.//../../aob26[text()="Standort"]/a266f/text()')} #{record.xpath('.//../../aob26[text()="Standort"]/a266h/text()')})".gsub(/, , /, '').gsub(/\A, /, '').gsub(/\( \)/, "")
     number = record.xpath('count(../../aob28[starts-with(text(),"Besitzer")])')
-    standort_besitzer = (1..(number.to_i)).map{ |index|
+    standort_besitzer = (1..(number.to_i)).map{|index|
       "#{record.xpath(".//../../aob28[starts-with(text(),'Besitzer')][#{index}]/a2864/text()")}, #{record.xpath(".//../../aob28[starts-with(text(),'Besitzer')][#{index}]/a2900/text()")}, #{record.xpath(".//../../aob28[starts-with(text(),'Besitzer')][#{index}]/a2910/text()")}".gsub(/, ,/, '').gsub(/\A, /, '').gsub(/, \z/, '')
     }
     number2 = record.xpath('count(../../aob28[starts-with(text(),"Eigentümer")])')
-    standort_eigentuemer = (1..(number2.to_i)).map{ |index|
-     "#{record.xpath(".//../../aob28[starts-with(text(),'Eigentümer')][#{index}]/a2864/text()")}, #{record.xpath(".//../../aob28[starts-with(text(),'Eigentümer')][#{index}]/a2900/text()")}, #{record.xpath(".//../../aob28[starts-with(text(),'Eigentümer')][#{index}]/a2910/text()")}".gsub(/, ,/, '').gsub(/\A, /, '').gsub(/, \z/, '')
+    standort_eigentuemer = (1..(number2.to_i)).map{|index|
+      "#{record.xpath(".//../../aob28[starts-with(text(),'Eigentümer')][#{index}]/a2864/text()")}, #{record.xpath(".//../../aob28[starts-with(text(),'Eigentümer')][#{index}]/a2900/text()")}, #{record.xpath(".//../../aob28[starts-with(text(),'Eigentümer')][#{index}]/a2910/text()")}".gsub(/, ,/, '').gsub(/\A, /, '').gsub(/, \z/, '')
     }
 
-    #standort_besitzer="#{record.xpath('.//../../aob28[starts-with(text(),"Besitzer")]/a2864/text()')}, #{record.xpath('.//../../aob28[starts-with(text(),"Besitzer")]/a2900/text()')}, #{record.xpath('.//../../aob28[starts-with(text(),"Besitzer")]/a2910/text()')}".gsub(/, ,/, '').gsub(/\A, /, '').gsub(/, \z/, '')
-    #standort_eigentuemer="#{record.xpath('.//../../aob28[starts-with(text(),"Eigentümer")]/a2864/text()')}, #{record.xpath('.//../../aob28[starts-with(text(),"Eigentümer")]/a2900/text()')}, #{record.xpath('.//../../aob28[starts-with(text(),"Eigentümer")]/a2910/text()')}".gsub(/, ,/, '').gsub(/\A, /, '').gsub(/, \z/, '')
-    standort_verwalter="#{record.xpath('.//../../aob28[text()="Verwalter"]/a2864/text()')}, #{record.xpath('.//../../aob28[text()="Verwalter"]/a2900/text()')}, #{record.xpath('.//../../aob28[text()="Verwalter"]/a2910/text()')}".gsub(/, ,/, '').gsub(/\A, /, '').gsub(/, \z/, '')
+    # standort_besitzer="#{record.xpath('.//../../aob28[starts-with(text(),"Besitzer")]/a2864/text()')}, #{record.xpath('.//../../aob28[starts-with(text(),"Besitzer")]/a2900/text()')}, #{record.xpath('.//../../aob28[starts-with(text(),"Besitzer")]/a2910/text()')}".gsub(/, ,/, '').gsub(/\A, /, '').gsub(/, \z/, '')
+    # standort_eigentuemer="#{record.xpath('.//../../aob28[starts-with(text(),"Eigentümer")]/a2864/text()')}, #{record.xpath('.//../../aob28[starts-with(text(),"Eigentümer")]/a2900/text()')}, #{record.xpath('.//../../aob28[starts-with(text(),"Eigentümer")]/a2910/text()')}".gsub(/, ,/, '').gsub(/\A, /, '').gsub(/, \z/, '')
+    standort_verwalter = "#{record.xpath('.//../../aob28[text()="Verwalter"]/a2864/text()')}, #{record.xpath('.//../../aob28[text()="Verwalter"]/a2900/text()')}, #{record.xpath('.//../../aob28[text()="Verwalter"]/a2910/text()')}".gsub(/, ,/, '').gsub(/\A, /, '').gsub(/, \z/, '')
     [standort, standort_besitzer, standort_eigentuemer, standort_verwalter].flatten
   end
 
-  #Herkunftsort
+  # Herkunftsort
   def origin
     number = record.xpath('count(../../aob26[text()="Herkunftsort"])')
-      (1..(number.to_i)).map{ |index|
-        "#{record.xpath(".//../../aob26[text()='Herkunftsort'][#{index}]/a2664/text()")}, #{record.xpath(".//../../aob26[text()='Herkunftsort'][#{index}]/a2690/text()")}, #{record.xpath(".//../../aob26[text()='Herkunftsort'][#{index}]/a2700/text()")}, #{record.xpath(".//../../aob26[text()='Herkunftsort'][#{index}]/a2730/text()")}, #{record.xpath(".//../../aob26[text()='Herkunftsort'][#{index}]/a2796/text()")}".gsub(/, , , , /,'').gsub(/, , , /,'').gsub(/, , /,'').gsub(/\A, /,'').gsub(/, \z/,'')
-     }
+    (1..(number.to_i)).map{|index|
+      "#{record.xpath(".//../../aob26[text()='Herkunftsort'][#{index}]/a2664/text()")}, #{record.xpath(".//../../aob26[text()='Herkunftsort'][#{index}]/a2690/text()")}, #{record.xpath(".//../../aob26[text()='Herkunftsort'][#{index}]/a2700/text()")}, #{record.xpath(".//../../aob26[text()='Herkunftsort'][#{index}]/a2730/text()")}, #{record.xpath(".//../../aob26[text()='Herkunftsort'][#{index}]/a2796/text()")}".gsub(/, , , , /, '').gsub(/, , , /, '').gsub(/, , /, '').gsub(/\A, /, '').gsub(/, \z/, '')
+    }
   end
 
-  #Entstehungsort
+  # Entstehungsort
   def origin_point
     ["#{record.xpath('.//../../a5130/text()')}", "#{record.xpath('.//../../a5140[text()="Faktischer Entstehungsort"]/a5145/text()')}", "#{record.xpath('.//../../a5140[text()="Stilistischer Entstehungsort"]/a5145/text()')}"].reject(&:blank?).join(" | ")
   end
@@ -84,9 +83,9 @@ class Indexing::Sources::Parents::Rba < Indexing::SourceSuper
   def size
     number = record.xpath('count(../../a5364)')
     if !number.blank?
-    (1..(number.to_i)).map{ |index|
-      "#{record.xpath(".//../../a5364[#{index}]/text()")}: #{record.xpath(".//../../a5364[#{index}]/a5365/text()")}"
-    }
+      (1..(number.to_i)).map{|index|
+        "#{record.xpath(".//../../a5364[#{index}]/text()")}: #{record.xpath(".//../../a5364[#{index}]/a5365/text()")}"
+      }
     else
       record.xpath('.//../../a5360/text()')
     end
@@ -107,41 +106,41 @@ class Indexing::Sources::Parents::Rba < Indexing::SourceSuper
   end
 
   def provenance
-    vorbesitzer=["#{record.xpath('.//../../aob28[text()="Vorbesitzer"]/a2864/text()')}", "#{record.xpath('.//../../aob28[text()="Vorbesitzer"]/a2890/text()')}", "#{record.xpath('.//../../aob28[text()="Vorbesitzer"]/a2910/text()')}", "#{record.xpath('.//../../aob28[text()="Vorbesitzer"]/a2996/text()')}"].reject(&:blank?).join(", ")
-    
-    erster_vorbesitzer=["#{record.xpath('.//../../aob28[text()="erster Vorbesitzer"]/a2864/text()')}", "#{record.xpath('.//../../aob28[text()="erster Vorbesitzer"]/a2890/text()')}", "#{record.xpath('.//../../aob28[text()="erster Vorbesitzer"]/a2910/text()')}", "#{record.xpath('.//../../aob28[text()="Vorbesitzer"]/a2996/text()')}"].reject(&:blank?).join(", ")
-    
-    zweiter_vorbesitzer=["#{record.xpath('.//../../aob28[text()="zweiter Vorbesitzer"]/a2864/text()')}", "#{record.xpath('.//../../aob28[text()="zweiter Vorbesitzer"]/a2890/text()')}", "#{record.xpath('.//../../aob28[text()="zweiter Vorbesitzer"]/a2910/text()')}", "#{record.xpath('.//../../aob28[text()="Vorbesitzer"]/a2996/text()')}"].reject(&:blank?).join(", ") 
-    
-    dritter_vorbesitzer=["#{record.xpath('.//../../aob28[text()="dritter Vorbesitzer"]/a2864/text()')}", "#{record.xpath('.//../../aob28[text()="dritter Vorbesitzer"]/a2890/text()')}", "#{record.xpath('.//../../aob28[text()="dritter Vorbesitzer"]/a2910/text()')}", "#{record.xpath('.//../../aob28[text()="Vorbesitzer"]/a2996/text()')}"].reject(&:blank?).join(", ")
+    vorbesitzer = ["#{record.xpath('.//../../aob28[text()="Vorbesitzer"]/a2864/text()')}", "#{record.xpath('.//../../aob28[text()="Vorbesitzer"]/a2890/text()')}", "#{record.xpath('.//../../aob28[text()="Vorbesitzer"]/a2910/text()')}", "#{record.xpath('.//../../aob28[text()="Vorbesitzer"]/a2996/text()')}"].reject(&:blank?).join(", ")
 
-    vierter_vorbesitzer=["#{record.xpath('.//../../aob28[text()="vierter Vorbesitzer"]/a2864/text()')}", "#{record.xpath('.//../../aob28[text()="vierter Vorbesitzer"]/a2890/text()')}", "#{record.xpath('.//../../aob28[text()="vierter Vorbesitzer"]/a2910/text()')}", "#{record.xpath('.//../../aob28[text()="Vorbesitzer"]/a2996/text()')}"].reject(&:blank?).join(", ")
+    erster_vorbesitzer = ["#{record.xpath('.//../../aob28[text()="erster Vorbesitzer"]/a2864/text()')}", "#{record.xpath('.//../../aob28[text()="erster Vorbesitzer"]/a2890/text()')}", "#{record.xpath('.//../../aob28[text()="erster Vorbesitzer"]/a2910/text()')}", "#{record.xpath('.//../../aob28[text()="Vorbesitzer"]/a2996/text()')}"].reject(&:blank?).join(", ")
 
-    fünfter_vorbesitzer=["#{record.xpath('.//../../aob28[text()="fünfter Vorbesitzer"]/a2864/text()')}", "#{record.xpath('.//../../aob28[text()="fünfter Vorbesitzer"]/a2890/text()')}", "#{record.xpath('.//../../aob28[text()="fünfter Vorbesitzer"]/a2910/text()')}", "#{record.xpath('.//../../aob28[text()="Vorbesitzer"]/a2996/text()')}"].reject(&:blank?).join(", ")
+    zweiter_vorbesitzer = ["#{record.xpath('.//../../aob28[text()="zweiter Vorbesitzer"]/a2864/text()')}", "#{record.xpath('.//../../aob28[text()="zweiter Vorbesitzer"]/a2890/text()')}", "#{record.xpath('.//../../aob28[text()="zweiter Vorbesitzer"]/a2910/text()')}", "#{record.xpath('.//../../aob28[text()="Vorbesitzer"]/a2996/text()')}"].reject(&:blank?).join(", ")
 
-    sechster_vorbesitzer=["#{record.xpath('.//../../aob28[text()="sechster Vorbesitzer"]/a2864/text()')}", "#{record.xpath('.//../../aob28[text()="sechster Vorbesitzer"]/a2890/text()')}", "#{record.xpath('.//../../aob28[text()="sechster Vorbesitzer"]/a2910/text()')}", "#{record.xpath('.//../../aob28[text()="Vorbesitzer"]/a2996/text()')}"].reject(&:blank?).join(", ")
+    dritter_vorbesitzer = ["#{record.xpath('.//../../aob28[text()="dritter Vorbesitzer"]/a2864/text()')}", "#{record.xpath('.//../../aob28[text()="dritter Vorbesitzer"]/a2890/text()')}", "#{record.xpath('.//../../aob28[text()="dritter Vorbesitzer"]/a2910/text()')}", "#{record.xpath('.//../../aob28[text()="Vorbesitzer"]/a2996/text()')}"].reject(&:blank?).join(", ")
 
-    siebter_vorbesitzer=["#{record.xpath('.//../../aob28[text()="siebter Vorbesitzer"]/a2864/text()')}", "#{record.xpath('.//../../aob28[text()="siebter Vorbesitzer"]/a2890/text()')}", "#{record.xpath('.//../../aob28[text()="siebter Vorbesitzer"]/a2910/text()')}", "#{record.xpath('.//../../aob28[text()="Vorbesitzer"]/a2996/text()')}"].reject(&:blank?).join(", ")
+    vierter_vorbesitzer = ["#{record.xpath('.//../../aob28[text()="vierter Vorbesitzer"]/a2864/text()')}", "#{record.xpath('.//../../aob28[text()="vierter Vorbesitzer"]/a2890/text()')}", "#{record.xpath('.//../../aob28[text()="vierter Vorbesitzer"]/a2910/text()')}", "#{record.xpath('.//../../aob28[text()="Vorbesitzer"]/a2996/text()')}"].reject(&:blank?).join(", ")
 
-    vorhergehender_Besitzer=["#{record.xpath('.//../../aob28[text()="vorhergehender Besitzer"]/a2864/text()')}", "#{record.xpath('.//../../aob28[text()="vorhergehender Besitzer"]/a2890/text()')}", "#{record.xpath('.//../../aob28[text()="vorhergehender Besitzer"]/a2910/text()')}", "#{record.xpath('.//../../aob28[text()="Vorbesitzer"]/a2996/text()')}"].reject(&:blank?).join(", ")
+    fünfter_vorbesitzer = ["#{record.xpath('.//../../aob28[text()="fünfter Vorbesitzer"]/a2864/text()')}", "#{record.xpath('.//../../aob28[text()="fünfter Vorbesitzer"]/a2890/text()')}", "#{record.xpath('.//../../aob28[text()="fünfter Vorbesitzer"]/a2910/text()')}", "#{record.xpath('.//../../aob28[text()="Vorbesitzer"]/a2996/text()')}"].reject(&:blank?).join(", ")
 
-    vorhergehender_Eigentümer=["#{record.xpath('.//../../aob28[text()="vorhergehender Eigentümer"]/a2864/text()')}", "#{record.xpath('.//../../aob28[text()="vorhergehender Eigentümer"]/a2890/text()')}", "#{record.xpath('.//../../aob28[text()="vorhergehender Eigentümer"]/a2910/text()')}", "#{record.xpath('.//../../aob28[text()="Vorbesitzer"]/a2996/text()')}"].reject(&:blank?).join(", ")
+    sechster_vorbesitzer = ["#{record.xpath('.//../../aob28[text()="sechster Vorbesitzer"]/a2864/text()')}", "#{record.xpath('.//../../aob28[text()="sechster Vorbesitzer"]/a2890/text()')}", "#{record.xpath('.//../../aob28[text()="sechster Vorbesitzer"]/a2910/text()')}", "#{record.xpath('.//../../aob28[text()="Vorbesitzer"]/a2996/text()')}"].reject(&:blank?).join(", ")
 
-    vorhergehender_Eigentümer_Besitzer=["#{record.xpath('.//../../aob28[text()="vorhergehender Eigentümer&amp;Besitzer"]/a2864/text()')}", "#{record.xpath('.//../../aob28[text()="vorhergehender Eigentümer&amp;Besitzer"]/a2890/text()')}", "#{record.xpath('.//../../aob28[text()="vorhergehender Eigentümer&amp;Besitzer"]/a2910/text()')}", "#{record.xpath('.//../../aob28[text()="Vorbesitzer"]/a2996/text()')}"].reject(&:blank?).join(", ")
+    siebter_vorbesitzer = ["#{record.xpath('.//../../aob28[text()="siebter Vorbesitzer"]/a2864/text()')}", "#{record.xpath('.//../../aob28[text()="siebter Vorbesitzer"]/a2890/text()')}", "#{record.xpath('.//../../aob28[text()="siebter Vorbesitzer"]/a2910/text()')}", "#{record.xpath('.//../../aob28[text()="Vorbesitzer"]/a2996/text()')}"].reject(&:blank?).join(", ")
 
-    vorhergehender_Verwalter=["#{record.xpath('.//../../aob28[text()="vorhergehender Verwalter"]/a2864/text()')}", "#{record.xpath('.//../../aob28[text()="vorhergehender Verwalter"]/a2890/text()')}", "#{record.xpath('.//../../aob28[text()="vorhergehender Verwalter"]/a2910/text()')}", "#{record.xpath('.//../../aob28[text()="Vorbesitzer"]/a2996/text()')}"].reject(&:blank?).join(", ")
+    vorhergehender_Besitzer = ["#{record.xpath('.//../../aob28[text()="vorhergehender Besitzer"]/a2864/text()')}", "#{record.xpath('.//../../aob28[text()="vorhergehender Besitzer"]/a2890/text()')}", "#{record.xpath('.//../../aob28[text()="vorhergehender Besitzer"]/a2910/text()')}", "#{record.xpath('.//../../aob28[text()="Vorbesitzer"]/a2996/text()')}"].reject(&:blank?).join(", ")
+
+    vorhergehender_Eigentümer = ["#{record.xpath('.//../../aob28[text()="vorhergehender Eigentümer"]/a2864/text()')}", "#{record.xpath('.//../../aob28[text()="vorhergehender Eigentümer"]/a2890/text()')}", "#{record.xpath('.//../../aob28[text()="vorhergehender Eigentümer"]/a2910/text()')}", "#{record.xpath('.//../../aob28[text()="Vorbesitzer"]/a2996/text()')}"].reject(&:blank?).join(", ")
+
+    vorhergehender_Eigentümer_Besitzer = ["#{record.xpath('.//../../aob28[text()="vorhergehender Eigentümer&amp;Besitzer"]/a2864/text()')}", "#{record.xpath('.//../../aob28[text()="vorhergehender Eigentümer&amp;Besitzer"]/a2890/text()')}", "#{record.xpath('.//../../aob28[text()="vorhergehender Eigentümer&amp;Besitzer"]/a2910/text()')}", "#{record.xpath('.//../../aob28[text()="Vorbesitzer"]/a2996/text()')}"].reject(&:blank?).join(", ")
+
+    vorhergehender_Verwalter = ["#{record.xpath('.//../../aob28[text()="vorhergehender Verwalter"]/a2864/text()')}", "#{record.xpath('.//../../aob28[text()="vorhergehender Verwalter"]/a2890/text()')}", "#{record.xpath('.//../../aob28[text()="vorhergehender Verwalter"]/a2910/text()')}", "#{record.xpath('.//../../aob28[text()="Vorbesitzer"]/a2996/text()')}"].reject(&:blank?).join(", ")
 
     [erster_vorbesitzer, zweiter_vorbesitzer, dritter_vorbesitzer, vierter_vorbesitzer, fünfter_vorbesitzer, sechster_vorbesitzer, siebter_vorbesitzer, vorbesitzer, vorhergehender_Besitzer, vorhergehender_Eigentümer, vorhergehender_Eigentümer_Besitzer, vorhergehender_Verwalter]
   end
 
   def owner
     number = record.xpath('count(../../aob28[starts-with(text(),"Besitzer")])')
-    standort_besitzer = (1..(number.to_i)).map{ |index|
+    standort_besitzer = (1..(number.to_i)).map{|index|
       "#{record.xpath(".//../../aob28[starts-with(text(),'Besitzer')][#{index}]/a2864/text()")}, #{record.xpath(".//../../aob28[starts-with(text(),'Besitzer')][#{index}]/a2900/text()")}, #{record.xpath(".//../../aob28[starts-with(text(),'Besitzer')][#{index}]/a2910/text()")}".gsub(/, ,/, '').gsub(/\A, /, '').gsub(/, \z/, '')
     }
     number2 = record.xpath('count(../../aob28[starts-with(text(),"Eigentümer")])')
-    standort_eigentuemer = (1..(number2.to_i)).map{ |index|
-     "#{record.xpath(".//../../aob28[starts-with(text(),'Eigentümer')][#{index}]/a2864/text()")}, #{record.xpath(".//../../aob28[starts-with(text(),'Eigentümer')][#{index}]/a2900/text()")}, #{record.xpath(".//../../aob28[starts-with(text(),'Eigentümer')][#{index}]/a2910/text()")}".gsub(/, ,/, '').gsub(/\A, /, '').gsub(/, \z/, '')
+    standort_eigentuemer = (1..(number2.to_i)).map{|index|
+      "#{record.xpath(".//../../aob28[starts-with(text(),'Eigentümer')][#{index}]/a2864/text()")}, #{record.xpath(".//../../aob28[starts-with(text(),'Eigentümer')][#{index}]/a2900/text()")}, #{record.xpath(".//../../aob28[starts-with(text(),'Eigentümer')][#{index}]/a2910/text()")}".gsub(/, ,/, '').gsub(/\A, /, '').gsub(/, \z/, '')
     }
     [standort_besitzer, standort_eigentuemer].flatten
   end

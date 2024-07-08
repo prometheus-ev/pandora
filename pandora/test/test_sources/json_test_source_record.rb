@@ -5,9 +5,9 @@ class JsonTestSourceRecord < Pandora::Indexing::Parser::Record
 
   def artist
     if record['creators'].size > 0
-      record['creators'].map { |creator|
+      record['creators'].map do |creator|
         creator['description']
-      }
+      end
     end
   end
 

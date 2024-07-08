@@ -4,7 +4,7 @@ class AccountsTest < ApplicationSystemTestCase
   test 'create a account and sign in with it' do
     login_as 'superadmin'
     click_on 'Administration'
-    
+
     section = find('h3', text: 'Account').find(:xpath, 'following-sibling::*[1]')
     section.click_on 'Create'
 
@@ -21,12 +21,20 @@ class AccountsTest < ApplicationSystemTestCase
     fill_in 'E-mail', with: 'hmustermann@example.com'
     select 'Köln, prometheus - Das verteilte ...', from: 'Institution'
     submit
-    
+
     assert_text 'successfully created'
     click_on 'Active'
     assert_text "Hans Mustermann"
 
     click_on 'Log out'
+
+    login_as 'hmustermann'
+
+    assert_text "Please verify your e-mail address!"
+
+    hmustermann = Account.find_by!(login: 'hmustermann')
+    hmustermann.email_verified_at = Time.now
+    hmustermann.save
 
     login_as 'hmustermann'
 
@@ -60,8 +68,16 @@ class AccountsTest < ApplicationSystemTestCase
 
     hmustermann = Account.find_by!(login: 'hmustermann')
     assert_equal hmustermann.institution, nowhere
-    assert_equal ['user'], hmustermann.roles.map{|r| r.title}
+    assert_equal(['user'], hmustermann.roles.map{|r| r.title})
     assert hmustermann.expires_at > 23.months.from_now
+
+    login_as 'hmustermann'
+    # The email of an account create by an institution admin is not confirmed
+    # automatically.
+    assert_text "You haven't confirmed your email address yet!"
+
+    hmustermann.email_verified_at = Time.now
+    hmustermann.save
 
     # try login after more than one year, see #1134
     travel_to 360.days.from_now do
@@ -150,7 +166,7 @@ class AccountsTest < ApplicationSystemTestCase
     assert_equal 0, ActionMailer::Base.deliveries.count
     login_as 'superadmin'
     click_on 'Administration'
-    
+
     section = find('h3', text: 'Account').find(:xpath, 'following-sibling::*[1]')
     section.click_on 'List'
 
@@ -385,7 +401,7 @@ class AccountsTest < ApplicationSystemTestCase
         visit '/en/license'
         assert_text 'You have a guest account'
         assert_text 'Obtain license'
-        
+
         # reset account and set 'institution' mode, then notify
         jdoe.update_columns notified_at: nil, mode: 'institution'
         Pandora::UpcomingExpiry.new.run
@@ -428,7 +444,6 @@ class AccountsTest < ApplicationSystemTestCase
         assert_no_changes 'ActionMailer::Base.deliveries.count' do
           Pandora::UpcomingExpiry.new.run
         end
-
       end
 
       travel 1.year + 1.week do
@@ -437,5 +452,33 @@ class AccountsTest < ApplicationSystemTestCase
         end
       end
     end
+  end
+
+  test 'account timestamps are updated when associated records are changing' do
+    login_as 'superadmin'
+
+    # update the record once to apply "empty" field values from form, otherwise,
+    # the record is updated because of (e.g.) `accounts.addressline = ''`
+    visit '/en/accounts/jdoe/edit'
+    submit
+
+    jdoe = Account.find_by! login: 'jdoe'
+    ts = jdoe.updated_at
+    visit '/en/accounts/jdoe/edit'
+    select 'Halle, University of Halle'
+    sleep 1 # because of mysql timestamp precision
+    submit
+    assert_text 'successfully updated!'
+    jdoe.reload
+    assert ts < jdoe.updated_at
+
+    ts = jdoe.updated_at
+    visit '/en/accounts/jdoe/edit'
+    select 'useradmin'
+    sleep 1 # because of mysql timestamp precision
+    submit
+    assert_text 'successfully updated!'
+    jdoe.reload
+    assert ts < jdoe.reload.updated_at
   end
 end

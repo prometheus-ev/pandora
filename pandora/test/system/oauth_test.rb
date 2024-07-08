@@ -82,8 +82,10 @@ class OAuthTest < ApplicationSystemTestCase
     assert_equal 3, JSON.parse(res.body).count
 
     # search index request
+    system 'touch', '/tmp/x'
     res = consumer.request(:get, "/api/json/search/search/?term=Stuhl&per_page=100", access_token)
     res_json = JSON.parse(res.body)
+    assert_equal '200', res.code
     assert_equal 12, res_json.count
 
     res = consumer.request(:get, "/api/json/search/index/?term=Stuhl&per_page=100", access_token)
@@ -107,7 +109,8 @@ class OAuthTest < ApplicationSystemTestCase
       assert_equal 'My Collection', Collection.find(JSON.parse(res.body)['id']).title
 
       # and another request
-      res = consumer.request(:post,
+      res = consumer.request(
+        :post,
         '/api/json/collection/create?collection%5Bpublic_access%5D=&collection%5Btitle%5D=Testwebapp',
         access_token, {}, data
       )
@@ -115,7 +118,8 @@ class OAuthTest < ApplicationSystemTestCase
       assert_equal 'Testwebapp', Collection.find(JSON.parse(res.body)['id']).title
 
       # we need to support the trailing slash for now
-      res = consumer.request(:post,
+      res = consumer.request(
+        :post,
         '/api/json/collection/create/?collection%5Bpublic_access%5D=&collection%5Btitle%5D=Another',
         access_token, {}, data
       )
@@ -143,7 +147,7 @@ class OAuthTest < ApplicationSystemTestCase
 
   test 'works with /pandora prefix' do
     TestSource.index
-    
+
     sp = 'http://127.0.0.1:47001/pandora'
     c = 'http://app.example.com/oauth/callback'
     consumer = OAuth::Consumer.new('somekey', 'somesecret', :site => sp)
@@ -164,7 +168,7 @@ class OAuthTest < ApplicationSystemTestCase
     post authorize_url, {'accept' => 'application/json'}
     assert_equal 401, @response.status
 
-    # we use jdoe (requesting json, because the html format would depend on 
+    # we use jdoe (requesting json, because the html format would depend on
     # session)
     post authorize_url, api_auth('jdoe').merge('accept' => 'application/json')
     assert response_successful?

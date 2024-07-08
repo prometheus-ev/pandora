@@ -11,5 +11,7 @@
   <% end %>
 </div>
 
-<%= render_sections %w[header] %>
-<%= render partial: 'shared/list/list', locals: {custom: true, klass: Upload} %>
+<% if @institutional_upload_database %>
+  <%= render_sections %w[header] %>
+  <%= render partial: 'shared/list/list', locals: {custom: true, klass: Upload} %>
+<% end %>

@@ -8,19 +8,20 @@ class Indexing::Sources::SaarbrueckenIfk < Indexing::SourceSuper
   end
 
   def path
-    medium_location = sprintf("%06d", record.at_xpath(".//id/text()").to_s).scan(/.../).join("/")
+    id = record.at_xpath(".//id/text()").to_s
+    medium_location = id.rjust(6, '0').scan(/.../).join("/")
     "000/#{medium_location}/image.jpg"
   end
 
   def artist
     artists = record.xpath("ancestor::row/relationships/relations[id=30]")
-    artists.map { |i|
+    artists.map {|i|
       "#{i.xpath('preceding-sibling::entities/name/text()')} (#{i.xpath('preceding-sibling::entities/entity_datings/dating_string/text()').to_a.join(" - ")})".gsub(/ \(\)/, '')
     }
   end
 
   def artist_normalized
-    an = record.xpath('ancestor::row/relationships/relations[id=30]/preceding-sibling::entities/name/text()').map { |a|
+    an = record.xpath('ancestor::row/relationships/relations[id=30]/preceding-sibling::entities/name/text()').map {|a|
       a.to_s.strip.split(/, /).reverse.join(" ")
     }
     super(an)
@@ -31,10 +32,17 @@ class Indexing::Sources::SaarbrueckenIfk < Indexing::SourceSuper
     distinct_name = record.xpath('ancestor::row/distinct_name/text()').to_s
 
     properties = record.at_xpath('ancestor::relationships/properties/text()').to_s
-    # The raw properties string in XML is encoded with UTF-8 literals. YAML escapes theses literals again when the
-    # string is loaded. In order to be displayed correctly, the UTF-8 literals have to be transformed to a byte string
-    # and then be encoded to UTF-8 again to avoid escaping.
-    properties_yaml = YAML.load(properties.gsub(/\\x../) {|s| [s[2..-1].hex].pack("C")}.force_encoding(Encoding::UTF_8))
+    # The raw properties string in XML is encoded with
+    # UTF-8 literals. YAML escapes theses literals again
+    # when the string is loaded. In order to be displayed
+    # correctly, the UTF-8 literals have to be transformed
+    # to a byte string and then be encoded to UTF-8 again
+    # to avoid escaping.
+    properties = properties.
+      gsub(/\\x../){|s| [s[2..-1].hex].pack("C")}.
+      force_encoding(Encoding::UTF_8)
+    properties = "" if properties == "--- !map:HashWithIndifferentAccess {}\n\n"
+    properties_yaml = YAML.load(properties)
 
     if (properties_yaml && properties_yaml.kind_of?(Array) && !properties_yaml.empty?)
       properties = ", " + properties_yaml.join("| ").force_encoding(Encoding::UTF_8)
@@ -61,7 +69,7 @@ class Indexing::Sources::SaarbrueckenIfk < Indexing::SourceSuper
 
   def location
     locations = record.xpath('ancestor::row/relationships/relations[id=25]')
-    locations.map { |i|
+    locations.map {|i|
       "#{i.xpath('preceding-sibling::entities/name/text()')}, #{i.xpath('preceding-sibling::entities/distinct_name/text()')}".gsub(/\A, /, '').gsub(/, \z/, '')
     }
   end
@@ -75,14 +83,14 @@ class Indexing::Sources::SaarbrueckenIfk < Indexing::SourceSuper
   end
 
   def addition
-    record.xpath('ancestor::row/attachment/properties/property').map{ |property|
+    record.xpath('ancestor::row/attachment/properties/property').map{|property|
       property.children.to_a.reverse.join(": ")
     }
   end
 
   def credits
     credits = record.xpath('ancestor::row/relationships/relations[id=45]')
-    credits.map{ |i|
+    credits.map{|i|
       "#{i.xpath('preceding-sibling::entities/name/text()')}, #{i.xpath('preceding-sibling::entities/attachment/dataset/publisher/text()')} #{i.xpath('preceding-sibling::entities/attachment/dataset/year-of-publication/text()')}, #{i.xpath('preceding-sibling::entities/attachment/dataset/edition/text()')}, #{i.xpath('preceding-sibling::properties/text()')}".gsub(/, , /, ', ').gsub(/\A, /, '').gsub(/, \z/, '').gsub(/--- \n- /, '')
     }
   end

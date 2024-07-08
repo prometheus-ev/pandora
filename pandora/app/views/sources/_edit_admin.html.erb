@@ -13,7 +13,7 @@
 <tr>
   <th><label for="source_keyword_list" ><%= 'Keywords'.t %></label><br /><small>(<%= 'One per line'.t %>)</small></th>
   <td>
-    <%= f.text_area :keyword_list, rows: 5 %>
+    <%= f.text_area :keyword_list, rows: 5, class: "mandatory" %>
     <div id="keyword_suggestions" class="suggestions"></div>
     <script>
       new Ajax.Autocompleter(

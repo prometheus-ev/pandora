@@ -1,13 +1,11 @@
 module MoreHelpers
-
   module ListHelper
-
     def pagination_for(*args)
-      render :partial => 'shared/list/pagination', :locals => { :args => args }
+      render :partial => 'shared/list/pagination', :locals => {:args => args}
     end
 
     def list_sort_links_for(*args)
-      render :partial => 'shared/list/sort_links', :locals => { :args => args }
+      render :partial => 'shared/list/sort_links', :locals => {:args => args}
     end
 
     def list_sort_links(args = ['Title', 'Updated at'])
@@ -22,16 +20,17 @@ module MoreHelpers
         # remote_form_for(:box,
         #   :url => {}, :update => id, :complete => "Pandora.Behaviour.apply(true, '#{id}')",
         #   :html => { :class => 'page_form' }, &block)
-        form_for(:box,
+        form_for(
+          :box,
           url: {box_id: params[:box_id]},
           data: {update: id},
           complete: "Pandora.Behaviour.apply(true, '#{id}')",
-          html: { :class => 'page_form' },
+          html: {:class => 'page_form'},
           remote: true,
           &block
         )
       else
-        # REWRITE: in fact, we have to stay on the same url always if nothing 
+        # REWRITE: in fact, we have to stay on the same url always if nothing
         # else is specified
         # form_tag(url ? params.slice(*%w[controller action]).merge(:id => nil) : {}, {
         form_tag({}, {method: 'get', class: 'page_form'}, &block)
@@ -39,7 +38,7 @@ module MoreHelpers
     end
 
     def list_search_for(klass, options = {})
-      render :partial => 'shared/list/search', :locals => { :klass => klass, :options => options.merge(:page => nil) }
+      render :partial => 'shared/list/search', :locals => {:klass => klass, :options => options.merge(:page => nil)}
     end
 
     def list_search_link_for(field, term, options = {})
@@ -50,14 +49,16 @@ module MoreHelpers
       options[:action] ||= action_name
       options.update(:field => field, :value => term, :page => nil)
 
-      term.blank? ? placeholder : link_to(h(value || term), options,
+      term.blank? ? placeholder : link_to(
+        h(value || term),
+        options,
         :title => "Filter by this #{field.to_s.singularize}".t
       )
     end
 
     def list_search_links_for(field, terms, options = {})
       separator = options.delete(:separator) || ', '
-      terms.map { |term| list_search_link_for(field, term, options.dup) }.compact.join(separator).html_safe
+      terms.map{|term| list_search_link_for(field, term, options.dup)}.compact.join(separator).html_safe
     end
 
     def render_list_for(klass, options = {})
@@ -68,7 +69,5 @@ module MoreHelpers
       id ||= params[:box_id]
       "#{id}-content" if id
     end
-
   end
-
 end

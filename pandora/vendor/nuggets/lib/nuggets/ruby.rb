@@ -143,8 +143,8 @@ module Nuggets
 
     %w[gem rake rspec].each { |name| define_ruby_tool(name) }
 
-    def ruby_options_to_argv(args, ruby_command = ruby_command)
-      argv = [ruby_command]
+    def ruby_options_to_argv(args, rc = ruby_command)
+      argv = [rc]
 
       ruby_options_from_hash(args.pop, argv) if args.last.is_a?(::Hash)
 

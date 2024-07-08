@@ -2569,7 +2569,7 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
     'pm-message': message
   }), _class),
   template: function template(_template, expressionTypes, bindingTypes, getComponent) {
-    return _template('\n  This should show an animation, but its a dummy, for now it just renders\n  another tag:\n\n  <div><pm-message expr17="expr17"></pm-message></div>', [{
+    return _template('\n  This should show an animation, but its a dummy, for now it just renders\n  another tag:\n\n  <div><pm-message expr22="expr22"></pm-message></div>', [{
       type: bindingTypes.TAG,
       getComponent: getComponent,
       evaluate: function evaluate(_scope) {
@@ -2577,8 +2577,8 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
       },
       slots: [],
       attributes: [],
-      redundantAttribute: 'expr17',
-      selector: '[expr17]'
+      redundantAttribute: 'expr22',
+      selector: '[expr22]'
     }]);
   },
   name: 'pm-spinner'

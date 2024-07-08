@@ -24,10 +24,10 @@ class UploadTest < ActiveSupport::TestCase
 
   test 'should be added when indexing (new indexing pipeline)' do
     Pandora::Indexing::Indexer.index(['json_test_source'])
-    
+
     jdoe = Account.find_by(login: 'jdoe')
     pid = pid_for(74539, 'json_test_source')
-    
+
     um = UserMetadata.create!(
       pid: pid,
       field: 'title',
@@ -39,5 +39,22 @@ class UploadTest < ActiveSupport::TestCase
     super_image = Pandora::SuperImage.new(pid)
 
     assert_equal 'Something', super_image.elastic_record['_source']['title'][0]
+  end
+
+  test "updating elastic shouldn't fail when the record is missing" do
+    Pandora::Indexing::Indexer.index(['json_test_source'])
+
+    jdoe = Account.find_by(login: 'jdoe')
+    pid = 'json_test_source-noexist'
+
+    um = UserMetadata.create!(
+      pid: pid,
+      field: 'title',
+      value: 'Something',
+      account: jdoe
+    )
+    um.to_elastic
+
+    # no exception -> we're happy
   end
 end

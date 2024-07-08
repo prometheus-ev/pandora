@@ -1,5 +1,4 @@
 class Indexing::Sources::ParisMusees < Indexing::SourceSuper
-
   CRD_IMAGES_URL = "http://parismuseescollections.paris.fr"
 
   CREATIVE_COMMONS_0_LINE = "Creative Commons Zero (CC0),https://creativecommons.org/publicdomain/zero/1.0/"
@@ -25,7 +24,7 @@ class Indexing::Sources::ParisMusees < Indexing::SourceSuper
   end
 
   def path
-    record.xpath('./entity/publicUrl/text()').to_s.gsub(/\n/, "").gsub(/(#{CRD_IMAGES_URL})/, "").sub(/^(\/*)/,'')
+    record.xpath('./entity/publicUrl/text()').to_s.gsub(/\n/, "").gsub(/(#{CRD_IMAGES_URL})/, "").sub(/^(\/*)/, '')
   end
 
   ##############################################################################
@@ -60,7 +59,7 @@ class Indexing::Sources::ParisMusees < Indexing::SourceSuper
   # standort
   def location
     [
-      record.xpath('../../fieldMusee/entity/fieldMuseeTitreCourt/text()'), 
+      record.xpath('../../fieldMusee/entity/fieldMuseeTitreCourt/text()'),
       record.xpath('../../fieldMusee/entity/fieldAdresse/locality/text()')
     ].reject(&:blank?).join(", ")
   end
@@ -200,9 +199,9 @@ class Indexing::Sources::ParisMusees < Indexing::SourceSuper
     end.reject(&:blank?).join (" | ")
   end
 
-  ##############################################################################
 
   private
+
     def fieldDate(fieldElement)
       start_date = [
         fieldElement.xpath('./startDay/text()'),
@@ -215,9 +214,9 @@ class Indexing::Sources::ParisMusees < Indexing::SourceSuper
         fieldElement.xpath('./endYear/text()')
       ].reject(&:blank?).join("/")
 
-      date = [ 
-        start_date, 
-        end_date        
+      date = [
+        start_date,
+        end_date
       ].reject(&:blank?).join(" - ")
 
       if !(century = fieldElement.xpath('./century/text()')).blank?
@@ -294,5 +293,4 @@ class Indexing::Sources::ParisMusees < Indexing::SourceSuper
         fieldElement.xpath('./fieldRessNumeroFascicule/text()')
       ].reject(&:blank?).join(", ")
     end
-
 end

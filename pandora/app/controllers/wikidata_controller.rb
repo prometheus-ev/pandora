@@ -2,7 +2,8 @@ class WikidataController < ApplicationController
   def index
     term = params[:term]
 
-    response = Faraday.get('https://www.wikidata.org/w/api.php?',
+    response = Faraday.get(
+      'https://www.wikidata.org/w/api.php?',
       action: 'wbsearchentities',
       search: term,
       format: 'json',

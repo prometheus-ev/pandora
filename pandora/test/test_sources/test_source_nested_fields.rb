@@ -12,15 +12,13 @@ class TestSourceNestedFields < Indexing::SourceSuper
   end
 
   def artist
-    artist_nested.map { |artist|
-      artist['name']
-    }.join(' | ')
+    artist_nested.map{|artist| artist['name']}.join(' | ')
   end
 
   def artist_nested
     record.xpath('.//artists/artist').map do |artist|
       doc = {
-        "name" => artist.text,
+        "name" => artist.text.strip,
         "dating" => artist['dating'],
         "wikidata" => artist['wikidata']
       }.compact
@@ -35,12 +33,28 @@ class TestSourceNestedFields < Indexing::SourceSuper
     record.xpath('.//title/text()')
   end
 
+  def location
+    location_nested.map {|location|
+      location['name']
+    }.join(' | ')
+  end
+
   def location_nested
     record.xpath('.//locations/location').map do |location|
-      {
-        'name' => location.text,
-        'wikidata' => location['wikidata']
-      }
+      if location['wikidata']
+        next {
+          'name' => location.text,
+          'wikidata' => location['wikidata']
+        }
+      end
+
+      if location['link-url']
+        next {
+          'name' => location.text,
+          'link_text' => location['link-text'],
+          'link_url' => location['link-url']
+        }
+      end
     end
   end
 

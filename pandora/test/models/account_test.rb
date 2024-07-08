@@ -45,6 +45,13 @@ class AccountTest < ActiveSupport::TestCase
     assert account.errors[:login].include?('is too long (maximum is 99 characters)')
   end
 
+  test 'should not allow login names conflicting with routes' do
+    account = Account.new login: "active"
+    account.valid?
+
+    assert account.errors[:login].include?('is invalid')
+  end
+
   test "should require well-formed e-mail" do
     account = Account.new email: 'foo@bar@example.com'
     account.valid?
@@ -52,9 +59,8 @@ class AccountTest < ActiveSupport::TestCase
     assert account.errors[:email].include?('is invalid')
   end
 
-  test "should require e-mail with valid domain name" do
-    skip 'the domain check depends on a live dns request which is unreliable during testing'
-
+  # skip: the domain check depends on a live dns request which is unreliable during testing
+  test "should require e-mail with valid domain name @skip" do
     account = Account.new email: 'foo@noexist.wendig.io'
     account.valid?
 
@@ -95,22 +101,20 @@ class AccountTest < ActiveSupport::TestCase
     token     = account.magic_encrypt(timestamp)
 
     yielded = false
-    assert_nil Account.authenticate_from_token(account.login, timestamp, token) { yielded = true }
+    assert_nil Account.authenticate_from_token(account.login, timestamp, token){yielded = true}
     assert yielded
   end
 
   # brittle because the address verification uses a dns lookup which is not
   # reliable (e.g. doesn't work from everywhere)
-  if ENV['PM_BRITTLE'] == 'true'
-    test "should verify e-mail on magic login" do
-      account = Account.find_by! login: 'jdoe'
-      timestamp, token = account.token_auth(true)
+  test "should verify e-mail on magic login @brittle" do
+    account = Account.find_by! login: 'jdoe'
+    timestamp, token = account.token_auth(true)
 
-      assert_changes 'account.email_verified_at' do
-        account = Account.authenticate_from_token(account.login, timestamp, token)
-      end
-      assert_kind_of Time, account.email_verified_at
+    assert_changes 'account.email_verified_at' do
+      account = Account.authenticate_from_token(account.login, timestamp, token)
     end
+    assert_kind_of Time, account.email_verified_at
   end
 
   test "should perform magic confirmation" do
@@ -174,7 +178,9 @@ class AccountTest < ActiveSupport::TestCase
   test 'validate login on create' do
     account = Account.new(login: 'john doe')
     account.valid?
-    msg = 'has to start with a Latin letter and can only contain Latin letters, digits, underscores and full stops and cannot end with a full stop'
+    msg = "has to start with a Latin letter and can only contain Latin letters, " \
+          "digits, underscores and full stops and cannot end with a full stop. " \
+          "Specifically, the login cannot contain any spaces."
     assert_equal [msg], account.errors[:login]
   end
 
@@ -182,7 +188,9 @@ class AccountTest < ActiveSupport::TestCase
     account = Account.find_by!(login: 'jdoe')
     account.login = 'john_doe.'
     account.valid?
-    msg = 'has to start with a Latin letter and can only contain Latin letters, digits, underscores and full stops and cannot end with a full stop'
+    msg = "has to start with a Latin letter and can only contain Latin letters, " \
+          "digits, underscores and full stops and cannot end with a full stop. " \
+          "Specifically, the login cannot contain any spaces."
     assert_equal [msg], account.errors[:login]
   end
 

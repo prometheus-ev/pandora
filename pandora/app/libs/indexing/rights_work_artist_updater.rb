@@ -7,7 +7,7 @@ class Indexing::RightsWorkArtistUpdater
     artist_normalized = validated_fields['artist_normalized']
 
     if validated_fields['rights_work'].blank? && !artist_normalized.blank?
-      unless (artist_normalized_selected = artist_normalized.select{|an|@non_vgbk_artists_list.include?(an.encode(Encoding::UTF_8))}).empty?
+      unless (artist_normalized_selected = artist_normalized.select{|an| @non_vgbk_artists_list.include?(an.encode(Encoding::UTF_8))}).empty?
         validated_fields['rights_work'] = artist_normalized_selected
       end
     end

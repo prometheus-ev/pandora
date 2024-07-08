@@ -25,7 +25,7 @@
   <%= list_controls = render :partial => 'list_controls', :locals => { :results => @sources, sort_columns: Source.sort_columns } %>
 
   <table class="list sources-list clear-float clear-padding">
-    <%= render :partial => "sources/row", :collection => @sources.items, :locals => { :cycle_name => 'list' } %>
+    <%= render partial: "sources/row", collection: @sources.items, locals: {cycle_name: "list", sources_counts: @sources_counts} %>
   </table>
 
   <%= list_controls %>

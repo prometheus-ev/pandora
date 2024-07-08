@@ -42,6 +42,14 @@ const request = (url, init = {}) => {
     init['headers']['X-CSRF-Token'] = csrfToken
   }
 
+  if (init['body']) {
+    if (init['headers']['content-type'] == 'application/json') {
+      if (!isString(init['body'])) {
+        init['body'] = JSON.stringify(init['body'])
+      }
+    }
+  }
+
   requests += 1
   const promise = fetch(url, init).then(r => r.json())
   bus.emit('loading-state-change', {count: requests})
@@ -59,9 +67,14 @@ const locale = () => {
   return !!m ? m[1] : 'de'
 }
 
+const isString = (value) => {
+  return typeof value == 'string' || value instanceof String
+}
+
 export {
   clamp,
   locale,
   delay,
-  request
+  request,
+  isString
 }

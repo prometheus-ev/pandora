@@ -18,13 +18,13 @@ class Indexing::Sources::KoelnRbaKoer < Indexing::SourceSuper
   # künstler
   def artist
     number = record.xpath('count(ancestor::Block[@Type="obj"]/Field[@Type="ob30"])')
-    (1..(number.to_i)).map{ |index|
+    (1..(number.to_i)).map{|index|
       "#{record.xpath(".//ancestor::Block[@Type='obj']/Field[@Type='ob30'][#{index}]/Field[@Type='3100']/@Value")} (#{record.xpath(".//ancestor::Block[@Type='obj']/Field[@Type='ob30'][#{index}]/Field[@Type='3475']/@Value")})".gsub(/\(\)/, "")
     }
   end
 
   def artist_normalized
-    an = record.xpath('.//ancestor::Block[@Type="obj"]/Field[@Type="ob30"]/Field[@Type="3100"]/@Value').map { |a|
+    an = record.xpath('.//ancestor::Block[@Type="obj"]/Field[@Type="ob30"]/Field[@Type="3100"]/@Value').map {|a|
       a.to_s.split(', ').reverse.join(' ')
     }
     super(an)
@@ -57,7 +57,7 @@ class Indexing::Sources::KoelnRbaKoer < Indexing::SourceSuper
   # Format
   def size
     number = record.xpath('count(ancestor::Block[@Type="obj"]/Field[@Type="5364"])')
-    (1..(number.to_i)).map{ |index|
+    (1..(number.to_i)).map{|index|
       "#{record.xpath(".//ancestor::Block[@Type='obj']/Field[@Type='5364'][#{index}]/@Value")}: #{record.xpath(".//ancestor::Block[@Type='obj']/Field[@Type='5364'][#{index}]/Field[@Type='5365']/@Value")}"
     }
   end

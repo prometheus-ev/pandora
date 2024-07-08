@@ -2,29 +2,30 @@ require 'resolv'
 require 'pandora/validation/email_validator'
 
 class Institution < ApplicationRecord
-
   include Util::Config
 
-  has_many                :licenses,    :dependent  => :destroy
+  has_many                :licenses, :dependent => :destroy
   has_many                :accounts
-  has_many                :sources,     :dependent  => :restrict_with_error
-  has_many                :databases, :class_name => 'Source',  as: :owner, :foreign_key => 'owner_id', :dependent => :destroy
+  has_many                :sources, :dependent => :restrict_with_error
+  has_many                :databases, :class_name => 'Source', as: :owner, :foreign_key => 'owner_id', :dependent => :destroy
   has_many                :departments, lambda{where('institutions.id != institutions.campus_id')}, :class_name => 'Institution', :foreign_key => 'campus_id'
   belongs_to              :campus,      :class_name => 'Institution', :foreign_key => 'campus_id', optional: true
   belongs_to              :contact,     :class_name => 'Account',     :foreign_key => 'contact_id', optional: true
   belongs_to              :ipuser,      :class_name => 'Account',     :foreign_key => 'ipuser_id', optional: true
-  has_and_belongs_to_many :admins, -> {with_role('useradmin')}, :class_name => 'Account',     :uniq        => true
+  has_and_belongs_to_many :admins, ->{with_role('useradmin')}, :class_name => 'Account', :uniq => true
 
-  serialize :hostnames, Array
+  serialize :hostnames, coder: YAML, type: Array
 
   REQUIRED = %w[name title city country]
 
   DEFAULT_DATABASE_QUOTA = 51200 # in megabytes
 
-  validates_presence_of   *REQUIRED
-  validates_format_of     :name, :with => /\A#{LETTER_RE}/,
-                          :message => 'must begin with a letter'
-                          validates :email, :'pandora/validation/email' => true, allow_blank: true
+  validates_presence_of *REQUIRED
+  validates_format_of :name, {
+    :with => /\A#{LETTER_RE}/,
+    :message => 'must begin with a letter'
+  }
+  validates :email, :'pandora/validation/email' => true, allow_blank: true
   validates_uniqueness_of :name, :title, :case_sensitive => false
 
   # REWRITE: re-activating custom legacy validations
@@ -47,7 +48,7 @@ class Institution < ApplicationRecord
   def self.same_campus?(*institutions)
     campus_id = nil
 
-    institutions.uniq.each { |institution|
+    institutions.uniq.each {|institution|
       id = institution.top_campus.id or return
       return false unless id == campus_id ||= id
     }
@@ -164,7 +165,7 @@ class Institution < ApplicationRecord
   end
 
   def short
-    # REWRITE: this method has changed signature. Also, do not escape the 
+    # REWRITE: this method has changed signature. Also, do not escape the
     # truncated text
     # TODO: check how institution titles are getting into the system and ensure
     # security
@@ -196,6 +197,7 @@ class Institution < ApplicationRecord
 
     ip_ranges.each do |r|
       return false if r.excludes?(ip)
+
       result |= r.contains?(ip)
     end
 
@@ -205,7 +207,7 @@ class Institution < ApplicationRecord
         return true if resolver.getaddress(h).to_s == ip
       rescue Resolv::ResolvError => e
         Rails.logger.info("Institution#authorizes_ip?: #{e.message}")
-        
+
         false
       end
     end
@@ -285,7 +287,7 @@ class Institution < ApplicationRecord
       license.update_attribute(:expires_at, at) if expires_at > at
     end
 
-    departments.each { |department| department.expire!(at) }
+    departments.each{|department| department.expire!(at)}
 
     at
   end
@@ -300,7 +302,7 @@ class Institution < ApplicationRecord
     if (new_license_type = license_attributes[:license_type]).blank?
       license.update_attribute(:expires_at, Time.now.utc) if license
     else
-      real_license_type = 
+      real_license_type =
         new_license_type.is_a?(LicenseType) ?
         new_license_type :
         LicenseType.find(new_license_type)
@@ -315,7 +317,7 @@ class Institution < ApplicationRecord
 
         if paid_from = license_attributes[:paid_from]
           if paid_from.is_a?(Time)
-            license_attributes[:paid_from] = paid_from  
+            license_attributes[:paid_from] = paid_from
           end
 
           if paid_from.is_a?(String)
@@ -348,9 +350,9 @@ class Institution < ApplicationRecord
 
     self.license_attributes = {
       :license_type => license_type(last_license),
-      :valid_from   => at,
-      :paid_from    => at,
-      :expires_at   => at.at_end_of_year
+      :valid_from => at,
+      :paid_from => at,
+      :expires_at => at.at_end_of_year
     } if renewable?(at)
   end
 
@@ -398,6 +400,7 @@ class Institution < ApplicationRecord
 
   def same_campus?(*others)
     raise ArgumentError, "at least one argument required" if others.empty?
+
     self.class.same_campus?(self, *others)
   end
 
@@ -408,31 +411,31 @@ class Institution < ApplicationRecord
 
   protected
 
-  # REWRITE: renaming to avoid conflict with rails code (preemptive measure)
-  # def validate
-  def validate_legacy
-    if ipranges.present?
-      pristine = self.pristine
+    # REWRITE: renaming to avoid conflict with rails code (preemptive measure)
+    # def validate
+    def validate_legacy
+      if ipranges.present?
+        pristine = self.pristine
 
-      campus_changed = (ipranges_changed =
-        new_record? || ipranges  != pristine.ipranges) ||
-        new_record? || campus_id != pristine.campus_id
+        campus_changed =
+          (ipranges_changed = new_record? || ipranges != pristine.ipranges) ||
+          new_record? ||
+          campus_id != pristine.campus_id
 
-      validate_ranges
-      # (!ipranges_changed || validate_ranges != false) &&
-      #   (!campus_changed || check_range_overlap != false)
-    end
-  end
-
-  # REWRITE: changed to prevent ruby 2.2 circular argument warning
-  def validate_ranges
-    ip_ranges.each do |r|
-      if r == :invalid
-        errors.add :ipranges, :invalid
-        return false
+        validate_ranges
+        # (!ipranges_changed || validate_ranges != false) &&
+        #   (!campus_changed || check_range_overlap != false)
       end
     end
-    # Util::IP.parse_ranges(ipranges || self.ipranges)
-  end
 
+    # REWRITE: changed to prevent ruby 2.2 circular argument warning
+    def validate_ranges
+      ip_ranges.each do |r|
+        if r == :invalid
+          errors.add :ipranges, :invalid
+          return false
+        end
+      end
+      # Util::IP.parse_ranges(ipranges || self.ipranges)
+    end
 end

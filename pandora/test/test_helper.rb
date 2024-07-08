@@ -7,7 +7,8 @@ if ENV['COVERAGE'] == 'true'
     coverage_dir 'tmp/coverage'
     track_files '{app,lib}/**/*.{rb,rake}'
     add_filter 'vendor/nuggets/spec'
-    add_filter 'app/libs/indexing/sources'
+    add_filter 'app/libs/indexing'
+    add_filter 'app/libs/pandora/indexing'
     add_filter 'lib/tasks'
   end
 
@@ -144,9 +145,11 @@ class ActiveSupport::TestCase
   end
 
   def links_from_email(email)
-    body = !email.body.multipart? ? email.body : email.body.parts.find{ |p|
-      p.content_type.match?(/^text\/plain/)
-    }
+    body = (
+      !email.body.multipart? ?
+      email.body :
+      email.body.parts.find{|p| p.content_type.match?(/^text\/plain/)}
+    )
     body.to_s.scan(/http[^\n> ]+/).map{|l| l.gsub(/=0D/, '')}
   end
 
@@ -233,7 +236,7 @@ class ActiveSupport::TestCase
       ENV[key] = value
     end
     yield
-    overrides.each do |key, value|
+    overrides.each_key do |key|
       ENV[key] = old[key]
     end
   end
@@ -334,12 +337,8 @@ class ActiveSupport::TestCase
     patch '/en/terms', params: {accepted: 1}
   end
 
-  def elastic
-    @elastic ||= Pandora::Elastic.new
-  end
-
   def require_test_sources
-    Dir["#{Rails.root}/test/test_sources/*.rb"].each{ |file| require file }
+    Dir["#{Rails.root}/test/test_sources/*.rb"].each{|file| require file}
   end
 
   def pid_for(id, source_id = 'test_source')
@@ -347,7 +346,7 @@ class ActiveSupport::TestCase
   end
 
   def elastic
-    Pandora::Elastic.new
+    @elastic ||= Pandora::Elastic.new
   end
 
   def stats_data
@@ -360,8 +359,8 @@ class ActiveSupport::TestCase
 
     # generate sum stats records
     sum_stats = Pandora::SumStats.new(
-      Date.new(2018,12,1),
-      Date.new(2019,2,28)
+      Date.new(2018, 12, 1),
+      Date.new(2019, 2, 28)
     )
     sum_stats.aggregate
 
@@ -421,7 +420,7 @@ class ActiveSupport::TestCase
   end
 
   def populate_announcements
-    6.times.map { |i|
+    6.times.map {|i|
       n = valid_announcement
 
       if i == 0 || i == 1

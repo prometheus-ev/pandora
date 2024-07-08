@@ -1,4 +1,6 @@
 class UserMetadataController < ApplicationController
+  wrap_parameters false
+
   def self.initialize_me!
     control_access([:user] => :ALL)
   end

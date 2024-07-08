@@ -25,19 +25,20 @@ module Util
       end
     end
 
-    
+
+    class << self
+      private
+
+        def included(base)
+          base.extend(ClassMethods)
+        end
+    end
+
+
     protected
-    
+
       def from_textarea(value)
         value.is_a?(String) ? value.split(TEXTAREA_SEPARATOR_RE).reject(&:blank?) : value
       end
-
-    
-    private
-    
-      def self.included(base)
-        base.extend(ClassMethods)
-      end
-
   end
 end

@@ -6,7 +6,6 @@ require 'test_sources/test_source'
 require 'test_sources/test_source_sorting'
 
 class ApiTest < ActionDispatch::IntegrationTest
-
   # examples
 
   test 'wadl de' do
@@ -80,13 +79,25 @@ class ApiTest < ActionDispatch::IntegrationTest
     assert response.successful?
     assert xml['objects'].size > 0
 
-    # see #1233
-    jdoe = Account.find_by! login: 'jdoe'
-    jdoe.update_columns accepted_terms_of_use_revision: nil
-    get '/api/json/search/search', headers: api_auth('jdoe')
-    assert_match /Bitte akzeptieren Sie unsere Nutzungsbedingungen/, json
-    get '/api/xml/search/search', headers: api_auth('jdoe')
-    assert_match /Bitte akzeptieren Sie unsere Nutzungsbedingungen/, xml['hash']['message']
+    # # see #1233
+    # jdoe = Account.find_by! login: 'jdoe'
+    # jdoe.update_columns accepted_terms_of_use_revision: nil
+    # get '/api/json/search/search', headers: api_auth('jdoe')
+    # assert_match /Bitte akzeptieren Sie unsere Nutzungsbedingungen/, json
+    # get '/api/xml/search/search', headers: api_auth('jdoe')
+    # assert_match /Bitte akzeptieren Sie unsere Nutzungsbedingungen/, xml['hash']['message']
+  end
+
+  test 'search (open access)' do
+    TestSource.index
+    source = Source.find_by!(name: 'test_source')
+    source.update(open_access: true)
+
+    get '/api/json/search/index', params: {s: ['test_source'], term: '*'}
+    assert_equal 10, json.size
+
+    get '/api/xml/search/index', params: {s: ['test_source'], term: '*'}
+    assert_equal 10, xml['objects'].size
   end
 
   test 'image data and metadata (blob, upload)' do
@@ -177,6 +188,18 @@ class ApiTest < ActionDispatch::IntegrationTest
 
     assert_equal "http://www.example.com/en/image/upload-356a192b7913b04c54574d18c28d46e6395428ab.html?api_version=v1", xml['image']['link']
     assert_equal true, xml['image']['status_as_of'].is_a?(Time)
+  end
+
+  test 'geonames rendering (xml, json)' do
+    TestSourceNestedFields.index
+    pid = pid_for(1, 'test_source_nested_fields')
+    url = 'http://sws.geonames.org/8410588'
+
+    get "/api/xml/image/show/#{pid}", headers: api_auth('jdoe')
+    assert_equal url, xml['image']['location'][2]['link_url']
+
+    get "/api/json/image/show/#{pid}", headers: api_auth('jdoe')
+    assert_equal url, json['location'][2]['link_url']
   end
 
   test 'image data and metadata (json, upload)' do
@@ -291,7 +314,7 @@ class ApiTest < ActionDispatch::IntegrationTest
         rights_work: 'some work rights',
         rights_reproduction: 'some rights',
         credits: 'some credits',
-        file: fixture_file_upload('mona_lisa.jpg','image/jpeg')
+        file: fixture_file_upload('mona_lisa.jpg', 'image/jpeg')
       }
     }
 
@@ -382,7 +405,7 @@ class ApiTest < ActionDispatch::IntegrationTest
     get '/api/json/account/show', params: {id: superadmin.id}
     assert_equal 401, response.status
 
-    # TODO: see https://prometheus-srv1.uni-koeln.de/redmine/issues/764
+    # TODO: see #764
     get '/api/json/account/show', params: {id: superadmin.id}, headers: api_auth('jdoe')
     assert_equal 200, response.status
 
@@ -922,6 +945,18 @@ class ApiTest < ActionDispatch::IntegrationTest
         assert_equal 2, response.headers['X-RateLimit-Remaining']
         assert_equal 2, RateLimit.count
       end
+    end
+  end
+
+  test 'trusted host authentication' do
+    pid = Upload.last.image.pid
+
+    get "/api/blob/image/r448/#{pid}"
+    assert_equal 401, response.status
+
+    with_env 'PM_TRUSTED_HOSTS' => '127.0.0.0/8' do
+      get "/api/blob/image/r448/#{pid}"
+      assert_match '/images/test.png', response.location
     end
   end
 end

@@ -13,14 +13,14 @@ class Indexing::IndexTasks
     out = headers.map.with_index do |h, i|
       h.to_s.ljust(paddings[i])
     end.join(' | ')
-    puts out
+    Pandora.puts out
 
     out = results.map do |r|
       headers.map.with_index do |h, i|
         r[h].to_s.ljust(paddings[i])
       end.join(' | ')
     end.join("\n")
-    puts out
+    Pandora.puts out
   end
 
   def dump(indices)
@@ -29,13 +29,12 @@ class Indexing::IndexTasks
     if indices[0] == 'all'
       indices = elastic.aliases
     elsif indices.empty?
-      puts "No indices selected."
-      puts
-      puts 'Usage e.g: pandora:index:dump INDEX="daumier robertin", or pandora:index:dump INDEX="all"'
+      Pandora.puts "No indices selected."
+      Pandora.puts
+      Pandora.puts 'Usage e.g: pandora:index:dump INDEX="daumier robertin", or pandora:index:dump INDEX="all"'
     end
 
     indices.each do |index|
-
       # get the mapping
       settings = elastic.settings(index).values.first['settings']
       mappings = elastic.mappings(index).values.first['mappings']
@@ -78,9 +77,9 @@ class Indexing::IndexTasks
     if indices[0] == 'all'
       indices = files.map{|f| f.split('/').last.split('.').first}
     elsif indices.empty?
-      puts "No indices selected."
-      puts
-      puts 'Usage, e.g: pandora:index:load INDEX="daumier robertin", or pandora:index:load INDEX="all"'
+      Pandora.puts "No indices selected."
+      Pandora.puts
+      Pandora.puts 'Usage, e.g: pandora:index:load INDEX="daumier robertin", or pandora:index:load INDEX="all"'
     end
 
     indices.each do |alias_name|
@@ -109,7 +108,7 @@ class Indexing::IndexTasks
         record['_source'] = attachments.enrich(record['_source'])
 
         elastic.bulk([
-          {'create' => {'_index' => new_index_name, '_id' => record['_id']} },
+          {'create' => {'_index' => new_index_name, '_id' => record['_id']}},
           record['_source']
         ], batch_size: 500)
 
@@ -131,7 +130,7 @@ class Indexing::IndexTasks
     when :all then drop(elastic.aliases)
     when Array
       if index.empty?
-        puts "no indices selected"
+        Pandora.puts "no indices selected"
       else
         index.map{|s| drop(s)}
       end
@@ -146,7 +145,7 @@ class Indexing::IndexTasks
     when :all then check(files.map{|f| f.split('/').last.split('.').first})
     when Array
       if index.empty?
-        puts "no indices selected"
+        Pandora.puts "no indices selected"
       else
         index.map{|s| check(s)}
       end
@@ -158,7 +157,7 @@ class Indexing::IndexTasks
         errors += validate(record)
         progress
       end
-      puts errors
+      Pandora.puts errors
     end
   end
 
@@ -167,7 +166,7 @@ class Indexing::IndexTasks
     when :all then revert(elastic.aliases.keys)
     when Array
       if index.empty?
-        puts "no indices selected"
+        Pandora.puts "no indices selected"
       else
         index.map{|s| revert(s)}
       end
@@ -193,24 +192,24 @@ class Indexing::IndexTasks
     url = 'https://bildkunst-onlinemeldung.de/api/search/file/1'
 
     # https://ruby-doc.org/stdlib-2.5.3/libdoc/net/http/rdoc/Net/HTTP.html
-    printf "Downloading " + csv_filename + "... \r"
+    Pandora.puts "Downloading " + csv_filename + "... \r"
     open csv_filename, 'wb' do |io|
       response = fetch(url)
-      io.write response.body#.encode(Encoding::UTF_8)
+      io.write response.body # .encode(Encoding::UTF_8)
     end
-    printf "Downloading " + csv_filename + "... finished!\n"
+    Pandora.puts "Downloading " + csv_filename + "... finished!\n"
 
     # https://ruby-doc.org/stdlib-2.5.3/libdoc/csv/rdoc/CSV.html
-    printf "Reading " + csv_filename + "... \r"
+    Pandora.puts "Reading " + csv_filename + "... \r"
     # col_sep \t represents a tab. Now a ';' is used.
     csv_content = CSV.read(csv_filename, headers: true, encoding: "ISO-8859-1:UTF-8", col_sep: ";", liberal_parsing: true)
-    printf "Reading " + csv_filename + "... finished!\n"
+    Pandora.puts "Reading " + csv_filename + "... finished!\n"
 
-    printf "Writing #{yml_filename}... \r"
-    File.open(yml_filename, 'w') { |file|
+    Pandora.puts "Writing #{yml_filename}... \r"
+    File.open(yml_filename, 'w') {|file|
       file.puts "<%= Rails.env %>:"
       file.puts "  artists:"
-      csv_content.each { |row|
+      csv_content.each {|row|
         artist = row.field(1) || ""
         artist = artist[0...-1] if artist.chars.last == "*"
         artist << " " unless artist.empty?
@@ -221,7 +220,7 @@ class Indexing::IndexTasks
         file.puts "    - '" + artist.downcase + "'"
       }
     }
-    printf "Writing #{yml_filename}... finished!\n"
+    Pandora.puts "Writing #{yml_filename}... finished!\n"
   end
 
   def write_vgbk_artist_records_as_csv
@@ -246,10 +245,10 @@ class Indexing::IndexTasks
 
           if artist_normalized = record["_source"]["artist_normalized"]
             artist = if artist_normalized.is_a? Array
-                       artist_normalized.join(' | ')
-                     else
-                       artist_normalized
-                     end
+              artist_normalized.join(' | ')
+            else
+              artist_normalized
+            end
           end
 
           if title = record["_source"]["title"]
@@ -282,7 +281,7 @@ class Indexing::IndexTasks
 
     # https://www.rubydoc.info/github/sparklemotion/nokogiri/Nokogiri/XML/Document#errors-instance_method
     if document.errors.size != 0
-      document.errors.map{ |error| logger.info error }
+      document.errors.map{|error| Pandora.puts error}
       error 'Please correct the syntax errors and try again...'
     end
 
@@ -297,12 +296,12 @@ class Indexing::IndexTasks
         artist = main_artist + sub_artists
 
         # Preprocess.
-        artist.map! { |synonym_artist|
+        artist.map! {|synonym_artist|
           synonym_artist.content.gsub(/,? Künstlerin/, '')
           synonym_artist.content.gsub(/,? Künstler/, '')
         }
 
-        last_names = artist.map { |synonym_artist|
+        last_names = artist.map {|synonym_artist|
           synonym_artist = synonym_artist.split(',')
           if synonym_artist.size == 1
             synonym_artist[0]
@@ -311,7 +310,7 @@ class Indexing::IndexTasks
           end
         }
 
-        reversed_names = artist.map { |synonym_artist|
+        reversed_names = artist.map {|synonym_artist|
           synonym_artist = synonym_artist.split(', ')
 
           if synonym_artist.size == 4
@@ -381,16 +380,12 @@ class Indexing::IndexTasks
       settings['index'].delete('uuid')
       settings['index'].delete('version')
 
-      ['search_analyzer', 'artist_normalized_search_analyzer'].each do |file|
-        filter = settings['index']['analysis']['filter']
-        new_path = "#{ENV['PM_SYNONYMS_DIR']}/#{file}.txt"
-
-        if filter["synonym_#{file}"]
-          filter["synonym_#{file}"]['synonyms_path'] = new_path
-        elsif filter["synonym_graph_#{file}"]
-          filter["synonym_graph_#{file}"]['synonyms_path'] = new_path
-        else
-          puts "A filter for synonyms file \"#{file}\" is not available in the index. Please update the index pack."
+      filters = settings['index']['analysis']['filter']
+      filters.each_value do |filter|
+        if path = filter['synonyms_path']
+          file = path.split('/').last
+          new_path = "#{ENV['PM_SYNONYMS_DIR']}/#{file}"
+          filter['synonyms_path'] = new_path
         end
       end
 
@@ -415,7 +410,7 @@ class Indexing::IndexTasks
     def get_status
       results = {}
 
-      elastic.aliases.each do |a, i|
+      elastic.aliases.each_key do |a|
         results[a] ||= {name: a}
         results[a][:alias] = true
       end
@@ -464,6 +459,7 @@ class Indexing::IndexTasks
 
     def read(file)
       raise "#{file} doesn't exist" unless File.exist?(file)
+
       `gunzip -c #{file}`
     end
 

@@ -1,7 +1,6 @@
 require 'pandora/validation/email_validator'
 
 class Source < ApplicationRecord
-
   include Util::Config
   include Util::Attribution
 
@@ -18,7 +17,7 @@ class Source < ApplicationRecord
   belongs_to              :institution
   belongs_to              :contact, class_name: 'Account', foreign_key: 'contact_id', optional: true
 
-  has_and_belongs_to_many :source_admins, -> {with_role('dbadmin')}, :class_name => 'Account', join_table: "admins_sources", :uniq => true
+  has_and_belongs_to_many :source_admins, ->{with_role('dbadmin')}, :class_name => 'Account', join_table: "admins_sources", :uniq => true
 
   belongs_to              :dbuser, class_name: 'Account', foreign_key: 'dbuser_id', optional: true
   belongs_to              :owner, polymorphic: true, foreign_key: 'owner_id', optional: true
@@ -28,25 +27,35 @@ class Source < ApplicationRecord
   has_many                :rated_images, lambda{where(Image.conditions_for_rated[:conditions])}, class_name: 'Image', :dependent => :destroy
 
   has_many :keyword_source, dependent: :destroy
-  has_many :keywords, -> {distinct.order('title ASC')}, through: :keyword_source
+  has_many :keywords, ->{distinct.order('title ASC')}, through: :keyword_source
 
   # Required attributes for a source
-  REQUIRED = %w[name title kind institution]
+  REQUIRED = %w[name title kind institution keyword_list]
 
-  validates_presence_of   *REQUIRED
+  validates_presence_of *REQUIRED
 
-  validates_format_of     :name, :with => /\A#{LETTER_RE}/,
-                          :message => 'must begin with a letter'
-  validates_format_of     :name, :with => /\A\w+\z/,
-                          :message => 'must only consist of word characters'
-                          # in particular: must not match Image::PID_SEPARATOR!
-                          validates :email, :'pandora/validation/email' => true, allow_blank: true
-  validates_presence_of   :emails, if: :can_exploit_rights?
+  validates_format_of :name, {
+    :with => /\A#{LETTER_RE}/,
+    :message => 'must begin with a letter'
+  }
+  validates_format_of :name, {
+    :with => /\A\w+\z/,
+    :message => 'must only consist of word characters'
+  }
+  # in particular: must not match Image::PID_SEPARATOR!
+  validates :email, :'pandora/validation/email' => true, allow_blank: true
+
+  validates_presence_of :emails, if: :can_exploit_rights?
 
   validates_uniqueness_of :name, case_sensitive: true
 
   # number in megabytes
-  validates :quota, numericality: { only_integer: true, greater_than_or_equal_to: 0, less_than_or_equal_to: 51200, allow_nil: true  }
+  validates :quota, numericality: {
+    only_integer: true,
+    greater_than_or_equal_to: 0,
+    less_than_or_equal_to: 51200,
+    allow_nil: true
+  }
 
   # Action to be taken before validation
   before_validation :sanitize_email
@@ -59,13 +68,13 @@ class Source < ApplicationRecord
   def self.create_user_database(user)
     src = Source.create!(
       name: "user_database_#{user.id}",
-      title:  "User database #{user.id}",
-      kind:  "User database",
-      type:  "upload",
-      institution:  Institution.find_by!(name: 'prometheus'),
+      title: "User database #{user.id}",
+      kind: "User database",
+      type: "upload",
+      institution: Institution.find_by!(name: 'prometheus'),
       owner: user,
-      keywords:  [Keyword.find_or_create_by!(title: 'upload')],
-      quota:  Account::DEFAULT_DATABASE_QUOTA
+      keywords: [Keyword.find_or_create_by!(title: 'upload')],
+      quota: Account::DEFAULT_DATABASE_QUOTA
     )
 
     user.reload_database
@@ -220,9 +229,7 @@ class Source < ApplicationRecord
   #
   # @return [Array] An array of Source name strings.
   def self.names
-    all.map { |source|
-      source.name
-    }
+    all.map{|source| source.name}
   end
 
   def self.search_columns
@@ -253,17 +260,17 @@ class Source < ApplicationRecord
     end
   end
 
-  #def record_count
-  #  if user_database? || institutional_user_database?
-  #    if uploads && record_count = uploads.size
-  #      record_count
-  #    else
-  #      0
-  #    end
-  #  else
-  #    self[:record_count]
-  #  end
-  #end
+  # def record_count
+  #   if user_database? || institutional_user_database?
+  #     if uploads && record_count = uploads.size
+  #       record_count
+  #     else
+  #       0
+  #     end
+  #   else
+  #     self[:record_count]
+  #   end
+  # end
 
   def user_database?
     kind == 'User database'
@@ -330,6 +337,10 @@ class Source < ApplicationRecord
 
   def score
     @score ||= rated_images.sum(:score)
+  end
+
+  def comments
+    Comment.where('image_id LIKE ?', "#{name}-%")
   end
 
   def update_rating

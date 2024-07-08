@@ -20,7 +20,7 @@ class Pandora::SizeParserTest < ActiveSupport::TestCase
   end
 
   # tests the sampe file, see
-  # https://redmine.prometheus-srv.uni-koeln.de/issues/1389#note-11
+  # see #1389#note-11
   # test 'parses sample file' do
   #   parser = Pandora::SizeParser.new
 

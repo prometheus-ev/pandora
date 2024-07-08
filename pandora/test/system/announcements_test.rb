@@ -1,7 +1,6 @@
 require "application_system_test_case"
 
 class AnnouncementsTest < ApplicationSystemTestCase
-
   setup do
     Announcement.all.each{|n| n.destroy}
   end
@@ -52,7 +51,6 @@ class AnnouncementsTest < ApplicationSystemTestCase
       within '#main' do
         assert_text 'bitcoin'
       end
-
     end
 
     click_on 'Log out'

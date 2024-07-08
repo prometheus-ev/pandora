@@ -38,9 +38,9 @@ class Indexing::Index
   # @return [Array] An array of index alias names.
   def aliases
     # Map index aliases names, reject empty ones.
-    @index_aliases ||= client.indices.get_alias.values.reject { |index_alias|
+    @index_aliases ||= client.indices.get_alias.values.reject {|index_alias|
       index_alias["aliases"] == {}
-    }.map { |index_alias|
+    }.map {|index_alias|
       index_alias["aliases"].keys[0]
     }
   end
@@ -51,7 +51,6 @@ class Indexing::Index
   def indices
     client.indices.get_settings.keys.sort
   end
-
 
   # Create an index with settings and mappings.
   #
@@ -84,7 +83,7 @@ class Indexing::Index
     if index_name == "_all"
       client.count(index: Source.active_names.join(","), ignore_unavailable: true)['count']
     elsif client.indices.exists? index: index_name
-      client.count({ index: index_name })['count']
+      client.count({index: index_name})['count']
     else
       0
     end
@@ -99,51 +98,51 @@ class Indexing::Index
   def process_indices(params_indices)
     if params_indices.present?
       # Reject aliases that are not available as sources.
-      aliases = self.aliases.sort.reject { |alias_name|
+      aliases = self.aliases.sort.reject {|alias_name|
         !source_names.include?(alias_name) || client.count(index: alias_name, ignore_unavailable: true)["count"] == 0
-      # Go through all existing index aliases and set them as checked if they exist as param, set them unchecked if they do not exist as param.
-      }.map { |alias_name|
+        # Go through all existing index aliases and set them as checked if they exist as param, set them unchecked if they do not exist as param.
+      }.map {|alias_name|
         if params_indices[alias_name] == "true"
-          [alias_name, { checked: true }]
+          [alias_name, {checked: true}]
         else
-          [alias_name, { checked: false }]
+          [alias_name, {checked: false}]
         end
       }.to_h
       # Reject indices that are not available as sources.
-      indices = self.indices.sort.reject { |index_name|
+      indices = self.indices.sort.reject {|index_name|
         !source_names.include?(alias_name_from_index_name(index_name)) || client.count(index: alias_name_from_index_name(index_name), ignore_unavailable: true)["count"] == 0
-      # Go through all existing indices and set them as checked if they exist as param, set them unchecked if they do not exist as param.
-      }.map { |index_name|
+        # Go through all existing indices and set them as checked if they exist as param, set them unchecked if they do not exist as param.
+      }.map {|index_name|
         source_name = alias_name_from_index_name(index_name)
         if params_indices[source_name] == "true"
-          [source_name, { checked: true }]
+          [source_name, {checked: true}]
         else
-          [source_name, { checked: false }]
+          [source_name, {checked: false}]
         end
       }.to_h
 
       indices.merge!(aliases)
     else
       # Reject aliases that are not available as sources.
-      aliases = self.aliases.sort.reject { |alias_name|
+      aliases = self.aliases.sort.reject {|alias_name|
         !source_names.include?(alias_name) || client.count(index: alias_name, ignore_unavailable: true)["count"] == 0
-      # Set all index aliases checked by default.
-      }.map { |alias_name|
-        [alias_name, { checked: true }]
+        # Set all index aliases checked by default.
+      }.map {|alias_name|
+        [alias_name, {checked: true}]
       }.to_h
       # Reject indices that are not available as sources.
-      indices = self.indices.sort.reject { |index_name|
+      indices = self.indices.sort.reject {|index_name|
         !source_names.include?(alias_name_from_index_name(index_name)) || client.count(index: alias_name_from_index_name(index_name), ignore_unavailable: true)["count"] == 0
-      # Set all indices checked by default.
-      }.map { |index_name|
-        [alias_name_from_index_name(index_name), { checked: true }]
+        # Set all indices checked by default.
+      }.map {|index_name|
+        [alias_name_from_index_name(index_name), {checked: true}]
       }.to_h
 
       indices.merge!(aliases)
     end
 
     # Extend indices hash to include source model data
-    sources.each { |source|
+    sources.each {|source|
       if indices[source.name]
         indices[source.name].merge!(source: {
           name: source.name,
@@ -154,7 +153,7 @@ class Indexing::Index
           location: source.institution.location,
           url: source.url,
           email: source.email,
-          keywords: source.keywords.map{ |keyword| keyword.title }.join(", "),
+          keywords: source.keywords.map{|keyword| keyword.title}.join(", "),
           open_access: source.open_access? ? "Open access" : "Non-Open access",
           source_id: source.id,
           institution_id: source.institution.id
@@ -170,7 +169,7 @@ class Indexing::Index
   end
 
   def source_names
-    @source_names ||= sources.map { |source|
+    @source_names ||= sources.map {|source|
       source.name
     }
   end
@@ -181,13 +180,13 @@ class Indexing::Index
     records[:total] = client ? count : 0
 
     # Go through index aliases reject those which do not have a source.
-    aliases.sort.reject { |alias_name|
+    aliases.sort.reject {|alias_name|
       !source_names.include?(alias_name)
-    }.each { |alias_name|
+    }.each {|alias_name|
       records[alias_name] = client ? count(alias_name) : 0
     }
 
-    { records: records }
+    {records: records}
   end
 
   # Get the current index name from an index alias name.

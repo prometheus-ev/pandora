@@ -1,7 +1,5 @@
 module MoreHelpers
-
   module ImageHelper
-
     def image_tag_for(image, size = :small, options = {}, cachable = false)
       si = Pandora::SuperImage.from(image)
 
@@ -27,8 +25,8 @@ module MoreHelpers
       link_to_if(
         si.has_record?,
         name,
-        { :controller => 'images', :action => 'show', :id => si.pid }.reverse_merge(options),
-        { :title => image_title }.merge(html_options)
+        {:controller => 'images', :action => 'show', :id => si.pid}.reverse_merge(options),
+        {:title => image_title}.merge(html_options)
       )
     end
 
@@ -98,14 +96,15 @@ module MoreHelpers
 
     def upload_image_manipulation_icons(image, edit = false, delete = false)
       return '' unless image.upload_record? && (edit || delete)
+
       res = <<-EOT
         <div class="icons dim">
       EOT
       res << <<-EOT if delete
-          <div>#{link_to(image_tag('icon/delete.gif', :class => 'icon upload-icon delete-icon upload-delete-icon', :title => 'Delete image from database'.t), { :controller => 'uploads', :action => 'destroy', :id => image.upload.id}, method: 'delete', :confirm => 'Are you sure?'.t )}</div>
+          <div>#{link_to(image_tag('icon/delete.gif', :class => 'icon upload-icon delete-icon upload-delete-icon', :title => 'Delete image from database'.t), {:controller => 'uploads', :action => 'destroy', :id => image.upload.id}, method: 'delete', :confirm => 'Are you sure?'.t)}</div>
       EOT
       res << <<-EOT if edit
-          <div>#{link_to(image_tag('icon/edit.gif', :class => "icon upload-icon upload-edit-icon"), { :controller => 'uploads', :action => 'edit', :id => image.upload.id }, :title => 'Edit upload'.t)}</div>
+          <div>#{link_to(image_tag('icon/edit.gif', :class => "icon upload-icon upload-edit-icon"), {:controller => 'uploads', :action => 'edit', :id => image.upload.id}, :title => 'Edit upload'.t)}</div>
       EOT
       res << <<-EOT if !image.upload.approved_record
           <div class="upload-icon-div">#{image_tag('misc/access_status_private.gif', :class => "upload-approval-icon", :title => 'This image of your database is not available to public collections and presentations until approval of the prometheus office.'.t)}</div>

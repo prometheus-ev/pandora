@@ -28,11 +28,11 @@
   </tr>
   <tr>
     <th><%= 'Starts at'.t %>:</th>
-    <td id="announcement_starts_at"><%= @announcement.starts_at %></td>
+    <td id="announcement_starts_at"><%= @announcement.starts_at.to_fs %></td>
   </tr>
   <tr>
   <th><%='Ends at'.t %>:</th>
-    <td id="announcement_ends_at"><%= @announcement.ends_at %></td>
+    <td id="announcement_ends_at"><%= @announcement.ends_at.to_fs %></td>
   </tr>
   <tr>
     <th><%= 'Display for'.t %>:</th>

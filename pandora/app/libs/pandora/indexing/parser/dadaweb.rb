@@ -9,10 +9,10 @@ class Pandora::Indexing::Parser::Dadaweb < Pandora::Indexing::Parser::XmlReader
   end
 
   def preprocess
-    puts "#{@source[:name]}: loading ArtigoParser..."
-    @artigo_parser =  Pandora::Indexing::Parser::ArtigoParser.new(@source[:name])
-    puts "#{@source[:name]}: loading MiroParser..."
-    @miro_parser =  Pandora::Indexing::Parser::MiroParser.new(@source[:name])
+    Pandora.puts "#{@source[:name]}: loading ArtigoParser..."
+    @artigo_parser = Pandora::Indexing::Parser::ArtigoParser.new(@source[:name])
+    Pandora.puts "#{@source[:name]}: loading MiroParser..."
+    @miro_parser = Pandora::Indexing::Parser::MiroParser.new(@source[:name])
 
     super
   end

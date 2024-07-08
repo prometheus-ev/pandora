@@ -8,7 +8,7 @@ class Indexing::Sources::Uustb < Indexing::SourceSuper
   end
 
   def path
-    ("#{record.at_xpath('.//a5000/text()')}".gsub(/\A0*/,'') << "/landschaft_web.jpg").sub(/^(\/*)/,'')
+    ("#{record.at_xpath('.//a5000/text()')}".gsub(/\A0*/, '') << "/landschaft_web.jpg").sub(/^(\/*)/, '')
   end
 
   def s_location

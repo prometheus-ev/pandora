@@ -26,10 +26,9 @@ class Indexing::Sources::Bern < Indexing::SourceSuper
     if path.blank?
       begin
         url = URI.parse(VERSIONS_URL % image_id)
-        result = Net::HTTP.start(url.host, url.port, { :open_timeout => 1, :read_timeout => 1 })
+        result = Net::HTTP.start(url.host, url.port, {:open_timeout => 1, :read_timeout => 1})
 
-        JSON.parse(result.body).each { |version|
-          printf '-'
+        JSON.parse(result.body).each {|version|
           if version == 'original'
             path = "#{version['link']}/#{image_id}.jpg"
           end
@@ -39,7 +38,7 @@ class Indexing::Sources::Bern < Indexing::SourceSuper
       end
     end
 
-    path.sub(/^(\/*)/,'')
+    path.sub(/^(\/*)/, '')
   end
 
   # künstler
@@ -55,7 +54,7 @@ class Indexing::Sources::Bern < Indexing::SourceSuper
   end
 
   def artist_normalized
-    an = record.xpath('.//Kuenstler/name/text()').map { |a|
+    an = record.xpath('.//Kuenstler/name/text()').map {|a|
       a.to_s.split(', ').reverse.join(' ')
     }
     super(an)

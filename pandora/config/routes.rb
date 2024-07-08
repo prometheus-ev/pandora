@@ -51,6 +51,7 @@ Rails.application.routes.draw do
       get 'small(/:id)', action: 'small'
       get 'medium(/:id)', action: 'medium'
       get 'large(/:id)', action: 'large'
+      get 'original(/:id)', action: 'original'
       get 'r:resolution(:mode)(/:id)', {
         action: 'custom',
         constraints: {resolution: /\d+/, mode: /m/}
@@ -109,6 +110,12 @@ Rails.application.routes.draw do
     scope 'user_metadata', controller: 'user_metadata' do
       patch ':pid/:field/(:position)', action: 'update', constraints: {field: /[a-z0-9\._]+/}
     end
+
+    scope 'indexing', controller: 'indexing' do
+      get 'results', action: 'results'
+      get 'counts', action: 'counts'
+      post 'image_urls', action: 'image_urls'
+    end
   end
 
   # install *both* the normal route and a corresponding one with :locale prefix
@@ -166,8 +173,8 @@ Rails.application.routes.draw do
 
       scope ':id' do
         resources :uploads, {
-          controller: 'institutional_uploads', 
-          as: 'institutional_uploads', 
+          controller: 'institutional_uploads',
+          as: 'institutional_uploads',
           only: ['index', 'new', 'create']
         }
       end
@@ -266,6 +273,13 @@ Rails.application.routes.draw do
         # requests
         # post :show
       end
+
+      get(
+        'image/:id',
+        controller: 'images',
+        action: 'show',
+        constraints: {id: /[a-z0-9_\-]+/}
+      )
     end
 
     resources :boxes, only: ['show', 'index', 'create', 'destroy'] do
@@ -285,6 +299,8 @@ Rails.application.routes.draw do
 
     scope 'administration', controller: 'administration' do
       root action: 'index', via: 'GET', as: 'administration'
+
+      get 'indexing', controller: 'indexing', action: 'index'
     end
 
     controller 'sessions' do
@@ -350,9 +366,11 @@ Rails.application.routes.draw do
         patch 'disable'
       end
     end
-    get 'profile/:id/download_legacy_presentation/:presentation_id/:presentation_filename',
+    get(
+      'profile/:id/download_legacy_presentation/:presentation_id/:presentation_filename',
       to: 'profile#download_legacy_presentation',
       as: 'download_legacy_presentation'
+    )
 
     resources :newsletters do
       collection do
@@ -409,6 +427,6 @@ Rails.application.routes.draw do
 
   get '*path', {
     to: 'redirect#locale_redirect',
-    constraints: lambda{ |r| !r.path.match(/^\/(en|de|pandora|oauth)/) }
+    constraints: lambda{|r| !r.path.match(/^\/(en|de|pandora|oauth)/)}
   }
 end

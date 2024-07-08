@@ -1,5 +1,4 @@
 class InstitutionalUploadsController < ApplicationController
-
   include Util::Config
   include ActionView::Helpers::NumberHelper
 
@@ -10,7 +9,7 @@ class InstitutionalUploadsController < ApplicationController
   # Class methods
   #############################################################################
 
-  def self.initialize_me!  # :nodoc:
+  def self.initialize_me! # :nodoc:
     control_access [:superadmin, :admin, :dbadmin] => [:institutional_databases, :index, :new, :create]
   end
 
@@ -65,7 +64,7 @@ class InstitutionalUploadsController < ApplicationController
       redirect_to :controller => 'uploads', :action => 'edit', :id => @upload, :upload_latest => upload_latest
     else
       set_mandatory_fields
-      
+
       render action: 'new', status: 422
     end
 
@@ -113,90 +112,87 @@ class InstitutionalUploadsController < ApplicationController
 
   private
 
-  def set_list_title(database)
-    quota = number_to_human_size(database.quota.megabytes, precision: 2)
-    space_used = number_to_human_size(space_used_in_bytes(database), precision: 2)
-    space_used_percentage = number_to_percentage(space_used_in_bytes(database)/database.quota.megabytes*100, :precision => 2)
-    'Using %s of %s (about %s)'.t % [space_used, quota, space_used_percentage]
-  end
+    def set_list_title(database)
+      quota = number_to_human_size(database.quota.megabytes, precision: 2)
+      space_used = number_to_human_size(space_used_in_bytes(database), precision: 2)
+      space_used_percentage = number_to_percentage(space_used_in_bytes(database) / database.quota.megabytes * 100, :precision => 2)
+      'Using %s of %s (about %s)'.t % [space_used, quota, space_used_percentage]
+    end
 
-  # overwrites generic ApplicationController#set_mandatory_fields
-  def set_mandatory_fields
-    mandatory = Set.new(Upload::REQUIRED)
-    @mandatory = HashWithIndifferentAccess.new { |h, k| h[k] = mandatory.include?(k.to_s) }
-  end
+    # overwrites generic ApplicationController#set_mandatory_fields
+    def set_mandatory_fields
+      mandatory = Set.new(Upload::REQUIRED)
+      @mandatory = HashWithIndifferentAccess.new{|h, k| h[k] = mandatory.include?(k.to_s)}
+    end
 
-  def check_quota
-    if (database = Source.find(params[:id]))
-      if space_used_in_bytes(database) > database.quota.megabytes
-        flash[:notice] = 
-          "You've reached your quota limit of ".t + 
-          number_to_human_size(database.quota.megabytes, precision: 2) + ". " +
-          "Please delete some of your images!".t
+    def check_quota
+      if (database = Source.find(params[:id]))
+        if space_used_in_bytes(database) > database.quota.megabytes
+          flash[:notice] =
+            "You've reached your quota limit of ".t +
+            number_to_human_size(database.quota.megabytes, precision: 2) + ". " +
+            "Please delete some of your images!".t
+          redirect_to :action => 'index'
+        end
+      else
+        flash[:warning] = "You have to specify an institutional uploads database"
         redirect_to :action => 'index'
       end
-    else
-      flash[:warning] =  "You have to specify an institutional uploads database"
-      redirect_to :action => 'index'
     end
-  end
 
-  def space_used_in_bytes(database)
-    database.uploads.sum(:file_size) or 0
-  end
-
-  def current_user_writables
-    @collections = Collection.
-      allowed(current_user, :write).
-      includes(:owner, :viewers, :collaborators)
-  end
-
-  def records(rw = :read)
-    Upload.
-      allowed(current_user, rw).
-      includes(image: [:collections, :source, :voters, :locations]).
-      preload(:database).
-      sorted(sort_column, sort_direction).
-      search(search_column, search_value)
-  end
-
-  def sort_column_default
-    upload_settings[:order] || 'title'
-  end
-
-  def sort_direction_default
-    upload_settings[:direction] || 'asc'
-  end
-
-  def per_page_default
-    upload_settings[:per_page] || super
-  end
-
-  def zoom_default
-    !upload_settings[:zoom].nil? ? upload_settings[:zoom] : true
-  end
-
-  def upload_settings
-    current_user.try(:upload_settings) || {}
-  end
-
-  def upload_params
-    if current_user.admin_or_superadmin?
-      params.fetch(:upload, {}).permit!
-    else
-      params.fetch(:upload, {}).permit(
-        :title, :file, :rights_reproduction, :credits, :license, :rights_work,
-        :latitude, :longitude, :discoveryplace, :date, :artist, :genre,
-        :keyword_list, :location, :addition, :annotation, :iconography,
-        :institution, :inventory_no, :origin, :other_persons, :photographer,
-        :size, :subtitle, :text, :parent_id, :material, :description,
-        :add_to_index
-      )
+    def space_used_in_bytes(database)
+      database.uploads.sum(:file_size) or 0
     end
-  end
 
-  ############################################################################
-  initialize_me!
-  ############################################################################
+    def current_user_writables
+      @collections = Collection.
+        allowed(current_user, :write).
+        includes(:owner, :viewers, :collaborators)
+    end
 
+    def records(rw = :read)
+      Upload.
+        allowed(current_user, rw).
+        includes(image: [:collections, :source, :voters, :locations]).
+        preload(:database).
+        sorted(sort_column, sort_direction).
+        search(search_column, search_value)
+    end
+
+    def sort_column_default
+      upload_settings[:order] || 'title'
+    end
+
+    def sort_direction_default
+      upload_settings[:direction] || 'asc'
+    end
+
+    def per_page_default
+      upload_settings[:per_page] || super
+    end
+
+    def zoom_default
+      !upload_settings[:zoom].nil? ? upload_settings[:zoom] : true
+    end
+
+    def upload_settings
+      current_user.try(:upload_settings) || {}
+    end
+
+    def upload_params
+      if current_user.admin_or_superadmin?
+        params.fetch(:upload, {}).permit!
+      else
+        params.fetch(:upload, {}).permit(
+          :title, :file, :rights_reproduction, :credits, :license, :rights_work,
+          :latitude, :longitude, :discoveryplace, :date, :artist, :genre,
+          :keyword_list, :location, :addition, :annotation, :iconography,
+          :institution, :inventory_no, :origin, :other_persons, :photographer,
+          :size, :subtitle, :text, :parent_id, :material, :description,
+          :add_to_index
+        )
+      end
+    end
+
+    initialize_me!
 end

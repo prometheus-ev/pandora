@@ -1,18 +1,18 @@
 class Collection < ApplicationRecord
-
   include Util::Config
   include Util::Attribution
 
-  has_many                :forks,  :class_name => 'Collection', :foreign_key => 'parent_id'
-  has_many                :comments, lambda{where('comments.image_id IS NULL')}, dependent: :destroy
-  belongs_to              :parent, :class_name => 'Collection', :foreign_key => 'parent_id', optional: true
-  belongs_to              :owner,  :class_name => 'Account',    :foreign_key => 'owner_id'
-  belongs_to              :thumbnail, class_name: 'Image', optional: true
+  has_many :forks, :class_name => 'Collection', :foreign_key => 'parent_id'
+  has_many :comments, lambda{where('comments.image_id IS NULL')}, dependent: :destroy
+  belongs_to :parent, :class_name => 'Collection', :foreign_key => 'parent_id', optional: true
+  belongs_to :owner,  :class_name => 'Account',    :foreign_key => 'owner_id'
+  belongs_to :thumbnail, class_name: 'Image', optional: true
   has_many :collections_images, class_name: 'CollectionImage'
   has_many :images, through: :collections_images, after_remove: :content_changed, after_add: :content_changed
   has_many :collection_keyword, dependent: :destroy
-  has_many :keywords, -> {distinct.order('title ASC')}, through: :collection_keyword
-  has_and_belongs_to_many(:viewers,
+  has_many :keywords, ->{distinct.order('title ASC')}, through: :collection_keyword
+  has_and_belongs_to_many(
+    :viewers,
     class_name: 'Account',
     join_table: 'collections_viewers',
     uniq: true,
@@ -20,7 +20,8 @@ class Collection < ApplicationRecord
     after_add: :record_new_viewer,
     after_remove: :record_removed_viewer
   )
-  has_and_belongs_to_many(:collaborators,
+  has_and_belongs_to_many(
+    :collaborators,
     class_name: 'Account',
     join_table: 'collections_collaborators',
     uniq: true,
@@ -132,16 +133,17 @@ class Collection < ApplicationRecord
     end
   end
 
-  serialize :links, Array
-  serialize :references, Array
+  serialize :links, coder: YAML, type: Array
+  serialize :references, coder: YAML, type: Array
 
   def self.owned_by(user)
     return none unless user
 
     if user.is_a?(String)
-      includes(:owner).
-      references(:owner).
-      where('accounts.login LIKE ?', user)
+      self.
+        includes(:owner).
+        references(:owner).
+        where('accounts.login LIKE ?', user)
     else
       where(owner_id: user.id)
     end
@@ -223,12 +225,14 @@ class Collection < ApplicationRecord
   def self.shared(user, rw = :read)
     case rw
     when :read
-      joins('LEFT JOIN collections_collaborators cc ON cc.collection_id = collections.id').
-      joins('LEFT JOIN collections_viewers AS cv ON cv.collection_id = collections.id').
-      where('cc.account_id = :id OR cv.account_id = :id', id: user.id)
+      self.
+        joins('LEFT JOIN collections_collaborators cc ON cc.collection_id = collections.id').
+        joins('LEFT JOIN collections_viewers AS cv ON cv.collection_id = collections.id').
+        where('cc.account_id = :id OR cv.account_id = :id', id: user.id)
     when :write
-      joins('LEFT JOIN collections_collaborators cc ON cc.collection_id = collections.id').
-      where('cc.account_id = :id', id: user.id)
+      self.
+        joins('LEFT JOIN collections_collaborators cc ON cc.collection_id = collections.id').
+        where('cc.account_id = :id', id: user.id)
     else
       raise Pandora::Exception, "unknown access mode: #{rw.inspect}"
     end
@@ -243,10 +247,10 @@ class Collection < ApplicationRecord
 
   def self.sharing(user)
     owned_by(user).
-    joins('LEFT JOIN collections_collaborators cc ON cc.collection_id = collections.id').
-    joins('LEFT JOIN collections_viewers AS cv ON cv.collection_id = collections.id').
-    where('cc.account_id IS NOT NULL OR cv.account_id IS NOT NULL').
-    distinct
+      joins('LEFT JOIN collections_collaborators cc ON cc.collection_id = collections.id').
+      joins('LEFT JOIN collections_viewers AS cv ON cv.collection_id = collections.id').
+      where('cc.account_id IS NOT NULL OR cv.account_id IS NOT NULL').
+      distinct
   end
 
   def self.search(field, value)
@@ -256,24 +260,24 @@ class Collection < ApplicationRecord
     when 'title' then where('title like ?', "%#{value}%")
     when 'description' then where('description like ?', "%#{value}%")
     when 'keywords'
-      column_name = (I18n.locale == :en ? 'title' : 'title_de')
-
       joins('LEFT JOIN collections_keywords ck ON ck.collection_id = collections.id').
-      joins('LEFT JOIN keywords k ON ck.keyword_id = k.id').
-      where("k.#{column_name} like ?", "%#{value}%").
-      distinct
+        joins('LEFT JOIN keywords k ON ck.keyword_id = k.id').
+        where("k.title LIKE :value OR k.title_de LIKE :value", value: "%#{value}%").
+        distinct
     when 'owner'
       includes(:owner).
-      references(:owner).
-      where("
-        accounts.login LIKE :v OR
-        CONCAT(accounts.firstname, ' ', accounts.lastname) LIKE :v",
-        v: "%#{value}%"
-      )
+        references(:owner).
+        where(
+          "
+            accounts.login LIKE :v OR
+            CONCAT(accounts.firstname, ' ', accounts.lastname) LIKE :v
+          ",
+          v: "%#{value}%"
+        )
     when 'image_pid'
       includes(:images).
-      references(:images).
-      where('images.pid in (?)', value)
+        references(:images).
+        where('images.pid in (?)', value)
     else
       raise Pandora::Exception, "unknown search field #{field}"
     end
@@ -287,8 +291,8 @@ class Collection < ApplicationRecord
     when 'updated_at' then order('updated_at' => direction)
     when 'owner'
       includes(:owner).
-      references(:owner).
-      order('accounts.lastname' => direction)
+        references(:owner).
+        order('accounts.lastname' => direction)
     else
       raise Pandora::Exception, "unknown sort criteria for Collection: #{column}"
     end
@@ -355,8 +359,9 @@ class Collection < ApplicationRecord
   # returns the images for the current collection as a Pandora::Collection
   # observing user permissions
   def images_pandora_collection(account, opts = {})
-    items = owned_or_administered_uploads(account)
-      .search(opts[:search_column], opts[:search_value])
+    items =
+      owned_or_administered_uploads(account).
+        search(opts[:search_column], opts[:search_value])
 
     if ['title', 'artist', 'location', 'credits'].include?(opts[:sort_column])
       # we can't use AR scopes for this because the data might be in the uploads
@@ -544,7 +549,7 @@ class Collection < ApplicationRecord
   end
 
   def links=(value)
-    self[:links] = from_textarea(value).map { |link|
+    self[:links] = from_textarea(value).map {|link|
       link.strip!
       link.gsub!('"', '%22')
 
@@ -565,17 +570,17 @@ class Collection < ApplicationRecord
     skip_associations = options.delete(:skip_associations)
 
     options.reverse_merge!(
-      :only       => [:id, :title, :description],
-      :skip_nil   => true,
+      :only => [:id, :title, :description],
+      :skip_nil => true,
       :skip_types => true
     )
 
-    super(options) { |xml|
+    super(options) do |xml|
       yield xml if block_given?
 
       unless skip_associations
         xml.keywords do
-          keywords.each { |k| xml.keyword k.title }
+          keywords.each{|k| xml.keyword k.title}
         end
       end
 
@@ -584,7 +589,7 @@ class Collection < ApplicationRecord
       opts = {}
       opts[:type] = 'datetime' unless options[:skip_types]
       xml.tag!('status-as-of', opts, Time.now.utc.xmlschema)
-    }
+    end
   end
 
   # REWRITE: we override Resourceful#to_txt so that we don't need the ar
@@ -606,9 +611,8 @@ class Collection < ApplicationRecord
       txt << "#{label}: #{link}"
     end
 
-    txt << Time.now.utc
+    txt << Time.now.utc.to_fs
 
     txt.join("\n\n")
   end
-
 end

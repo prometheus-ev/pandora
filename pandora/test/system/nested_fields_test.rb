@@ -4,10 +4,9 @@ class NestedFieldsTest < ApplicationSystemTestCase
   setup do
     require_test_sources
   end
-  
-  test 'seach nested artist name and dating' do
-    skip 'still stashed'
 
+  # skip: still stashed
+  test 'seach nested artist name and dating @skip' do
     TestSourceNestedFields.index
 
     login_as 'jdoe'
@@ -31,5 +30,16 @@ class NestedFieldsTest < ApplicationSystemTestCase
     submit 'Search'
 
     page.assert_selector('.list_row', count: 1)
+  end
+
+  test 'linkified nested location' do
+    TestSourceNestedFields.index
+    login_as 'jdoe'
+    pid = pid_for(1, 'test_source_nested_fields')
+
+    visit "/en/image/#{pid}"
+    assert_link('8410588', href: 'http://sws.geonames.org/8410588')
+
+    # see also api_test.rb: "image data and metadata (xml, upload)"
   end
 end

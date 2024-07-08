@@ -21,9 +21,9 @@ class MassMailer < ApplicationMailer
 
     if newsletter = email.newsletter? and email.individual? and user
       address = case to
-        when String then to
-        when Array  then to.first if to.size == 1
-        when Hash then to.values[0]
+      when String then to
+      when Array  then to.first if to.size == 1
+      when Hash then to.values[0]
       end
 
       if address
@@ -48,7 +48,7 @@ class MassMailer < ApplicationMailer
     @newsletter_url = webview_newsletter_url(email)
 
     @root_url = root_url
-    @root_url_without_locale = root_url(:locale=>nil)
+    @root_url_without_locale = root_url(:locale => nil)
 
     unless to.is_a?(Hash)
       to = {to: to}
@@ -66,7 +66,7 @@ class MassMailer < ApplicationMailer
       cc: to[:cc],
       bcc: to[:bcc],
       from: email.from,
-      subject: prefix + email.combined_subject(localized_or_combined(locale) { email.subject }),
+      subject: prefix + email.combined_subject(localized_or_combined(locale){email.subject}),
     }
 
     mail opts do |format|
@@ -76,5 +76,4 @@ class MassMailer < ApplicationMailer
       end
     end
   end
-
 end

@@ -52,7 +52,7 @@ class UploadsTest < ApplicationSystemTestCase
     assert_text 'Uploads 1 of 1'
 
     login_as 'jnadie'
-    create_upload('leonardo', { database: Account.find_by!(login: 'jnadie').database })
+    create_upload('leonardo', {database: Account.find_by!(login: 'jnadie').database})
 
     visit '/uploads'
 
@@ -76,8 +76,8 @@ class UploadsTest < ApplicationSystemTestCase
   end
 
   test 'search umlaut' do
-    upload_bar = create_upload('leonardo', { title: 'Bar' })
-    upload_baer = create_upload('leonardo', { title: 'Bär' })
+    upload_bar = create_upload('leonardo', {title: 'Bar'})
+    upload_baer = create_upload('leonardo', {title: 'Bär'})
 
     login_as 'jdoe'
 
@@ -130,10 +130,30 @@ class UploadsTest < ApplicationSystemTestCase
 
     click_on 'My Uploads'
 
-    # TODO: see https://prometheus-srv1.uni-koeln.de/redmine/projects/pandora-refactoring/wiki/2019-04-29
-    # assert_text '<marquee>'
-
     assert_link 'VG Bild-Kunst'
+  end
+
+  test 'create an upload with long metadata' do
+    upload_long_metadata = create_upload(
+      'leonardo',
+      {
+        title: 'Gemälderestauratorinnen Letizia Marcattilli und Maria Canavan, Bank of America Global Arts & Culture Executive Rena De Sisto, Kuratorin italienischer und spanischer Kunst Aoife Brady, Managerin des Bank of America Art Programme Nikki Wright in der National Gallery of Ireland',
+        origin: "Anonyme Auktion London (Philips), 24. Juni 1980, Nr. 55 (als \"D. Ryckaert\"); anonyme Auktion, London (Sotheby's), 3. Juni 1981, Nr. 87 (als \"Sweerts\"); 1981, bei Sir Humphreys Wakefield & Partners, Ldt., London (als \"Sweerts\"); anonyme Auktion, New York (Sotheby's), 30. Januar 2014, Nr. 236 (als Umfeld von Michael Sweerts); 2015, im Kunsthandel Bijl-Van Urk, Alkmaar.",
+        discoveryplace: "Cornelia Escher „GEAM and ZERO. Spaces between architecture and art“, in: Tiziana Caianiello u. Barbara Könches (Hrsgg.), Between the viewer and the work. Encounters in space: essays on ZERO art, Heidelberg 2019, S. 69–81, https://doi.org/10.11588/arthistoricum.541"
+      }
+    )
+
+    login_as 'jdoe'
+
+    visit '/uploads'
+
+    select 'Title', from: 'field'
+    fill_in 'value', with: 'Marcattilli'
+
+    submit 'Search'
+    assert_text 'Uploads 1 of 1'
+
+    upload_long_metadata.destroy
   end
 
   test 'reuse latest metadata' do
@@ -166,39 +186,37 @@ class UploadsTest < ApplicationSystemTestCase
     find('#reuse_latest_metadata').click
 
     assert_field 'Artist', with: 'Leonardo da Vinci'
-    assert_field 'Title', with: 'Saint John the Baptist'
+    assert_field 'Title', with: 'Mona Lisa'
     assert_field 'Keywords', with: 'painting'
 
     open_section('object_rights')
     assert_field 'upload_license', with: 'In the public domain'
   end
 
-  if ENV['PM_BRITTLE'] == 'true'
-    test 'modify upload' do
-      login_as 'jdoe'
+  test 'modify upload @brittle' do
+    login_as 'jdoe'
 
-      click_on 'My Uploads'
-      within '.list_row:first-child' do
-        find('img.upload-edit-icon').click
-      end
-
-      within '#object_geographic-section' do
-        fill_in 'Location', with: 'Happurg'
-        using_wait_time 10 do
-          find('#upload-location-search-result li:first-child').click
-        end
-        lat = find("input[name='upload[latitude]']").value.to_f
-        lng = find("input[name='upload[longitude]']").value.to_f
-        assert_in_delta 49.49277, lat, 0.005
-        assert_in_delta 11.47152, lng, 0.005
-        find('div.button_middle', text: 'Save').click
-      end
-
-      assert_text 'Object successfully updated!'
-
-      click_on 'My Uploads' # Back to list
-      assert_text 'Happurg'
+    click_on 'My Uploads'
+    within '.list_row:first-child' do
+      find('img.upload-edit-icon').click
     end
+
+    within '#object_geographic-section' do
+      fill_in 'Location', with: 'Happurg'
+      using_wait_time 10 do
+        find('#upload-location-search-result li:first-child').click
+      end
+      lat = find("input[name='upload[latitude]']").value.to_f
+      lng = find("input[name='upload[longitude]']").value.to_f
+      assert_in_delta 49.49277, lat, 0.005
+      assert_in_delta 11.47152, lng, 0.005
+      find('div.button_middle', text: 'Save').click
+    end
+
+    assert_text 'Object successfully updated!'
+
+    click_on 'My Uploads' # Back to list
+    assert_text 'Happurg'
   end
 
   test 'show upload and send email to owner' do
@@ -319,7 +337,7 @@ class UploadsTest < ApplicationSystemTestCase
     within '.list_row', text: /Leonardo/ do
       find('img.upload-edit-icon').click
     end
-    
+
     open_section 'object_parent'
     within '#object_parent-section' do
       assert_text 'A upload'
@@ -395,7 +413,7 @@ class UploadsTest < ApplicationSystemTestCase
       submit('Save')
     end
     assert_text 'successfully updated!'
-    assert Upload.all.to_a.all?{|u| u.artist == 'Luigi Davide'}
+    assert(Upload.all.to_a.all?{|u| u.artist == 'Luigi Davide'})
   end
 
   test 'geotag display' do
@@ -407,9 +425,9 @@ class UploadsTest < ApplicationSystemTestCase
       within '.list_row', text: /Skull/ do
         click_on 'Edit upload'
       end
-      assert_text 'Image latitude 59.42078'
-      assert_text 'Image longitude 24.80317'
-      assert_link 'on Google Maps', href: /maps.google.com\/maps\?q=59/
+      assert_text 'Latitude 59.42078'
+      assert_text 'Longitude 24.80317'
+      assert_link href: /maps.google.com\/maps\?q=59/
 
       fill_in 'upload[latitude]', with: '32.7471823'
       fill_in 'upload[longitude]', with: '-117.2536688'
@@ -419,8 +437,8 @@ class UploadsTest < ApplicationSystemTestCase
       end
 
       # shouldn't have changed the exif
-      assert_text 'Image latitude 59.42078'
-      assert_text 'Image longitude 24.80317'
+      assert_text 'Latitude 59.42078'
+      assert_text 'Longitude 24.80317'
       upload = Upload.find_by!(title: 'Skull')
       assert_equal 32.74720, upload.latitude
       assert_equal -117.25400, upload.longitude
@@ -588,6 +606,8 @@ class UploadsTest < ApplicationSystemTestCase
 
   test 'returns working image url for indexed uploads (also after removing from index)' do
     with_env 'PM_USE_TEST_IMAGE' => 'false' do
+      restore_images_dir
+
       upload = Upload.first
       upload.update_columns approved_record: true
       upload.index_doc
@@ -602,7 +622,7 @@ class UploadsTest < ApplicationSystemTestCase
 
       upload.update_columns approved_record: false
       upload.index_doc
-      
+
       si = Pandora::SuperImage.new(pid)
       response = Faraday.get(si.image_url(:small))
       assert_equal 502, response.status
@@ -639,5 +659,4 @@ class UploadsTest < ApplicationSystemTestCase
   #   priv = Collection.find_by! title: "John's private collection"
   #   assert_equal 2, priv.images.count
   # end
-
 end

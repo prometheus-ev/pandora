@@ -7,11 +7,11 @@ class Image < ApplicationRecord
 
   self.primary_key = 'pid'
 
-  belongs_to              :source
-  belongs_to              :item, optional: true
-  has_one                 :upload, autosave: false
-  has_many                :locations, :dependent => :destroy
-  has_many                :comments, :dependent => :destroy
+  belongs_to :source
+  belongs_to :item, optional: true
+  has_one :upload, autosave: false
+  has_many :locations, :dependent => :destroy
+  has_many :comments, :dependent => :destroy
   has_many :collections_images, class_name: 'CollectionImage'
   has_many :collections, through: :collections_images
   has_and_belongs_to_many :voters, :class_name => 'Account', :uniq => true
@@ -28,11 +28,11 @@ class Image < ApplicationRecord
 
   ALL_STATIC_FIELDS = %w[all].concat(STATIC_FIELDS).freeze
 
-  PREFIX_FOR = Hash.new { |hash, key|
+  PREFIX_FOR = Hash.new {|hash, key|
     raise ArgumentError, "illegal field type: #{key}"
   }.update(
-    :search  => 's',
-    :sort    => 't',
+    :search => 's',
+    :sort => 't',
     :display => 'd'
   ).freeze
 
@@ -60,7 +60,7 @@ class Image < ApplicationRecord
   URI_UNSAFE_RE = Regexp.union(URI::UNSAFE, /[\[\]]/).freeze
 
   # Enumeration characters
-  ENUM_CHARS = Array.new(16**2) { |i| i.to_s(16).rjust(2, '0') }.freeze
+  ENUM_CHARS = Array.new(16**2){|i| i.to_s(16).rjust(2, '0')}.freeze
 
   SIMILARITY_WIDTH  = 48
   SIMILARITY_HEIGHT = 48
@@ -87,15 +87,17 @@ class Image < ApplicationRecord
       # only worḱs on Collection images association
       merge(CollectionImage.insertion_order(direction))
     when 'source_title'
-      includes(:source).
-      references(:source).
-      order('sources.title' => direction)
+      self.
+        includes(:source).
+        references(:source).
+        order('sources.title' => direction)
     when 'rating_average' then order(score: direction)
     when 'rating_count' then order(votes: direction)
     when 'comment_count'
-      joins('LEFT JOIN comments cs ON cs.image_id = images.pid').
-      group('images.pid').
-      order(Arel.sql("count(DISTINCT cs.id) #{direction}"))
+      self.
+        joins('LEFT JOIN comments cs ON cs.image_id = images.pid').
+        group('images.pid').
+        order(Arel.sql("count(DISTINCT cs.id) #{direction}"))
     else
       raise Pandora::Exception, "unknown sort criteria for Image: #{column}"
     end
@@ -134,7 +136,7 @@ class Image < ApplicationRecord
   end
 
   def self.static_field?(field)
-    (@static_field ||= Hash.nest { |k|
+    (@static_field ||= Hash.nest {|k|
       ALL_STATIC_FIELDS.include?(k.to_s)
     })[field.to_sym]
   end
@@ -148,11 +150,15 @@ class Image < ApplicationRecord
   def self.field_from(field_name, type = nil)
     h, k = (@field_from ||= {})[field_name.to_sym] ||= {}, type && type.to_sym
 
-    h.has_key?(k) ? h[k] : h[k] = if static_field?(field_name = field_name.to_s)
-      field_name unless k
-    else
-      field_name[/\A#{k ? PREFIX_FOR[k] : PREFIX_RE}_(\w+)\z/, 1]
+    unless h.has_key?(k)
+      h[k] = if static_field?(field_name = field_name.to_s)
+        field_name unless k
+      else
+        field_name[/\A#{k ? PREFIX_FOR[k] : PREFIX_RE}_(\w+)\z/, 1]
+      end
     end
+
+    h[k]
   end
 
   def self.all_fields
@@ -177,7 +183,7 @@ class Image < ApplicationRecord
 
   def self.display_fields_translated
     hash = {}
-    display_fields_app.map{ |key|
+    display_fields_app.map{|key|
       hash[key] = I18n.t(key.humanize_all, globalize: true)
     }
     hash
@@ -200,7 +206,7 @@ class Image < ApplicationRecord
   end
 
   def self.elastic_record?(id)
-    Indexing::Index.exists?(id.split("-").first)
+    Pandora::Elastic.new.alias_exists?(id.split("-").first)
   end
 
   def self.elastic_record(id)
@@ -247,8 +253,8 @@ class Image < ApplicationRecord
   def legacy_to_xml(options = {})
     skip, link = {}, options.delete(:link)
 
-    %w[source link status extra].map { |key|
-      skip[key.to_sym] = options.delete("skip_#{key}".to_sym)
+    %w[source link status extra].map {|key|
+      skip[key.to_sym] = options.delete(:"skip_#{key}")
     }
 
     # REWRITE: 'keywords' represents an association and that tries to find the
@@ -261,12 +267,12 @@ class Image < ApplicationRecord
     #   :skip_types => true
     # )) { |xml|
     to_xml(options.reverse_merge(
-      only:       [:pid, :votes, :score],
-      methods:    [:descriptive_title] + Indexing::IndexFields.display - ['keywords', 'owner'],
-      include:    ['keywords'],
-      skip_nil:   true,
+      only: [:pid, :votes, :score],
+      methods: [:descriptive_title] + Indexing::IndexFields.display - ['keywords', 'owner'],
+      include: ['keywords'],
+      skip_nil: true,
       skip_types: true
-    )) { |xml|
+    )) {|xml|
       yield xml if block_given?
 
       unless skip[:extra]
@@ -302,7 +308,7 @@ class Image < ApplicationRecord
       txt << "#{label}: #{link}"
     end
 
-    txt << Time.now.utc
+    txt << Time.now.utc.to_fs
 
     txt.join("\n\n")
   end
@@ -317,14 +323,14 @@ class Image < ApplicationRecord
     # REWRITE: see below
     si = Pandora::SuperImage.new(pid, image: self, elastic_record_image: elastic_record_image)
 
-    self.class.display_fields_app.map{ |key|
+    self.class.display_fields_app.map{|key|
       if key == "rights_work"
-        hash.merge!({ "rights_work" => rights_representative })
+        hash.merge!({"rights_work" => rights_representative})
       elsif key == "database"
         if self.source
-          hash.merge!({ "database" => self.source.fulltitle })
+          hash.merge!({"database" => self.source.fulltitle})
         else
-          hash.merge!({ "database" => "" })
+          hash.merge!({"database" => ""})
         end
       else
         # REWRITE: we change this to not fail with an exception when fields are
@@ -346,7 +352,7 @@ class Image < ApplicationRecord
       rights_representative = [rights_representative]
     end
 
-    rights_representative.map { |right_representative|
+    rights_representative.map {|right_representative|
       if right_representative == 'rights_work_warburg'
         'The Warburg Institute, London'
       elsif right_representative == 'rights_work_vgbk'
@@ -385,11 +391,11 @@ class Image < ApplicationRecord
         record.discoveryplace.kind_of?(Array) ? discoveryplace = record.discoveryplace.join : discoveryplace = record.discoveryplace
       end
 
-      [[artist, title], [location, discoveryplace]].each { |i|
+      [[artist, title], [location, discoveryplace]].each do |i|
         j = []
-        i.each { |k| j << k if k && !(k = k.gsub(/\s+/, ' ').strip).empty? }
+        i.each{|k| j << k if k && !(k = k.gsub(/\s+/, ' ').strip).empty?}
         t << (t.empty? ? j : j.parenthesize) unless (j = j.join(': ')).empty?
-      }
+      end
 
       t.empty? ? path.gsub(/.*?\/|\.[^.]*\z/, '') : t.join(' ')
     end
@@ -405,7 +411,7 @@ class Image < ApplicationRecord
       words = @descriptive_title[0, length].split(/(\s+)/)
 
       title = words[0..-3].join.sub(/\W+\z/, '')
-      title.empty? && words.find { |word| !word.blank? } || title
+      title.empty? && words.find{|word| !word.blank?} || title
     end
   end
 
@@ -478,7 +484,7 @@ class Image < ApplicationRecord
   end
 
   def self.conditions_for_rated
-    { :conditions => 'images.votes > 0' }
+    {:conditions => 'images.votes > 0'}
   end
 
   def rating
@@ -511,12 +517,12 @@ class Image < ApplicationRecord
 
   def latitude
     lat, lat_ref = exif_metadata_value_for('gps_latitude'), exif_metadata_value_for('gps_latitude_ref')
-    lat && lat_ref ? lat.inject{ |m,v| m * 60 + v}.to_f / 3600 * (lat_ref == 'S' ? -1 : 1) : nil
+    lat && lat_ref ? lat.inject{|m, v| m * 60 + v}.to_f / 3600 * (lat_ref == 'S' ? -1 : 1) : nil
   end
 
   def longitude
     long, long_ref = exif_metadata_value_for('gps_longitude'), exif_metadata_value_for('gps_longitude_ref')
-    long && long_ref ? long.inject{ |m,v| m * 60 + v}.to_f / 3600 * (long_ref == 'W' ? -1 : 1) : nil
+    long && long_ref ? long.inject{|m, v| m * 60 + v}.to_f / 3600 * (long_ref == 'W' ? -1 : 1) : nil
   end
 
   # overwrites #print implemented by Image(Kernel) in order to access the display field print
@@ -538,8 +544,10 @@ class Image < ApplicationRecord
   end
 
   def respond_to?(m, i = false, r = true)
-    super(m, i) || if r && self.class.valid_field?(m) && (ur = upload_record?)
+    result = super(m, i)
+    return result if result
 
+    result = if r && self.class.valid_field?(m) && (ur = upload_record?)
       field = self.class.field_name_for(m, :display)
       field_valid = self.class.valid_field?(field)
 
@@ -548,7 +556,10 @@ class Image < ApplicationRecord
       else
         fr.respond_to?(field_valid ? field : m, i, false)
       end
-    end || false
+    end
+    return result if result
+
+    false
   end
 
   # TODO: adapt this for institutional user databases as well
@@ -576,7 +587,6 @@ class Image < ApplicationRecord
     upload_record? || self.class.elastic_record?(id)
   end
 
-
   protected
 
     def must_have_record
@@ -603,6 +613,8 @@ class Image < ApplicationRecord
       attr_reader :pid
 
       def initialize(pid)
+        super
+
         @pid = pid
       end
 

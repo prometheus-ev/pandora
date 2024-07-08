@@ -1,11 +1,11 @@
 require "application_system_test_case"
-Dir["./test/test_sources/*.rb"].each {|file| require file }
+Dir["./test/test_sources/*.rb"].each{|file| require file}
 
 class IndexingTest < ApplicationSystemTestCase
   test 'index multi word synonyms' do
     with_all_synonyms do
       Pandora::Indexing::Indexer.index(['test_source_multi_word_synonyms'])
-      #TestSourceMultiWordSynonyms.index
+      # TestSourceMultiWordSynonyms.index
     end
 
     login_as 'jdoe'
@@ -213,9 +213,8 @@ class IndexingTest < ApplicationSystemTestCase
     Pandora::Elastic.new.destroy_index('test*')
   end
 
-  test 'artist array field ordering' do
-    skip 'Waiting for Elastic forum feedback...'
-
+  # skip: Waiting for Elastic forum feedback...
+  test 'artist array field ordering @skip' do
     TestSourceOrder.index
     login_as 'jdoe'
 

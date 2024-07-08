@@ -1,5 +1,4 @@
 class AnnouncementsController < ApplicationController
-
   include Util::Config
 
   # skip_before_action :store_location, :only => [:hide]
@@ -8,7 +7,7 @@ class AnnouncementsController < ApplicationController
   DEFAULT_ORDER     = 'date'.freeze
   DEFAULT_DIRECTION = 'DESC'.freeze
 
-  def self.initialize_me!  # :nodoc:
+  def self.initialize_me! # :nodoc:
     control_access [:admin, :superadmin] => :ALL,
                    :DEFAULT => [:current, :hide, :index, :list]
 
@@ -46,9 +45,9 @@ class AnnouncementsController < ApplicationController
   def list(current_only = false)
     if params[:field] == 'current'
       params.delete(:field)
-      # REWRITE: limit redirect to current host 
+      # REWRITE: limit redirect to current host
       # redirect_to params.merge({ :action => 'current' })
-      redirect_to params.merge({ :action => 'current', :only_path => true })
+      redirect_to params.merge({:action => 'current', :only_path => true})
       return
     end
 
@@ -64,12 +63,12 @@ class AnnouncementsController < ApplicationController
     }
 
     @announcements = Announcement.pandora_find(:all, @params).to_a
-    @announcements.delete_if { |announcement| !announcement.allowed?(current_user) }
+    @announcements.delete_if{|announcement| !announcement.allowed?(current_user)}
 
-    respond_to { |format|
-      format.html { render :action => 'list' }
-      format.xml  { render :xml => @announcements.to_a }
-      format.json { render :json => '[' + @announcements.map { |a| a.to_json }.join( ', ') + ']' }
+    respond_to {|format|
+      format.html{render :action => 'list'}
+      format.xml{render :xml => @announcements.to_a}
+      format.json{render :json => '[' + @announcements.map{|a| a.to_json}.join(', ') + ']'}
     }
   end
 
@@ -83,7 +82,7 @@ class AnnouncementsController < ApplicationController
 
   api_method :current, :get => {
     :doc => 'Get the list of current announcements.',
-    :returns => { :xml => { :root => 'announcements', :hints => { 'announcement' => true } }, :json => {} }
+    :returns => {:xml => {:root => 'announcements', :hints => {'announcement' => true}}, :json => {}}
   }
 
   def new
@@ -154,7 +153,6 @@ class AnnouncementsController < ApplicationController
       @announcement.destroy
       flash[:notice] = "Announcement '%s' successfully deleted!".t / @announcement
       redirect_to(:action => 'list')
-
     rescue
       flash[:warning] = "Announcement '%s' couldn't be deleted!".t / @announcement
       redirect_to(:action => 'list')
@@ -172,5 +170,4 @@ class AnnouncementsController < ApplicationController
         :id
       )
     end
-
 end

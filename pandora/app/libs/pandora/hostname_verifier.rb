@@ -9,7 +9,7 @@ class Pandora::HostnameVerifier
     Institution.find_each do |institution|
       institution.hostnames.each do |hostname|
         unless resolve(hostname)
-          puts "institution '#{institution.name}' (id #{institution.id}), hostname '#{hostname}' could not be resolved"
+          Pandora.puts "institution '#{institution.name}' (id #{institution.id}), hostname '#{hostname}' could not be resolved"
         end
       end
     end

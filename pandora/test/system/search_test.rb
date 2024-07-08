@@ -59,7 +59,7 @@ class SearchTest < ApplicationSystemTestCase
 
     all(:link, 'Gallery view').first.click
     assert_css '.image_list.view-gallery'
-    
+
     within '.list_row:nth-child(1)' do
       assert_text 'Affe auf Stuhl'
     end
@@ -95,7 +95,7 @@ class SearchTest < ApplicationSystemTestCase
     assert_text 'Details'
     assert_text 'Comments'
     # Disabled, see #1225.
-    #assert_text 'Related images'
+    # assert_text 'Related images'
 
     back
     within '.list_row:nth-child(1)' do
@@ -127,7 +127,7 @@ class SearchTest < ApplicationSystemTestCase
 
       click_on 'Title'
       groups = all('.pm-groups .pm-header').map{|e| e.text.strip}
-      titles = ["TEST-Source (1/1)", "TEST-Source (sorting) (1/1)"]
+      titles = ["Test Source (1/1)", "Test Source (Sorting) (1/1)"]
       assert_equal titles, groups
       titles.each do |title|
         within '.pm-groups > li', text: title do
@@ -212,6 +212,22 @@ class SearchTest < ApplicationSystemTestCase
     assert_text 'Record 1 - 3 of 3 records'
 
     Indexing::Index.delete("test_source_boolean*")
+  end
+
+  test 'advanced search boolean and' do
+    login_as 'jdoe'
+
+    fill_in 'search_value_0', with: 'Donatello Stuhl'
+    submit 'Search'
+    assert_text 'Record 1 - 10 of 11 records'
+
+    fill_in 'search_value_0', with: 'Donatello AND Stuhl'
+    submit 'Search'
+    assert_text 'Record 1 - 10 of 11 records'
+
+    fill_in 'search_value_0', with: 'Affe AND Stuhl'
+    submit 'Search'
+    assert_text 'Record 1 - 1 of 1 records'
   end
 
   test 'sample search' do
@@ -345,16 +361,16 @@ class SearchTest < ApplicationSystemTestCase
     login_as 'jdoe'
     fill_in 'search_value_0', with: 'ipsum'
     submit
-    
+
     credits = find('td.credits-field')
     assert credits.text.size <= 500
     assert_match /more/, credits.text
-    
+
     find('td.credits-field').find('span.a.dim').click
     assert_link 'https://wendig.io'
     assert_link 'Wendig OÜ', href: 'https://wendig.io'
     assert_link 'Musée Carnavalet, Paris Musées', href: 'http://parismuseescollections.paris.fr/'
-    
+
     # check proper link rendering when truncation doesn't kick in
     record['_source']['credits'] = [
       'ipsum',
@@ -383,13 +399,21 @@ class SearchTest < ApplicationSystemTestCase
     assert_text 'Katze auf Stuhl'
   end
 
-  # TODO: see https://prometheus-srv1.uni-koeln.de/redmine/projects/prometheus/wiki/2018-11-19
-  # test 'random image' do
-  #   login_as 'jdoe'
-
-  #   click_on 'Sitemap'
-  #   click_on 'Random image'
-  # end
-
   # TODO: test image and metadata download when date is not an array, see #492
+
+  test 'simple time query' do
+    login_as 'jdoe'
+
+    visit '/en/searches/advanced'
+    fill_in 'search_value_0', with: '*'
+    submit
+
+    check 'Filter by date'
+    fill_in 'From year', with: '1970'
+    fill_in 'To year', with: '1980'
+    submit 'Filter'
+
+    assert_text 'Record 1 - 1 of 1 records'
+    assert_text 'Artist 1'
+  end
 end

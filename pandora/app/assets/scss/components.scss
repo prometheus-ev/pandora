@@ -158,3 +158,74 @@ pm-ol {
     border: 1px solid #dddddd;
   }
 }
+
+[is='pm-indexing-page'] {
+  color: $prom-off-white;
+
+  [is='pm-loading-indicator'] {
+    position: absolute;
+    top: 10px;
+    right: 30px;
+  }
+
+  table {
+    font-family: monospace;
+
+    th {
+      font-weight: bold;
+      padding: 10px 0;
+    }
+
+    td {
+      height: 30px;
+      padding-right: 10px;
+      color: $prom-off-white;
+    }
+  }
+
+  .result, .elastic-counts {
+    margin-top: -4px;
+    display: inline-block;
+    margin-right: 4px;
+    padding: 4px;
+    white-space: nowrap;
+
+    background-color: $prom-gray-01;
+    border-radius: 4px;
+
+    &.error {
+      background-color: $prom-error;
+    }
+
+    &.warn {
+      background-color: $prom-warn;
+    }
+
+    &:last-child {
+      margin-right: 0;
+    }
+  }
+
+  .samples {
+    white-space: nowrap;
+    margin-top: -5px;
+
+    img {
+      display: inline-block;
+      height: 30px;
+      margin-right: 2px;
+    }
+  }
+
+  pre {
+    white-space: pre-wrap;
+  }
+}
+
+[is='ir-modal'] {
+  [is='pm-modal'] > .content {
+    width: 600px;
+    max-width: 600px;
+    overflow-y: scroll;
+  }
+}

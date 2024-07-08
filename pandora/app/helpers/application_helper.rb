@@ -1,6 +1,5 @@
 # Methods added to this helper will be available to all templates in the application.
 module ApplicationHelper
-
   include MoreHelpers
   include UpgradeHelper
 
@@ -21,7 +20,7 @@ module ApplicationHelper
   end
 
   def page_title
-    subject, verb, extra = segments_for_controller_title { |object, name|
+    subject, verb, extra = segments_for_controller_title {|object, name|
       name ? link_to_object(object, name) : link_to_object(object)
     }
 
@@ -32,7 +31,7 @@ module ApplicationHelper
   def segments_for_controller_title
     if object = object_for_controller and !object.new_record?
       extra = if respond_to?(method = "title_for_#{controller_name}")
-        send(method, object) { |oname|
+        send(method, object) {|oname|
           %Q{"#{block_given? ? yield(object, oname) : oname}"}
         }
       else
@@ -48,20 +47,20 @@ module ApplicationHelper
     subject, verb = controller_name.humanize, action_name.humanize
 
     case action_name
-      when 'show'
-        verb = nil
-      when *%w[history license ratings recipients settings]
-        verb = "#{verb} for"
-      when *%w[email]
-        subject = nil
-        verb = "Compose #{verb}"
+    when 'show'
+      verb = nil
+    when *%w[history license ratings recipients settings]
+      verb = "#{verb} for"
+    when *%w[email]
+      subject = nil
+      verb = "Compose #{verb}"
     end
 
     [subject, verb, extra]
   end
 
   def object_name_for_controller
-    @object_name_for_controller ||= !(controller_name == 'institutional_uploads')? controller_name : 'uploads'
+    @object_name_for_controller ||= !(controller_name == 'institutional_uploads') ? controller_name : 'uploads'
   end
 
   def object_for_controller
@@ -91,9 +90,10 @@ module ApplicationHelper
   end
 
   def classes_for_field(field, klass = nil)
-    [ klass,
+    [
+      klass,
       @mandatory && @mandatory[field.to_s] && 'mandatory',
-      @prompt    && @prompt[field]    && 'prompt',
+      @prompt && @prompt[field] && 'prompt'
     ].reject(&:blank?).join(' ')
   end
 
@@ -120,11 +120,11 @@ module ApplicationHelper
   end
 
   def link_for_prev_next(item)
-    { :id => item }
+    {:id => item, collection_id: params[:collection_id]}
   end
 
   def link_to_prev_next(item, direction, title = direction)
-    icon_for_active_inactive(item, "misc/#{direction}%s.gif", { :title => title && title.t }, link_for_prev_next(item))
+    icon_for_active_inactive(item, "misc/#{direction}%s.gif", {:title => title && title.t}, link_for_prev_next(item))
   end
 
   def link_to_prev_item(item, title = 'Previous item')
@@ -136,18 +136,20 @@ module ApplicationHelper
   end
 
   def link_to_item_top(top, title = "Back to #{top && top[0] || 'top'}")
-    icon_for_active_inactive(top, "misc/up%s.gif", { :title => title.t }, top && top[1])
+    icon_for_active_inactive(top, "misc/up%s.gif", {:title => title.t}, top && top[1])
   end
 
   def email_icon_for(source, element = :div)
     if source.user_database?
-      link_to(%Q{<#{element} class="email"></#{element}>}.html_safe,
-        { :controller => 'accounts', :action => 'email', :to => source.owner },
+      link_to(
+        %Q{<#{element} class="email"></#{element}>}.html_safe,
+        {:controller => 'accounts', :action => 'email', :to => source.owner},
         :title => 'Send a message to the owner of the user database'.t
       )
     else
       if inactive = (email = source.email).present?
-        mail_to(email,
+        mail_to(
+          email,
           %Q{<#{element} class="email#{' inactive' if inactive}"></#{element}>}.html_safe,
           :title => 'Send e-mail to the person in charge for the database'.t
         )
@@ -158,10 +160,11 @@ module ApplicationHelper
   def source_icons_for(source)
     icons = []
 
-    icons << link_to_unless(inactive = (url = source.url).blank?,
+    icons << link_to_unless(
+      inactive = (url = source.url).blank?,
       %Q{<div class="home#{' inactive' if inactive}"></div>}.html_safe,
       url,
-      :title  => "Go to the database's homepage".t,
+      :title => "Go to the database's homepage".t,
       :target => '_blank'
     )
 
@@ -171,7 +174,7 @@ module ApplicationHelper
     if source.upload?
       icons << link_to(
         '<div class="email"></div>'.html_safe,
-        { :controller => 'accounts', :action => 'email', :to => source.owner }
+        {:controller => 'accounts', :action => 'email', :to => source.owner}
       )
     else
       icons << email_icon_for(source)
@@ -180,8 +183,8 @@ module ApplicationHelper
     icons << link_to_unless(
       inactive = false,
       %Q{<div class="info#{' inactive' if inactive}"></div>}.html_safe,
-      { :controller => 'sources', :action => 'show', :id => source },
-      :title  => 'Information about the database'.t,
+      {:controller => 'sources', :action => 'show', :id => source},
+      :title => 'Information about the database'.t,
       :target => '_blank'
     )
 
@@ -246,9 +249,10 @@ module ApplicationHelper
     user = public_user(user, options.delete(:public) || default)
 
     if user.is_a?(Account)
-      link_to_if_allowed(name = h(user.fullname),
+      link_to_if_allowed(
+        name = h(user.fullname),
         options.merge(:controller => 'accounts', :action => 'show', id: user.login),
-        { :title => user == current_user ? 'Your profile'.t : "%s's profile" / name }.merge(html_options)
+        {:title => user == current_user ? 'Your profile'.t : "%s's profile" / name}.merge(html_options)
       )
     else
       link_to_help(
@@ -272,7 +276,6 @@ module ApplicationHelper
     link_to_profile_with_email(admin, admin_email, options, html_options) if admin
   end
 
-
   def link_to_author(object)
     link = link_to_profile(object.author)
 
@@ -295,14 +298,14 @@ module ApplicationHelper
   def hidden_field_tags_for(params, options = {}, ignore = %w[controller action])
     # REWRITE: needs a hash instead
     # params.map { |name, value|
-    params.to_h.map { |name, value|
+    params.to_h.map {|name, value|
       next if ignore.include?(name.to_s)
 
       case value
-        when Array
-          hidden_field_tags_for(value.map { |v| ["#{name}[]", v] }, options)
-        else
-          hidden_field_tag(name, value, options)
+      when Array
+        hidden_field_tags_for(value.map{|v| ["#{name}[]", v]}, options)
+      else
+        hidden_field_tag(name, value, options)
       end
     }.compact.join('').html_safe
   end
@@ -310,14 +313,14 @@ module ApplicationHelper
   def options_for_select_t(container, selected = nil)
     container = container.to_a if container.is_a?(Hash)
 
-    options_for_select(container.map { |option|
+    options_for_select(container.map {|option|
       text, value = option_text_and_value(option)
       [text.t, value]
     }, selected)
   end
 
   def options_for_order_select(args)
-    [*args].compact.map { |title, order|
+    [*args].compact.map {|title, order|
       if title.respond_to?(:human_name)
         order ||= title.name
         title = title.human_name
@@ -348,9 +351,12 @@ module ApplicationHelper
   def link_to_open_source(source, name = 'Open Access'.t, condition = !current_user || current_user.dbuser?)
     title = h(source.title)
 
-    link_to_if condition && source.open_access?, name || title,
+    link_to_if(
+      condition && source.open_access?,
+      name || title,
       open_access_source_url(source),
-      { :title => 'Enter "%s"' / title }
+      {:title => 'Enter "%s"' / title}
+    )
   end
 
   ## === Buttons for boxes within the sidebar ===================================
@@ -395,7 +401,7 @@ module ApplicationHelper
       title: expanded ? collapse_text : expand_text
     )
   end
-  
+
   def link_to_toggle_box(box)
     text = %Q{<span class="scriptonly box_toggle"><div class="#{box.expanded? ? 'collapse' : 'expand'}"></div></span>}.html_safe
 
@@ -423,7 +429,7 @@ module ApplicationHelper
     end
 
     @current_announcements ||= Announcement.current.since(since_then).to_a
-    @current_announcements.delete_if { |announcement| !announcement.allowed?(current_user) }
+    @current_announcements.delete_if{|announcement| !announcement.allowed?(current_user)}
   end
 
   ## === Box ==================================================================
@@ -440,7 +446,7 @@ module ApplicationHelper
     text = "Add #{name || object_name_for_controller} to sidebar".t
 
     args = [{
-      url: options = { controller: 'box', action: 'create', box: box_params }
+      url: options = {controller: 'box', action: 'create', box: box_params}
     }, {
       href: url_for(options),
       method: 'POST',
@@ -465,7 +471,7 @@ module ApplicationHelper
     style << "; width: #{width + border}px; height: #{height + border}px" if width && height
     style << '; display: block' if request.user_agent =~ /MSIE/
 
-    submit_tag(options.delete(:value), { :class => 'image_submit_tag', :style => style }.merge_html_options(options))
+    submit_tag(options.delete(:value), {:class => 'image_submit_tag', :style => style}.merge_html_options(options))
   end
 
   def distance_of_time_in_days_or_weeks(from_time, to_time = 0)
@@ -482,7 +488,7 @@ module ApplicationHelper
   end
 
   def distance_of_time_ago_in_words_tag(from_time)
-    %Q{<abbr title="#{from_time}">#{distance_of_time_ago_in_words(from_time)}</abbr>}.html_safe
+    %Q{<abbr title="#{from_time.to_fs}">#{distance_of_time_ago_in_words(from_time)}</abbr>}.html_safe
   end
 
   def gogif
@@ -490,17 +496,17 @@ module ApplicationHelper
   end
 
   def format_address_for(object, fields = %w[addressline city_with_postalcode country], separator = '<br />')
-    values = fields.map { |field|
+    values = fields.map {|field|
       value = object.send(field)
       next if value.blank?
 
       case field
-        when 'addressline'
-          h(value.strip).gsub(TEXTAREA_SEPARATOR_RE, '<br />')
-        when 'country'
-          h(value.t)
-        else
-          h(value)
+      when 'addressline'
+        h(value.strip).gsub(TEXTAREA_SEPARATOR_RE, '<br />')
+      when 'country'
+        h(value.t)
+      else
+        h(value)
       end
     }.compact
 
@@ -513,13 +519,14 @@ module ApplicationHelper
 
   def display_campus_login?
     return @campus if defined?(@campus)
+
     @campus = (!current_user || current_user.dbuser?) && Institution.find_by_ip(request.remote_ip)
   end
 
   # used in accounts and signup views at least
   def localize_expiry_date(user)
     if user.expires_at && !user.exempt_from_expiration?
-      if [Date, DateTime, Time].any? { |c| user.expires_at.is_a? c }
+      if [Date, DateTime, Time].any?{|c| user.expires_at.is_a? c}
         localize(user.expires_at, :format => :long)
       else
         user.expires_at.to_s
@@ -541,7 +548,7 @@ module ApplicationHelper
     ), {
       :action => action, :id => user.login
     }, {
-      :data => { confirm: "Are you sure to #{action} account: '%s'" / user },
+      :data => {confirm: "Are you sure to #{action} account: '%s'" / user},
       :method => action == 'destroy' ? 'DELETE' : 'PATCH',
       # REWRITE: see above
       :title => action.humanize.t

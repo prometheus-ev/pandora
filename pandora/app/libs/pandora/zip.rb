@@ -1,7 +1,6 @@
 require 'tmpdir'
 
 class Pandora::Zip
-
   def initialize(data = {})
     @data = data
   end
@@ -21,10 +20,10 @@ class Pandora::Zip
       @data.each do |filename, data|
         File.open "#{dir}/#{filename}", 'wb' do |f|
           case data
-            when IO then f.write(data.read)
-            when Proc then f.write(data.call)
-            else
-              f.write(data)
+          when IO then f.write(data.read)
+          when Proc then f.write(data.call)
+          else
+            f.write(data)
           end
         end
       end
@@ -38,5 +37,4 @@ class Pandora::Zip
 
     return data
   end
-
 end

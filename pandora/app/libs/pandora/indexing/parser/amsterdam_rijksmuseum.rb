@@ -5,10 +5,7 @@ class Pandora::Indexing::Parser::AmsterdamRijksmuseum < Pandora::Indexing::Parse
 
     super(
       source,
-      record_node_name: 'lido:lido',
-      record_node_query: "boolean(./lido:administrativeMetadata/lido:rightsWorkWrap/lido:rightsWorkSet/lido:rightsType/lido:term[text()='Public Domain Mark 1.0'])",
-      namespaces: true,
-      namespace_uri: 'http://www.lido-schema.org'
-    )
+      record_node_name: "ArtObject",
+      record_node_query: "boolean(WebImage)")
   end
 end

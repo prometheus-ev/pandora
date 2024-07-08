@@ -3,8 +3,8 @@ class Indexing::Sources::LueneburgOppermann < Indexing::SourceSuper
     13001..13215 => 'Öl auf Leinwand',
     23001..23574 => 'MKÜVO',
     33001..33026 => 'MKÜVO-Fensterecke'
-  }.inject({}) { |hash, (range, addition)|
-    range.each { |key| hash["a#{key}"] = addition }
+  }.inject({}) {|hash, (range, addition)|
+    range.each{|key| hash["a#{key}"] = addition}
     hash
   }
 
@@ -71,10 +71,10 @@ class Indexing::Sources::LueneburgOppermann < Indexing::SourceSuper
   def location
     refs = (record.xpath('.//annotation/line/link/@ref')).map(&:to_s)
 
-    if (refs & DEPOT_IDS ).any?
+    if refs.intersect?(DEPOT_IDS)
       'Depot Anna Oppermann'
     else
-      if (refs & ALTONA_IDS).any?
+      if refs.intersect?(ALTONA_IDS)
         'Hamburg, Altonaer Rathaus'
       else
         'Hamburg, Kunsthalle'
@@ -96,7 +96,7 @@ class Indexing::Sources::LueneburgOppermann < Indexing::SourceSuper
   end
 
   def annotation
-    record.xpath(".//annotation[@lang='de']/line").to_a.map { |node|
+    record.xpath(".//annotation[@lang='de']/line").to_a.map {|node|
       node.content = '' if SKIP_ANNOTATION.include?(node.text)
       node.content
     }

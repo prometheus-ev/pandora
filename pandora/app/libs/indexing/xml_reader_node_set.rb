@@ -2,7 +2,7 @@
 class Indexing::XmlReaderNodeSet
   # Initialize.
   # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-  # BEWARE when using XmlReaderNodeSet, add source name to xml_reader_source_names 
+  # BEWARE when using XmlReaderNodeSet, add source name to xml_reader_source_names
   # in SourceParent#document
   # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
   #

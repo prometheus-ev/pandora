@@ -1,5 +1,4 @@
 class Announcement < ApplicationRecord
-
   include Util::Config
 
   validates :title_de, presence: true
@@ -9,10 +8,10 @@ class Announcement < ApplicationRecord
   validates :starts_at, presence: true
   validates :ends_at, presence: true
   validates :role, presence: true
-  validates :role, inclusion: { in: %w(anyone users admins), message: "%{value} is not a valid role" }
+  validates :role, inclusion: {in: %w(anyone users admins), message: "%{value} is not a valid role"}
 
-  scope :current, -> { where(["starts_at < ? and ends_at > ?", Time.now, Time.now]) }
-  scope :since, -> (time = Time.new(1970, 1, 1)) { where(["starts_at > ?", !time.nil? ? time : '']) }
+  scope :current, ->{where(["starts_at < ? and ends_at > ?", Time.now, Time.now])}
+  scope :since, ->(time = Time.new(1970, 1, 1)){where(["starts_at > ?", !time.nil? ? time : ''])}
 
   def self.pandora_find(scope, params)
     if scope == :all
@@ -113,5 +112,4 @@ class Announcement < ApplicationRecord
   #     (v.is_a?(DateTime) || v.is_a?(Time)) ? v : Time.zone.parse(v)
   #   end
   # end
-
 end

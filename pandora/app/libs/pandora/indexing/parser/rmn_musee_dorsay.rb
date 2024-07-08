@@ -2,9 +2,8 @@ class Pandora::Indexing::Parser::RmnMuseeDorsay < Pandora::Indexing::Parser::Par
   def initialize(source)
     source[:kind] = Source::KINDS[:museum]
 
-    super(
-      source,
-      record_array_keys_path: ['_source', 'images'],
-      object_array_keys_path: ['hits', 'hits'])
+    super(source,
+          record_array_keys_path: ["_source", "images"],
+          object_array_keys_path: ["hits", "hits"])
   end
 end

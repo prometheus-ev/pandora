@@ -13,7 +13,7 @@ class KeywordsControllerTest < ActionDispatch::IntegrationTest
 
   test 'no access for non-admins' do
     login_as 'jdoe'
-    
+
     get '/en/keywords'
     assert_redirected_to login_path
   end

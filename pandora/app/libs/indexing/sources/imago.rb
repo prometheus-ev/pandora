@@ -27,7 +27,7 @@ class Indexing::Sources::Imago < Indexing::SourceSuper
   end
 
   def artist_normalized
-    an = record.xpath('.//kuenstler/text()').map { |a|
+    an = record.xpath('.//kuenstler/text()').map {|a|
       HTMLEntities.new.decode(a.to_s.sub(/ \(.*/, '').split(', ').reverse.join(' '))
     }
     super(an)

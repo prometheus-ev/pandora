@@ -9,7 +9,8 @@ rescue LoadError => e
 end
 
 Vagrant.configure("2") do |a|
-  a.vagrant.plugins = ['vagrant-vbguest', 'dotenv']
+  a.vagrant.plugins = ['dotenv']
+  a.vbguest.auto_update = false
 
   a.vm.hostname = 'prometheus'
 
@@ -27,7 +28,7 @@ Vagrant.configure("2") do |a|
 
   a.vm.provider :virtualbox do |vb|
     vb.name = 'prometheus'
-    vb.memory = 4 * 1024
+    vb.memory = 6 * 1024
     vb.cpus = 2
   end
 
@@ -38,8 +39,8 @@ Vagrant.configure("2") do |a|
   )
 
   a.vm.define vm_name, primary: true do |c|
-    c.vm.box = 'generic/debian11'
-    c.vm.box_version = '3.5.4'
+    c.vm.box = 'debian/bookworm64'
+    c.vm.box_version = '12.20230615.1'
 
     c.vm.provider :virtualbox do |vb|
       vb.name = "prometheus.#{vm_name}"
@@ -71,19 +72,5 @@ Vagrant.configure("2") do |a|
       git config --global user.name #{`git config user.name`}
       git config --global user.email #{`git config user.email`}
     "
-  end
-
-  a.vm.define 'centos', autostart: false do |c|
-    c.vm.box = 'centos/6'
-
-    c.vm.provider :virtualbox do |vb|
-      vb.name = 'prometheus.centos'
-    end
-
-    c.vm.provision :shell, path: 'provision.sh', args: 'centos_basics'
-    c.vm.provision :shell, path: 'provision.sh', args: 'install_rbenv', privileged: false
-    c.vm.provision :shell, path: 'provision.sh', args: 'install_nvm', privileged: false
-    c.vm.provision :shell, path: 'provision.sh', args: 'prepare_for_pandora', privileged: false
-    c.vm.provision :shell, path: 'provision.sh', args: 'prepare_for_rack_images', privileged: false
   end
 end

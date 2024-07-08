@@ -42,12 +42,11 @@
       <tr>
         <th><label for="invoice_address_country"><%= 'Country'.t %></label></th>
         <td>
-          <!-- REWRITE: the method has a different signature now -->
-          <%#= country_select(:invoice_address, :country, PRIORITY_COUNTRIES, {}, options_for_field(:country) %>
-          <%= country_select(:invoice_address, :country,
+          <%= country_select(
+            :invoice_address,
+            :country,
             {priority_countries: PRIORITY_COUNTRIES},
-            options_for_field(:country)
-          ) %>
+            options_for_field(:country)) %>
         </td>
       </tr>
     </table>

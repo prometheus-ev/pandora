@@ -10,5 +10,4 @@ class Indexing::Sources::HeidiconPu < Indexing::Sources::Parents::Heidicon
   def external_references
     ""
   end
-
 end

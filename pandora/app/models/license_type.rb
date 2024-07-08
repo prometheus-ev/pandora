@@ -1,5 +1,4 @@
 class LicenseType < ApplicationRecord
-
   has_many :licenses, :dependent => :destroy
 
   validates_presence_of   :amount, :title
@@ -8,5 +7,4 @@ class LicenseType < ApplicationRecord
   def to_s
     "#{title} (#{amount})"
   end
-
 end

@@ -4,7 +4,6 @@ class Pandora::Indexing::Parser::Archgiessen < Pandora::Indexing::Parser::XmlRea
 
     super(
       source,
-      record_node_name: 'datensatz'
-    )
+      record_node_name: "datensatz")
   end
 end

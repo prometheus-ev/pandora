@@ -1,13 +1,12 @@
 class Settings < ApplicationRecord
-
   belongs_to :user, :class_name => 'Account', :foreign_key => 'user_id', required: false
 
   SETTINGS = content_columns.map(&:name).freeze
 
   LIST_SETTINGS = {
-    :order     => [],
+    :order => [],
     :direction => [[['ASC', 'DESC'], nil]],
-    :per_page  => [[1..100, 10]]
+    :per_page => [[1..100, 10]]
   }
 
   SEARCH_SETTINGS = {
@@ -19,7 +18,7 @@ class Settings < ApplicationRecord
     original, self[key] = self[key], value
     # REWRITE: we have Object#tap now
     # returning(valid?(key)) { |ok| yield self[key] if ok && block_given? }
-    valid?(key).tap { |ok| yield self[key] if ok && block_given? }
+    valid?(key).tap{|ok| yield self[key] if ok && block_given?}
   ensure
     self[key] = original if defined?(original)
   end
@@ -82,16 +81,16 @@ class Settings < ApplicationRecord
   def self.provides_settings(hash)
     spec = HashWithIndifferentAccess.new
 
-    hash.each { |key, values|
+    hash.each do |key, values|
       default = values.first
       values, default = default if default.is_a?(Array)
 
-      spec[key] = { :values => values, :default => default }
-    }
+      spec[key] = {:values => values, :default => default}
+    end
 
     yield spec if block_given?
 
-    spec.each { |key, subspec|
+    spec.each do |key, subspec|
       values, default = subspec.values_at(:values, :default).map(&:freeze)
       # raise "setting `#{key}' has no default" if default.nil?
       next if default.nil?
@@ -107,18 +106,18 @@ class Settings < ApplicationRecord
           self[:#{key}]
         end
       EOS
-    }
+    end
 
     instance_variable_set(:@spec, spec.freeze)
     class << self; attr_reader :spec; end
 
-    (SETTINGS - spec.keys).each { |key|
+    (SETTINGS - spec.keys).each do |key|
       class_eval <<-EOS, __FILE__, __LINE__ + 1
         def #{key}
           raise NotImplementedError, "setting `#{key}' not available"
         end
       EOS
-    }
+    end
   end
 
   def self.provides_list_settings(extra = {}, &block)
@@ -173,7 +172,7 @@ class Settings < ApplicationRecord
   end
 
   def settings
-    spec.keys.inject({}) { |h, k| h[k] = send(k); h }
+    spec.keys.inject({}){|h, k| h[k] = send(k); h}
   end
 
   alias_method :to_hash, :settings
@@ -181,5 +180,4 @@ class Settings < ApplicationRecord
   def merge(other)
     settings.merge(other)
   end
-
 end

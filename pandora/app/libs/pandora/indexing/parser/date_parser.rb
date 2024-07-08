@@ -26,6 +26,10 @@ class Pandora::Indexing::Parser::DateParser
           date_range
         else
           date_range = HistoricalDating.parse(date_range)
+
+          if date_range.from > date_range.to
+            date_range = nil
+          end
         end
       else
         date_range = nil
@@ -42,7 +46,7 @@ class Pandora::Indexing::Parser::DateParser
 
   # TODO Replace this method with a dating preprocessor class/lib.
   def date_range_preprocess(date)
-    # This is needed for dates that have a 'to' date with v. Chr. but the 'from' date is missing v. Chr. 
+    # This is needed for dates that have a 'to' date with v. Chr. but the 'from' date is missing v. Chr.
     if date.include? 'bis'
       from_to = date.split('bis')
 

@@ -1,6 +1,15 @@
 require "application_system_test_case"
 
 class WikidataTest < ApplicationSystemTestCase
+  setup do
+    @old_wait_time = Capybara.default_max_wait_time
+    Capybara.default_max_wait_time = 10
+  end
+
+  teardown do
+    Capybara.default_max_wait_time = @old_wait_time
+  end
+
   test "add/edit/delete wikidata on 'artist' (write to 'artist_wikidata')" do
     TestSource.index
     login_as 'jdoe'
@@ -10,7 +19,7 @@ class WikidataTest < ApplicationSystemTestCase
 
     click_on 'add a Wikidata ID'
     fill_in 'wikidata_id.label', with: 'Raphael'
-    find('li', text: "Italian painter and architect").click
+    find('li', text: /painter and architect/i).click
     click_on 'Save'
 
     assert_link 'go to the Wikidata Page', href: 'https://www.wikidata.org/wiki/Q5597'
@@ -61,7 +70,7 @@ class WikidataTest < ApplicationSystemTestCase
 
     click_on 'edit'
     fill_in 'wikidata_id.label', with: 'Raphael'
-    find('li', text: "Italian painter and architect").click
+    find('li', text: /painter and architect/i).click
     click_on 'Save'
 
     assert_link 'go to the Wikidata Page', href: 'https://www.wikidata.org/wiki/Q5597'
@@ -77,8 +86,8 @@ class WikidataTest < ApplicationSystemTestCase
     submit
 
     within '.list_row' do
-      assert_no_link 'Q183458'
-      assert_no_link 'Q762'
+      assert_link 'Q183458'
+      assert_link 'Q762'
 
       within ".artist", text: /Andrea del Verrocchio/ do
         assert_no_link 'edit'

@@ -1,9 +1,9 @@
-class Pandora::Indexing::Parser::DdorfKaRecord < Pandora::Indexing::Parser::Record 
+class Pandora::Indexing::Parser::DdorfKaRecord < Pandora::Indexing::Parser::Record
   def record_id
     if !(prom_id = record.xpath('.//prometheus_id/text()')).empty?
       prom_id
     else
-      record.xpath('.//_system_object_id/text()') 
+      record.xpath('.//_system_object_id/text()')
     end
   end
 
@@ -19,9 +19,9 @@ class Pandora::Indexing::Parser::DdorfKaRecord < Pandora::Indexing::Parser::Reco
   def artist_normalized
     return @artist_normalized if @artist_normalized
 
-    an = record.xpath('.//_nested__bilder__kuenstler/bilder__kuenstler/kuenstler/person/_standard/de-DE/text()').map { |a|
+    an = record.xpath('.//_nested__bilder__kuenstler/bilder__kuenstler/kuenstler/person/_standard/de-DE/text()').map do |a|
       a.to_s.split(', ').reverse.join(' ')
-    }
+    end
 
     @artist_normalized = @artist_parser.normalize(an)
   end
@@ -46,7 +46,7 @@ class Pandora::Indexing::Parser::DdorfKaRecord < Pandora::Indexing::Parser::Reco
   def date_range
     return @date_range if @date_range
 
-    date = date.to_s.strip 
+    date = date.to_s.strip
 
     @date_range = @date_parser.date_range(date)
   end

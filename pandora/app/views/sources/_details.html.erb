@@ -23,7 +23,11 @@
 <% for column in Source.display_columns -%>
   <tr>
     <th><%= column.human_name.tn(controller_name) %></th>
-    <td><%=h @source.send(column.name) %></td>
+    <td>
+      <% v = @source.send(column.name) %>
+      <% v = v.to_fs if v.is_a?(ActiveSupport::TimeWithZone) %>
+      <%=h v %>
+    </td>
   </tr>
 <% end -%>
   <tr>

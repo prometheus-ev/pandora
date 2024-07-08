@@ -1,6 +1,9 @@
 en:
   en: English
   de: German
+  elasticsearch: Elasticsearch
+  indexer: pandora indexer
+  rack_images: rack images
 
   messages:
     offensive: |
@@ -15,6 +18,9 @@ en:
 
   prompts:
     sure: Are you sure?
+
+  pages:
+    indexing_status: Indexing Status
 
   verbs:
     hide: hide
@@ -32,8 +38,21 @@ en:
   to_wikidata_item: go to the Wikidata Page
 
   activerecord:
+    models:
+      source:
+        one: source
+        other: sources
     attributes:
       source:
+        id: id
+        name: name
+        title: title
+        kind: kind
+        open_access: open access
+        record_count: record count
+        index_count: record count
+        indexings: indexings
+        samples: samples
         auto_approve_records: "Auto-approve records (Institutional uploads only)"
       account:
         mode: Access mode
@@ -199,7 +218,10 @@ en:
       greater_than_or_equal_to: must be greater than or equal to %{count}
       inclusion: is not included in the list
       invalid: is invalid
-      invalid_user_name: has to start with a Latin letter and can only contain Latin letters, digits, underscores and full stops and cannot end with a full stop
+      invalid_user_name: >-
+        has to start with a Latin letter and can only contain Latin letters,
+        digits, underscores and full stops and cannot end with a full stop.
+        Specifically, the login cannot contain any spaces.
       less_than: must be less than %{count}
       less_than_or_equal_to: must be less than or equal to %{count}
       model_invalid: "Validation failed: %{errors}"

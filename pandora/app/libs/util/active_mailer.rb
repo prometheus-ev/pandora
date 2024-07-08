@@ -22,12 +22,12 @@ module Util
       def magic_for(action, timestamp, token, options = {})
         link, short_link = url_with_short_for(options.merge(
           :controller => 'accounts',
-          :action     => action,
-          :timestamp  => timestamp,
-          :token      => token
+          :action => action,
+          :timestamp => timestamp,
+          :token => token
         ))
 
-        { :link => link, :short_link => short_link, :expires => Time.at(timestamp.to_i).to_s }
+        {:link => link, :short_link => short_link, :expires => Time.at(timestamp.to_i).to_s}
       end
 
       def confirmation_for(what, user, timestamp, token)
@@ -38,13 +38,12 @@ module Util
         Locale.set(DEFAULT_LOCALE) unless Locale.active?
 
         if locale
-          Locale.switch_locale(locale) { yield }
+          Locale.switch_locale(locale){yield}
         else
-          ORDERED_LANGUAGES.map { |lang|
-            Locale.switch_locale(lang) { yield }
+          ORDERED_LANGUAGES.map {|lang|
+            Locale.switch_locale(lang){yield}
           }.reject(&:blank?).join(multi_line ? "\n\n#{'-' * 68}\n\n" : ' / ')
         end
       end
-
   end
 end

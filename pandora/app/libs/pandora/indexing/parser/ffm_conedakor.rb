@@ -4,14 +4,14 @@ class Pandora::Indexing::Parser::FfmConedakor < Pandora::Indexing::Parser::XmlRe
 
     super(
       source,
-      record_node_name: 'work',
-      record_node_query: 'mediums/medium'
+      object_node_name: "work",
+      record_node_name: "medium",
     )
   end
 
   def preprocess
-    puts "#{@source[:name]}: loading MiroParser..."
-    @miro_parser =  Pandora::Indexing::Parser::MiroParser.new(@source[:name])
+    Pandora.puts "#{@source[:name]}: loading MiroParser..."
+    @miro_parser = Pandora::Indexing::Parser::MiroParser.new(@source[:name])
 
     super
   end

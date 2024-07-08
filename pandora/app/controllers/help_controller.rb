@@ -1,5 +1,4 @@
 class HelpController < ApplicationController
-
   skip_before_action :login_required
 
   helper_method :pages, :previous_page, :next_page
@@ -59,13 +58,14 @@ class HelpController < ApplicationController
     def previous_page
       i = pages.find_index{|page| page[:section] == params[:section]}
       return nil if i == nil
+
       i == 0 ? nil : pages[i - 1]
     end
 
     def next_page
       i = pages.find_index{|page| page[:section] == params[:section]}
       return nil if i == nil
+
       i == pages.size - 1 ? nil : pages[i + 1]
     end
-
 end

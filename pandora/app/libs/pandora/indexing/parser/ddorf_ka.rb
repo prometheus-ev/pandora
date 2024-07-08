@@ -7,4 +7,3 @@ class Pandora::Indexing::Parser::DdorfKa < Pandora::Indexing::Parser::XmlReader
       record_node_name: 'bilder')
   end
 end
-

@@ -4,7 +4,7 @@
       <%= 'Title'.t %>
     </label>
   </th>
-  <td><%= f.text_field :title, options_for_field(:title) %></td>
+  <td><%= f.text_area :title, options_for_field(:title, :rows => 3) %></td>
   <td>
     <%= image_tag('misc/info_form_field.gif', :class => 'dim', :title => "Enter here a descriptive notation that ensures the recognition of the object, e.g. \"Ecce homo\".".t) %>
   </td>

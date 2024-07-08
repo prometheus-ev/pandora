@@ -1,6 +1,6 @@
 require 'test_helper'
 
-Dir["./test/test_sources/*.rb"].each {|file| require file }
+Dir["./test/test_sources/*.rb"].each{|file| require file}
 
 class ElasticTest < ActiveSupport::TestCase
   test 'create_index_and_switch_alias' do

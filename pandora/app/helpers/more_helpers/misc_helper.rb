@@ -1,7 +1,5 @@
 module MoreHelpers
-
   module MiscHelper
-
     def show_action
       'show'
     end
@@ -17,9 +15,9 @@ module MoreHelpers
     end
 
     def remote_edit_link_to(object, section, options = {}, html_options = {}, text = nil)
-      url_options = { :action => edit_action, :id => object }.merge(options)
+      url_options = {:action => edit_action, :id => object}.merge(options)
 
-      html_options = { :title => 'Edit this section'.t }.merge(html_options)
+      html_options = {:title => 'Edit this section'.t}.merge(html_options)
 
       link_to(
         text || image_tag('icon/edit.gif', class: 'icon'),
@@ -65,16 +63,16 @@ module MoreHelpers
     end
 
     def render_sections(sections, object = object_for_controller, locals = {})
-      sections.map { |section| render_section(object, section, locals) }.join("\n").html_safe
+      sections.map{|section| render_section(object, section, locals)}.join("\n").html_safe
     end
 
     def render_form_part(form, part, prefix = nil)
-      render :partial => "#{edit_action}_#{part}", :locals => { :f => form } if !edit_action.blank? && !part.blank?
+      render :partial => "#{edit_action}_#{part}", :locals => {:f => form} if !edit_action.blank? && !part.blank?
     end
 
     def render_form_parts(form, parts)
       parts = form_parts_for(parts) unless parts.is_a?(Array)
-      parts.map { |part| render_form_part(form, part) }.join("\n").html_safe
+      parts.map{|part| render_form_part(form, part)}.join("\n").html_safe
     end
 
     def form_parts_for(section)
@@ -126,7 +124,7 @@ module MoreHelpers
 
       # Truncate after the last closed link tag.
       if truncated_content && truncated_content.rindex("</a>")
-        # REWRITE: its called mb_chars now but since ruby supports multibyte 
+        # REWRITE: its called mb_chars now but since ruby supports multibyte
         # chars everywhere anyhow, we don't need it anymore
         # truncated_content = truncated_content.chars[0, (truncated_content.rindex("</a>") + 4)]
         truncated_content = truncated_content[0, (truncated_content.rindex("</a>") + 4)]
@@ -148,13 +146,13 @@ module MoreHelpers
         content, truncated_content = simple_format(content), simple_format(truncated_content) if simple
 
         render :partial => 'shared/misc/truncated', :locals => options.reverse_merge(
-          :parent        => '',
-          :short_title   => "#{'more'.t} (#{'Ctrl-click to expand all'.t})",
-          :full_title    => "#{'less'.t} (#{'Ctrl-click to collapse all'.t})",
-          :expand_text   => 'more'.t,
+          :parent => '',
+          :short_title => "#{'more'.t} (#{'Ctrl-click to expand all'.t})",
+          :full_title => "#{'less'.t} (#{'Ctrl-click to collapse all'.t})",
+          :expand_text => 'more'.t,
           :collapse_text => 'less'.t
         ).merge(
-          :content           => content.html_safe,
+          :content => content.html_safe,
           :truncated_content => truncated_content.html_safe
         )
       else
@@ -201,7 +199,5 @@ module MoreHelpers
       locals.delete(:locals)
       locals.merge!(nested_locals)
     end
-
   end
-
 end

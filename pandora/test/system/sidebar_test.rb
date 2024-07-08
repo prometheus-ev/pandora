@@ -54,7 +54,7 @@ class SidebarTest < ApplicationSystemTestCase
     assert_no_text 'This collection is no longer available'
     assert_text "John's collaboration collection"
     assert_text 'by John Doe'
-    
+
     # add a second collection
     click_on 'Add collection to sidebar'
     assert_css '#boxes > .sidebar_box', count: 2
@@ -69,7 +69,7 @@ class SidebarTest < ApplicationSystemTestCase
 
     within '#sidebar' do
       assert_text 'Jean-Baptiste ' # ... Dupont: A Upload
-      
+
       dismiss_confirm do
         find('div.close').click
       end
@@ -78,11 +78,11 @@ class SidebarTest < ApplicationSystemTestCase
       accept_confirm do
         find('div.close').click
       end
-      
+
       assert_no_text 'Jean-Baptiste'
     end
   end
-  
+
   test 'render box with outdated params' do
     jdoe = Account.find_by! login: 'jdoe'
 

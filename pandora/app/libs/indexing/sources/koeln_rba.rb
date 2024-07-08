@@ -17,7 +17,7 @@ class Indexing::Sources::KoelnRba < Indexing::SourceSuper
   end
 
   def artist_normalized
-    an = record.xpath('.//Field[@Type="ob30"]/Field[@Type="3100"]/@Value').map { |a|
+    an = record.xpath('.//Field[@Type="ob30"]/Field[@Type="3100"]/@Value').map {|a|
       a.to_s.split(', ').reverse.join(' ')
     }
     super(an)

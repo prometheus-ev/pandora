@@ -94,7 +94,7 @@ class AccountsControllerTest < ActionDispatch::IntegrationTest
     jdupont = Account.find_by!(login: 'jdupont')
 
     assert jdupont.expires_at
-    assert_equal(Time.zone.parse("2018-01-13 23:59:59"), Time.zone.parse(jdupont.expires_at.to_s))
+    assert_equal(Time.zone.parse("2018-01-13 23:59:59"), Time.zone.parse(jdupont.expires_at.to_fs))
   end
 
   test 'newsletter subscribers are not suggested' do

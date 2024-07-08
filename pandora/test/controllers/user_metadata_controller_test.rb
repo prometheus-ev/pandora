@@ -184,5 +184,4 @@ class UserMetadataControllerTest < ActionDispatch::IntegrationTest
   end
 
   # test 'deal with invalid field names (security)'
-
 end

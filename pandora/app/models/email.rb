@@ -2,7 +2,6 @@ require 'pandora/validation/email_validator'
 require 'pandora/validation/emails_validator'
 
 class Email < ApplicationRecord
-
   include Util::Config
 
   translates :subject, :body, :body_html
@@ -24,7 +23,7 @@ class Email < ApplicationRecord
   validates :cc, :'pandora/validation/emails' => true, allow_blank: true
 
   RECIPIENT_FIELDS = %w[to cc bcc].freeze
-  RECIPIENT_FIELDS.each { |field| serialize field, Array }
+  RECIPIENT_FIELDS.each{|field| serialize field, coder: YAML, type: Array}
 
   def self.display_columns
     @display_columns ||= content_columns - columns_by_name(:subject, :body, :body_html)
@@ -90,15 +89,15 @@ class Email < ApplicationRecord
   end
 
   def recipients_by_address
-    @recipients_by_address ||= Hash.new { |h, k|
+    @recipients_by_address ||= Hash.new do |h, k|
       h[k] = Account.email_verified.find_by(email: k)
-    }
+    end
   end
 
   def deliver_now(by)
     recipients = {
-      :to  => expanded_to,
-      :cc  => expanded_cc,
+      :to => expanded_to,
+      :cc => expanded_cc,
       :bcc => expanded_bcc
     }
 
@@ -214,8 +213,8 @@ class Email < ApplicationRecord
   class << self
     def newsletter
       new(
-        :to         => ['newsletter'],
-        :tag        => 'Newsletter',
+        :to => ['newsletter'],
+        :tag => 'Newsletter',
         :newsletter => next_newsletter,
         :individual => true
       )
@@ -228,12 +227,11 @@ class Email < ApplicationRecord
         last = newsletters.order(id: :desc).first
         last && last.year == Time.now.utc.year ? last.newsletter + 1 : 1
       end
-
   end
 
-  
+
   private
-  
+
     def recipients_for(recipients)
       case recipients
       when Array
@@ -246,5 +244,4 @@ class Email < ApplicationRecord
     end
 
     class DoubleSendError < StandardError; end
-
 end

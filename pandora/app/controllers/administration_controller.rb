@@ -1,5 +1,5 @@
 class AdministrationController < ApplicationController
-  def self.initialize_me!  # :nodoc:
+  def self.initialize_me! # :nodoc:
     control_access [:superadmin, :admin] => :ALL,
                    [:useradmin, :user, :dbadmin] => :index
   end
@@ -11,5 +11,4 @@ class AdministrationController < ApplicationController
   end
 
   initialize_me!
-
 end

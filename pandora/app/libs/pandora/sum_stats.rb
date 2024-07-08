@@ -100,6 +100,15 @@ class Pandora::SumStats
     end
   end
 
+  def self.result
+    return {
+      'sessions' => 0,
+      'searches' => 0,
+      'downloads' => 0,
+      'hits' => 0
+    }
+  end
+
 
   protected
 
@@ -129,14 +138,5 @@ class Pandora::SumStats
       (@to - @from + 1).to_i.times.map do |i|
         @to - i
       end.sort
-    end
-
-    def self.result
-      return {
-        'sessions' => 0,
-        'searches' => 0,
-        'downloads' => 0,
-        'hits' => 0
-      }
     end
 end

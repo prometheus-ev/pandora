@@ -40,17 +40,13 @@ class Indexing::SourceParent
   # Class methods
   #############################################################################
 
-  def self.logger
-    Rails.logger
-  end
-
   # Get Source names as array of strings.
   #
   # @return [Array] An array of Source name strings.
   def self.names
-    Source.all.map { |source|
+    Source.all.map do |source|
       source.name
-    }
+    end
   end
 
   # Index a Source subclass.
@@ -80,9 +76,9 @@ class Indexing::SourceParent
   # @param log [Boolean] Enable the log.
   def self.index_all(glob_pattern: "*", time: false, log: false)
     source_files = Dir.glob("app/libs/indexing/sources/" + glob_pattern + ".rb")
-    sources = source_files.map { |source_file|
+    sources = source_files.map do |source_file|
       File.basename(source_file, ".rb")
-    }
+    end
     self.index_array(sources: sources, time: time, log: log)
   end
 
@@ -92,24 +88,24 @@ class Indexing::SourceParent
   # @param log [Boolean] Enable the log.
   def self.index_array(sources: [], time: false, create_institutional_uploads: false, log: false)
     if time
-      sources = sources.delete_if { |source|
+      sources = sources.delete_if do |source|
         source = source.camelize.constantize.new(create_institutional_uploads: create_institutional_uploads, log: log)
         !source.respond_to?('date_range')
-      }
+      end
     end
 
-    logger.info "Sources to index:"
-    logger.info sources.sort
+    Pandora.puts "Sources to index:"
+    Pandora.puts sources.sort
 
     remaining_sources = sources
     number_of_sources = sources.count
     number_of_current_source = 0
     records_indexed_total = 0
 
-    sources.sort.each { |source|
+    sources.sort.each do |source|
       source = source.camelize.constantize.new(create_institutional_uploads: create_institutional_uploads, log: log)
       number_of_current_source += 1
-      logger.info "Indexing source #{number_of_current_source}/#{number_of_sources}, #{source.name}..."
+      Pandora.puts "Indexing source #{number_of_current_source}/#{number_of_sources}, #{source.name}..."
 
       s = Source.find_by_name(source.name)
 
@@ -139,11 +135,11 @@ class Indexing::SourceParent
       remaining_sources = remaining_sources - [source.name]
 
       records_indexed_total += records_indexed
-      logger.info "Total records indexed: #{records_indexed_total}"
-      logger.info "-" * 100
-      logger.info "Remaining sources:"
-      logger.info remaining_sources.sort
-    }
+      Pandora.puts "Total records indexed: #{records_indexed_total}"
+      Pandora.puts "-" * 100
+      Pandora.puts "Remaining sources:"
+      Pandora.puts remaining_sources.sort
+    end
 
     check_klapsch(Indexing::Index.aliases)
 
@@ -166,15 +162,15 @@ class Indexing::SourceParent
   end
 
   def self.check_klapsch(alias_names)
-    logger.info ""
+    Pandora.puts ""
     klapsch_record_ids = filter_records(alias_names, KLAPSCH_FILTER)
-    logger.info "#{klapsch_record_ids.size} indexed records containing \"#{KLAPSCH_FILTER}\":"
+    Pandora.puts "#{klapsch_record_ids.size} indexed records containing \"#{KLAPSCH_FILTER}\":"
 
     klapsch_record_ids.each do |klapsch_record_id|
-      logger.info klapsch_record_id
+      Pandora.puts klapsch_record_id
     end
 
-    logger.info ""
+    Pandora.puts ""
   end
 
   #############################################################################
@@ -210,10 +206,10 @@ class Indexing::SourceParent
     @records_created = 0
     recs = nil
 
-    benchmark = Benchmark.realtime {
+    benchmark = Benchmark.realtime do
       directory = Rails.configuration.x.dumps_path + name
       if File.directory?(directory)
-        logger.info "Number of dump files: " + Dir.children(directory).count.to_s
+        Pandora.puts "Number of dump files: " + Dir.children(directory).count.to_s
         Dir.each_child(directory) do |file|
           # Do not process directories, only XML and JSON files.
           if !File.directory?(file) && (File.extname(file) == '.xml' || File.extname(file) == '.json')
@@ -242,8 +238,8 @@ class Indexing::SourceParent
         # http://www.rubydoc.info/gems/elasticsearch-api/Elasticsearch/API/Indices/Actions#update_aliases-instance_method
         @index.client.indices.update_aliases body: {
           actions: [
-            { remove: { index: current_index_name, alias: name } },
-            { add:    { index: new_index_name, alias: name } }
+            {remove: {index: current_index_name, alias: name}},
+            {add:    {index: new_index_name, alias: name}}
           ]
         }
         @index.delete(previous_index_name)
@@ -253,73 +249,73 @@ class Indexing::SourceParent
         # http://www.rubydoc.info/gems/elasticsearch-api/Elasticsearch/API/Indices/Actions#put_alias-instance_method
         @index.client.indices.put_alias(index: new_index_name, name: name)
       end
-    }
+    end
 
-    logger.info "\nFinished indexing #{name} in #{benchmark} s, #{benchmark / 60} min."
-    logger.info "-" * 100
-    logger.info "Index for alias " + name + ":"
-    logger.info @index.client.indices.get_alias(name: name)
-    logger.info "-" * 100
-    logger.info "Index versions:"
-    logger.info @index.client.indices.get(index: name + '*').keys
-    logger.info "-" * 100
+    Pandora.puts "\nFinished indexing #{name} in #{benchmark} s, #{benchmark / 60} min."
+    Pandora.puts "-" * 100
+    Pandora.puts "Index for alias " + name + ":"
+    Pandora.puts @index.client.indices.get_alias(name: name)
+    Pandora.puts "-" * 100
+    Pandora.puts "Index versions:"
+    Pandora.puts @index.client.indices.get(index: name + '*').keys
+    Pandora.puts "-" * 100
 
     if respond_to?('date_range')
       if @date_ranges_parse_failed.size > 0
-        logger.info 'Unparseable datings of ' + name + ':'
-        logger.info ''
+        Pandora.puts 'Unparseable datings of ' + name + ':'
+        Pandora.puts ''
         @date_ranges_parse_failed.each do |date_range_parse_failed|
-          logger.info date_range_parse_failed
+          Pandora.puts date_range_parse_failed
         end
-        logger.info ''
-        logger.info "Please update the dating preprocessor or the historical_dating Gem."
-        logger.info ''
+        Pandora.puts ''
+        Pandora.puts "Please update the dating preprocessor or the historical_dating Gem."
+        Pandora.puts ''
       end
 
-      logger.info name + ' stats:'
-      logger.info "#{@date_ranges_count} of #{@records_created} records do have datings."
-      logger.info "#{@date_ranges_count - @date_ranges_parse_failed.size} datings could be parsed."
-      logger.info "#{@date_ranges_parse_failed.size} datings could not be parsed."
+      Pandora.puts name + ' stats:'
+      Pandora.puts "#{@date_ranges_count} of #{@records_created} records do have datings."
+      Pandora.puts "#{@date_ranges_count - @date_ranges_parse_failed.size} datings could be parsed."
+      Pandora.puts "#{@date_ranges_parse_failed.size} datings could not be parsed."
     else
-      logger.info name + ' is not configured for time search.'
-      logger.info ''
-      logger.info 'If you want it to, please add a date_range method to the source file in the following way:'
-      logger.info ''
-      logger.info 'def date_range'
-      logger.info '  super(<date-as-string>)'
-      logger.info 'end'
+      Pandora.puts name + ' is not configured for time search.'
+      Pandora.puts ''
+      Pandora.puts 'If you want it to, please add a date_range method to the source file in the following way:'
+      Pandora.puts ''
+      Pandora.puts 'def date_range'
+      Pandora.puts '  super(<date-as-string>)'
+      Pandora.puts 'end'
     end
 
-    logger.info "-" * 100
+    Pandora.puts "-" * 100
 
     Source.find_and_update_or_create_by(name: name,
                                         is_time_searchable: respond_to?('date_range'),
                                         record_count: @records_created)
 
-    logger.info "-" * 100
+    Pandora.puts "-" * 100
     index_ratings(name)
-    logger.info "-" * 100
+    Pandora.puts "-" * 100
     index_comments(name)
-    logger.info "-" * 100
+    Pandora.puts "-" * 100
     index_image_vectors(name)
-    logger.info "-" * 100
+    Pandora.puts "-" * 100
     index_user_metadata(name)
-    logger.info "-" * 100
+    Pandora.puts "-" * 100
 
     if @create_institutional_uploads
       Pandora::DilpsImporter.new(name).import
-      logger.info "-" * 100
+      Pandora.puts "-" * 100
     end
 
     # Remove original and resized images on staging in order to see
-    # if the can still be requested successfully.
+    # if they can still be requested successfully.
     #
     # Surrounding a system command with backticks executes the command
     # and returns the output as string.
     if `hostname`.delete("\n") == 'prometheus2.uni-koeln.de'
-      logger.info "-" * 100
+      Pandora.puts "-" * 100
       Pandora::ImagesDir.new.delete_upstream_images(name)
-      logger.info "-" * 100
+      Pandora.puts "-" * 100
     end
 
     @records_created
@@ -330,11 +326,11 @@ class Indexing::SourceParent
   # @param index_name [String] The name of the index.
   # @param log [Boolean] Enable the log.
   def index_image_vectors(index_name = "_all", log = false)
-    if File.exist?(vectors_file = File.join(ENV['PM_VECTORS_DIR'], '/', "#{name}.json"))
-      logger.info "Parsing image vectors file..."
-      image_vectors = JSON.parse(File.read(vectors_file))
-    else
-      logger.info "No image vectors file available..."
+    source_id = (index_name == '_all' ? 'all' : index_name)
+    image_vectors = Pandora::SuperImage.load_vectors(source_id)
+
+    if image_vectors == {}
+      logger.info "No image vectors found..."
       return
     end
 
@@ -343,17 +339,26 @@ class Indexing::SourceParent
     elastic = Pandora::Elastic.new
     bulk = []
 
-    benchmark = Benchmark.realtime {
-      logger.info "Image vectors counted: " + image_vectors_count
-
+    benchmark = Benchmark.realtime do
+      Pandora.puts "Image vectors counted: " + image_vectors_count
       if @index.client.indices.exists? index: index_name
-        image_vectors.each do |image_vector|
+        image_vectors.each do |pid, data|
+          next unless data['features']['similarity']
+
+          image_vector = JSON.parse(data['features']['similarity'][pid]['vector'])
+          next if image_vector.empty?
+
+          # dominant_colors = data['features']['dominant_colors']
+          # ...
+
+          # TODO
+
           field_validator = Indexing::FieldValidator.new
-          field_validator.validate('image_vector', image_vector['vector'])
+          field_validator.validate('image_vector', image_vector)
 
           begin
             bulk += [
-              {'update' => {'_index' => index_name, '_id' => image_vector['img_id']}},
+              {'update' => {'_index' => index_name, '_id' => pid}},
               {'doc' => field_validator.validated_fields}
             ] if !field_validator.validated_fields.nil?
 
@@ -362,7 +367,7 @@ class Indexing::SourceParent
             if bulk.size >= 1000
               elastic.bulk bulk
               bulk = []
-              printf "\rImage vectors indexed: #{image_vectors_indexed}" unless Rails.env.test?
+              Pandora.printf "\rImage vectors indexed: #{image_vectors_indexed}" unless Rails.env.test?
             end
           rescue Exception => e
             logger.error "\n" + e.message
@@ -373,10 +378,10 @@ class Indexing::SourceParent
 
         elastic.bulk bulk
         elastic.bulk_commit(refresh: true)
-        printf "\rImage vectors indexed: #{image_vectors_indexed}" unless Rails.env.test?
+        Pandora.printf "\rImage vectors indexed: #{image_vectors_indexed}" unless Rails.env.test?
       end
-    }
-    logger.info "\nFinished in #{benchmark} s."
+    end
+    Pandora.puts "\nFinished in #{benchmark} s."
     image_vectors_indexed
   end
 
@@ -393,8 +398,8 @@ class Indexing::SourceParent
     ratings_indexed = 0
     ratings_count = ratings.count.to_s
 
-    benchmark = Benchmark.realtime {
-      logger.info "Ratings counted: " + ratings_count
+    benchmark = Benchmark.realtime do
+      Pandora.puts "Ratings counted: " + ratings_count
       ratings.each do |rating|
         rating_index = Source.find(rating.source_id).name
         if @index.client.indices.exists? index: rating_index
@@ -405,11 +410,11 @@ class Indexing::SourceParent
           begin
             @index.client.update index: rating_index,
                                  id: rating.pid,
-                                 body: { doc: field_validator.validated_fields },
+                                 body: {doc: field_validator.validated_fields},
                                  refresh: true
 
             ratings_indexed += 1
-            printf "\rRatings indexed: #{ratings_indexed}" unless Rails.env.test?
+            Pandora.printf "\rRatings indexed: #{ratings_indexed}" unless Rails.env.test?
           rescue Exception => e
             logger.error "\n" + e.message
             logger.error " Rating update failed..."
@@ -417,9 +422,9 @@ class Indexing::SourceParent
           end
         end
       end
-    }
-    logger.info "\nFinished in #{benchmark} s."
-    logger.info "Ratings indexed: #{ratings_indexed}/#{ratings_count}"
+    end
+    Pandora.puts "\nFinished in #{benchmark} s."
+    Pandora.puts "Ratings indexed: #{ratings_indexed}/#{ratings_count}"
     ratings_indexed
   end
 
@@ -438,9 +443,8 @@ class Indexing::SourceParent
     comments_indexed = 0
     comments_count = comments.count.to_s
 
-    benchmark = Benchmark.realtime {
-      logger.info "Comments counted: " + comments_count
-
+    benchmark = Benchmark.realtime do
+      Pandora.puts "Comments counted: " + comments_count
       comments.each do |comment|
         comment_index = comment.image_id.split("-").first
         comment_count = comment.image.comments.count
@@ -454,11 +458,11 @@ class Indexing::SourceParent
           begin
             @index.client.update index: comment_index,
                                  id: comment.image_id,
-                                 body: { doc: field_validator.validated_fields },
+                                 body: {doc: field_validator.validated_fields},
                                  refresh: true
 
             comments_indexed += 1
-            printf "\rComments indexed: #{comments_indexed}/#{comments_count}" unless Rails.env.test?
+            Pandora.printf "\rComments indexed: #{comments_indexed}/#{comments_count}" unless Rails.env.test?
           rescue Exception => e
             logger.error "\n" + e.message
             logger.error " Comment update failed..."
@@ -466,9 +470,9 @@ class Indexing::SourceParent
           end
         end
       end
-    }
-    logger.info "\nFinished in #{benchmark} s."
-    logger.info "Comments indexed: #{comments_indexed}/#{comments_count}"
+    end
+    Pandora.puts "\nFinished in #{benchmark} s."
+    Pandora.puts "Comments indexed: #{comments_indexed}/#{comments_count}"
     comments_indexed
   end
 
@@ -505,9 +509,9 @@ class Indexing::SourceParent
       if File.exist?(@file_name)
         @document = xml_document(@file_name)
       else
-        logger.info "!" * 100
-        logger.info "#{@file_name} does not exist."
-        logger.info "!" * 100
+        Pandora.puts "!" * 100
+        Pandora.puts "#{@file_name} does not exist."
+        Pandora.puts "!" * 100
 
         @document = Nokogiri::XML("")
       end
@@ -515,9 +519,9 @@ class Indexing::SourceParent
       if File.exist?(@file_name)
         @document = json_document(@file_name)
       else
-        logger.info "!" * 100
-        logger.info "#{@file_name} does not exist."
-        logger.info "!" * 100
+        Pandora.puts "!" * 100
+        Pandora.puts "#{@file_name} does not exist."
+        Pandora.puts "!" * 100
 
         @document = {}
       end
@@ -544,7 +548,7 @@ class Indexing::SourceParent
       "albertina"
     ]
 
-    if xml_reader_source_names.any? { |n| name.include?(n) }
+    if xml_reader_source_names.any?{|n| name.include?(n)}
       # http://www.rubydoc.info/github/sparklemotion/nokogiri/Nokogiri/XML/Reader
       @document = Nokogiri::XML::Reader(File.open(file), nil, encoding(file))
     else
@@ -577,88 +581,93 @@ class Indexing::SourceParent
 
   private
 
-  def process_records(recs, new_index_name, log = false)
-    @date_ranges_count = 0
-    @date_ranges_parse_failed = []
+    def process_records(recs, new_index_name, log = false)
+      @date_ranges_count = 0
+      @date_ranges_parse_failed = []
 
-    if @document.errors.size != 0
-      # https://www.rubydoc.info/github/sparklemotion/nokogiri/Nokogiri/XML/Document#errors-instance_method
-      logger.info "!" * 100
-      @document.errors.map{ |error| logger.info error }
-      logger.info "Please correct the syntax errors and try again..."
-      logger.info "!" * 100
+      if @document.errors.size != 0
+        # https://www.rubydoc.info/github/sparklemotion/nokogiri/Nokogiri/XML/Document#errors-instance_method
+        Pandora.puts "!" * 100
+        @document.errors.map{|error| Pandora.puts error}
+        Pandora.puts "Please correct the syntax errors and try again..."
+        Pandora.puts "!" * 100
 
-      return false
-    elsif recs && recs.is_a?(Nokogiri::XML::NodeSet)
-      records_counted = recs.count.to_s
-      records_parser_info = ", using Nokogiri::XML for parsing."
-    elsif recs && recs.is_a?(Indexing::XmlReaderNodeSet)
-      records_counted = "unknown"
-      records_parser_info = ", using Nokogiri::XML::Reader for parsing."
-    elsif recs && recs.is_a?(Indexing::Sources::Albertina::RecordEmitter)
-      records_counted = recs.count.to_s
-      records_parser_info = ", using Nokogiri::XML::Reader and specialized emitter for parsing"
-    elsif recs && (recs.is_a?(Array) || recs.is_a?(Hash))
-      records_counted = recs.size.to_s
-      records_parser_info = ", using JSON for parsing."
-    else
-      logger.info "!" * 100
-      logger.info "Something is wrong with " + name + ", skipping..."
-      logger.info "!" * 100
-      return false
-    end
-
-    if records_counted == "0"
-      logger.info "!" * 100
-      logger.info "No records available for " + name + ", skipping..."
-      logger.info "!" * 100
-      return false
-    end
-
-    logger.info "Records counted: " + records_counted + records_parser_info
-    preprocess_record_object_ids if is_object? && !@node_name.blank?
-
-    rights_work_artist_updater = Indexing::RightsWorkArtistUpdater.new
-
-    recs.each do |record|
-      # Assign the record to the record instance variable with the help of the record setter method.
-      init(record)
-
-      # If the record ID is nil, we do not index.
-      if record_id.nil?
-        @records_excluded += 1
-        # If the records_to_exclude method exist and the record ID is included, we do not index.
-      elsif self.respond_to?("records_to_exclude") && records_to_exclude.include?(record_id.to_s)
-        @records_excluded += 1
-      elsif self.respond_to?(:exclude?) && self.exclude?
-        @records_excluded += 1
+        return false
+      elsif recs && recs.is_a?(Nokogiri::XML::NodeSet)
+        records_counted = recs.count.to_s
+        records_parser_info = ", using Nokogiri::XML for parsing."
+      elsif recs && recs.is_a?(Indexing::XmlReaderNodeSet)
+        records_counted = "unknown"
+        records_parser_info = ", using Nokogiri::XML::Reader for parsing."
+      elsif recs && (recs.is_a?(Array) || recs.is_a?(Hash))
+        records_counted = recs.size.to_s
+        records_parser_info = ", using JSON for parsing."
       else
-        processed_fields = Indexing::FieldProcessor.new(source: self, field_keys: Indexing::IndexFields.index).run
-        validated_fields = Indexing::FieldValidator.new(processed_fields: processed_fields).run
-        validated_fields = rights_work_artist_updater.run(validated_fields)
-
-        # Does the processed record ID already exist? If so, then update.
-        if @index.client.exists? index: new_index_name, id: validated_fields['record_id']
-          @records_updated += 1
-        else
-          @records_created += 1
-        end
-
-        # http://www.rubydoc.info/gems/elasticsearch-api/Elasticsearch/API/Actions#index-instance_method
-        # Right now, if the ID already exists, the whole document is updated, see:
-        # https://www.elastic.co/guide/en/elasticsearch/guide/current/update-doc.html
-        # @TODO: check if we also need partial updates, e.g.:
-        # https://www.elastic.co/guide/en/elasticsearch/guide/current/partial-updates.html
-        @index.client.index index: new_index_name,
-                            id: validated_fields['record_id'],
-                            body: validated_fields,
-                            refresh: false
-        @records_indexed += 1
+        Pandora.puts "!" * 100
+        Pandora.puts "Something is wrong with " + name + ", skipping..."
+        Pandora.puts "!" * 100
+        return false
       end
 
-      printf "\rRecords created: #{@records_created} | updated: #{@records_updated} (indexed in total: #{@records_indexed}) | excluded: #{@records_excluded}" unless Rails.env.test?
-    end
+      if records_counted == "0"
+        Pandora.puts "!" * 100
+        Pandora.puts "No records available for " + name + ", skipping..."
+        Pandora.puts "!" * 100
+        return false
+      end
 
-    return true
-  end
+      Pandora.puts "Records counted: " + records_counted + records_parser_info
+      preprocess_record_object_ids if is_object? && !@node_name.blank?
+
+      rights_work_artist_updater = Indexing::RightsWorkArtistUpdater.new
+
+      recs.each do |record|
+        # Assign the record to the record instance variable with the help of the record setter method.
+        init(record)
+
+        # If the record ID is nil, we do not index.
+        excluded = (
+          record_id.nil? ||
+          # If the records_to_exclude method exist and the record ID is included, we do not index.
+          (self.respond_to?("records_to_exclude") && records_to_exclude.include?(record_id.to_s)) ||
+          (self.respond_to?(:exclude?) && self.exclude?)
+        )
+        if excluded
+          @records_excluded += 1
+        else
+          processed_fields = Indexing::FieldProcessor.new(source: self, field_keys: Indexing::IndexFields.index).run
+          validated_fields = Indexing::FieldValidator.new(processed_fields: processed_fields).run
+          validated_fields = rights_work_artist_updater.run(validated_fields)
+
+          # Does the processed record ID already exist? If so, then update.
+          if @index.client.exists? index: new_index_name, id: validated_fields['record_id']
+            @records_updated += 1
+          else
+            @records_created += 1
+          end
+
+          # http://www.rubydoc.info/gems/elasticsearch-api/Elasticsearch/API/Actions#index-instance_method
+          # Right now, if the ID already exists, the whole document is updated, see:
+          # https://www.elastic.co/guide/en/elasticsearch/guide/current/update-doc.html
+          # @TODO: check if we also need partial updates, e.g.:
+          # https://www.elastic.co/guide/en/elasticsearch/guide/current/partial-updates.html
+          @index.client.index index: new_index_name,
+                              id: validated_fields['record_id'],
+                              body: validated_fields,
+                              refresh: false
+          @records_indexed += 1
+
+          if max = ENV['PM_MAX_RECORDS_PER_SOURCE']
+            if @records_indexed >= max.to_i
+              Pandora.puts "\nreached max (PM_MAX_RECORDS_PER_SOURCE: #{max}) records per source, stopping ...\n"
+              break
+            end
+          end
+        end
+
+        Pandora.printf "\rRecords created: #{@records_created} | updated: #{@records_updated} (indexed in total: #{@records_indexed}) | excluded: #{@records_excluded}" unless Rails.env.test?
+      end
+
+      return true
+    end
 end

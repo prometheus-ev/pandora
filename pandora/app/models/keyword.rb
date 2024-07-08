@@ -1,5 +1,4 @@
 class Keyword < ApplicationRecord
-
   include Util::Config
 
   has_many :collection_keyword, dependent: :destroy
@@ -75,11 +74,8 @@ class Keyword < ApplicationRecord
   def self.similar
     column = I18n.locale == :en ? 'title' : 'title_de'
 
-    scope =
-      select("
-        count(*) AS count,
-        soundex(#{column}) AS sound
-      ").
+    scope = self.
+      select("count(*) AS count, soundex(#{column}) AS sound").
       group('sound').
       having('count > 1 AND sound IS NOT NULL').
       order('count DESC')
@@ -92,7 +88,7 @@ class Keyword < ApplicationRecord
   def self.by_soundex(values)
     column = I18n.locale == :en ? 'title' : 'title_de'
 
-    scope =
+    scope = self.
       select("keywords.*, soundex(#{column}) AS sound").
       where("soundex(#{column}) IN (?)", values).
       order("#{column} ASC")

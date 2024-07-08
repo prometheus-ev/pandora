@@ -1,5 +1,4 @@
 class PaymentController < ApplicationController
-
   # skip_before_action :store_location
   skip_before_action :login_required
   skip_before_action :verify_authenticity_token, only: ['paypal_ipn']
@@ -14,8 +13,8 @@ class PaymentController < ApplicationController
       if paypal_ipn_verification(request.raw_post) && transaction.confirm(params)
         transaction.complete
       end
-    # TODO: What happens if the transaction is not found? Or should it also be created here?
-    # else
+      # TODO: What happens if the transaction is not found? Or should it also be created here?
+      # else
     end
 
     render plain: 'OK'
@@ -35,5 +34,4 @@ class PaymentController < ApplicationController
     end
 
     initialize_me!
-
 end

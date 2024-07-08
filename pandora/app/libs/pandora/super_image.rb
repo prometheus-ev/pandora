@@ -85,7 +85,7 @@ class Pandora::SuperImage
     si = new(pid)
 
     if si.upload?
-      return si if si.upload ? si : ()
+      return si if si.upload
     else # elastic record
       elastic_found = si.elastic_record["_source"]["path"] != "not-available"
       image_found = Image.find_by(pid: pid)
@@ -336,6 +336,7 @@ class Pandora::SuperImage
   def collection_counts_any?(account)
     results = @collection_counts_cache || Collection.counts_for(pid, account)
     return false if results[pid].blank?
+
     results[pid].any? do |key, count|
       count > 0
     end
@@ -500,7 +501,7 @@ class Pandora::SuperImage
     elastic = UserMetadata.apply_updates_to(
       elastic, pid, field, account: account
     )
-    
+
     elastic
   end
 
@@ -568,16 +569,25 @@ class Pandora::SuperImage
     end
   end
 
+  def original_filename(resolution = :small)
+    unless path.blank?
+      resizer = RackImages::Resizer.new(source: source_id, upstream_path: path)
+      resizer.original_file
+    end
+  end
+
   def image_data(resolution = :small, options = {})
     if ENV['PM_USE_TEST_IMAGE'] == 'true'
       return File.read("#{Rails.root}/public/images/test.png")
     end
 
-    options.reverse_merge! dummy: false
+    options.reverse_merge!(dummy: false, curl_transfer_max_time: "10")
 
     path_info = image_path(resolution)
-    file = RackImages::Resizer.new.run(path_info)
-    file.read
+    file = RackImages::Resizer.new(options.slice(:curl_transfer_max_time)).run(path_info)
+    content = file.read
+    file.close
+    content
   rescue RackImages::Exception => e
     # raise e unless Rails.env.production?
 
@@ -585,6 +595,7 @@ class Pandora::SuperImage
       file = "#{ENV['PM_ROOT']}/rack-images/public/no_image_available.png"
       File.read(file)
     else
+      # binding.pry
       nil
     end
   end
@@ -594,13 +605,19 @@ class Pandora::SuperImage
       return "#{ENV['PM_BASE_URL']}/images/test.png"
     end
 
+
     path_info = image_path(resolution)
 
     lifetime = ENV['PM_ASD_LIFETIME'].to_i.seconds
     token = ::RackImages::Secret.token_for(path_info, Time.now + lifetime)
 
     connector = (path_info.match(/\?/) ? '&' : '?')
-    "#{ENV['PM_RACK_IMAGES_BASE_URL']}#{path_info}#{connector}_asd=#{token}"
+    base_url = (
+      upload? ?
+      ENV['PM_RACK_IMAGES_UPLOADS_BASE_URL'] || ENV['PM_RACK_IMAGES_BASE_URL'] :
+      ENV['PM_RACK_IMAGES_BASE_URL']
+    )
+    "#{base_url}#{path_info}#{connector}_asd=#{token}"
   end
 
   def resolution_for(label_or_number)
@@ -623,6 +640,33 @@ class Pandora::SuperImage
     @exif ||= EXIFR::JPEG.new(StringIO.new(data))
   rescue EXIFR::MalformedJPEG => e
     nil
+  end
+
+  # retrieves image vector data from its source's vectors.json. The file content
+  # is cached to speed up future lookups, therefore this shouldn't be used in a
+  # web request context. Use `Pandora::SuperImage.expire_vectors!` to drop
+  # the cache.
+  # @return [Hash] the vector data for this image
+  def vectors
+    @vectors = self.class.cache_vectors(source_id)
+    self.class.vectors[source_id][pid] ||= {}
+  end
+
+  def self.cache_vectors(source_id)
+    self.vectors[source_id] ||= load_vectors(source_id)
+  end
+
+  def self.load_vectors(source_id)
+    file = "#{ENV['PM_VECTORS_DIR']}/#{source_id}.json"
+    File.exist?(file) ? JSON.parse(File.read(file)) : {}
+  end
+
+  def self.vectors
+    @vectors ||= {}
+  end
+
+  def self.expire_vectors!
+    @vectors = nil
   end
 
   def iframe_url
@@ -669,7 +713,7 @@ class Pandora::SuperImage
     end
   rescue Pandora::Exception => e
     raise e unless Rails.env.production?
-    
+
     Rails.logger.info("Could not index doc for #{self.inspect}")
     nil
   ensure

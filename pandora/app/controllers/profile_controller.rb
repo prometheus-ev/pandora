@@ -15,7 +15,7 @@ class ProfileController < ApplicationController
     @user = current_user
 
     # view compatibility
-    @public_collections  = @shared_collections   = false
+    @public_collections = @shared_collections = false
     if @user.active?
       @public_collections = @user.collections.public
       @shared_collections = @user.collections.shared(current_user)
@@ -71,13 +71,27 @@ class ProfileController < ApplicationController
 
   def download_legacy_presentation
     if current_user.id == params[:id].to_i
-      respond_to { |format|
-        format.pdf { send_file File.join(ENV['PM_PRESENTATIONS_DIR'], params[:id], params[:presentation_id],
-          "#{params[:presentation_filename]}.pdf"), type: "application/pdf",
-          filename: "#{params[:presentation_filename]}.pdf"}
-        format.zip { send_file File.join(ENV['PM_PRESENTATIONS_DIR'], params[:id], params[:presentation_id],
-          "#{params[:presentation_filename]}.zip"), type: "application/zip",
-          filename: "#{params[:presentation_filename]}.zip"}
+      respond_to {|format|
+        format.pdf do
+          filename = "#{params[:presentation_filename]}.pdf"
+          file = File.join(
+            ENV['PM_PRESENTATIONS_DIR'],
+            params[:id],
+            params[:presentation_id],
+            filename
+          )
+          send_file file, type: "application/pdf", filename: filename
+        end
+        format.zip do
+          filename = "#{params[:presentation_filename]}.zip"
+          file = File.join(
+            ENV['PM_PRESENTATIONS_DIR'],
+            params[:id],
+            params[:presentation_id],
+            filename
+          )
+          send_file file, type: "application/zip", filename: filename
+        end
       }
     else
       flash[:warning] = 'You are not allowed to access this resource.'.t
@@ -109,5 +123,4 @@ class ProfileController < ApplicationController
 
 
     initialize_me!
-
 end

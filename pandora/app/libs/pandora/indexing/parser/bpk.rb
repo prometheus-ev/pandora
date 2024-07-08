@@ -5,14 +5,14 @@ class Pandora::Indexing::Parser::Bpk < Pandora::Indexing::Parser::XmlReader
 
     super(
       source,
-      record_node_name: 'PHOTO',
-      record_node_query: 'not(contains(OBJECTTYPE, "Fotografie") and contains(INSTITUTION,             "Kunstbibliothek"))',
+      record_node_name: "PHOTO",
+      record_node_query: "not(contains(OBJECTTYPE, 'Fotografie') and contains(INSTITUTION, 'Kunstbibliothek'))",
       records_to_exclude: records_to_exclude)
   end
 
   def preprocess
-    puts "#{@source[:name]}: loading MiroParser..."
-    @miro_parser =  Pandora::Indexing::Parser::MiroParser.new(@source[:name])
+    Pandora.puts "#{@source[:name]}: loading MiroParser..."
+    @miro_parser = Pandora::Indexing::Parser::MiroParser.new(@source[:name])
 
     super
   end

@@ -1,10 +1,7 @@
 class Pandora::Indexing::Parser::ActiveRecordReader < Pandora::Indexing::Parser
-  def initialize(source, filename: nil)
-    super(source)
-  end
-
   def preprocess
     @record_count = scope.count
+    @object_count = 0
   end
 
   def to_enum
@@ -16,18 +13,31 @@ class Pandora::Indexing::Parser::ActiveRecordReader < Pandora::Indexing::Parser
   end
 
   def scope
-    @scope ||= Source.find_by(name: source.name).uploads
+    @scope ||= Source.find_by(name: @source[:name]).uploads
+  end
+
+  def total
+    to_enum.count
+  end
+
+  def batch
+    'ActiveRecord'
   end
 
   private
 
-  def new_record(record)
-    @record_class_name.constantize.new(
-      name: @source[:name],
-      record: record,
-      artist_parser: @artist_parser,
-      date_parser: @date_parser,
-      vgbk_parser: @vgbk_parser,
-      warburg_parser: @warburg_parser)
-  end
+    def new_record(record)
+      "Pandora::Indexing::Parser::InstitutionalDatabaseRecord".constantize.new(
+        name: @source[:name],
+        record: record,
+        object: nil,
+        parser: {artist_parser: @artist_parser,
+                 date_parser: @date_parser,
+                 vgbk_parser: @vgbk_parser,
+                 warburg_parser: @warburg_parser,
+                 artigo_parser: @artigo_parser,
+                 miro_parser: @miro_parser},
+        mapping: nil
+      )
+    end
 end

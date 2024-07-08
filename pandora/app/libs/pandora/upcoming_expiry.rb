@@ -17,9 +17,7 @@ class Pandora::UpcomingExpiry
     # notify other accounts 1 week in advance
     scope.non_guests.upcoming_expiry(1.month).each{|a| notify(a)}
 
-    if ENV['PM_SILENT'] != 'true'
-      puts "#{@notification_count} expiration notifications sent"
-    end
+    Pandora.puts "#{@notification_count} expiration notifications sent"
   end
 
   def notify(account)
@@ -28,13 +26,11 @@ class Pandora::UpcomingExpiry
     account.deliver(:expiration_notification)
     account.notified!
 
-    if ENV['PM_SILENT'] != 'true'
-      puts [
-        "sent notification to '#{account.login} <#{account.email}>'", ', ',
-        account.mode, ', ',
-        "expires at #{account.expires_at}"
-      ].join
-    end
+    Pandora.puts [
+      "sent notification to '#{account.login} <#{account.email}>'", ', ',
+      account.mode, ', ',
+      "expires at #{account.expires_at}"
+    ].join
   end
 
 
@@ -48,5 +44,4 @@ class Pandora::UpcomingExpiry
         protocol: url.scheme,
       }
     end
-
 end

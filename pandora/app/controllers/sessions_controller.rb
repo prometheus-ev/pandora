@@ -68,7 +68,6 @@ class SessionsController < ApplicationController
   end
 
   def new
-
   end
 
   def create
@@ -116,44 +115,44 @@ class SessionsController < ApplicationController
 
   protected
 
-  def notify_upcoming_expiry(account)
-    if account.expires? && account.status == 'activated'
-      flash[:info] = [
-        "Your #{'guest ' if account.mode == 'guest'}account is about to expire on %s." / helpers.localize_expiry_date(account),
-        translate_with_link(
-          'You can %{obtain a new license}% or contact your local administrator!',
-          controller: 'signup', action: 'license'
-        )
-      ].join(' ').html_safe
+    def notify_upcoming_expiry(account)
+      if account.expires? && account.status == 'activated'
+        flash[:info] = [
+          "Your #{'guest ' if account.mode == 'guest'}account is about to expire on %s." / helpers.localize_expiry_date(account),
+          translate_with_link(
+            'You can %{obtain a new license}% or contact your local administrator!',
+            controller: 'signup', action: 'license'
+          )
+        ].join(' ').html_safe
 
-      # flash_with_embedded_link(:info, [
-      #   "Your #{'guest ' if account.mode.guest?}account is about to expire on %s." / helpers.localize_expiry_date(account),
-      #   'You can %{obtain a new license}% or contact your local administrator!'.t
-      # ], :controller => 'signup', :action => 'license')
-    end
-  end
-
-  def cookies_required
-    return unless session_enabled?
-
-    tc = '_test_cookies'
-    tv = params.delete(tc)
-
-    session_key = params.delete('test_key')
-    return if cookies['test_key'] ||= session_key
-
-    if tv.blank?
-      # set some cookie...
-      cookies['test_key'] = tc
-
-      # ...and try again
-      redirect_to safe_params(tc => 1)
-    else
-      # no, really no cookies enabled!
-      @current_page, @domain = safe_params, request.host
-      render template: 'pandora/no_cookies'
+        # flash_with_embedded_link(:info, [
+        #   "Your #{'guest ' if account.mode.guest?}account is about to expire on %s." / helpers.localize_expiry_date(account),
+        #   'You can %{obtain a new license}% or contact your local administrator!'.t
+        # ], :controller => 'signup', :action => 'license')
+      end
     end
 
-    false
-  end
+    def cookies_required
+      return unless session_enabled?
+
+      tc = '_test_cookies'
+      tv = params.delete(tc)
+
+      session_key = params.delete('test_key')
+      return if cookies['test_key'] ||= session_key
+
+      if tv.blank?
+        # set some cookie...
+        cookies['test_key'] = tc
+
+        # ...and try again
+        redirect_to safe_params(tc => 1)
+      else
+        # no, really no cookies enabled!
+        @current_page, @domain = safe_params, request.host
+        render template: 'pandora/no_cookies'
+      end
+
+      false
+    end
 end

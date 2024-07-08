@@ -3,10 +3,6 @@ class Pandora::Indexing::Parser::ArchgiessenRecord < Pandora::Indexing::Parser::
     record.xpath('.//bilddatei/text()')
   end
 
-  def s_credits
-    [record.xpath('.//bildvorlage/text()'), record.xpath('.//literatur/text()')]
-  end
-
   def path
     "#{record.xpath('.//bilddatei/text()')}"
   end
@@ -28,7 +24,9 @@ class Pandora::Indexing::Parser::ArchgiessenRecord < Pandora::Indexing::Parser::
   end
 
   def date_range
-    @date_parser.date_range(date.to_s)
+    return @date_range if @date_range
+
+    @date_range = @date_parser.date_range(date.to_s)
   end
 
   def location

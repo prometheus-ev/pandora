@@ -1,6 +1,5 @@
 class LicensesController < ApplicationController
-
-  def self.initialize_me!  # :nodoc:
+  def self.initialize_me! # :nodoc:
     control_access [:superadmin, :admin] => :ALL
   end
 
@@ -17,5 +16,4 @@ class LicensesController < ApplicationController
   end
 
   initialize_me!
-
 end

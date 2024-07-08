@@ -4,24 +4,16 @@ class Pandora::Indexing::Parser::CmaRecord < Pandora::Indexing::Parser::Record
   end
 
   def path
-    if record['images'] && record['images']['print']
-      url = record['images']['print']['url']
-      url.gsub(/^https?:\/\/[^\/]+\//, '')
+    if url = record.dig("images", "print", "url")
+      url.gsub("https://openaccess-cdn.clevelandart.org/", "")
     end
-  end
-
-  def source_url
-    n = record['accession_number']
-    return if n.blank?
-
-    "https://www.clevelandart.org/art/#{n}"
   end
 
   def artist
     if record['creators'].size > 0
-      record['creators'].map { |creator|
+      record['creators'].map do |creator|
         creator['description']
-      }
+      end
     end
   end
 
@@ -62,6 +54,13 @@ class Pandora::Indexing::Parser::CmaRecord < Pandora::Indexing::Parser::Record
     'CC0 1.0 Universal (CC0 1.0),https://creativecommons.org/publicdomain/zero/1.0/'
   end
 
+  # def source_url
+  #   n = record['accession_number']
+  #   return if n.blank?
+
+  #   "https://www.clevelandart.org/art/#{n}"
+  # end
+
   def source_url
     record['url']
   end
@@ -76,9 +75,9 @@ class Pandora::Indexing::Parser::CmaRecord < Pandora::Indexing::Parser::Record
 
   def material
     if record['support_materials']
-      record['support_materials'].map { |support_material|
+      record['support_materials'].map do |support_material|
         support_material['description']
-      }
+      end
     end
   end
 
@@ -100,7 +99,7 @@ class Pandora::Indexing::Parser::CmaRecord < Pandora::Indexing::Parser::Record
 
   def inscription
     if record['inscriptions']
-      record['inscriptions'].map { |inscription|
+      record['inscriptions'].map {|inscription|
         inscription['inscription']
       }
     end
@@ -112,11 +111,11 @@ class Pandora::Indexing::Parser::CmaRecord < Pandora::Indexing::Parser::Record
 
   def provenance
     if record['provenance']
-      record['provenance'].map { |inscription|
+      record['provenance'].map do |inscription|
         provenance = "#{inscription['description']}"
         provenance << " (#{inscription['date']})" if inscription['date']
         provenance
-      }
+      end
     end
   end
 

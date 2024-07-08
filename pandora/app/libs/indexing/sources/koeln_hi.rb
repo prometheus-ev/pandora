@@ -1,5 +1,4 @@
 class Indexing::Sources::KoelnHi < Indexing::SourceSuper
-
   # StatementID "EqSriBebHxRZwvRv" == prometheus-freigabe
   def records
     document.xpath("//item[./metadataSet/metadata/statement[text()='#{url('EqSriBebHxRZwvRv')}']/../text[text()='ja']]")
@@ -174,5 +173,4 @@ class Indexing::Sources::KoelnHi < Indexing::SourceSuper
   def similar_pictures_collection
     metadata_text('IYETt3e0gZDhC6YT')
   end
-
 end

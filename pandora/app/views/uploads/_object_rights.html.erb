@@ -40,7 +40,7 @@
           </tr>
           <tr>
             <td>
-              <%= f.text_field :credits, options_for_field(:credits, :value => @upload.credits) %>
+              <%= f.text_area :credits, options_for_field(:credits, :rows => 3, :value => @upload.credits) %>
             </td>
           </tr>
           <tr>

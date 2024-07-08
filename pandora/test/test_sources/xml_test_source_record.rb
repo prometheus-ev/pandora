@@ -8,9 +8,9 @@ class XmlTestSourceRecord < Pandora::Indexing::Parser::Record
   end
 
   def artist_normalized
-    an = record.xpath('.//KünstlerIn/text()').map { |a|
+    an = record.xpath('.//KünstlerIn/text()').map do |a|
       a.to_s.split(', ').reverse.join(' ')
-    }
+    end
 
     @artist_parser.normalize(an)
   end

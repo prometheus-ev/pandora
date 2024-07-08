@@ -8,7 +8,7 @@ class BoxesController < ApplicationController
   skip_before_action :verify_account_signup_complete, only: [:index]
   skip_before_action :verify_account_terms_accepted, only: [:index]
 
-  def self.initialize_me!  # :nodoc:
+  def self.initialize_me! # :nodoc:
     control_access(
       [:superadmin, :user] => :ALL,
       DEFAULT: :index
@@ -21,15 +21,15 @@ class BoxesController < ApplicationController
       to_a.select{|b| b.ref.present?}
 
     respond_to do |format|
-      format.html { render layout: false }
-      format.xml  { render xml: @boxes.to_xml }
-      format.json { render json: "[#{@boxes.map { |box| box.to_json }.join(',')}]" }
+      format.html{render layout: false}
+      format.xml{render xml: @boxes.to_xml}
+      format.json{render json: "[#{@boxes.map{|box| box.to_json}.join(',')}]"}
     end
   end
 
   api_method :list, get: {
     doc: "List a user's favorites.",
-    returns: { xml: { root: 'box', hints: %w[id] }, json: {} }
+    returns: {xml: {root: 'box', hints: %w[id]}, json: {}}
   }
 
   def show
@@ -40,8 +40,8 @@ class BoxesController < ApplicationController
         format.html do
           render partial: "show", layout: false, locals: {box: @box}
         end
-        format.xml  { render xml: @box.to_xml }
-        format.json { render json: @box.to_json }
+        format.xml{render xml: @box.to_xml}
+        format.json{render json: @box.to_json}
       end
     else
       render_403 object: @box.ref
@@ -54,7 +54,7 @@ class BoxesController < ApplicationController
     # box = Box.from_params(params, current_user.boxes)
     if @box.save
       respond_to do |format|
-        format.html { redirect_to boxes_path }
+        format.html{redirect_to boxes_path}
         # format.html do
         #   if request.xhr?
         #     render partial: 'shared/layout/boxes'
@@ -62,8 +62,8 @@ class BoxesController < ApplicationController
         #     redirect_back fallback_location: locale_root_url
         #   end
         # end
-        format.xml  { render xml: @box.to_xml(only: [:id]) }
-        format.json { render json: @box.to_json(only: :id) }
+        format.xml{render xml: @box.to_xml(only: [:id])}
+        format.json{render json: @box.to_json(only: :id)}
       end
     else
       message = 'You cannot create a box like that'.t
@@ -73,16 +73,16 @@ class BoxesController < ApplicationController
           flash[:error] = message
           redirect_to boxes_path, status: :see_other
         end
-        format.xml { render xml: {message: message, errors: @box.errors} }
-        format.json { render json: {message: message, errors: @box.errors} }
+        format.xml{render xml: {message: message, errors: @box.errors}}
+        format.json{render json: {message: message, errors: @box.errors}}
       end
     end
   end
 
   api_method :create, :post => {
     :doc => "Create a favorite.",
-    :expects => { :box => { :type => 'string', :required => true, :doc => 'Nested parameter that must contain box[id] (the ID of the object), box[controller] (the controller of the object, namely image, collection, or presentation), and box[action]=\'show\'.' } },
-    :returns => { :xml => { :root => 'box', :hints => %w[id] }, :json => {} }
+    :expects => {:box => {:type => 'string', :required => true, :doc => 'Nested parameter that must contain box[id] (the ID of the object), box[controller] (the controller of the object, namely image, collection, or presentation), and box[action]=\'show\'.'}},
+    :returns => {:xml => {:root => 'box', :hints => %w[id]}, :json => {}}
   }
 
   def toggle
@@ -101,8 +101,8 @@ class BoxesController < ApplicationController
 
     # return unless current_user.allowed?(box, :delete)
 
-    # box = ensure_find(Box, params[:id], :delete) { 
-    #   update_boxes 
+    # box = ensure_find(Box, params[:id], :delete) {
+    #   update_boxes
     # } or return
 
     # if box.destroy && !update_boxes
@@ -118,8 +118,8 @@ class BoxesController < ApplicationController
 
   api_method :delete, :delete => {
     :doc => "Delete a favorite.",
-    :expects => { :id => { :type => 'string', :required => true, :doc => 'The id of the favorite.' } },
-    :returns => { :xml => { :root => 'box', :hints => %w[id] }, :json => {} }
+    :expects => {:id => {:type => 'string', :required => true, :doc => 'The id of the favorite.'}},
+    :returns => {:xml => {:root => 'box', :hints => %w[id]}, :json => {}}
   }
 
   def reorder
@@ -161,14 +161,5 @@ class BoxesController < ApplicationController
       result
     end
 
-    # def update_boxes
-    #   return unless request.xhr?
-
-    #   render partial: 'shared/layout/boxes'
-
-    #   true
-    # end
-
-  initialize_me!
-
+    initialize_me!
 end

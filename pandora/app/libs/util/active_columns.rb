@@ -1,20 +1,17 @@
 module Util
-
   module ActiveColumns
-
     PseudoColumn = Struct.new(:name, :human_name)
 
     module ClassMethods
-
       def columns_by_name(*names)
         @columns_by_name ||= begin
-          columns_hash = HashWithIndifferentAccess.new { |h, k|
+          columns_hash = HashWithIndifferentAccess.new do |h, k|
             PseudoColumn.new(k, k.to_s.tr('.', '_').humanize)
-          }
+          end
 
-          columns.each { |column|
+          columns.each do |column|
             columns_hash[column.name] = column
-          }
+          end
 
           columns_hash
         end
@@ -58,17 +55,15 @@ module Util
       def display_columns
         @display_columns ||= content_columns - columns_for(:display_exclude)
       end
-
     end
 
-    ###########################################################################
-    private
-    ###########################################################################
 
-    def self.included(base)
-      base.extend(ClassMethods)
+    class << self
+      private
+
+        def included(base)
+          base.extend(ClassMethods)
+        end
     end
-
   end
-
 end

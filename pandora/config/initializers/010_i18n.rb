@@ -31,13 +31,13 @@ module I18n
       end
     end
   end
-  
+
   module Backend
     class Pandora
       def self.cache
         @cache ||= JSON.parse(File.read "#{Rails.root}/config/locales/legacy.de.json")
       end
-      
+
       def self.drop_cache!
         @cache = nil
       end
@@ -93,7 +93,7 @@ module I18n
           else
             raise "unknown locale: #{locale}"
           end
-          
+
           result
         end
       end

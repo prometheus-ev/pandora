@@ -1,18 +1,17 @@
 class UploadsController < ApplicationController
-
   include Util::Config
   include ActionView::Helpers::NumberHelper
 
   VARIOUS_VALUES = '<various values>'
 
-  before_action :current_user_writables, :only => [:index, :all, :unapproved, :approved, :associated, :list_index_remove_requests, :create, :edit]
+  before_action :current_user_writables, :only => [:index, :all, :unapproved, :approved, :associated, :create, :edit]
   before_action :check_quota, only: ['new', 'create']
 
   #############################################################################
   # Class methods
   #############################################################################
 
-  def self.initialize_me!  # :nodoc:
+  def self.initialize_me! # :nodoc:
     control_access [:superadmin, :admin] => action_symbols - [:feed],
                    [:user] => [:index, :associated, :new, :create, :update, :show, :edit, :edit_selected, :update_selected, :destroy, :disconnect, :record, :record_image_url]
 
@@ -24,34 +23,34 @@ class UploadsController < ApplicationController
       :doc => 'Get the list of your database records.',
       :expects => {
         :page => {
-          :type    => 'positiveInteger',
+          :type => 'positiveInteger',
           :default => 1,
-          :doc     => 'Number of page to return.'
+          :doc => 'Number of page to return.'
         },
         :per_page => {
-          :type    => 'positiveInteger',
+          :type => 'positiveInteger',
           :default => UploadSettings.default_for(:per_page),
-          :doc     => 'Number of results to display per page.'
+          :doc => 'Number of results to display per page.'
         },
         :order => {
-          :select  => UploadSettings.values_for(:order),
+          :select => UploadSettings.values_for(:order),
           :default => UploadSettings.default_for(:order),
-          :doc     => 'Attribute to sort database records by.'
+          :doc => 'Attribute to sort database records by.'
         },
         :direction => {
-          :select  => UploadSettings.values_for(:direction),
+          :select => UploadSettings.values_for(:direction),
           :default => 'ASC',
-          :doc     => 'Direction to sort database records in.'
+          :doc => 'Direction to sort database records in.'
         },
         :field => {
           :select => Upload.search_columns,
-          :doc    => 'Search field.'
+          :doc => 'Search field.'
         },
         :value => {
           :doc => 'Query term.'
         }
       },
-      :returns => { :xml => { :root => 'uploads', :hints => { 'upload' => true } }, :json => {} }
+      :returns => {:xml => {:root => 'uploads', :hints => {'upload' => true}}, :json => {}}
     }
   end
 
@@ -76,7 +75,7 @@ class UploadsController < ApplicationController
       end
 
       # api compatibility
-      format.xml  {render :xml => @uploads.items}
+      format.xml{render :xml => @uploads.items}
       format.json do
         render :json => {
           number_of_pages: @uploads.number_of_pages,
@@ -201,12 +200,12 @@ class UploadsController < ApplicationController
         )
       ].join(' ').html_safe
 
-      respond_to { |format|
-        format.html { redirect_to :action => 'edit', :id => @upload, :upload_latest => upload_latest }
+      respond_to {|format|
+        format.html{redirect_to :action => 'edit', :id => @upload, :upload_latest => upload_latest}
 
         # api compatibility
-        format.xml  { render :xml => @upload.to_xml(:only => @upload.attributes.keys) }
-        format.json { render :json => @upload }
+        format.xml{render :xml => @upload.to_xml(:only => @upload.attributes.keys)}
+        format.json{render :json => @upload}
       }
     else
       set_mandatory_fields
@@ -220,8 +219,8 @@ class UploadsController < ApplicationController
 
   api_method :create, :post => {
     :doc => "Create a record for your database.",
-    :expects => { :upload => { :type => 'string', :required => true, :doc => 'Nested parameter that must contain upload[file], upload[title], upload[rights_reproduction] or upload[credits] and upload[rights_work].' } },
-    :returns => { :xml => { :root => 'upload' }, :json => {} }
+    :expects => {:upload => {:type => 'string', :required => true, :doc => 'Nested parameter that must contain upload[file], upload[title], upload[rights_reproduction] or upload[credits] and upload[rights_work].'}},
+    :returns => {:xml => {:root => 'upload'}, :json => {}}
   }
 
   def edit
@@ -260,15 +259,15 @@ class UploadsController < ApplicationController
     if @upload.update(upload_params)
       @upload.index_doc
 
-      respond_to { |format|
+      respond_to {|format|
         format.html do
           flash[:notice] = "Object successfully updated!".t
           redirect_to action: 'edit'
         end
 
         # api compatibility
-        format.xml  { render :xml => @upload.to_xml(:only => @upload.attributes.keys) }
-        format.json { render :json => @upload }
+        format.xml{render :xml => @upload.to_xml(:only => @upload.attributes.keys)}
+        format.json{render :json => @upload}
       }
     else
       respond_to do |format|
@@ -279,22 +278,22 @@ class UploadsController < ApplicationController
         end
 
         # api compatibility
-        format.xml  { render :xml => @upload.errors, status: 422 }
-        format.json { render :json => @upload.errors, status: 422 }
+        format.xml{render :xml => @upload.errors, status: 422}
+        format.json{render :json => @upload.errors, status: 422}
       end
     end
   end
 
   api_method :show, :get => {
     :doc => "Read a record of your database.",
-    :expects => { :id => { :type => 'string', :required => true, :doc => 'The id of the record of your database.' } },
-    :returns => { :xml => { :root => 'upload' }, :json => {} }
+    :expects => {:id => {:type => 'string', :required => true, :doc => 'The id of the record of your database.'}},
+    :returns => {:xml => {:root => 'upload'}, :json => {}}
   }
 
   api_method :edit, :put => {
     :doc => "Update a record of your database.",
-    :expects => { :id => { :type => 'string', :required => true, :doc => 'The id of the record of your database.' }, :upload  => { :type => 'string', :required => true, :doc => 'Nested parameter where upload[title], upload[rights_reproduction] or upload[credits] and upload[rights_work] can not be empty.' } },
-    :returns => { :xml => { :root => 'upload' }, :json => {} }
+    :expects => {:id => {:type => 'string', :required => true, :doc => 'The id of the record of your database.'}, :upload => {:type => 'string', :required => true, :doc => 'Nested parameter where upload[title], upload[rights_reproduction] or upload[credits] and upload[rights_work] can not be empty.'}},
+    :returns => {:xml => {:root => 'upload'}, :json => {}}
   }
 
   def edit_selected
@@ -326,7 +325,7 @@ class UploadsController < ApplicationController
     @uploads = records(:write).find(params[:uploads])
 
     attribs = upload_params
-    attribs.delete_if{ |_, value| value == VARIOUS_VALUES }
+    attribs.delete_if{|_, value| value == VARIOUS_VALUES}
 
     success = @uploads.all? do |u|
       if u.update(attribs)
@@ -370,7 +369,7 @@ class UploadsController < ApplicationController
       File.delete(@upload.path)
     end
 
-    respond_to { |format|
+    respond_to {|format|
       format.html do
         flash[:notice] = "Upload successfully deleted!".t
 
@@ -378,15 +377,15 @@ class UploadsController < ApplicationController
       end
 
       # api compatibility
-      format.xml  { render :xml => @upload.to_xml }
-      format.json { render :json => @upload }
+      format.xml{render :xml => @upload.to_xml}
+      format.json{render :json => @upload}
     }
   end
 
   api_method :destroy, :delete => {
     :doc => "Delete a record of your database.",
-    :expects => { :id => { :type => 'string', :required => true, :doc => 'The id of the record of your database.' } },
-    :returns => { :xml => { :root => 'upload' }, :json => {} }
+    :expects => {:id => {:type => 'string', :required => true, :doc => 'The id of the record of your database.'}},
+    :returns => {:xml => {:root => 'upload'}, :json => {}}
   }
 
   def record_image_url
@@ -422,7 +421,8 @@ class UploadsController < ApplicationController
         flash[:notice] = helpers.sanitize(
           "You've reached your quota limit of ".t +
           number_to_human_size(current_user.database_quota_bytes, precision: 2) + ". " +
-          link + ".")
+          link + "."
+        )
         redirect_to :action => 'index'
       end
     end
@@ -445,7 +445,7 @@ class UploadsController < ApplicationController
       if action_name == 'index'
         quota = number_to_human_size(current_user.database_quota_bytes, precision: 2)
         space_used = number_to_human_size(space_used_in_bytes, precision: 2)
-        space_used_percentage = number_to_percentage(space_used_in_bytes/current_user.database_quota_bytes*100, :precision => 2)
+        space_used_percentage = number_to_percentage(space_used_in_bytes / current_user.database_quota_bytes * 100, :precision => 2)
         @page_title = 'Using %s of %s (about %s)'.t % [space_used, quota, space_used_percentage]
       elsif action_name == 'all'
         space_used_total = number_to_human_size(space_used_in_bytes_total, precision: 2)
@@ -497,8 +497,5 @@ class UploadsController < ApplicationController
       current_user.try(:upload_settings) || {}
     end
 
-    ############################################################################
     initialize_me!
-    ############################################################################
-
 end

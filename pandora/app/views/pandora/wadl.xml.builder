@@ -1,7 +1,8 @@
-xml.application :xmlns => 'http://wadl.dev.java.net/2009/02',
-  'xmlns:xsd'  => 'http://www.w3.org/2001/XMLSchema',
-  'xmlns:html' => 'http://www.w3.org/1999/xhtml' do
-
+xml.application(
+  :xmlns => 'http://wadl.dev.java.net/2009/02',
+  'xmlns:xsd' => 'http://www.w3.org/2001/XMLSchema',
+  'xmlns:html' => 'http://www.w3.org/1999/xhtml'
+) do
   xml.resources :base => root_url(locale: nil) do
     xml.resource :path => 'api' do
       xml.resource :path => 'v1' do
@@ -15,17 +16,22 @@ xml.application :xmlns => 'http://wadl.dev.java.net/2009/02',
           end
         end
 
-        xml.param :name => 'locale', :style => 'query',
-          :type => 'xsd:string', :default => DEFAULT_LANGUAGE do
-
-          ORDERED_LOCALES.each { |locale| xml.option :value => locale }
+        o = {
+          name: 'locale',
+          style: 'query',
+          type: 'xsd:string',
+          default: DEFAULT_LANGUAGE
+        }
+        xml.param o do
+          ORDERED_LOCALES.each{|locale| xml.option :value => locale}
         end
 
         @api_formats.sort_by_key(&:to_s).each do |format, controllers|
           xml.resource :path => format do
             controllers.sort_by_key(&:to_s).each do |controller, actions|
-              skip, acts = actions.partition { |_, methods| methods[:skip_controller] }.
-                                   map { |partition| partition.sort_by_key(&:to_s) }
+              skip, acts = actions.
+                partition{|_, methods| methods[:skip_controller]}.
+                map{|partition| partition.sort_by_key(&:to_s)}
 
               act = lambda do |action, methods|
                 xml.resource :path => action do
@@ -45,16 +51,16 @@ xml.application :xmlns => 'http://wadl.dev.java.net/2009/02',
                           _popts[:type] = "xsd:#{popts[:type]}"
 
                           blocks = []
-                          blocks << lambda { xml.doc 'xml:lang' => 'en', :title => popts[:doc] } if popts[:doc]
-                          blocks << lambda { popts[:select].each { |value| xml.option :value => value } } if popts[:select]
-                          block = lambda { |*args| blocks.each(&:call) } unless blocks.empty?
+                          blocks << lambda{xml.doc 'xml:lang' => 'en', :title => popts[:doc]} if popts[:doc]
+                          blocks << lambda{popts[:select].each{|value| xml.option :value => value}} if popts[:select]
+                          block = lambda{|*args| blocks.each(&:call)} unless blocks.empty?
 
                           xml.param _popts, &block
                         end
                       end unless opts[:params].empty?
 
                       xml.response do
-                        ropts = { :mediaType => opts[:type] }
+                        ropts = {:mediaType => opts[:type]}
 
                         if root = opts[:root]
                           ropts[:element] = root
@@ -63,7 +69,7 @@ xml.application :xmlns => 'http://wadl.dev.java.net/2009/02',
 
                         xml.representation ropts do
                           rparams.each do |param, repeating|
-                            popts = { :name => param, :path => "/#{root}/#{param}" }
+                            popts = {:name => param, :path => "/#{root}/#{param}"}
                             popts[:repeating] = repeating unless repeating.nil?
 
                             xml.param popts
@@ -79,7 +85,7 @@ xml.application :xmlns => 'http://wadl.dev.java.net/2009/02',
               unless acts.empty?
                 xml.resource(:path => controller) do
                   acts.to_h.each{|k, v| act.call(k, v)}
-                end 
+                end
               end
             end
           end

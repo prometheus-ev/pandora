@@ -1,13 +1,12 @@
 require 'csv'
 
 class CsvStats
-
   include ActiveModel::Model
 
   def self.for(user, attribs)
     result = new(user: user)
     result.assign_attributes(attribs)
-    result    
+    result
   end
 
   attr_writer :from_year
@@ -18,7 +17,6 @@ class CsvStats
   attr_accessor :institution
   attr_reader :include_ips
   attr_reader :compressed
-  attr_accessor :features
   attr_accessor :user
 
   def from_year
@@ -95,11 +93,12 @@ class CsvStats
       Institution.campuses
     end
 
-    result.map{|i| i.name.downcase}
+    result.map{|i| i.name.downcase}.sort
   end
 
   def to_csv
-    data = self.class.write_csv(nil,
+    data = self.class.write_csv(
+      nil,
       [from_year, from_month],
       [to_year, to_month],
       issuer: issuer,
@@ -111,8 +110,7 @@ class CsvStats
     compressed ? Pandora.gzip(data) : data
   end
 
-  # generate the stats CSV from with the SumStats model according to
-  # https://redmine.prometheus-srv.uni-koeln.de/issues/1188
+  # generate the stats CSV from with the SumStats model according to #1188
   # @param from [Array<String, Integer>] the start month, e.g. [2019, 4] for
   #                                      January 2019
   # @param to [Array<String, Integer>] the end month, for example see from
@@ -122,9 +120,10 @@ class CsvStats
   # @option options [String] :issuer (nil) either "prometheus" or "hbz"
   def self.get_csv(from = [], to = [], receiver = [], options = {})
     headers = [
-      'Jahr_Monat',
+      'Year_Month',
       'Name',
       'Title',
+      'License',
       'Sessions',
       'Searches',
       'Downloads'
@@ -164,6 +163,7 @@ class CsvStats
           date.strftime('%Y_%m'),
           institution.name,
           institution.title,
+          institution&.license&.license_type&.to_s || "-",
           scope.total_sessions,
           scope.total_searches,
           scope.total_downloads
@@ -189,9 +189,10 @@ class CsvStats
     result = []
 
     result << [
-      'Jahr_Monat',
+      'Year_Month',
       'Name',
       'Title',
+      'License',
       'Sessions',
       'Sessions personalized',
       'Searches',
@@ -219,6 +220,7 @@ class CsvStats
           date.strftime('%Y_%m'),
           institution.name,
           institution.title,
+          institution&.license&.license_type&.to_s || "-",
           iscope.sum(:sessions_campus),
           iscope.sum(:sessions_personalized),
           iscope.sum(:searches_campus),

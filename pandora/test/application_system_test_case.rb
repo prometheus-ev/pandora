@@ -5,24 +5,28 @@ if ENV['PM_RETRY_TESTS']
   Minitest::Retry.use!
 end
 
-require 'webdrivers/chromedriver'
+options = Selenium::WebDriver::Chrome::Options.new
+options.add_argument 'window-size=1280x960'
+
+# set download path
+path = Rails.root.join('tmp', 'test_downloads').to_s
+system "mkdir -p '#{path}'"
+options.add_preference(:download, {
+  prompt_for_download: false,
+  default_directory: path
+})
 
 Capybara.register_driver :headless_chrome do |app|
-  options = Selenium::WebDriver::Chrome::Options.new
-  [
-    'headless',
-    'window-size=1280x960',
-    'remote-debugging-address=0.0.0.0',
-    'remote-debugging-port=9222'
-  ].each{|a| options.add_argument(a)}
+  options.add_argument 'headless'
 
-  # set download path
-  path = Rails.root.join('tmp', 'test_downloads').to_s
-  system "mkdir -p '#{path}'"
-  options.add_preference(:download, {
-    prompt_for_download: false, 
-    default_directory: path
-  })
+  Capybara::Selenium::Driver.new(app, browser: :chrome, options: options)
+end
+
+Capybara.register_driver :chrome do |app|
+  path = '/usr/bin/chromium'
+  if File.exist?(path)
+    options.binary = path
+  end
 
   Capybara::Selenium::Driver.new(app, browser: :chrome, options: options)
 end
@@ -38,9 +42,9 @@ end
 
 class ApplicationSystemTestCase < ActionDispatch::SystemTestCase
   if ENV['HEADLESS']
-    driven_by :headless_chrome, screen_size: [1400, 1400]
+    driven_by :headless_chrome
   else
-    driven_by :selenium, using: :chrome, screen_size: [1400, 1400]
+    driven_by :chrome
   end
 
   setup do

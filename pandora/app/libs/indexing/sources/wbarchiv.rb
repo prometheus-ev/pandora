@@ -17,8 +17,8 @@ class Indexing::Sources::Wbarchiv < Indexing::SourceSuper
   end
 
   def artist_normalized
-    an = record.xpath('.//kuenstler/text()').map { |a|
-      a.to_s.split('; ').map { |i|
+    an = record.xpath('.//kuenstler/text()').map {|a|
+      a.to_s.split('; ').map {|i|
         i.split(', ').reverse.join(' ')
       }
     }

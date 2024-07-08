@@ -1,6 +1,5 @@
 class ChangeBoxesParamsImagesControllerName < ActiveRecord::Migration[5.2]
   def change
-
     reversible do |dir|
       dir.up do
         # change controller name for ImagesController after refactoring
@@ -17,6 +16,5 @@ class ChangeBoxesParamsImagesControllerName < ActiveRecord::Migration[5.2]
         SQL
       end
     end
-
   end
 end

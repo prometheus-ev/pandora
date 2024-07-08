@@ -1,33 +1,64 @@
 <% unless @source.url.blank? -%>
-  <%= link_to 'Database homepage'.t, @source.url %>
-  <%= image_tag('/images/icon/arrow-up-right-from-square-solid.png', style: 'vertical-align: baseline;') %>
+  <% html_before = true %>
+  <%= link_to "Database homepage".t, @source.url %>
+  <%= image_tag("/images/icon/arrow-up-right-from-square-solid.png", style: "vertical-align: baseline;") %>
 <% end -%>
-<% unless @source.url.blank? -%>
-  <%= vbar %>
-<% end -%>
-<strong class="nowrap">
-  <% c = (@source_counts ? @source_counts['records'] : 0) %>
-  <% record_count = pm_labelled_delimited_counter(c, '%s record', '%s records') %>
-  
-  <%= link_to(
-      record_count,
-      { controller: 'searches',
-        action: 'advanced',
-        'search_value[0]': '*',
-        #objects: 1,
-        indices: {"#{@source.name}": true} }) %>
-</strong>
 
-<% if @source.open_access? && !(current_user && current_user.dbuser? && current_user == @source.dbuser) -%>
-  <%= vbar %>
+<%= vbar if html_before %>
+<% html_before = false %>
+
+<% if @source_counts -%>
+  <% html_before = true %>
   <strong class="nowrap">
-    <%= link_to_open_source @source %>
+    <% record_count = pm_labelled_delimited_counter(@source_counts["records"], "%s record", "%s records") %>
+    <%= link_to(record_count,
+                { controller: "searches",
+                  action: "advanced",
+                  "search_value[0]": "*",
+                  #objects: 1,
+                  indices: {"#{@source.name}": true} }) %>
   </strong>
 <% end -%>
-<% if current_user && current_user.allowed?(@source) -%>
-  <%= vbar %>
+
+<%= vbar if html_before %>
+<% html_before = false %>
+
+<% if @source.open_access? && !(current_user && current_user.dbuser? && current_user == @source.dbuser) -%>
+  <% html_before = true %>
+  <strong class="nowrap">
+    <%= link_to_open_source(@source) %>
+  </strong>
+<% end -%>
+
+<%= vbar if html_before %>
+<% html_before = false %>
+
+<% if current_user && current_user.allowed?(@source, :read) -%>
   <span class="nowrap">
-    <% ratings_count = @source.rated_images.count %>
-    <%= link_to "%d" / ratings_count + " " + (ratings_count == 1 ? "rating".t : "ratings".t), :action => 'ratings', :id => @source %>
+    <% rating_count = pm_labelled_delimited_counter(@source.rated_images.count,
+                                                     "%s rating",
+                                                     "%s ratings") %>
+    <%= link_to_unless(rating_count == "0 ratings",
+                       rating_count,
+                       { controller: "searches",
+                         action: "advanced",
+                         "search_field[0]": "rating_count",
+                         "search_value[0]": ">0",
+                         indices: {"#{@source.name}": true} }) %>
+  </span>
+
+  <%= vbar %>
+
+  <span class="nowrap">
+    <% comment_count = pm_labelled_delimited_counter(@source.comments.count,
+                                                     "%s comment",
+                                                     "%s comments") %>
+    <%= link_to_unless(comment_count == "0 comments",
+                       comment_count,
+                       { controller: "searches",
+                         action: "advanced",
+                         "search_field[0]": "user_comments",
+                         "search_value[0]": "?*",
+                         indices: {"#{@source.name}": true} }) %>
   </span>
 <% end -%>

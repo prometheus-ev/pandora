@@ -1,7 +1,5 @@
 module Util
-
   module Attribution
-
     def self.included(base)
       if base.has_column?(:owner_id)
         base.send :include, OwnerMethods
@@ -16,15 +14,12 @@ module Util
     end
 
     module OwnerMethods
-
       def owned_by?(user)
         owner_id && user.id ? owner_id == user.id : owner == user
       end
-
     end
 
     module NoOwnerMethods
-
       def owner
         object.owner if object.respond_to?(:owner)
       end
@@ -32,25 +27,18 @@ module Util
       def owned_by?(user)
         owner == user if owner
       end
-
     end
 
     module AuthorMethods
-
       def by?(user)
         author_id && user.id ? author_id == user.id : author == user
       end
-
     end
 
     module OwnerAuthorMethods
-
       def by_owner?
         by?(owner) if owner
       end
-
     end
-
   end
-
 end

@@ -168,7 +168,6 @@ class PandoraController < ApplicationController
   end
 
   def conference_signup_confirmation
-
   end
 
   # test environment only: trigger arbitrary exceptions handling
@@ -208,5 +207,4 @@ class PandoraController < ApplicationController
     def feedback_params
       params.fetch(:feedback, {}).permit(:name, :code, :send_by_email, :email, :message)
     end
-
 end

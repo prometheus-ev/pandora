@@ -1,0 +1,10 @@
+#!/bin/bash -e
+
+rubocop \
+  --format html \
+  --extra-details \
+  --out ./tmp/rubocop/report.html \
+  --display-time \
+  --cache true \
+  --cache-root ./tmp/rubocop/cache \
+  $@

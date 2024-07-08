@@ -1,5 +1,4 @@
 class AccountMailerPreview < ActionMailer::Preview
-
   def welcome
     configure
     PandoraMailer.welcome(Account.first)
@@ -10,6 +9,7 @@ class AccountMailerPreview < ActionMailer::Preview
     PandoraMailer.activation_request(Account.first)
   end
 
+
   protected
 
     def configure
@@ -18,5 +18,4 @@ class AccountMailerPreview < ActionMailer::Preview
         port: 3000
       }
     end
-
 end

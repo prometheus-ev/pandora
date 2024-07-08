@@ -3,7 +3,7 @@ class AccessToken < OauthToken
 
   before_create :set_authorized_at
 
-  
+
   protected
 
     def set_authorized_at

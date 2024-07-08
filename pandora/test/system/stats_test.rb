@@ -1,17 +1,29 @@
 require "application_system_test_case"
-require 'nuggets/log_parser/rails'
+# require 'nuggets/log_parser/rails'
 
 class StatsTest < ApplicationSystemTestCase
+  setup do
+    # we warp back to when the test data was within the range of 5 years before
+    # "now" (the time when the test is run).
+    travel_to Time.zone.local(2023, 6, 10, 15, 4, 44)
+  end
+
+  teardown do
+    travel_back
+  end
+
   test 'download prometheus csv' do
     stats_data
 
     # we set the nowhere license as if it had been active at the time of the
     # download
     nowhere = Institution.find_by! name: 'nowhere'
-    nowhere.license.update(
+    nowhere.update(license: License.new(
+      license_type: LicenseType.find_by!(title: 'library'),
       valid_from: Date.new(2019, 1, 1),
+      paid_from: 2.months.from_now.beginning_of_quarter,
       expires_at: Date.new(2019, 12, 31)
-    )
+    ))
 
     login_as 'superadmin'
 
@@ -26,10 +38,10 @@ class StatsTest < ApplicationSystemTestCase
     select 'February', from: 'csv_stats_to_month'
     submit 'Generate'
 
-    assert_text 'Jahr_Monat,Name,Title,Sessions,Searches,Downloads'
-    assert_text '2018_12,nowhere,Nowhere University,0,0,0'
-    assert_text '2019_01,nowhere,Nowhere University,0,0,0'
-    assert_text '2019_02,nowhere,Nowhere University,7,4,0'
+    assert_text 'Year_Month,Name,Title,License,Sessions,Searches,Downloads'
+    assert_text '2018_12,nowhere,Nowhere University,-,0,0,0'
+    assert_text '2019_01,nowhere,Nowhere University,-,0,0,0'
+    assert_text '2019_02,nowhere,Nowhere University,-,7,4,0'
   end
 
   test 'download institution csv' do
@@ -48,10 +60,10 @@ class StatsTest < ApplicationSystemTestCase
     select 'February', from: 'csv_stats_to_month'
     submit 'Generate'
 
-    assert_text 'Jahr_Monat,Name,Title,Sessions,Searches,Downloads'
-    assert_text '2018_12,prometheus,prometheus - Das verteilte digitale Bildarchiv für Forschung & Lehre,0,0,0'
-    assert_text '2019_01,prometheus,prometheus - Das verteilte digitale Bildarchiv für Forschung & Lehre,0,0,0'
-    assert_text '2019_02,prometheus,prometheus - Das verteilte digitale Bildarchiv für Forschung & Lehre,75,66,20'
+    assert_text 'Year_Month,Name,Title,License,Sessions,Searches,Downloads'
+    assert_text '2018_12,prometheus,prometheus - Das verteilte digitale Bildarchiv für Forschung & Lehre,-,0,0,0'
+    assert_text '2019_01,prometheus,prometheus - Das verteilte digitale Bildarchiv für Forschung & Lehre,-,0,0,0'
+    assert_text '2019_02,prometheus,prometheus - Das verteilte digitale Bildarchiv für Forschung & Lehre,-,75,66,20'
   end
 
   test 'download issuer csv' do
@@ -96,14 +108,15 @@ class StatsTest < ApplicationSystemTestCase
     # we also include 'nowhere' to check if its only included when licensed
     # properly
     nowhere = Institution.find_by! name: 'nowhere'
-    nowhere.update(
-      issuer: 'hbz'
+    nowhere.update!(
+      issuer: 'hbz',
+      license: License.new(
+        license_type: LicenseType.find_by!(title: 'library'),
+        valid_from: Date.new(2019, 1, 1),
+        paid_from: Date.new(2018, 11, 1),
+        expires_at: Date.new(2019, 12, 31)
+      )
     )
-    nowhere.license.update(
-      valid_from: Date.new(2019, 1, 1),
-      expires_at: Date.new(2019, 12, 31)
-    )
-
     login_as 'superadmin'
 
     click_on 'Administration'
@@ -117,15 +130,15 @@ class StatsTest < ApplicationSystemTestCase
     select 'February', from: 'csv_stats_to_month'
     submit 'Generate'
 
-    assert_text '2018_12,nowhere,Nowhere University,0,0,0'
+    assert_text '2018_12,nowhere,Nowhere University,-,0,0,0'
 
     title = 'prometheus - Das verteilte digitale Bildarchiv für Forschung & Lehre'
-    assert_text "2018_12,prometheus,#{title},0,0,0"
-    assert_text "2019_01,prometheus,#{title},9,7,5"
-    assert_text "2019_02,prometheus,#{title},81,70,22"
+    assert_text "2018_12,prometheus,#{title},-,0,0,0"
+    assert_text "2019_01,prometheus,#{title},-,9,7,5"
+    assert_text "2019_02,prometheus,#{title},-,81,70,22"
 
     # remove the license and try again (since prometheus is always licensed,
-    nowhere.license.destroy
+    nowhere.licenses.destroy_all
 
     back
     submit 'Generate'
@@ -140,7 +153,7 @@ class StatsTest < ApplicationSystemTestCase
     subscriber.update newsletter: true, email_verified_at: Time.now
 
     login_as 'superadmin'
-    
+
     visit '/en/stats/facts'
     select '2021'
     submit 'Generate'

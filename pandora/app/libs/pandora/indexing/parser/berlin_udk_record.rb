@@ -7,10 +7,6 @@ class Pandora::Indexing::Parser::BerlinUdkRecord < Pandora::Indexing::Parser::Re
     "#{record.xpath('.//filename/text()')}"
   end
 
-  def s_location
-    [record.xpath('.//ort/text()'), record.xpath('.//institution/text()')]
-  end
-
   def artist
     record.xpath('.//name/text()')
   end

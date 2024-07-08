@@ -7,8 +7,9 @@ namespace :pandora do
 
     # in production, logrotate moves old log files to the log archive in .gz
     # format
-    dir = (Rails.env.production? ?
-      ENV['PM_LOG_ARCHIVE_DIR'] : 
+    dir = (
+      Rails.env.production? ?
+      ENV['PM_LOG_ARCHIVE_DIR'] :
       "#{ENV['PM_ROOT']}/pandora/log"
     )
 

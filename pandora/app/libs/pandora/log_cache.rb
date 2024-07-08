@@ -5,6 +5,8 @@ class Pandora::LogCache
 
   def add(requests)
     requests.each do |r|
+      next unless r['ts']
+
       ts = r['ts'].strftime('%Y%m%d')
       @requests[ts] ||= []
       @requests[ts] << r

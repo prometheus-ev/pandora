@@ -4,33 +4,33 @@ class Pandora::Indexing::Parser::Parents::DilpsRecord < Pandora::Indexing::Parse
   end
 
   def artist
-    (record.xpath('.//name1/text()') + record.xpath('.//name2/text()')).map { |artist|
+    (record.xpath('.//name1/text()') + record.xpath('.//name2/text()')).map do |artist|
       artist.to_s.gsub(/\A; /, '').gsub(/; \z/, '')
-    }
+    end
   end
 
   def artist_normalized
     return @artist_normalized if @artist_normalized
 
-    an = artist.map { |a|
+    an = artist.map do |a|
       a.to_s.split(', ').reverse.join(' ')
-    }
+    end
 
     @artist_normalized = @artist_parser.normalize(an)
   end
 
   def title
-    record.xpath('.//title/text()').map { |title|
+    record.xpath('.//title/text()').map do |title|
       title = title.to_s
       title.slice!("[]")
       title
-    }
+    end
   end
 
   def location
-    (record.xpath('.//location/text()') + record.xpath('.//institution/text()')).map { |location_term|
+    (record.xpath('.//location/text()') + record.xpath('.//institution/text()')).map {|location_term|
       location_term.to_s.strip
-    }.delete_if { |location_term|
+    }.delete_if {|location_term|
       location_term.blank?
     }.join(", ")
   end
@@ -52,7 +52,9 @@ class Pandora::Indexing::Parser::Parents::DilpsRecord < Pandora::Indexing::Parse
   end
 
   def date_range(date)
-    @date_range ||= @date_parser.date_range(date)
+    return @date_range if @date_range
+
+    @date_range = @date_parser.date_range(date)
   end
 
   def credits
@@ -98,11 +100,11 @@ class Pandora::Indexing::Parser::Parents::DilpsRecord < Pandora::Indexing::Parse
 
   protected
 
-  def path_for(name, include_base = false)
-    ng = name ? "ng_#{name}" : 'ng'
-    path = "#{record.at_xpath(".//#{ng}_img/collectionid/text()")}-#{record.at_xpath('.//imageid/text()').to_s.strip}.jpg"
+    def path_for(name, include_base = false)
+      ng = name ? "ng_#{name}" : 'ng'
+      path = "#{record.at_xpath(".//#{ng}_img/collectionid/text()")}-#{record.at_xpath('.//imageid/text()').to_s.strip}.jpg"
 
-    base = File.basename(record.at_xpath("#{ng}_img/#{ng}_img_base/base/text()").to_s.tr('\\', '/')) if include_base
-    base && base != 'images' ? File.join(base, path) : path
-  end
+      base = File.basename(record.at_xpath("#{ng}_img/#{ng}_img_base/base/text()").to_s.tr('\\', '/')) if include_base
+      base && base != 'images' ? File.join(base, path) : path
+    end
 end

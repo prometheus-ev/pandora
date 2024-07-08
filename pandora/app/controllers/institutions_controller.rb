@@ -1,11 +1,10 @@
 class InstitutionsController < ApplicationController
-
   # skip_before_action :store_location, :only => [:renew_license]
   skip_before_action :login_required, :only => [:licensed]
 
   DEFAULT_ORDER = 'name'.freeze
 
-  def self.initialize_me!  # :nodoc:
+  def self.initialize_me! # :nodoc:
     control_access [:superadmin, :admin] => :ALL,
                    [:user, :ipuser, :dbuser] => [:index, :mine, :show],
                    :DEFAULT => [:licensed]
@@ -59,6 +58,7 @@ class InstitutionsController < ApplicationController
 
   def show
     @institution = Institution.find_by!(name: params[:id])
+    @sources_counts = Pandora::Elastic.new.counts
 
     # view compatibility
     @user_administrators = @institution.active_admins.distinct.sort_by(&:lastname)
@@ -146,7 +146,7 @@ class InstitutionsController < ApplicationController
     at = Time.now.next_year
     succeeded, failed = [], []
 
-    [params[:id]].flatten.each { |id|
+    [params[:id]].flatten.each {|id|
       institution = Institution.find(id)
       next unless institution
 
@@ -157,7 +157,7 @@ class InstitutionsController < ApplicationController
       end
     }
 
-    flash[:warning] = 'License renewal failed for: %s' / failed.map { |i|
+    flash[:warning] = 'License renewal failed for: %s' / failed.map {|i|
       "'#{i.fulltitle}'"
     }.join(', ') unless failed.empty?
 
@@ -207,6 +207,5 @@ class InstitutionsController < ApplicationController
       'asc'
     end
 
-  initialize_me!
-
+    initialize_me!
 end

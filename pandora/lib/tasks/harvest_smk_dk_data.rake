@@ -3,7 +3,6 @@ require 'json'
 require 'uri'
 
 namespace :harvest do
-
   desc 'Harvest Statens Museum for Kunst, Copenhagen data'
   task harvest_smk_dk: :environment do
     BASE_URL = "http://api.smk.dk/api/v1/"
@@ -20,7 +19,6 @@ namespace :harvest do
     # total = art_all_ids["total"] # currently[July 2019]: 82458
     if art_all_ids["objectIDs"]
       art_all_ids["objectIDs"].each do |objectID|
-
         art_url = BASE_URL + "art/?object_number=#{objectID}"
         art = parse_response_as_json(get_response_with_retry(parse_url(art_url)))
 
@@ -28,7 +26,7 @@ namespace :harvest do
           art["items"].each do |art|
             if art["production"]
               art["production"].each do |production|
-                if  production["creator_lref"]
+                if production["creator_lref"]
                   person_url = BASE_URL + "person/?id=#{production["creator_lref"]}"
                   creator = parse_response_as_json(get_response_with_retry(parse_url(person_url)))
                   production["creator"] = creator
@@ -37,14 +35,12 @@ namespace :harvest do
             end
 
             puts art.to_xml(:root => :art, :skip_instruct => true)
-
           end
         end
       end
     end
 
     puts "</smk>"
-
   end
 
   # tries to get art_all_ids response until response complete and parseable as JSON
@@ -61,12 +57,12 @@ namespace :harvest do
     end
   end
 
-  def get_response_with_retry(uri, retry_attempts=3)
+  def get_response_with_retry(uri, retry_attempts = 3)
     Net::HTTP.get(uri)
   rescue SocketError, Net::ReadTimeout, Net::OpenTimeout
     if retry_attempts > 0
       retry_attempts -= 1
-      sleep 5 
+      sleep 5
       retry
     end
     debugger
@@ -85,5 +81,4 @@ namespace :harvest do
   rescue URI::InvalidURIError
     URI.parse(URI.escape(url))
   end
-
 end

@@ -54,7 +54,7 @@
             <div class="pm-text">
               <%=
                 case @search.db_group
-                when 'kind', 'open_access'
+                when 'kind', 'open_access', 'title'
                   group == 'User uploads' ?
                   'Uploads by prometheus users'.t :
                   group.titleize.t
@@ -63,7 +63,19 @@
                 end
               %>
 
-              <span class="pm-amount"></span>
+              <span class="pm-amount <%= group == 'User uploads' && 'd-none' %>"></span>
+
+              <span class="pm-count"></span>
+                <% if group == 'User uploads' %>
+                  (<%=
+                    pm_labelled_delimited_counter(
+                      @search.number_of['uploads']['records'],
+                      '%s record',
+                      '%s records'
+                    )
+                  %>)
+                <% end %>
+              </span>
             </div>
           </div>
 
@@ -76,11 +88,22 @@
                   ) %>
                 </div>
                 <div class="pm-name">
-                  <%= data['source']['title'] %>
+                  <% if name == 'uploads' %>
+                    <%= 'Uploads by prometheus users'.t %>
+                  <% else %>
+                    <%= data['source']['title'] %>
+                  <% end %>
+
                   <small>
-                    <%= data['source']['kind'].t %>,
-                    <%= data['source'].city %>,
-                    <%= data['source'].keywords.map {|keyword| keyword.t}.join(", ") %>
+                    <% if name != 'uploads' %>
+                      <%= data['source']['kind'].t %>,
+                    <% end %>
+                    <% if data['source'].keywords.any? %>
+                      <%= data['source'].city %>,
+                      <%= data['source'].keywords.map {|keyword| keyword.t}.join(", ") %>
+                    <% else %>
+                      <%= data['source'].city %>
+                    <% end %>
                   </small>
                 </div>
                 <div class="pm-amount">

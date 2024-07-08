@@ -6,7 +6,7 @@
     >
       <div
         class="align-self-center"
-      >{state.refHeight}cm</div>
+      >{state.refHeight} cm</div>
       <svg
         xmlns="http://www.w3.org/2000/svg"
         class="me-2"
@@ -58,7 +58,6 @@
     export default class {
       onBeforeMount(props, state) {
         const limit = 560.0
-        console.log(props)
 
         state.refWidth = parseInt(props.refWidth, 10)
         state.refHeight = parseInt(props.refHeight, 10)

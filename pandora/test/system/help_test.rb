@@ -12,7 +12,7 @@ class HelpTest < ApplicationSystemTestCase
     within('#statusbar'){click_on 'Help'}
 
     assert_text 'Managing your personal account'
-    assert_text 'Administrator management'    
+    assert_text 'Administrator management'
 
     tests = [
       # TODO: change to the page's header once corrected

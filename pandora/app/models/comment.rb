@@ -3,7 +3,7 @@ class Comment < ApplicationRecord
 
   # REWRITE: presentation functionality is to be removed
   EAGER_LOADING       = [:image, :collection, :author, :parent]
-  EAGER_LOADING_ROOTS = EAGER_LOADING + [{ :replies => EAGER_LOADING }]
+  EAGER_LOADING_ROOTS = EAGER_LOADING + [{:replies => EAGER_LOADING}]
 
   belongs_to :image, optional: true
   belongs_to :collection, optional: true
@@ -25,7 +25,7 @@ class Comment < ApplicationRecord
     end
 
     result.assign_attributes(attribs)
-    
+
     result
   end
 
@@ -87,6 +87,6 @@ class Comment < ApplicationRecord
     return super unless image_id && author_id
 
     src = image.source if image
-    %w[contact admin].map { |key| src["#{key}_id"] }.include?(author_id) if src
+    %w[contact admin].map{|key| src["#{key}_id"]}.include?(author_id) if src
   end
 end

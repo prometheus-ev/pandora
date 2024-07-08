@@ -17,7 +17,7 @@ class Indexing::Sources::Ingrid < Indexing::SourceSuper
   end
 
   def artist_normalized
-    an = record.xpath('.//KuenstlerIn/text()').map { |a|
+    an = record.xpath('.//KuenstlerIn/text()').map {|a|
       a.to_s.split(', ').reverse.join(' ')
     }
     super(an)
@@ -63,7 +63,7 @@ class Indexing::Sources::Ingrid < Indexing::SourceSuper
   end
 
   def carrier_medium
-    record.xpath('.//Trägermedien/text()') 
+    record.xpath('.//Trägermedien/text()')
   end
 
   # abbildungsnachweis
@@ -76,5 +76,4 @@ class Indexing::Sources::Ingrid < Indexing::SourceSuper
       rights_work_vgbk
     end
   end
-
 end

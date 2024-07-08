@@ -1,5 +1,4 @@
 class StatsController < ApplicationController
-
   def self.initialize_me!
     control_access(
       [:superadmin, :admin] => [:ALL],
@@ -15,7 +14,8 @@ class StatsController < ApplicationController
     @csv_stats = CsvStats.for(current_user, csv_stats_params)
 
     if @csv_stats.valid?
-      send_data(@csv_stats.to_csv,
+      send_data(
+        @csv_stats.to_csv,
         disposition: @csv_stats.compressed ? 'attachment' : 'inline',
         type: 'text/plain; charset=utf-8',
         filename: @csv_stats.filename
@@ -58,6 +58,5 @@ class StatsController < ApplicationController
       )
     end
 
-  initialize_me!
-
+    initialize_me!
 end

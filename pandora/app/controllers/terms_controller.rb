@@ -7,7 +7,6 @@ class TermsController < ApplicationController
   end
 
   def edit
-
   end
 
   def update
@@ -19,8 +18,8 @@ class TermsController < ApplicationController
           flash.now[:warning] = message
           render action: 'edit'
         end
-        format.json{ render json: {message: message}, status: 422 }
-        format.xml{ render xml: {message: message}, status: 422 }
+        format.json{render json: {message: message}, status: 422}
+        format.xml{render xml: {message: message}, status: 422}
       end
     else
       if current_user.ipuser? || current_user.dbuser?
@@ -49,15 +48,14 @@ class TermsController < ApplicationController
 
   api_method :terms_of_use, :get => {
     :doc => "Get current terms of use.",
-    :returns => { :xml => {}, :json => {} }
+    :returns => {:xml => {}, :json => {}}
   }
 
   api_method :terms_of_use, :post => {
     :doc => "Accept current terms of use.",
     :expects => {
-      :accepted => { :type => 'string', :required => true, :doc => 'True if accepted, false otherwise.' }
+      :accepted => {:type => 'string', :required => true, :doc => 'True if accepted, false otherwise.'}
     },
-    :returns => { :xml => {}, :json => {} }
+    :returns => {:xml => {}, :json => {}}
   }
-  
 end

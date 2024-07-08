@@ -19,7 +19,9 @@ class Pandora::FormBuilder < ActionView::Helpers::FormBuilder
       [text, u.id]
     end
 
-    select(:parent_id, choices,
+    select(
+      :parent_id,
+      choices,
       {include_blank: 'Available parent objects'.t},
       onchange: 'update_image();'
     )

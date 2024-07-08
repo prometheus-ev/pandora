@@ -210,6 +210,19 @@ module Indexing::IndexMappings
           }
         }
       },
+      rating_count: {
+        type: "text",
+        term_vector: "yes",
+        fields: {
+          short: {
+            type: 'short'
+          },
+          raw: {
+            type: "keyword",
+            index: false
+          }
+        }
+      },
       rating_average: {
         type: "text",
         term_vector: "yes",
@@ -247,6 +260,10 @@ module Indexing::IndexMappings
       image_vector: {
         type: "dense_vector",
         dims: 80
+      },
+      domainant_color1: {
+        type: "dense_vector",
+        dims: 3
       },
       is_main_record: {
         type: "text",

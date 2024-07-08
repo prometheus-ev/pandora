@@ -7,28 +7,18 @@ class Pandora::Indexing::Parser::BerlinWinckelmannRecord < Pandora::Indexing::Pa
     record.at_xpath('@relative_path')
   end
 
-  def _label(*str)
-    str = str.map { |s| %Q{"#{s}" / } }.join
-    re  = /\A#{Regexp.escape(str)}/
-
-    (record.xpath(".//LINK/@label[starts-with(.,'#{str}')]")).map { |label|
-      label = label.to_s.sub(re, '')
-      block_given? ? yield(label) : label
-    }
-  end
-
   def title
     "#{record.xpath('@description')}".gsub(/ ?\(..\);?\z/, "")
   end
 
   def date
-    _label('DATIERUNG IN JAHRHUNDERTEN') { |label|
+    _label('DATIERUNG IN JAHRHUNDERTEN') {|label|
       label.delete('"').split(%r{ / }).reverse.join(' ')
     }.join(", ")
   end
 
   def date_range
-    date = _label('DATIERUNG IN JAHRHUNDERTEN') { |label|
+    date = _label('DATIERUNG IN JAHRHUNDERTEN') {|label|
       label.delete('"').split(%r{ / }).reverse.join(' ')
     }.to_s
 
@@ -44,7 +34,7 @@ class Pandora::Indexing::Parser::BerlinWinckelmannRecord < Pandora::Indexing::Pa
   end
 
   def location
-    _label('TOPOGRAPHIE / INSTITUTION" / "Institution') { |label|
+    _label('TOPOGRAPHIE / INSTITUTION" / "Institution') {|label|
       label.delete('"').split(%r{ / }).values_at(-1, 0).join('; ')
     }
   end
@@ -68,4 +58,17 @@ class Pandora::Indexing::Parser::BerlinWinckelmannRecord < Pandora::Indexing::Pa
   def credits
     "#{record.xpath('@source_title')}, #{record.xpath('@title')}"
   end
+
+
+  private
+
+    def _label(*str)
+      str = str.map{|s| %Q{"#{s}" / }}.join
+      re  = /\A#{Regexp.escape(str)}/
+
+      (record.xpath(".//LINK/@label[starts-with(.,'#{str}')]")).map {|label|
+        label = label.to_s.sub(re, '')
+        block_given? ? yield(label) : label
+      }
+    end
 end

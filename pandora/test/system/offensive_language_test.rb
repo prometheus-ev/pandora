@@ -72,4 +72,18 @@ class OffensiveLanguageTest < ApplicationSystemTestCase
     assert_text 'Drei N***'
     assert_text 'Ein M*** im Hemd'
   end
+
+  test 'title attributes are taken into account' do
+    within '#menu' do
+      click_on 'Search'
+    end
+    fill_in 'search_value_0', with: "*"
+    find('.submit_button').click
+
+    assert_text 'Svenja Maler'
+
+    page.all('div.image img').each do |img|
+      assert_match /\*\*\*/, img['title']
+    end
+  end
 end

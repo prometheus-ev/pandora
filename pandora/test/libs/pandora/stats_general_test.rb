@@ -21,15 +21,19 @@ class StatsGeneralTest < ActiveSupport::TestCase
     cache = Pandora::LogCache.new
     cache.add requests
     cache.finalize
-    assert File.exist?("#{ENV['PM_STATS_DIR']}/packs/201902/06.json.gz")
+    pack = "#{ENV['PM_STATS_DIR']}/packs/201902/06.json.gz"
+    assert File.exist?(pack)
 
-    Pandora::SumStats.new(Date.new(2018,1,1), Date.new(2019,12,31)).cache_top_terms
+    stats = Pandora::Stats.load(pack)
+    assert_instance_of Time, stats.first['ts']
 
-    sum_stats = Pandora::SumStats.new(Date.new(2018,11,14), Date.new(2019,2,5))
+    Pandora::SumStats.new(Date.new(2018, 1, 1), Date.new(2019, 12, 31)).cache_top_terms
+
+    sum_stats = Pandora::SumStats.new(Date.new(2018, 11, 14), Date.new(2019, 2, 5))
     assert_equal 84, sum_stats.send(:dates).count
     assert_empty sum_stats.top_terms
 
-    sum_stats = Pandora::SumStats.new(Date.new(2019,1,10), Date.new(2019,2,10))
+    sum_stats = Pandora::SumStats.new(Date.new(2019, 1, 10), Date.new(2019, 2, 10))
     assert_equal 32, sum_stats.send(:dates).count
     assert_equal 'baum', sum_stats.top_terms[0]['term']
     assert_equal 11, sum_stats.top_terms[0]['count']

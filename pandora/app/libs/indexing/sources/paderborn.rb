@@ -15,7 +15,6 @@ class Indexing::Sources::Paderborn < Indexing::SourceSuper
       end
       path = @paths_document.xpath("//Bilder/Bild/ID[text()='#{easy4_id}']/../Bildreferenz/text()").to_s.gsub(/https:\/\/eas-neu.uni-paderborn.de\//, 'https://eas.uni-paderborn.de/') || ""
     end
-
   end
 
   def path
@@ -32,7 +31,7 @@ class Indexing::Sources::Paderborn < Indexing::SourceSuper
   end
 
   def artist_normalized
-    an = record.xpath('.//KuenstlerIn/text()').map { |a|
+    an = record.xpath('.//KuenstlerIn/text()').map {|a|
       a.to_s.split(', ').reverse.join(' ')
     }
     super(an)

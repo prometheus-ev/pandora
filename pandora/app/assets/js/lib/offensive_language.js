@@ -36,44 +36,74 @@ const replacements = [
 ]
 
 const replace = () => {
-  for (const {node, m, replacement} of jobs) {
-    // split the text node apart
-    let after = node.splitText(m.index)
-    let before = node
-    let tmp = after.splitText(m[0].length)
-    let swap = after
-    after = tmp
+  for (const {type, node, m, replacement} of jobs) {
+    if (type == 'text') {
+      // split the text node apart
+      let after = node.splitText(m.index)
+      let before = node
+      let tmp = after.splitText(m[0].length)
+      let swap = after
+      after = tmp
 
-    // ... and replace the matched part
-    const widget = document.createElement('pm-ol')
-    widget.setAttribute('replacement', replacement)
-    widget.setAttribute('revealed', revealed())
-    swap.parentNode.replaceChild(widget, swap)
-    widget.append(swap)
+      // ... and replace the matched part
+      const widget = document.createElement('pm-ol')
+      widget.setAttribute('replacement', replacement)
+      widget.setAttribute('revealed', revealed())
+      swap.parentNode.replaceChild(widget, swap)
+      widget.append(swap)
 
-    riot.mount(widget)
+      riot.mount(widget)
+    }
+
+    if (type == 'title') {
+      const original = node.getAttribute('title')
+      node.setAttribute('title', replacement)
+
+      console.log(original, replacement)
+      const handler = () => {
+        const revealed = pageStorage['ol.revealed']
+
+        node.setAttribute('title', revealed ? original : replacement)
+      }
+
+      bus.addEventListener('ol.toggle', handler)
+      handler()
+    }
   }
 }
 
 const process = (node) => {
-  for (const r of replacements) {
-    const m = node.data.match(r.pattern)
-    if (m) {
-      jobs.push({node, m, replacement: r.replacement})
+  if (node.nodeType == Node.TEXT_NODE) {
+    for (const r of replacements) {
+      const m = node.data.match(r.pattern)
+      if (m) {
+        jobs.push({node, m, replacement: r.replacement, type: 'text'})
+      }
+    }
+  }
+
+  if (node.nodeType == Node.ELEMENT_NODE) {
+    const title = node.getAttribute('title')
+
+    if (title) {
+      for (const r of replacements) {
+        const m = title.match(r.pattern)
+        if (m) {
+          jobs.push({node, m, replacement: r.replacement, type: 'title'})
+        }
+      }
     }
   }
 }
 
 const idempotencyFilter = {
   acceptNode: (node) => {
-    // console.log(node, node.nodeType, Node.ELEMENT_NODE)
-
     if (node.nodeType == Node.ELEMENT_NODE) {
       if (node.tagName == 'PM-OL') {
         return NodeFilter.FILTER_REJECT
       }
 
-      return NodeFilter.FILTER_SKIP
+      return NodeFilter.FILTER_ACCEPT
     }
 
     return NodeFilter.FILTER_ACCEPT

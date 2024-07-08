@@ -1,6 +1,9 @@
 de:
   en: englisch
   de: deutsch
+  elasticsearch: Elasticsearch
+  indexer: pandora Indexer
+  rack_images: rack images
 
   messages:
     offensive: |
@@ -18,6 +21,9 @@ de:
   prompts:
     sure: Sind Sie sicher?
 
+  pages:
+    indexing_status: Indizierungsstatus
+
   verbs:
     hide_all: alle ausblenden
     hide: ausblenden
@@ -34,6 +40,10 @@ de:
   to_wikidata_item: zum Wikidata-Eintrag
 
   activerecord:
+    models:
+      source:
+        one: Quelldatenbank
+        other: Quelldatenbank
     attributes:
       account:
         mode: Zugangsmodus
@@ -45,6 +55,15 @@ de:
         research_interest: Forschungsinteresse
         email: E-Mail
       source:
+        id: Id
+        name: Name
+        title: Titel
+        kind: Typ
+        open_access: Open-Access
+        record_count: Anzahl der Einträge
+        index_count: Anzahl der Einträge
+        indexings: Indizierungen
+        samples: Stichproben
         auto_approve_records: "Uploads automatisch freigeben (nur institutionelle Uploads)"
       upload:
         add_to_index: Diesen Upload in der Suche anzeigen (für alle Nutzer*innen)
@@ -207,7 +226,11 @@ de:
       greater_than_or_equal_to: muss größer oder gleich %{count} sein
       inclusion: ist kein gültiger Wert
       invalid: ist nicht gültig
-      invalid_user_name: muss mit einem lateinischen Buchstaben beginnen und darf nur lateinische Buchstaben, Zahlen, Unterstriche und Punkte beinhalten und darf nicht mit einem Punkt enden
+      invalid_user_name: |
+        muss mit einem lateinischen Buchstaben beginnen und darf nur lateinische
+        Buchstaben, Zahlen, Unterstriche und Punkte beinhalten und darf nicht
+        mit einem Punkt enden. Insbesondere darf kein Leerzeichen enthalten
+        sein.
       less_than: muss kleiner als %{count} sein
       less_than_or_equal_to: muss kleiner oder gleich %{count} sein
       model_invalid: "Gültigkeitsprüfung ist fehlgeschlagen: %{errors}"

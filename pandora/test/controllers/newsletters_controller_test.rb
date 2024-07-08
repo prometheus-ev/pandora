@@ -72,7 +72,7 @@ class NewslettersControllerTest < ActionDispatch::IntegrationTest
         'de': {body: 'Ein test'}
       }
     )
-    
+
     login_as 'superadmin'
 
     get '/en/newsletters'

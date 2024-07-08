@@ -38,13 +38,13 @@ class SignupController < ApplicationController
     if user = Account.non_subscribers.where(
       'email LIKE :email',
       email: user_params[:email]
-      ).first
+    ).first
       @user = user
       flash.now[:info] = 'An account with this email address already exists.'.t
     elsif user = Account.non_subscribers.where(
       'login LIKE :login',
       login: user_params[:login]
-      ).first
+    ).first
       @user = user
       flash.now[:info] = 'An account with this login already exists.'.t
     end
@@ -164,7 +164,6 @@ class SignupController < ApplicationController
   end
 
   def email_confirmation_sent
-
   end
 
   def confirm_email_linkback
@@ -184,7 +183,8 @@ class SignupController < ApplicationController
         if @user.mode == 'guest'
           @user.deliver(:activation_request)
         end
-        push_flash(:notice,
+        push_flash(
+          :notice,
           'Your e-mail address has been confirmed. Thank you!'.t
         )
       end
@@ -218,8 +218,12 @@ class SignupController < ApplicationController
         return
       end
 
-      @user.mode = 'institution'
-      @user.status = 'pending'
+      if @user.mode == 'institution' && @user.institution == @institution && @user.status == 'activated'
+        # Do nothing.
+      else
+        @user.mode = 'institution'
+        @user.status = 'pending'
+      end
     when 'paypal'
       institution = Institution.find_by!(name: 'prometheus')
       @user.needs_research_interest!
@@ -232,7 +236,7 @@ class SignupController < ApplicationController
       @user.research_interest = license_user_params[:research_interest]
 
       address_incomplete = false
-      @address_fields.each { |field|
+      @address_fields.each {|field|
         if @address_hash[field].blank?
           set_prompt_field(field)
           address_incomplete ||= true
@@ -254,8 +258,9 @@ class SignupController < ApplicationController
 
     if @user.save
       @user.accepted_terms_of_use
-      @user.notified!  # pretend they have been notified
-                       # to avoid disturbing reminders
+      @user.notified!
+      # pretend they have been notified
+      # to avoid disturbing reminders
 
       current_user.reload
 
@@ -277,7 +282,7 @@ class SignupController < ApplicationController
         redirect_to PaymentTransaction.transaction_for(@user).url, allow_other_host: true
         return
       elsif @user.mode == 'invoice'
-          @user.deliver(:invoice_notice, address: @invoice_address)
+        @user.deliver(:invoice_notice, address: @invoice_address)
         render action: 'signup_completed'
         return
       end
@@ -359,7 +364,7 @@ class SignupController < ApplicationController
       required += Account::REQUIRED_UNLESS_VIA_INSTITUTION if @user && @user.needs_research_interest?
       required += %w[password]
 
-      super required
+      super(required)
     end
 
     def initialize_licence_variables
@@ -379,7 +384,7 @@ class SignupController < ApplicationController
 
       @address_hash = invoice_address_params
       @address_fields = %w[fullname addressline postalcode city country]
-      @address_fields.each { |field| @address_hash[field] ||= @user.send(field) }
+      @address_fields.each{|field| @address_hash[field] ||= @user.send(field)}
 
       @invoice_address = OpenStruct.new(@address_hash)
 
@@ -391,5 +396,4 @@ class SignupController < ApplicationController
 
       set_mandatory_fields
     end
-
 end

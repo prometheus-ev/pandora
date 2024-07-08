@@ -37,7 +37,7 @@ class Indexing::Sources::KielDigicult < Indexing::SourceSuper
   end
 
   def artist_normalized
-    an = artist.map { |a|
+    an = artist.map {|a|
       a.to_s.split(', ').reverse.join(' ')
     }
     super(an)

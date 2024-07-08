@@ -1,7 +1,7 @@
 require "application_system_test_case"
 
 class PandoraTest < ApplicationSystemTestCase
-  test 'about'do
+  test 'about' do
     visit '/en/about'
     assert_text Rails.version
   end
@@ -28,9 +28,8 @@ class PandoraTest < ApplicationSystemTestCase
     assert_text "No collections found"
   end
 
-  test 'terms of use' do
-    skip '#1573 We now link to the PDF file directly.'
-
+  # skip: #1573 We now link to the PDF file directly.
+  test 'terms of use @skip' do
     visit '/'
     click_on 'Terms of use'
     assert_text 'Please read the terms of use carefully!'
@@ -106,6 +105,54 @@ class PandoraTest < ApplicationSystemTestCase
 
     login_as 'jdupont'
     assert_text 'Administration'
+  end
+
+  test 'navigation active state highlighting' do
+    TestSource.index
+    image = Pandora::SuperImage.find(pid_for(1))
+    image2 = Pandora::SuperImage.find(pid_for(2))
+    upload = Pandora::SuperImage.find(Upload.last.pid)
+
+    collection = Collection.find_by!(title: "John Expired's public collection")
+    collection.images << image.image
+    collection.images << image2.image
+    collection.images << upload.image
+
+    login_as 'superadmin'
+
+    visit '/en/searches'
+    assert_equal 'Search', find('.navigation_icon.active').text
+
+    visit "/en/image/#{image.pid}"
+    assert_equal 'Search', find('.navigation_icon.active').text
+
+    visit "/en/image/#{upload.pid}"
+    assert_equal 'Search', find('.navigation_icon.active').text
+
+    visit '/en/collections'
+    assert_equal 'Collections', find('.navigation_icon.active').text
+
+    visit "/en/collections/#{collection.id}"
+    assert_equal 'Collections', find('.navigation_icon.active').text
+
+    # ensure pagination to "next" image in collection works
+    click_on 'Katze auf Stuhl'
+    find("img[title='Next image']").click
+    assert_equal 'Collections', find('.navigation_icon.active').text
+
+    visit "/en/collections/#{collection.id}/image/#{image.pid}"
+    assert_equal 'Collections', find('.navigation_icon.active').text
+
+    visit "/en/collections/#{collection.id}/image/#{upload.pid}"
+    assert_equal 'Collections', find('.navigation_icon.active').text
+
+    login_as 'jdoe'
+
+    visit "/en/image/#{upload.pid}"
+    assert_equal 'My Uploads', find('.navigation_icon.active').text
+
+    visit "/en/collections/#{collection.id}/image/#{upload.pid}"
+    assert_equal 'Collections', find('.navigation_icon.active').text
   end
 
   test 'env overrides' do

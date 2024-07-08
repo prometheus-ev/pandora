@@ -4,6 +4,6 @@ class Pandora::Indexing::Parser::BerlinSpsg < Pandora::Indexing::Parser::XmlRead
 
     super(
       source,
-      record_node_name: 'museumdat:museumdat')
+      record_node_name: "museumdat:museumdat")
   end
 end

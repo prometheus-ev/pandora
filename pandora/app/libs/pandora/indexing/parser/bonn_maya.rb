@@ -3,6 +3,6 @@ class Pandora::Indexing::Parser::BonnMaya < Pandora::Indexing::Parser::XmlReader
     source[:kind] = Source::KINDS[:research]
 
     super(source,
-      name: 'medium')
+          record_node_name: "medium")
   end
 end

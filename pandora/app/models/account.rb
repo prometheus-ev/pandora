@@ -2,7 +2,6 @@ require 'pandora/validation/email_validator'
 
 class Account < ApplicationRecord
   include Util::Config
-  include Util::LegacySql
 
   has_one                 :license,                                                                            :dependent => :destroy
   has_one                 :account_settings,                                     :foreign_key => 'user_id',    :dependent => :destroy, required: false
@@ -20,17 +19,17 @@ class Account < ApplicationRecord
   has_many                :invoices,              :through    => 'license'
   has_many                :contact_sources,       :class_name => 'Source',       :foreign_key => 'contact_id'
   has_many                :open_sources,          :class_name => 'Source',       :foreign_key => 'dbuser_id'
-  has_many                :tokens, lambda{includes(:client_application).order('authorized_at DESC')}, :class_name => 'OauthToken',   :foreign_key => 'user_id',    :dependent => :destroy
+  has_many                :tokens, lambda{includes(:client_application).order('authorized_at DESC')}, :class_name => 'OauthToken', :foreign_key => 'user_id', :dependent => :destroy
 
   # REWRITE: belongs_to are automatically required now, so we have to make them optional specifically
   belongs_to              :institution, optional: true
-  belongs_to              :creator,               :class_name => 'Account',      :foreign_key => 'creator_id', optional: true
+  belongs_to              :creator,               :class_name => 'Account', :foreign_key => 'creator_id', optional: true
 
   has_many :account_roles
   has_many :roles, through: :account_roles
 
   has_and_belongs_to_many :admin_institutions,    :class_name => 'Institution',  :uniq => true
-  has_and_belongs_to_many :admin_sources,         :class_name => 'Source',       join_table: "admins_sources",  :uniq => true
+  has_and_belongs_to_many :admin_sources,         :class_name => 'Source',       join_table: "admins_sources", :uniq => true
 
   has_and_belongs_to_many :rated_images,          :class_name => 'Image',        :uniq => true
 
@@ -43,12 +42,14 @@ class Account < ApplicationRecord
   REQUIRED_UNLESS_ANONYMOUS       = %w[email firstname lastname]
   REQUIRED_UNLESS_VIA_INSTITUTION = %w[research_interest]
 
-  validates_inclusion_of(:status,
+  validates_inclusion_of(
+    :status,
     in: ['pending', 'activated', 'deactivated'],
     allow_nil: true
   )
 
-  validates_inclusion_of(:mode,
+  validates_inclusion_of(
+    :mode,
     in: ['institution', 'association', 'guest', 'paid', 'paypal', 'clickandbuy', 'invoice'],
     allow_nil: true
   )
@@ -67,29 +68,10 @@ class Account < ApplicationRecord
     mapping[self.mode]
   end
 
-  # has_enumerated_field :status, %w[pending activated deactivated],
-  #   :validate => { :unless => :anonymous?, :allow_blank => true } do
-  #     # TODO: not model concern, this should be done in the controller(s)
-  #     # def activated
-  #     #   t = __target__
-  #     #   t.deliver(:welcome) unless activated? || t.subscriber? || t.expires_in?(1.minute)
-
-  #     #   super
-  #     # end
-  #   end
-
-  # has_enumerated_field :mode,
-  #   %w[institution association guest paid] << { :paid => ['invoice', 'paypal', 'clickandbuy'] },
-  #   :validate => {
-  #     :unless => :anonymous?,
-  #     :inclusion => { :allow_blank => true },
-  #     :legality => { :scrub => nil }
-  #   }
-
-  validates_presence_of     *REQUIRED
-  validates_presence_of     *REQUIRED_UNLESS_ANONYMOUS.dup.push(:unless => :anonymous?)
-  validates_presence_of     *REQUIRED_UNLESS_VIA_INSTITUTION.dup.push(:if => :needs_research_interest?)
-  validates_exclusion_of    *REQUIRED_UNLESS_VIA_INSTITUTION.dup.push(:if => :needs_research_interest?, :in => ["n.a.", "n.a. - created by useradmin"], :message => 'is invalid')
+  validates_presence_of(*REQUIRED)
+  validates_presence_of(*REQUIRED_UNLESS_ANONYMOUS.dup.push(:unless => :anonymous?))
+  validates_presence_of(*REQUIRED_UNLESS_VIA_INSTITUTION.dup.push(:if => :needs_research_interest?))
+  validates_exclusion_of(*REQUIRED_UNLESS_VIA_INSTITUTION.dup.push(:if => :needs_research_interest?, :in => ["n.a.", "n.a. - created by useradmin"], :message => 'is invalid'))
 
   validates_presence_of     :password,                   :if => :password_required?
   validates_presence_of     :password_confirmation,      :if => :password_required?
@@ -101,8 +83,8 @@ class Account < ApplicationRecord
 
   validates :email, :'pandora/validation/email' => true, :unless => :anonymous?
 
-  validates_uniqueness_of   :login, :email, :case_sensitive => false,
-                            :unless => :anonymous?
+  validates_uniqueness_of :login, :email, :case_sensitive => false,
+                                          :unless => :anonymous?
 
 
   IPUSER_LOGIN = 'campus'.freeze
@@ -110,8 +92,8 @@ class Account < ApplicationRecord
 
   # TODO: replace with smarter way!
   EXPIRES = {
-    true  => 3.days,  # guest
-    false => 1.month  # other
+    true => 3.days, # guest
+    false => 1.month # other
   }
 
   DEFAULT_DATABASE_QUOTA = 1000 # in megabytes
@@ -175,7 +157,7 @@ class Account < ApplicationRecord
 
   def reset_notified_at
     future = (mode == 'guest' ? 1.week.from_now : 1.month.from_now)
-    
+
     if expires_at && expires_at > future
       self.notified_at = nil
     end
@@ -249,25 +231,19 @@ class Account < ApplicationRecord
   # Encrypts the password with the salt.
   def self.digest(password, salt)
     PBKDF2.new(
-      :password      => password,
-      :salt          => salt,
-      :iterations    => ENV['PM_HASH_ITERATIONS'].to_i,
+      :password => password,
+      :salt => salt,
+      :iterations => ENV['PM_HASH_ITERATIONS'].to_i,
       :hash_function => ENV['PM_HASH_FUNCTION'].dup
     ).hex_string if password && salt
   end
 
   def self.create_ipuser(institution)
-    # REWRITE: don't use tap as there is now a create method
     Account.create!(
-    # returning(Account.new(
-      :login       => IPUSER_LOGIN,
+      :login => IPUSER_LOGIN,
       :institution => institution,
-      # REWRITE: using new query interface
-      # :roles       => [Role[:ipuser]],
-      :roles       => Role.where(title: 'ipuser'),
-      :newsletter  => false
-    # REWRITE: again, don't use tap
-    # )) { |user| user.save! }
+      :roles => Role.where(title: 'ipuser'),
+      :newsletter => false
     )
   end
 
@@ -275,76 +251,78 @@ class Account < ApplicationRecord
     user_role_id = Role.find_by!(title: 'user').id
     role_ids = Role.where(title: ['dbadmin', 'dbuser']).pluck(:id).map{|id| id.to_s}.join(',')
     institution_ids = Institution.licensed_ids(true).map{|id| id.to_s}.join(',')
-    
-    joins('JOIN accounts_roles ar ON ar.account_id = accounts.id').
-    joins('JOIN roles r ON r.id = ar.role_id').
-    where(
-      "
-        (
-          (ar.role_id = %d)
-          AND
+
+    self.
+      joins('JOIN accounts_roles ar ON ar.account_id = accounts.id').
+      joins('JOIN roles r ON r.id = ar.role_id').
+      where(
+        "
           (
+            (ar.role_id = %d)
+            AND
             (
               (
                 (
-                  institution_id IS NULL
-                  OR
                   (
-                    ar.role_id IN (%s)
-                    AND EXISTS(
-                      (
-                        SELECT 1
-                        FROM sources
-                        WHERE sources.record_count > 0 AND sources.admin_id = accounts.id
-                        LIMIT 1
-                      )
-                      UNION
-                      (
-                        SELECT 1
-                        FROM sources
-                        WHERE sources.record_count > 0 AND sources.contact_id = accounts.id
-                        LIMIT 1
-                      )
-                      UNION
-                      (
-                        SELECT 1
-                        FROM sources
-                        WHERE sources.record_count > 0 AND sources.dbuser_id = accounts.id
-                        LIMIT 1
+                    institution_id IS NULL
+                    OR
+                    (
+                      ar.role_id IN (%s)
+                      AND EXISTS(
+                        (
+                          SELECT 1
+                          FROM sources
+                          WHERE sources.record_count > 0 AND sources.admin_id = accounts.id
+                          LIMIT 1
+                        )
+                        UNION
+                        (
+                          SELECT 1
+                          FROM sources
+                          WHERE sources.record_count > 0 AND sources.contact_id = accounts.id
+                          LIMIT 1
+                        )
+                        UNION
+                        (
+                          SELECT 1
+                          FROM sources
+                          WHERE sources.record_count > 0 AND sources.dbuser_id = accounts.id
+                          LIMIT 1
+                        )
                       )
                     )
+                    OR
+                    accounts.institution_id IN (%s)
                   )
-                  OR
-                  accounts.institution_id IN (%s)
+                  AND (disabled_at IS NULL)
                 )
-                AND (disabled_at IS NULL)
+                AND (status = 'activated')
               )
-              AND (status = 'activated')
-            )
-            AND
-            (
-              NOT (
-                expires_at IS NOT NULL
-                AND expires_at <= '%s'
-                AND NOT EXISTS(
-                  SELECT 1
-                  FROM accounts_roles
-                  WHERE
-                    (`accounts_roles`.account_id = `accounts`.id)
-                    AND
-                    (`accounts_roles`.role_id IN (9))
-                  LIMIT 1
+              AND
+              (
+                NOT (
+                  expires_at IS NOT NULL
+                  AND expires_at <= '%s'
+                  AND NOT EXISTS(
+                    SELECT 1
+                    FROM accounts_roles
+                    WHERE
+                      (`accounts_roles`.account_id = `accounts`.id)
+                      AND
+                      (`accounts_roles`.role_id IN (9))
+                    LIMIT 1
+                  )
                 )
               )
             )
           )
-        )
-      ",
-      user_role_id,
-      role_ids,
-      institution_ids,
-      Time.now.utc
-    ).count
+        ",
+        user_role_id,
+        role_ids,
+        institution_ids,
+        Time.now.utc.strftime('%Y-%m-%d %H:%M:%S')
+      ).
+      count
   end
 
   def self.subscribed?(email)
@@ -374,18 +352,19 @@ class Account < ApplicationRecord
 
   def self.subscribers
     joins('LEFT JOIN accounts_roles ar ON ar.account_id = accounts.id').
-    joins('LEFT JOIN roles ON roles.id = ar.role_id').
-    where('roles.title = ?', 'subscriber')
+      joins('LEFT JOIN roles ON roles.id = ar.role_id').
+      where('roles.title = ?', 'subscriber')
   end
 
   def self.non_subscribers
     joins('LEFT JOIN accounts_roles ar ON ar.account_id = accounts.id').
-    joins('LEFT JOIN roles ON roles.id = ar.role_id').
-    where('roles.title != ?', 'subscriber')
+      joins('LEFT JOIN roles ON roles.id = ar.role_id').
+      where('roles.title != ?', 'subscriber')
   end
 
   def banned?
     return @banned unless @banned.nil?
+
     login_failed?(BAN_DURATION.ago) ? lift_ban! : @banned = failed_logins >= LOGIN_ATTEMPTS
   end
 
@@ -424,36 +403,45 @@ class Account < ApplicationRecord
   end
 
   def role_titles
-    @role_titles ||= roles.map { |role| role.title }
+    @role_titles ||= roles.map{|role| role.title}
   end
 
   def has_role?(role)
     roles.map{|r| r.title}.include?(role)
   end
+
   def superadmin?
     has_role?('superadmin')
   end
+
   def admin?
     has_role?('admin')
   end
+
   def useradmin?
     has_role?('useradmin')
   end
+
   def webadmin?
     has_role?('webadmin')
   end
+
   def user?
     has_role?('user')
   end
+
   def dbuser?
     has_role?('dbuser')
   end
+
   def visitor?
     has_role?('visitor')
   end
+
   def ipuser?
     has_role?('ipuser')
   end
+
   def dbadmin?
     has_role?('dbadmin')
   end
@@ -552,12 +540,12 @@ class Account < ApplicationRecord
 
   def self.allowed?(object, rw)
     case object
-      when Source
-        if rw == :read
-          true
-        end
-      else
-        false
+    when Source
+      if rw == :read
+        true
+      end
+    else
+      false
     end
   end
 
@@ -614,7 +602,7 @@ class Account < ApplicationRecord
       binds = {}
       value.split.first(3).each.with_index do |v, i|
         clause << "login LIKE :t#{i} OR firstname LIKE :t#{i} OR lastname LIKE :t#{i}"
-        binds["t#{i}".to_sym] = "%#{v}%"
+        binds[:"t#{i}"] = "%#{v}%"
       end
       where(clause.join(' OR '), binds)
     when 'institution'
@@ -639,101 +627,100 @@ class Account < ApplicationRecord
     return true if verb == :read && allowed?(object)
 
     case object
-      when Account
-        return false if object.superadmin?
+    when Account
+      return false if object.superadmin?
 
-        case verb
-          when :read
-            object.user? || object.useradmin? ||
-            object.dbadmin? || object.admin?  # ???
-          when :delete
-            object != self && admin_or_superadmin? && allowed?(object)
-          else
-            object == self || (
-              roles_allowed?(object.roles) && (
-                !useradmin_only? ||
-                institution == object.institution ||
-                admin_institutions.include?(object.institution)
-              )
-            )
-        end
-      when Institution
-        case verb
-          when :read   then !dbuser? || open_sources.map(&:institution).include?(object)
-          when :delete then false
-          else              admin?
-        end
-      when License
-        verb == :read || admin?
-      when Box
-        object.owned_by?(self)
+      case verb
+      when :read
+        object.user? || object.useradmin? ||
+        object.dbadmin? || object.admin? # ???
+      when :delete
+        object != self && admin_or_superadmin? && allowed?(object)
+      else
+        object == self || (
+          roles_allowed?(object.roles) && (
+            !useradmin_only? ||
+            institution == object.institution ||
+            admin_institutions.include?(object.institution)
+          )
+        )
+      end
+    when Institution
+      case verb
+      when :read   then !dbuser? || open_sources.map(&:institution).include?(object)
+      when :delete then false
+      else admin?
+      end
+    when License, ClientApplication, Email
+      verb == :read || admin?
+    when Box
+      object.owned_by?(self)
       # REWRITE: functionality dropped
       # when Collection, Presentation
-      when Collection
-        return true if object.owned_by?(self)
+    when Collection
+      return true if object.owned_by?(self)
 
-        case verb
-          when :read   then object.readable?(self)
-          when :delete then false
-          when :comment then user? || superadmin? || admin?
-          else object.writable?(self)
-        end
-      when Source
-        case verb
-          when :read   then true
-          when :delete then false
-        else admin? || object.source_admins.include?(self) || object.contact == self
-        end
-      when Image, ElasticRecordImage
-        if verb == :read
-          return false if dbuser? && !open_sources.include?(object.source)
-          return true unless object.upload_record?
-          return true if object.upload.approved_record
-          return true if admin_or_superadmin?
-
-          if object.upload.database
-            return true if object.upload.database.owned_by?(self)
-            return true if self.admin_institutions.include?(object.upload.database.owner)
-            return true if self.admin_sources.include?(object.upload.database)
-          end
-
-          false
-        elsif verb == :comment
-          user? || superadmin? || admin?
-        end
-      when Comment
-        case verb
-        when :read then true
-        when :comment then user? || superadmin? || admin?
-        else
-          return true if object.by?(self) or admin_or_superadmin?
-        end
-      when PaymentTransaction
-        verb == :read && object.client == self
-      when ClientApplication, Email
-        verb == :read || admin?
-      when License
-        admin?
-      when Upload
-        object.database.owned_by?(self) or admin_or_superadmin?
-      when Keyword
-        admin_or_superadmin?
+      case verb
+      when :read   then object.readable?(self)
+      when :delete then false
+      when :comment then user? || superadmin? || admin?
       else
+        return false if ipuser?
+
+        object.writable?(self)
+      end
+    when Source
+      case verb
+      when :read   then true
+      when :delete then false
+      else admin? || object.source_admins.include?(self) || object.contact == self
+      end
+    when Image, ElasticRecordImage
+      if verb == :read
+        return false if dbuser? && !open_sources.include?(object.source)
+        return true unless object.upload_record?
+        return true if object.upload.approved_record
+        return true if admin_or_superadmin?
+
+        if object.upload.database
+          return true if object.upload.database.owned_by?(self)
+          return true if self.admin_institutions.include?(object.upload.database.owner)
+          return true if self.admin_sources.include?(object.upload.database)
+        end
+
         false
+      elsif verb == :comment
+        user? || superadmin? || admin?
+      end
+    when Comment
+      case verb
+      when :read then true
+      when :comment then user? || superadmin? || admin?
+      else
+        return true if object.by?(self) or admin_or_superadmin?
+      end
+    when PaymentTransaction
+      verb == :read && object.client == self
+    when Upload
+      object.database.owned_by?(self) or admin_or_superadmin?
+    when Keyword
+      admin_or_superadmin?
+    else
+      false
     end
   end
 
   def action_allowed?(controller, action = :index)
     controller_class = case controller
-      when ApplicationController then controller.class
-      else "#{controller.to_s.camelcase}Controller".constantize
+    when ApplicationController then controller.class
+    else "#{controller.to_s.camelcase}Controller".constantize
     end
 
     action = action.to_sym
 
-    roles.any? { |role|
+    roles.any? do |role|
       controller_class.allowed_actions_for(role.title).include?(action)
-    }
+    end
   end
 
   # def controller_allowed?(controller)
@@ -741,7 +728,7 @@ class Account < ApplicationRecord
   # end
 
   def allowed_actions(controller, actions)
-    actions.select { |action_name| action_allowed?(controller, action_name) }
+    actions.select{|action_name| action_allowed?(controller, action_name)}
   end
 
   def sha1(token)
@@ -784,6 +771,7 @@ class Account < ApplicationRecord
       enable = value > 0
 
       return set_expiration(expires_at) if enable && value < 1.minute
+
       from << expires_at if expires_at && mode == 'invoice'
 
       # REWRITE: use .seconds to make it a duration
@@ -874,7 +862,7 @@ class Account < ApplicationRecord
   def self.with_status
     where("status IS NOT NULL AND status <> ''")
   end
-  
+
   def self.enabled
     where('disabled_at IS NULL')
   end
@@ -902,7 +890,7 @@ class Account < ApplicationRecord
 
   def self.expired(at = nil)
     where('expires_at IS NOT NULL AND expires_at <= ?', at || Time.now.utc).
-    without_role('dbadmin')
+      without_role('dbadmin')
   end
 
   # return a scope representing accounts with upcoming expiry
@@ -995,13 +983,13 @@ class Account < ApplicationRecord
   end
 
   def paid_before?
-    payment_transactions.map { |t|
+    payment_transactions.map {|t|
       t.status == 'succeeded'
     }.include?(true)
   end
 
   def email_verified?
-    #email_verified_at && email_verified_at > 1.year.ago.utc
+    # email_verified_at && email_verified_at > 1.year.ago.utc
     !!email_verified_at
   end
 
@@ -1080,8 +1068,13 @@ class Account < ApplicationRecord
   end
 
   def fullname?
-    defined?(@has_fullname) ? @has_fullname : @has_fullname =
-      (firstname || lastname) && (firstname != '-' || lastname != '-')
+    unless defined?(@has_fullname)
+      @has_fullname =
+        (firstname || lastname) &&
+        (firstname != '-' || lastname != '-')
+    end
+
+    @has_fullname
   end
 
   # Get the full name of the user of this account
@@ -1108,10 +1101,10 @@ class Account < ApplicationRecord
   end
 
   def active_admins
-    arr = institution.active_admins.select { |a| a.allowed?(self) }
-    arr.tap { |a|
+    arr = institution.active_admins.select{|a| a.allowed?(self)}
+    arr.tap do |a|
       a.delete(self); a << Account.find_by!(login: 'prometheus') if a.empty?
-    }
+    end
   end
 
   def via_issuer?
@@ -1139,8 +1132,8 @@ class Account < ApplicationRecord
     account_settings.assign_attributes(locale: locale)
   end
 
-  def deliver(what, **args)
-    AccountMailer.with(user: self, **args).send(what).deliver_now
+  def deliver(what, *, **)
+    AccountMailer.with(user: self, **).send(what).deliver_now
   end
 
   def deliver_token(what, reset = false)
@@ -1215,5 +1208,4 @@ class Account < ApplicationRecord
       # fact to the user (as an error).
       !anonymous? && !subscriber? && (crypted_password.blank? || !(password.nil? || password.empty?))
     end
-
 end

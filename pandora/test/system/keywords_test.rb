@@ -49,7 +49,9 @@ class KeywordsTest < ApplicationSystemTestCase
     jdoe.roles.push(Role.find_by(title: 'dbadmin'))
     jdoe.save!
     database = institutional_upload_source([jdoe])
-    upload = institutional_upload(database, "galette",
+    upload = institutional_upload(
+      database,
+      "galette",
       title: 'my-upload',
       keywords: [Keyword.find_by!(title: 'painting')]
     )

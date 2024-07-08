@@ -27,12 +27,6 @@ class Pandora::Indexing::Parser::Parents::RmnRecord < Pandora::Indexing::Parser:
     record['urls']['original'].delete_prefix('https://api.art.rmngp.fr/')
   end
 
-  def source_url
-    n = object['_source']['accession_number']
-    return if n.blank?
-    "http://www.photo.rmn.fr/archive/#{n}.html"
-  end
-
   def artist
     authors = object['_source']['authors']
     authors[0]['name']['en'] unless authors.blank?
@@ -74,9 +68,16 @@ class Pandora::Indexing::Parser::Parents::RmnRecord < Pandora::Indexing::Parser:
 
   def rights_reproduction
     if object.dig('_source', 'image', 'photographer')
-      object['_source']['image']['photographer']['name']  
+      object['_source']['image']['photographer']['name']
     end
   end
+
+  # def source_url
+  #   n = object['_source']['accession_number']
+  #   return if n.blank?
+
+  #   "http://www.photo.rmn.fr/archive/#{n}.html"
+  # end
 
   def source_url
     if object['_source']['image']
@@ -88,19 +89,19 @@ class Pandora::Indexing::Parser::Parents::RmnRecord < Pandora::Indexing::Parser:
     object['_source']['culture']
   end
 
-  def technique 
+  def technique
     if object['_source']['techniques']
-      object['_source']['techniques'].map { |technique|
+      object['_source']['techniques'].map do |technique|
         technique['suggest_en']['input']
-      }  
+      end
     end
   end
 
   def material
     if object['_source']['support_materials']
-      object['_source']['support_materials'].map { |support_material|
+      object['_source']['support_materials'].map do |support_material|
         support_material['description']
-      }
+      end
     end
   end
 
@@ -110,9 +111,9 @@ class Pandora::Indexing::Parser::Parents::RmnRecord < Pandora::Indexing::Parser:
 
   def collection
     if object['_source']['collections']
-      object['_source']['collections'].map { |collection|
+      object['_source']['collections'].map do |collection|
         collection['name']['fr']
-      }
+      end
     end
   end
 
@@ -142,18 +143,18 @@ class Pandora::Indexing::Parser::Parents::RmnRecord < Pandora::Indexing::Parser:
   end
 
   def pictured_location
-    if object['_source']['geographies'] 
-      object['_source']['geographies'].map { |geography|
-      geography['name']['fr']
-    }
+    if object['_source']['geographies']
+      object['_source']['geographies'].map do |geography|
+        geography['name']['fr']
+      end
     end
   end
 
   def epoch
     if object['_source']['periods']
-      object['_source']['periods'].map { |period|
+      object['_source']['periods'].map do |period|
         period['suggest_en']['input']
-      }
+      end
     end
   end
 
@@ -191,25 +192,26 @@ class Pandora::Indexing::Parser::Parents::RmnRecord < Pandora::Indexing::Parser:
     record.dig('identifier')
   end
 
+
   private
 
-  def record_id_value
-    if record_object_id_value.blank?
-      record['id'].to_s
-    else
-      "#{record_object_id_value}#{record['id'].to_s}"
+    def record_id_value
+      if record_object_id_value.blank?
+        record['id'].to_s
+      else
+        "#{record_object_id_value}#{record['id'].to_s}"
+      end
     end
-  end
 
-  def main_record_id_value
-    if record_object_id_value.blank?
-      object['_source']['images'][0]['id'].to_s
-    else
-      "#{record_object_id_value}#{object['_source']['images'][0]['id'].to_s}"
+    def main_record_id_value
+      if record_object_id_value.blank?
+        object['_source']['images'][0]['id'].to_s
+      else
+        "#{record_object_id_value}#{object['_source']['images'][0]['id'].to_s}"
+      end
     end
-  end
 
-  def record_object_id_value
-    object['_source']['id'].to_s
-  end
+    def record_object_id_value
+      object['_source']['id'].to_s
+    end
 end

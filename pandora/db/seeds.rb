@@ -95,7 +95,8 @@ Source.create!(
   kind: 'User upload',
   type: 'user_upload',
   institution: prometheus,
-  record_count: 0
+  record_count: 0,
+  keyword_list: 'upload'
 )
 
 brain_busters = [

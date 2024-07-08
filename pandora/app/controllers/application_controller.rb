@@ -50,18 +50,18 @@ class ApplicationController < ActionController::Base
 
   # REWRITE: refactor this, it can probably be done entirely in the routes file
   DEFAULT_LOCATION = {
-    :start    => { :controller => 'searches' },
-    :admin    => { :controller => 'administration' },
-    :redirect => { :controller => 'sessions', :action => 'new' },
+    :start => {:controller => 'searches'},
+    :admin => {:controller => 'administration'},
+    :redirect => {:controller => 'sessions', :action => 'new'},
 
     # custom start pages
-    'search'             => { :controller => 'searches' },
-    'searches'           => { :controller => 'searches' },
-    'advanced_search'    => { :controller => 'searches', :action => 'advanced' },
-    'collections'        => { :controller => 'collections' },
-    'public_collections' => { :controller => 'collections', :action => 'public' },
-    'administration'     => { :controller => 'administration' },
-    'accounts'           => { :controller => 'accounts' }
+    'search' => {:controller => 'searches'},
+    'searches' => {:controller => 'searches'},
+    'advanced_search' => {:controller => 'searches', :action => 'advanced'},
+    'collections' => {:controller => 'collections'},
+    'public_collections' => {:controller => 'collections', :action => 'public'},
+    'administration' => {:controller => 'administration'},
+    'accounts' => {:controller => 'accounts'}
   }.freeze
 
   UNSAFE_OPTIONS = ActionDispatch::Routing::RouteSet::RESERVED_OPTIONS - [:anchor]
@@ -79,7 +79,7 @@ class ApplicationController < ActionController::Base
                 :admin_or_superadmin?, :allowed?,
                 :user_login, :user_institution, :user_is_personalized
 
-  def self.initialize_me!  # :nodoc:
+  def self.initialize_me! # :nodoc:
     unless name == 'ApplicationController'
       raise 'ILLEGALLY CALLED BY CHILD CLASS %s -- GO WRITE YOUR OWN!' / name
     end
@@ -95,14 +95,15 @@ class ApplicationController < ActionController::Base
       return superclass.load_all_controllers
     else
       return if @_loaded_all_controllers
+
       @_loaded_all_controllers = true
     end
 
     # REWRITE: this is done via the Rails module now
     # (Dir["#{RAILS_ROOT}/app/controllers/*.rb"].map { |controller|
-    (Dir["#{Rails.root}/app/controllers/*.rb"].map { |controller|
+    (Dir["#{Rails.root}/app/controllers/*.rb"].map {|controller|
       File.basename(controller, '.rb').classify
-    } - subclasses - %w[ApplicationController]).each { |klass|
+    } - subclasses - %w[ApplicationController]).each {|klass|
       begin
         klass.constantize
       rescue NameError, LoadError
@@ -133,7 +134,12 @@ class ApplicationController < ActionController::Base
 
     def current_user
       @current_user ||= cookie_user || begin
-        user = remembered_user || token_user || basic_user || oauth_user
+        user =
+          remembered_user ||
+          trusted_host_user ||
+          token_user ||
+          basic_user ||
+          oauth_user
 
         # so if a user was found by other means than the session cookie, we
         # need to log him in so that the session cookie is set. However, if the
@@ -244,6 +250,18 @@ class ApplicationController < ActionController::Base
       @current_oauth_user
     end
 
+    def trusted_host_user
+      request_ip = IPAddr.new(request.ip)
+      (ENV['PM_TRUSTED_HOSTS'] || '').split(/\s+/).each do |t|
+        ip = IPAddr.new(t)
+        if ip.include?(request_ip)
+          return Account.find_by!(login: 'superadmin')
+        end
+      end
+
+      nil
+    end
+
     def allowed?(object, action = :read)
       return false unless current_user
 
@@ -313,10 +331,10 @@ class ApplicationController < ActionController::Base
 
           redirect_to login_path
         end
-        format.json{ render json: {message: message}, status: 403 }
-        format.xml{ render xml: {message: message}, status: 403 }
+        format.json{render json: {message: message}, status: 403}
+        format.xml{render xml: {message: message}, status: 403}
         format.any do
-          format.all{ render plain: 'forbidden', status: 403 }
+          format.all{render plain: 'forbidden', status: 403}
         end
       end
     end
@@ -332,17 +350,17 @@ class ApplicationController < ActionController::Base
             status: 404
           )
         end
-        format.json{ render json: {message: message}, status: 404 }
-        format.xml{ render xml: {message: message}, status: 404 }
-        format.all{ render plain: message, status: 404 }
+        format.json{render json: {message: message}, status: 404}
+        format.xml{render xml: {message: message}, status: 404}
+        format.all{render plain: message, status: 404}
       end
     end
 
     # 422
     def unprocessable_entity(message = 'unprocessable entity')
       respond_to do |format|
-        format.json{ render json: {message: message}, status: 422 }
-        format.xml{ render xml: {message: message}, status: 422 }
+        format.json{render json: {message: message}, status: 422}
+        format.xml{render xml: {message: message}, status: 422}
       end
     end
 
@@ -351,7 +369,7 @@ class ApplicationController < ActionController::Base
       # we notify in any env if recipients are defined
       notify(exception)
 
-      production_mode = 
+      production_mode =
         Rails.env.production? ||
         ENV['PM_PRODUCTION_ERROR_HANDLING'] == 'true'
 
@@ -368,9 +386,9 @@ class ApplicationController < ActionController::Base
             status: 500
           )
         end
-        format.json{ render json: {message: 'internal server error'}, status: 500 }
-        format.xml{ render xml: {message: 'internal server error'}, status: 500 }
-        format.all{ render plain: 'internal server error', status: 500 }
+        format.json{render json: {message: 'internal server error'}, status: 500}
+        format.xml{render xml: {message: 'internal server error'}, status: 500}
+        format.all{render plain: 'internal server error', status: 500}
       end
     end
 
@@ -382,11 +400,11 @@ class ApplicationController < ActionController::Base
         ActionController::UnknownFormat,
         ActionDispatch::Http::MimeNegotiation::InvalidType
       ]
-      return if skip_for.any?{ |s| exception.is_a?(s) }
+      return if skip_for.any?{|s| exception.is_a?(s)}
 
       ExceptionNotifier.notify_exception(
         exception,
-        env: request.env, data: { message: 'was doing something wrong' }
+        env: request.env, data: {message: 'was doing something wrong'}
       )
     end
 
@@ -463,12 +481,12 @@ class ApplicationController < ActionController::Base
     end
 
     def zoom
-       case params[:zoom]
-       when 'true' then true
-       when 'false' then false
-       else
-         zoom_default
-       end
+      case params[:zoom]
+      when 'true' then true
+      when 'false' then false
+      else
+        zoom_default
+      end
     end
 
     def zoom_default
@@ -637,7 +655,7 @@ class ApplicationController < ActionController::Base
 
     def set_mandatory_fields(mandatory = default = true)
       mandatory = Set.new(default ? self.class.model_class::REQUIRED : mandatory)
-      @mandatory = HashWithIndifferentAccess.new { |h, k| h[k] = mandatory.include?(k.to_s) }
+      @mandatory = HashWithIndifferentAccess.new{|h, k| h[k] = mandatory.include?(k.to_s)}
     end
 
     def set_prompt_field(field)
@@ -734,7 +752,7 @@ class ApplicationController < ActionController::Base
           elsif access == 'false'
             false
           else
-            !(access.split('|') & user.role_titles).empty?
+            access.split('|').intersect?(user.role_titles)
           end
         else
           true
@@ -796,9 +814,9 @@ class ApplicationController < ActionController::Base
             'info' => rate_limit.info
           }
 
-          format.json{ render json: data, status: 503}
-          format.xml{ render xml: data, status: 503}
-          format.blob{ render nothing: true, layout: false, status: 503}
+          format.json{render json: data, status: 503}
+          format.xml{render xml: data, status: 503}
+          format.blob{render nothing: true, layout: false, status: 503}
 
           Rails.logger.info "RATE LIMIT EXCEEDED"
         end
@@ -836,13 +854,13 @@ class ApplicationController < ActionController::Base
       obj = instance_variable_get("@#{section}")
       obj = object.send(section) if (obj.nil? || obj.is_a?(String)) && object.respond_to?(section)
 
-      %w[count size].find { |method| return obj.send(method) if obj.respond_to?(method) }
+      %w[count size].find{|method| return obj.send(method) if obj.respond_to?(method)}
     end
 
     def section_partial(object, section, expanded = true, count = count_for_section(object, section), locals = {})
       {
         :partial => 'shared/misc/section',
-        :locals  => { :object => object, :section => section, :expanded => expanded, :count => count, :locals => locals}
+        :locals => {:object => object, :section => section, :expanded => expanded, :count => count, :locals => locals}
       }
     end
 
@@ -928,7 +946,7 @@ class ApplicationController < ActionController::Base
         account.extend_remember_me!
 
         cookies[:auth_token] = {
-          :value   => account.remember_token,
+          :value => account.remember_token,
           :expires => account.remember_token_expires_at
         }
       end
@@ -949,8 +967,8 @@ class ApplicationController < ActionController::Base
 
     def render_invalid_login_or_password
       respond_to do |format|
-        format.json { render json: {message: 'Invalid user name or password!'.t} }
-        format.xml { render xml: {message: 'Invalid user name or password!'.t} }
+        format.json{render json: {message: 'Invalid user name or password!'.t}}
+        format.xml{render xml: {message: 'Invalid user name or password!'.t}}
         format.html do
           flash.now[:warning] = [
             'Invalid user name or password!'.t,
@@ -972,8 +990,8 @@ class ApplicationController < ActionController::Base
       ]
 
       respond_to do |format|
-        format.json { render json: {message: 'Invalid user name or password!'.t} }
-        format.xml { render xml: {message: 'Invalid user name or password!'.t} }
+        format.json{render json: {message: 'Invalid user name or password!'.t}}
+        format.xml{render xml: {message: 'Invalid user name or password!'.t}}
         format.html do
           link = helpers.link_to(message[1], login_path(login: params[:login]))
           flash.now[:warning] = [message[0], link].join(' ').html_safe
@@ -995,12 +1013,12 @@ class ApplicationController < ActionController::Base
       return unless current_user
 
       if current_user.expired?
-        formatted_redirect_with_warning(nil, 'signup', 'license_form') {
+        formatted_redirect_with_warning(nil, 'signup', 'license_form') do
           [
             "Your #{'guest ' if current_user.mode == 'guest'}account has expired!".t,
             'Please obtain a new license in order to proceed.'.t
           ].join(' ')
-        }
+        end
       end
     end
 
@@ -1008,12 +1026,12 @@ class ApplicationController < ActionController::Base
       return unless current_user
 
       if current_user.status == 'deactivated'
-        formatted_redirect_with_warning(nil, 'signup', 'license_form') {
+        formatted_redirect_with_warning(nil, 'signup', 'license_form') do
           [
             "Your #{'guest ' if current_user.mode == 'guest'}account has been deactivated!".t,
             'Please obtain a new license in order to proceed.'.t
           ].join(' ')
-        }
+        end
       end
     end
 
@@ -1073,6 +1091,7 @@ class ApplicationController < ActionController::Base
     end
 
     def verify_account_terms_accepted
+      return if api_request?
       return unless current_user
 
       accepted =
@@ -1082,9 +1101,9 @@ class ApplicationController < ActionController::Base
         # TODO Remove German version of flash notice after the prometheus app has been updated for prometheus-ng.
         # The legacy app checks this sentence in German.
         flash[:prompt] = 'Bitte akzeptieren Sie unsere Nutzungsbedingungen bevor Sie das Bildarchiv betreten.'.t
-        formatted_response_with_message(flash[:prompt]) {
+        formatted_response_with_message(flash[:prompt]) do
           redirect_to controller: 'terms', action: 'edit', return_to: params[:return_to] || request.url
-        }
+        end
       end
     end
 
@@ -1107,14 +1126,13 @@ class ApplicationController < ActionController::Base
     end
 
     def formatted_redirect_with_warning(warning, controller, action, status = :forbidden)
-      formatted_response_with_message(warning ||= yield, status) {
-        # we want to keep potential messages from this request and show them
+      formatted_response_with_message(warning ||= yield, status) do # we want to keep potential messages from this request and show them
         # after the redirect
         flash.keep
 
         flash[:warning] = warning
         redirect_to controller: controller, action: action, id: current_user.login
-      }
+      end
     end
 
     # tries to find specified user settings value but instead of raising an
@@ -1125,7 +1143,7 @@ class ApplicationController < ActionController::Base
     # @return the setting when found and configured for the user or nil
     def try_setting(type, key)
       if current_user
-        if settings = current_user.send("#{type}_settings".to_sym)
+        if settings = current_user.send(:"#{type}_settings")
           settings[key]
         end
       end
@@ -1161,5 +1179,4 @@ class ApplicationController < ActionController::Base
     end
 
     initialize_me!
-
 end

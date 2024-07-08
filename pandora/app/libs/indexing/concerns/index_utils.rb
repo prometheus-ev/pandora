@@ -72,19 +72,19 @@ module Indexing::Concerns::IndexUtils
         # previous_index_name = alias_name + "_" + (current_index_version - 1).to_s
 
         # @todo sort_by_date ???
-        indices = index.client.indices.get(index: "#{alias_name}*" ).keys.sort
+        indices = index.client.indices.get(index: "#{alias_name}*").keys.sort
 
         if indices.length > 1
-           # ES API 5.0
-           # index.client.indices.rollover alias: alias_name, new_index: indices[0].to_s
+          # ES API 5.0
+          # index.client.indices.rollover alias: alias_name, new_index: indices[0].to_s
 
-           # ES API 2.0
-           index.client.indices.put_alias index: indices[0].to_s, name: alias_name
-           index.client.indices.delete_alias index: current_index_name, name: alias_name
-           index.delete(indices[-1])
-         else
-           puts "Only a single version of index #{alias_name} available, cannot rollback..."
-         end
+          # ES API 2.0
+          index.client.indices.put_alias index: indices[0].to_s, name: alias_name
+          index.client.indices.delete_alias index: current_index_name, name: alias_name
+          index.delete(indices[-1])
+        else
+          Pandora.puts "Only a single version of index #{alias_name} available, cannot rollback..."
+        end
       end
     end
 
@@ -104,7 +104,7 @@ module Indexing::Concerns::IndexUtils
     # @param log [Boolean] Enable the log.
     def info(log = false)
       index = Indexing::Index.new(log)
-      max_index_name = index.indices.max_by{ |x| x.length }
+      max_index_name = index.indices.max_by{|x| x.length}
       index.indices.each do |idx|
         aliases = index.client.indices.get_alias(index: idx)[idx]['aliases'].keys[0]
         index_settings = index.client.indices.get_settings(index: idx)
@@ -112,16 +112,16 @@ module Indexing::Concerns::IndexUtils
         time_in_seconds = time_in_milliseconds.to_i / 1000
         creation_date = DateTime.strptime(time_in_seconds.to_s, '%s')
         date = creation_date.strftime('%Y-%m-%d %I:%M%p')
-        records =  index.client.count(index: idx)['count']
-        printf "Indexing::Index: "
-        printf "%#{max_index_name.length}s", idx
-        printf ", Documents: "
-        printf "%10i", records
-        printf ", Created on: "
-        printf "%10s", date
-        printf ", Aliases: "
-        printf "%5s", aliases
-        printf "\n"
+        records = index.client.count(index: idx)['count']
+        Pandora.printf "Indexing::Index: "
+        Pandora.printf "%#{max_index_name.length}s", idx
+        Pandora.printf ", Documents: "
+        Pandora.printf "%10i", records
+        Pandora.printf ", Created on: "
+        Pandora.printf "%10s", date
+        Pandora.printf ", Aliases: "
+        Pandora.printf "%5s", aliases
+        Pandora.printf "\n"
       end
     end
 
@@ -181,7 +181,7 @@ module Indexing::Concerns::IndexUtils
       }
 
       if pretty
-        puts JSON.pretty_generate(result)
+        Pandora.puts JSON.pretty_generate(result)
       else
         result
       end
@@ -202,12 +202,12 @@ module Indexing::Concerns::IndexUtils
     def rate(pid, average, count, log = false)
       index = Indexing::Index.new(log)
       doc = {}
-      doc.merge!({ rating_average: average })
-      doc.merge!({ rating_count: count })
+      doc.merge!({rating_average: average})
+      doc.merge!({rating_count: count})
 
       index.client.update index: pid.split("-").first,
                           id: pid,
-                          body: { doc: doc },
+                          body: {doc: doc},
                           refresh: true
     end
 
@@ -219,13 +219,15 @@ module Indexing::Concerns::IndexUtils
     def comment(pid, text, count, log = false)
       index = Indexing::Index.new(log)
       doc = {}
-      doc.merge!({ user_comments: text })
-      doc.merge!({ comment_count: count })
+      doc.merge!({user_comments: text})
+      doc.merge!({comment_count: count})
 
-      index.client.update index: pid.split("-").first,
-                           id: pid,
-                           body: { doc: doc },
-                           refresh: true
+      index.client.update(
+        index: pid.split("-").first,
+        id: pid,
+        body: {doc: doc},
+        refresh: true
+      )
     end
 
     # Convenience method for processing indices.

@@ -34,7 +34,7 @@ class Indexing::Sources::Parents::Mainz < Indexing::SourceSuper
   end
 
   def artist_normalized
-    an = record.xpath('.//p_KuenstlerIn/text()').map { |a|
+    an = record.xpath('.//p_KuenstlerIn/text()').map {|a|
       a.to_s.gsub(/ \(.*/, '').split(', ').reverse.join(' ')
     }
     super(an)

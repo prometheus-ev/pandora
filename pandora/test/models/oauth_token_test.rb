@@ -31,7 +31,6 @@ class RequestTokenTest < ActiveSupport::TestCase
 end
 
 class RequestTokenContext01Test < ActiveSupport::TestCase
-
   # context: with user
   # context: with provided callback
 
@@ -52,7 +51,6 @@ class RequestTokenContext01Test < ActiveSupport::TestCase
 end
 
 class RequestTokenContext02Test < ActiveSupport::TestCase
-
   # context: with user
   # context: with provided callback
   # context: authorize request
@@ -82,7 +80,6 @@ class RequestTokenContext02Test < ActiveSupport::TestCase
 end
 
 class RequestTokenContext03Test < ActiveSupport::TestCase
-
   # context: with user
   # context: with provided callback
   # context: authorize request
@@ -119,7 +116,6 @@ class RequestTokenContext03Test < ActiveSupport::TestCase
 end
 
 class RequestTokenContext04Test < ActiveSupport::TestCase
-
   # context: with user
   # context: with provided callback
   # context: authorize request
@@ -143,7 +139,6 @@ class RequestTokenContext04Test < ActiveSupport::TestCase
 end
 
 class RequestTokenContext05Test < ActiveSupport::TestCase
-
   # context: with user
   # context: with provided callback
   # context: attempt exchange without authorization
@@ -165,7 +160,6 @@ class RequestTokenContext05Test < ActiveSupport::TestCase
 end
 
 class RequestTokenContext06Test < ActiveSupport::TestCase
-
   # context: with user
   # context: with oob callback
   # context: authorize request
@@ -195,7 +189,6 @@ class RequestTokenContext06Test < ActiveSupport::TestCase
 end
 
 class RequestTokenContext07Test < ActiveSupport::TestCase
-
   # context: with user
   # context: with oob callback
   # context: authorize request
@@ -224,7 +217,6 @@ class RequestTokenContext07Test < ActiveSupport::TestCase
 end
 
 class RequestTokenContext08Test < ActiveSupport::TestCase
-
   # context: with user
   # context: with oob callback
   # context: authorize request

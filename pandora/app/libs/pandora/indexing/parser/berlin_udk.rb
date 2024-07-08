@@ -4,6 +4,6 @@ class Pandora::Indexing::Parser::BerlinUdk < Pandora::Indexing::Parser::XmlReade
 
     super(
       source,
-      record_node_name: 'objekt')
+      record_node_name: "objekt")
   end
 end

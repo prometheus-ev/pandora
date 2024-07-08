@@ -206,11 +206,26 @@ class SourcesTest < ApplicationSystemTestCase
     assert_css '.description-line', count: 0
   end
 
+  test 'render translated descriptions' do
+    source = Source.find_by! name: 'test_source'
+    source.update(
+      description_de: 'Eine Test-Quelle'
+    )
+
+    login_as 'superadmin'
+    visit '/de/sources'
+
+    assert_text 'Eine Test-Quelle'
+    assert_text 'Datensätze mit Bezug zu Kunstgeschichte'
+  end
+
   test 'source ratings' do
     TestSource.index
 
     pid = pid_for(1)
-    si(pid).image.update(votes: 3)
+    image = si(pid).image
+    image.vote(5)
+    image.save
 
     login_as 'superadmin'
     click_on 'Administration'
@@ -221,7 +236,7 @@ class SourcesTest < ApplicationSystemTestCase
       click_on 'TEST-Source'
     end
     click_on '1 rating'
-    assert_text 'Ratings for Source'
+    assert_text '(1)'
     assert_text 'Katze auf Stuhl'
   end
 
@@ -312,6 +327,13 @@ class SourcesTest < ApplicationSystemTestCase
     assert_text 'successfully updated'
 
     assert_not database.reload.auto_approve_records
+  end
+
+  test "non-existent source shouldn't trigger 500" do
+    login_as 'superadmin'
+    visit '/en/sources/noexist'
+
+    assert_text 'A source with name noexist does not exist!'
   end
 
   # see #417, dropped

@@ -38,7 +38,7 @@ class SignupControllerTest < ActionDispatch::IntegrationTest
   test 'mail address confirmation link (invalid)' do
     jdoe = Account.find_by! login: 'jdoe'
     jdoe.update_column :email_verified_at, nil
-    
+
     timestamp, token = jdoe.token_auth
 
     get '/en/confirm_email_linkback', params: {

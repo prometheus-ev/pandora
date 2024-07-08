@@ -10,8 +10,8 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.0].define(version: 2023_06_12_064940) do
-  create_table "accounts", id: :integer, charset: "utf8", force: :cascade do |t|
+ActiveRecord::Schema[7.1].define(version: 2024_04_26_094044) do
+  create_table "accounts", id: :integer, charset: "utf8mb3", collation: "utf8mb3_general_ci", force: :cascade do |t|
     t.string "email"
     t.string "login"
     t.string "firstname"
@@ -59,32 +59,32 @@ ActiveRecord::Schema[7.0].define(version: 2023_06_12_064940) do
     t.index ["remember_token"], name: "index_accounts_on_remember_token"
   end
 
-  create_table "accounts_images", id: false, charset: "utf8", force: :cascade do |t|
+  create_table "accounts_images", id: false, charset: "utf8mb3", collation: "utf8mb3_general_ci", force: :cascade do |t|
     t.integer "account_id"
     t.string "image_id"
     t.index ["account_id", "image_id"], name: "index_accounts_images_on_account_id_and_image_id"
   end
 
-  create_table "accounts_institutions", id: false, charset: "utf8", force: :cascade do |t|
+  create_table "accounts_institutions", id: false, charset: "utf8mb3", collation: "utf8mb3_general_ci", force: :cascade do |t|
     t.integer "institution_id"
     t.integer "account_id"
     t.index ["account_id", "institution_id"], name: "index_accounts_institutions_on_account_id_and_institution_id"
   end
 
-  create_table "accounts_roles", id: false, charset: "utf8", force: :cascade do |t|
+  create_table "accounts_roles", id: false, charset: "utf8mb3", collation: "utf8mb3_general_ci", force: :cascade do |t|
     t.integer "account_id"
     t.integer "role_id"
     t.index ["account_id", "role_id"], name: "index_accounts_roles_on_account_id_and_role_id"
   end
 
-  create_table "admins_sources", id: false, charset: "utf8", force: :cascade do |t|
+  create_table "admins_sources", id: false, charset: "utf8mb3", collation: "utf8mb3_general_ci", force: :cascade do |t|
     t.bigint "account_id"
     t.bigint "source_id"
     t.index ["account_id"], name: "index_admins_sources_on_account_id"
     t.index ["source_id"], name: "index_admins_sources_on_source_id"
   end
 
-  create_table "announcements", charset: "utf8", collation: "utf8_unicode_ci", force: :cascade do |t|
+  create_table "announcements", charset: "utf8mb3", collation: "utf8mb3_unicode_ci", force: :cascade do |t|
     t.datetime "starts_at", precision: nil
     t.datetime "ends_at", precision: nil
     t.datetime "created_at", precision: nil, null: false
@@ -96,7 +96,7 @@ ActiveRecord::Schema[7.0].define(version: 2023_06_12_064940) do
     t.text "body_en"
   end
 
-  create_table "boxes", id: :integer, charset: "utf8", force: :cascade do |t|
+  create_table "boxes", id: :integer, charset: "utf8mb3", collation: "utf8mb3_general_ci", force: :cascade do |t|
     t.string "image_id"
     t.string "ref_type"
     t.integer "owner_id"
@@ -110,13 +110,13 @@ ActiveRecord::Schema[7.0].define(version: 2023_06_12_064940) do
     t.index ["owner_id"], name: "index_boxes_on_owner_id"
   end
 
-  create_table "brain_busters", id: :integer, charset: "utf8", force: :cascade do |t|
+  create_table "brain_busters", id: :integer, charset: "utf8mb3", collation: "utf8mb3_general_ci", force: :cascade do |t|
     t.string "question"
     t.string "answer"
     t.string "lang", default: "en"
   end
 
-  create_table "client_applications", id: :integer, charset: "utf8", force: :cascade do |t|
+  create_table "client_applications", id: :integer, charset: "utf8mb3", collation: "utf8mb3_general_ci", force: :cascade do |t|
     t.string "name"
     t.string "url"
     t.string "support_url"
@@ -128,7 +128,7 @@ ActiveRecord::Schema[7.0].define(version: 2023_06_12_064940) do
     t.index ["key"], name: "index_client_applications_on_key", unique: true
   end
 
-  create_table "collections", id: :integer, charset: "utf8", force: :cascade do |t|
+  create_table "collections", id: :integer, charset: "utf8mb3", collation: "utf8mb3_general_ci", force: :cascade do |t|
     t.string "title"
     t.text "description"
     t.datetime "created_at", precision: nil
@@ -147,13 +147,13 @@ ActiveRecord::Schema[7.0].define(version: 2023_06_12_064940) do
     t.index ["title"], name: "index_collections_on_title"
   end
 
-  create_table "collections_collaborators", id: false, charset: "utf8", force: :cascade do |t|
+  create_table "collections_collaborators", id: false, charset: "utf8mb3", collation: "utf8mb3_general_ci", force: :cascade do |t|
     t.integer "collection_id"
     t.integer "account_id"
     t.index ["account_id", "collection_id"], name: "index_collections_collaborators_on_account_id_and_collection_id"
   end
 
-  create_table "collections_images", id: false, charset: "utf8", force: :cascade do |t|
+  create_table "collections_images", id: false, charset: "utf8mb3", collation: "utf8mb3_general_ci", force: :cascade do |t|
     t.integer "collection_id"
     t.string "image_id"
     t.datetime "created_at", precision: nil
@@ -161,19 +161,19 @@ ActiveRecord::Schema[7.0].define(version: 2023_06_12_064940) do
     t.index ["image_id", "collection_id"], name: "index_collections_images_on_image_id_and_collection_id"
   end
 
-  create_table "collections_keywords", charset: "utf8", force: :cascade do |t|
+  create_table "collections_keywords", charset: "utf8mb3", collation: "utf8mb3_general_ci", force: :cascade do |t|
     t.integer "keyword_id"
     t.integer "collection_id"
     t.index ["collection_id", "keyword_id"], name: "index_collections_keywords_on_collection_id_and_keyword_id"
   end
 
-  create_table "collections_viewers", id: false, charset: "utf8", force: :cascade do |t|
+  create_table "collections_viewers", id: false, charset: "utf8mb3", collation: "utf8mb3_general_ci", force: :cascade do |t|
     t.integer "collection_id"
     t.integer "account_id"
     t.index ["collection_id", "account_id"], name: "index_collections_viewers_on_collection_id_and_account_id"
   end
 
-  create_table "comments", id: :integer, charset: "utf8", force: :cascade do |t|
+  create_table "comments", id: :integer, charset: "utf8mb3", collation: "utf8mb3_general_ci", force: :cascade do |t|
     t.integer "collection_id"
     t.integer "parent_id"
     t.integer "author_id"
@@ -183,7 +183,7 @@ ActiveRecord::Schema[7.0].define(version: 2023_06_12_064940) do
     t.string "image_id"
   end
 
-  create_table "emails", id: :integer, charset: "utf8", force: :cascade do |t|
+  create_table "emails", id: :integer, charset: "utf8mb3", collation: "utf8mb3_general_ci", force: :cascade do |t|
     t.string "from"
     t.string "reply_to"
     t.text "to"
@@ -204,7 +204,7 @@ ActiveRecord::Schema[7.0].define(version: 2023_06_12_064940) do
     t.text "body_html_de"
   end
 
-  create_table "images", primary_key: "pid", id: :string, charset: "utf8", force: :cascade do |t|
+  create_table "images", primary_key: "pid", id: :string, charset: "utf8mb3", collation: "utf8mb3_general_ci", force: :cascade do |t|
     t.integer "source_id"
     t.integer "votes", default: 0
     t.integer "score", default: 0
@@ -213,7 +213,7 @@ ActiveRecord::Schema[7.0].define(version: 2023_06_12_064940) do
     t.index ["source_id"], name: "index_resources_on_source_id"
   end
 
-  create_table "institutions", id: :integer, charset: "utf8", force: :cascade do |t|
+  create_table "institutions", id: :integer, charset: "utf8mb3", collation: "utf8mb3_general_ci", force: :cascade do |t|
     t.string "name"
     t.string "title"
     t.text "description"
@@ -241,31 +241,31 @@ ActiveRecord::Schema[7.0].define(version: 2023_06_12_064940) do
     t.index ["name"], name: "index_institutions_on_name"
   end
 
-  create_table "keywords", id: :integer, charset: "utf8", force: :cascade do |t|
+  create_table "keywords", id: :integer, charset: "utf8mb3", collation: "utf8mb3_general_ci", force: :cascade do |t|
     t.string "title_de"
     t.string "title"
     t.index ["title", "title_de"], name: "titly"
   end
 
-  create_table "keywords_sources", charset: "utf8", force: :cascade do |t|
+  create_table "keywords_sources", charset: "utf8mb3", collation: "utf8mb3_general_ci", force: :cascade do |t|
     t.integer "keyword_id"
     t.integer "source_id"
     t.index ["keyword_id", "source_id"], name: "index_keywords_sources_on_keyword_id_and_source_id"
   end
 
-  create_table "keywords_uploads", charset: "utf8", force: :cascade do |t|
+  create_table "keywords_uploads", charset: "utf8mb3", collation: "utf8mb3_general_ci", force: :cascade do |t|
     t.integer "keyword_id"
     t.integer "upload_id"
     t.index ["keyword_id", "upload_id"], name: "index_keywords_uploads_on_keyword_id_and_upload_id"
   end
 
-  create_table "license_types", id: :integer, charset: "utf8", force: :cascade do |t|
+  create_table "license_types", id: :integer, charset: "utf8mb3", collation: "utf8mb3_general_ci", force: :cascade do |t|
     t.string "title"
     t.integer "amount"
     t.index ["title"], name: "index_license_types_on_title"
   end
 
-  create_table "licenses", id: :integer, charset: "utf8", force: :cascade do |t|
+  create_table "licenses", id: :integer, charset: "utf8mb3", collation: "utf8mb3_general_ci", force: :cascade do |t|
     t.integer "license_type_id"
     t.integer "institution_id"
     t.integer "account_id"
@@ -281,7 +281,7 @@ ActiveRecord::Schema[7.0].define(version: 2023_06_12_064940) do
     t.index ["license_type_id"], name: "index_licenses_on_license_type_id"
   end
 
-  create_table "locations", id: :integer, charset: "utf8", force: :cascade do |t|
+  create_table "locations", id: :integer, charset: "utf8mb3", collation: "utf8mb3_general_ci", force: :cascade do |t|
     t.integer "owner_id"
     t.string "image_id"
     t.float "latitude"
@@ -290,7 +290,7 @@ ActiveRecord::Schema[7.0].define(version: 2023_06_12_064940) do
     t.datetime "updated_at", precision: nil
   end
 
-  create_table "oauth_nonces", id: :integer, charset: "utf8", force: :cascade do |t|
+  create_table "oauth_nonces", id: :integer, charset: "utf8mb3", collation: "utf8mb3_general_ci", force: :cascade do |t|
     t.string "nonce"
     t.integer "timestamp"
     t.datetime "created_at", precision: nil
@@ -298,7 +298,7 @@ ActiveRecord::Schema[7.0].define(version: 2023_06_12_064940) do
     t.index ["nonce", "timestamp"], name: "index_oauth_nonces_on_nonce_and_timestamp", unique: true
   end
 
-  create_table "oauth_tokens", id: :integer, charset: "utf8", force: :cascade do |t|
+  create_table "oauth_tokens", id: :integer, charset: "utf8mb3", collation: "utf8mb3_general_ci", force: :cascade do |t|
     t.integer "user_id"
     t.string "type"
     t.integer "client_application_id"
@@ -313,7 +313,7 @@ ActiveRecord::Schema[7.0].define(version: 2023_06_12_064940) do
     t.index ["token"], name: "index_oauth_tokens_on_token", unique: true
   end
 
-  create_table "payment_transactions", id: :integer, charset: "utf8", force: :cascade do |t|
+  create_table "payment_transactions", id: :integer, charset: "utf8mb3", collation: "utf8mb3_general_ci", force: :cascade do |t|
     t.integer "price"
     t.datetime "created_at", precision: nil
     t.datetime "updated_at", precision: nil
@@ -324,30 +324,30 @@ ActiveRecord::Schema[7.0].define(version: 2023_06_12_064940) do
     t.string "pp_transaction_id"
   end
 
-  create_table "rate_limits", id: :integer, charset: "utf8", force: :cascade do |t|
+  create_table "rate_limits", id: :integer, charset: "utf8mb3", collation: "utf8mb3_general_ci", force: :cascade do |t|
     t.string "key"
     t.string "timestamp"
     t.integer "count", default: 0
     t.index ["key", "timestamp"], name: "index_rate_limits_on_key_and_timestamp"
   end
 
-  create_table "roles", id: :integer, charset: "utf8", force: :cascade do |t|
+  create_table "roles", id: :integer, charset: "utf8mb3", collation: "utf8mb3_general_ci", force: :cascade do |t|
     t.string "title"
     t.index ["title"], name: "index_roles_on_title"
   end
 
-  create_table "schema_info", id: false, charset: "utf8", force: :cascade do |t|
+  create_table "schema_info", id: false, charset: "utf8mb3", collation: "utf8mb3_general_ci", force: :cascade do |t|
     t.integer "version"
   end
 
-  create_table "sessions", id: :integer, charset: "utf8", force: :cascade do |t|
+  create_table "sessions", id: :integer, charset: "utf8mb3", collation: "utf8mb3_general_ci", force: :cascade do |t|
     t.string "session_id"
     t.datetime "updated_at", precision: nil
     t.text "data", size: :long
     t.index ["session_id"], name: "index_sessions_on_session_id"
   end
 
-  create_table "settings", id: :integer, charset: "utf8", force: :cascade do |t|
+  create_table "settings", id: :integer, charset: "utf8mb3", collation: "utf8mb3_general_ci", force: :cascade do |t|
     t.integer "user_id"
     t.string "type"
     t.boolean "zoom"
@@ -365,14 +365,14 @@ ActiveRecord::Schema[7.0].define(version: 2023_06_12_064940) do
     t.index ["type", "user_id"], name: "index_settings_on_type_and_user_id"
   end
 
-  create_table "short_urls", id: :integer, charset: "utf8", force: :cascade do |t|
+  create_table "short_urls", id: :integer, charset: "utf8mb3", collation: "utf8mb3_general_ci", force: :cascade do |t|
     t.text "url"
     t.string "token"
     t.datetime "created_at", precision: nil
     t.datetime "updated_at", precision: nil
   end
 
-  create_table "sources", id: :integer, charset: "utf8", force: :cascade do |t|
+  create_table "sources", id: :integer, charset: "utf8mb3", collation: "utf8mb3_general_ci", force: :cascade do |t|
     t.string "title"
     t.string "name"
     t.string "kind"
@@ -408,7 +408,7 @@ ActiveRecord::Schema[7.0].define(version: 2023_06_12_064940) do
     t.index ["owner_type", "owner_id"], name: "index_sources_on_owner_type_and_owner_id"
   end
 
-  create_table "sum_stats", id: :integer, charset: "utf8", force: :cascade do |t|
+  create_table "sum_stats", id: :integer, charset: "utf8mb3", collation: "utf8mb3_general_ci", force: :cascade do |t|
     t.integer "year"
     t.integer "month"
     t.integer "day"
@@ -427,20 +427,19 @@ ActiveRecord::Schema[7.0].define(version: 2023_06_12_064940) do
     t.index ["year", "month", "day"], name: "index_sum_stats_on_year_and_month_and_day"
   end
 
-  create_table "uploads", id: :integer, charset: "utf8", force: :cascade do |t|
+  create_table "uploads", id: :integer, charset: "utf8mb3", collation: "utf8mb3_general_ci", force: :cascade do |t|
     t.integer "parent_id"
-    t.integer "owner_id"
     t.string "image_id"
     t.boolean "approved_record", default: false
     t.string "filename_extension"
     t.float "file_size"
     t.string "artist"
-    t.string "title", default: ""
+    t.text "title", default: ""
     t.string "resource_title"
     t.string "location"
     t.float "latitude"
     t.float "longitude"
-    t.string "discoveryplace"
+    t.text "discoveryplace"
     t.string "genre"
     t.string "material"
     t.text "description"
@@ -453,7 +452,7 @@ ActiveRecord::Schema[7.0].define(version: 2023_06_12_064940) do
     t.string "iconography"
     t.string "institution"
     t.string "inventory_no"
-    t.string "origin"
+    t.text "origin"
     t.string "other_persons"
     t.string "photographer"
     t.string "size"
@@ -472,11 +471,10 @@ ActiveRecord::Schema[7.0].define(version: 2023_06_12_064940) do
     t.boolean "add_to_index"
     t.index ["database_id"], name: "index_uploads_on_database_id"
     t.index ["image_id"], name: "index_uploads_on_image_id"
-    t.index ["owner_id"], name: "index_uploads_on_owner_id"
     t.index ["parent_id"], name: "index_uploads_on_parent_id"
   end
 
-  create_table "user_metadata", charset: "utf8", force: :cascade do |t|
+  create_table "user_metadata", charset: "utf8mb3", collation: "utf8mb3_general_ci", force: :cascade do |t|
     t.string "pid"
     t.text "updates"
     t.datetime "created_at", null: false

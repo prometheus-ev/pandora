@@ -26,9 +26,9 @@ class Pandora::Indexing::Parser::DadawebRecord < Pandora::Indexing::Parser::Reco
   def artist_normalized
     return @artist_normalized if @artist_normalized
 
-    an = "#{record.xpath('.//zzzPerson/text()')}".split(" \/ ").map { |a|
+    an = "#{record.xpath('.//zzzPerson/text()')}".split(" \/ ").map do |a|
       a.to_s.sub(/ \(.*/, '').split(', ').reverse.join(' ')
-    }
+    end
 
     @artist_normalized = @artist_parser.normalize(an)
   end
@@ -50,9 +50,9 @@ class Pandora::Indexing::Parser::DadawebRecord < Pandora::Indexing::Parser::Reco
   end
 
   def location
-    (record.xpath('.//zzzStandort/text()') + record.xpath('.//zzzInstitution/text()')).map { |location|
+    (record.xpath('.//zzzStandort/text()') + record.xpath('.//zzzInstitution/text()')).map {|location|
       location.to_s.gsub(/Standort: /, '')
-    }.delete_if { |location|
+    }.delete_if {|location|
       location.blank?
     }.join(", ")
   end
@@ -62,11 +62,18 @@ class Pandora::Indexing::Parser::DadawebRecord < Pandora::Indexing::Parser::Reco
   end
 
   def size
-    size = "#{record.at_xpath('.//zzzDim_H/text()')} x #{record.at_xpath('.//zzzDim_B/text()')} x #{record.at_xpath('.//zzzDim_T/text()')}"
-    size = size.gsub(/ x  x /, "")
-    size = size.gsub(/\A x /, "")
-    size = size.gsub(/ x \z/, "")
-    size = size + " " + "#{record.at_xpath('.//zzzDim_Format/text()')}" unless size.blank?
+    dimensions = {
+      'H' => record.at_xpath('.//zzzDim_H/text()').to_s,
+      'B' => record.at_xpath('.//zzzDim_B/text()').to_s,
+      'T' => record.at_xpath('.//zzzDim_T/text()').to_s
+    }
+    unit = record.at_xpath('.//zzzDim_Format/text()').to_s
+
+    dimensions.each do |key, value|
+      dimensions[key] = "#{key}: #{value} #{unit}" unless value.blank?
+    end
+
+    dimensions.values.reject(&:blank?).join(' x ')
   end
 
   def genre

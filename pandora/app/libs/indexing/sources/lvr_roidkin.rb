@@ -58,11 +58,11 @@ class Indexing::Sources::LvrRoidkin < Indexing::SourceSuper
     record.xpath('.//Gattung/text()')
   end
 
-  def description 
+  def description
     record.xpath('.//Beschreibung/text()')
   end
 
-  def provenance 
+  def provenance
     record.xpath('.//Herkunft_Provenienz/text()')
   end
 

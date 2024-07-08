@@ -1,10 +1,9 @@
 class SourcesController < ApplicationController
-
   include Util::Config
 
   skip_before_action :login_required, :only => [:index, :open_access, :open_access_login, :show]
 
-  def self.initialize_me!  # :nodoc:
+  def self.initialize_me! # :nodoc:
     control_access [:superadmin, :admin] => :ALL,
                    :dbadmin => [:edit, :update, :ratings],
                    :DEFAULT => [:index, :open_access, :open_access_login, :show]
@@ -23,12 +22,12 @@ class SourcesController < ApplicationController
     )
     @sources_counts = Pandora::Elastic.new.counts
 
-    respond_to { |format|
+    respond_to do |format|
       format.html
-      format.json {
+      format.json do
         render json: @sources.to_json
-      }
-    }
+      end
+    end
   end
 
   api_method :list, get: {
@@ -45,7 +44,7 @@ class SourcesController < ApplicationController
         type: 'positiveInteger'
       }
     },
-    returns: { json: {} }
+    returns: {json: {}}
   }
 
   def open_access
@@ -60,14 +59,14 @@ class SourcesController < ApplicationController
       )
       @sources_counts = Pandora::Elastic.new.counts
 
-      respond_to { |format|
-        format.html {
+      respond_to do |format|
+        format.html do
           render :index
-        }
-        format.json {
+        end
+        format.json do
           render :json => @sources
-        }
-      }
+        end
+      end
     else
       flash[:warning] = 'Sorry, there are currently no databases available for Open Access.'.t
       redirect_back(fallback_location: locale_root_url)
@@ -105,21 +104,21 @@ class SourcesController < ApplicationController
   end
 
   def show
-    @source = record(:read)
+    @source = record(:read) or return
     @source_counts = Pandora::Elastic.new.counts[@source.name]
 
-    respond_to { |format|
+    respond_to do |format|
       format.html
-      format.json {
+      format.json do
         render :json => @source.to_json
-      }
-    }
+      end
+    end
   end
 
   api_method :show, :get => {
     :doc => 'Get a source record.',
-    :expects => { :id => { :type => 'string', :required => true, :doc => 'The id of the source record.' } },
-    :returns => { :json => {} }
+    :expects => {:id => {:type => 'string', :required => true, :doc => 'The id of the source record.'}},
+    :returns => {:json => {}}
   }
 
   def new
@@ -179,7 +178,7 @@ class SourcesController < ApplicationController
     # Source state before update:
     @institution = @source.institution
     @contact = @source.contact
-    @admins          = @source.source_admins
+    @admins = @source.source_admins
 
     source_params_permitted = prepare_source_params_for_update(source_params)
 
@@ -203,14 +202,13 @@ class SourcesController < ApplicationController
 
 
   private
-  #############################################################################
 
     def source_params
       params.fetch(:source, {}).permit(
         :name, :title, :email, :url,
         :institution, :kind, :type,
         :keyword_list,
-        :contact, { admins: [] },
+        :contact, {admins: []},
         :open_access,
         :can_exploit_rights,
         :description, :technical_info,
@@ -270,5 +268,4 @@ class SourcesController < ApplicationController
     def sort_column_default
       'title'
     end
-
 end

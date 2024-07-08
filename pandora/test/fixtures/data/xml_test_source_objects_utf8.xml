@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<root>
+<row>
+  <Höhe>130</Höhe>
+  <Material>Öl auf Leinwand</Material>
+  <KünstlerIn>Richter, Göttfried</KünstlerIn>
+  <Gattung>Malerei</Gattung>
+  <Ob_f41>280</Ob_f41>
+  <ObjektId>1</ObjektId>
+  <Datierung>um 1958</Datierung>
+  <Einheit>cm</Einheit>
+  <Breite>162</Breite>
+  <Titel>Geballte Kraft oder Das zwanzigste Jahrhundert</Titel>
+  <Standort>Kunstarchiv Beeskow</Standort>
+</row>
+<row>
+  <Höhe>97</Höhe>
+  <Material>Öl auf Leinwand</Material>
+  <KünstlerIn>Hegewald, Michäel</KünstlerIn>
+  <Gattung>Malerei</Gattung>
+  <Ob_f41>284</Ob_f41>
+  <ObjektId>1</ObjektId>
+  <Datierung>1989</Datierung>
+  <Einheit>cm</Einheit>
+  <Breite>138</Breite>
+  <Titel>Berlin</Titel>
+  <Standort>Kunstarchiv Beeskow</Standort>
+</row>
+<row>
+  <Höhe>112</Höhe>
+  <Material>Öl auf Hartfaser</Material>
+  <KünstlerIn>Nicolaus, Röland</KünstlerIn>
+  <Gattung>Malerei</Gattung>
+  <Ob_f41>367</Ob_f41>
+  <ObjektId>2</ObjektId>
+  <Datierung>1988</Datierung>
+  <Einheit>cm</Einheit>
+  <Breite>86</Breite>
+  <Titel>Stadtlandschaft</Titel>
+  <Standort>Kunstarchiv Beeskow</Standort>
+</row>
+</root>

@@ -7,7 +7,8 @@ class ApplicationControllerIntegrationTest < ActionDispatch::IntegrationTest
     assert_match '/en/login', response.location
 
     # with (wrong) basic auth credentials, we should get a proper 401
-    get('/en/image/heidicon_kg-090f8f0281d685234a265072de6ca18f6b56ddd4',
+    get(
+      '/en/image/heidicon_kg-090f8f0281d685234a265072de6ca18f6b56ddd4',
       headers: api_auth('jdoe', 'wrong-secret')
     )
     assert_equal 401, response.status

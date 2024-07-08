@@ -12,7 +12,12 @@
 </tr>
 <tr>
   <th><label for="user_country"><%= 'Country'.t %></label></th>
-  <td><%= f.country_select :country, PRIORITY_COUNTRIES, {}, options_for_field(:country) %></td>
+  <td>
+    <%= f.country_select(
+      :country,
+      {priority_countries: PRIORITY_COUNTRIES},
+      options_for_field(:country)) %>
+  </td>
 </tr>
 <% restrict_to :superadmin, :admin do -%>
 <tr>

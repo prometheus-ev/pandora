@@ -1,6 +1,19 @@
 <%
   active = case controller_name
-  when 'searches', 'images' then 'searches'
+  when 'searches' then 'searches'
+  when 'images'
+    if params[:collection_id].present?
+      'collections'
+    else
+      if action_name == 'show' &&
+         @super_image.present? &&
+         @super_image.upload? &&
+         @super_image.upload.database == current_user.database
+        'uploads'
+      else
+        'searches'
+      end
+    end
   when 'collections' then 'collections'
   when 'institutional_uploads', 'uploads' then 'uploads'
   else 'administration'

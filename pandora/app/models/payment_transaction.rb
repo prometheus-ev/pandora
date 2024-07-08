@@ -1,5 +1,4 @@
 class PaymentTransaction < ApplicationRecord
-
   include Util::Config
 
   belongs_to :client, :class_name => 'Account', :foreign_key => 'client_id'
@@ -10,9 +9,10 @@ class PaymentTransaction < ApplicationRecord
     "https://www.paypal.com/cgi-bin/webscr?"
   end
   PP_SELLER_ID = ENV['PM_PAYPAL_SELLER_ID']
-  CURRENCY  = 'EUR'
+  CURRENCY = 'EUR'
 
-  validates_inclusion_of(:status,
+  validates_inclusion_of(
+    :status,
     in: ['initialized', 'confirmed', 'succeeded', 'failed']
   )
   validates_inclusion_of :service, in: ['paypal']
@@ -88,11 +88,11 @@ class PaymentTransaction < ApplicationRecord
   end
 
   def pp_confirm(params)
-    if status == 'initialized'                   &&
-        params[:payment_status] == 'Completed'   &&
-        params[:mc_currency]    == CURRENCY      &&
-        params[:mc_gross].to_f  == price / 100.0 &&
-        params[:business]       == PP_SELLER_ID  &&
+    if status == 'initialized' &&
+        params[:payment_status] == 'Completed' &&
+        params[:mc_currency] == CURRENCY &&
+        params[:mc_gross].to_f.round(3) == (price / 100.0).round(3) &&
+        params[:business] == PP_SELLER_ID &&
         !PaymentTransaction.exists?(:pp_transaction_id => params[:txn_id])
 
       self.pp_transaction_id = params[:txn_id]
@@ -121,17 +121,16 @@ class PaymentTransaction < ApplicationRecord
       invoice_id = (Rails.env.production? ? self.id : self.class.generate_uuid)
 
       {
-        :business      => PP_SELLER_ID,
-        :cmd           => '_xclick',
-        :item_name     => 'prometheus License (#%s)'.t % id,
-        :amount        => price / 100.0,
+        :business => PP_SELLER_ID,
+        :cmd => '_xclick',
+        :item_name => 'prometheus License (#%s)'.t % id,
+        :amount => price / 100.0,
         :currency_code => CURRENCY,
-        :return        => "#{self.class.root_url}/account/payment_status/#{client_id}/#{id}",
+        :return => "#{self.class.root_url}/account/payment_status/#{client_id}/#{id}",
         :cancel_return => "#{self.class.root_url}/license",
-        :invoice       => invoice_id
-      }.tap { |params|
+        :invoice => invoice_id
+      }.tap {|params|
         params[:test_ipn] = 1 if ENV['PM_PAYPAL_SANDBOX'] == 'true'
       }
     end
-
 end

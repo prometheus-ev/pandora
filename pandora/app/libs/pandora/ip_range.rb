@@ -9,6 +9,7 @@ class Pandora::IpRange
 
   def ==(other)
     return false if other == :invalid
+
     from == other.from && to == other.to && options == other.options
   end
 
@@ -52,12 +53,9 @@ class Pandora::IpRange
       a = ip
       b = ip
     # 10.0.50.70-10.0.50.80
-    elsif str.match(/(\d+\.){3}\d+-(\d+\.){3}\d+/)
-      a, b = str.split('-')
-      a = to_ip(a)
-      b = to_ip(b)
     # 10.0.50-10.0.60
-    elsif str.match(/(\d+\.){2}\d+-(\d+\.){2}\d+/)
+    elsif str.match(/(\d+\.){3}\d+-(\d+\.){3}\d+/) ||
+          str.match(/(\d+\.){2}\d+-(\d+\.){2}\d+/)
       a, b = str.split('-')
       a = to_ip(a)
       b = to_ip(b)

@@ -5,6 +5,12 @@ require 'cgi'
 class RackImages::Resizer
   attr_reader :content_type
 
+  def initialize(opts = {})
+    @db = opts[:source]
+    @upstream_path = opts[:upstream_path]
+    @curl_transfer_max_time = opts[:curl_transfer_max_time] || "10"
+  end
+
   def run(path)
     @content_type = 'image/jpeg'
 
@@ -229,12 +235,13 @@ class RackImages::Resizer
     # we do this with curl since it reliably supports https proxies and this
     # is a relatively rare process (so no performance issues expected by
     # spawning a process each time)
-    Dir.mktmpdir 'rack-images-' do |dir|
-      tmp_file = "#{dir}/image.dat"
-      cmd = ['curl', '-L', '--fail', '--max-time', '10']
-      cmd << "--proxy \"#{proxy}\"" if proxy
-      cmd << url
+    tmp_dir = Dir.mktmpdir('rack-images-')
+    tmp_file = "#{tmp_dir}/image.dat"
+    cmd = ['curl', '-L', '--fail', '--max-time', @curl_transfer_max_time]
+    cmd << "--proxy \"#{proxy}\"" if proxy
+    cmd << url
 
+    begin
       status, stdout, stderr = RackImages.run(cmd, stdout: tmp_file)
 
       if status == 0
@@ -243,6 +250,8 @@ class RackImages::Resizer
       else
         fail_with "url #{url} could not be retrieved. Command used: #{cmd.inspect}, stderr: #{stderr}"
       end
+    ensure
+      FileUtils.remove_entry(tmp_dir) if File.exist?(tmp_dir)
     end
   end
 

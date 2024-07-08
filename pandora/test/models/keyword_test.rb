@@ -30,8 +30,8 @@ class KeywordTest < ActiveSupport::TestCase
     assert_equal 1, italy.collections.count
   end
 
-  test 'search by keyword only uses current locale' do
-    assert_equal 0, Collection.search('keywords', 'Italien').count
+  test 'search by keyword only uses both locales' do
+    assert_equal 1, Collection.search('keywords', 'Italien').count
     assert_equal 1, Collection.search('keywords', 'Italy').count
 
     assert_equal 0, Source.search('keywords', 'Archäologie').count
@@ -42,7 +42,7 @@ class KeywordTest < ActiveSupport::TestCase
 
     with_locale :de do
       assert_equal 1, Collection.search('keywords', 'Italien').count
-      assert_equal 0, Collection.search('keywords', 'Italy').count
+      assert_equal 1, Collection.search('keywords', 'Italy').count
 
       assert_equal 1, Source.search('keywords', 'Archäologie').count
       assert_equal 0, Source.search('keywords', 'art history').count

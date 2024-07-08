@@ -4,7 +4,6 @@ require 'json'
 
 namespace :harvest do
   namespace :paris_musees do
-
     URL = "http://apicollections.parismusees.paris.fr/graphql"
     CONTENT_TYPE = "application/json"
     AUTHENTICATION_TOKEN = "secret"
@@ -13,7 +12,7 @@ namespace :harvest do
     START_OFFSET = 0
 
     # Lists all artworks with free image
-    QUERY = "{ 
+    QUERY = "{
       nodeQuery(
         filter: {
           conditions:[
@@ -26,7 +25,7 @@ namespace :harvest do
         ]
         limit: #{QUERY_LIMIT.to_s}
         offset: #{START_OFFSET.to_s}
-      ) 
+      )
       {
         count
         entities {
@@ -194,8 +193,8 @@ namespace :harvest do
                 entityId
                 name
                 fieldMuseeTitreCourt
-                fieldMuseeLogo { 
-                  url 
+                fieldMuseeLogo {
+                  url
                 }
                 fieldAdresse {
                   countryCode
@@ -220,7 +219,7 @@ namespace :harvest do
               }
             }
             fieldReferenceExport {
-              value 
+              value
             }
             fieldOeuvreEpoquePeriode {
               entity {
@@ -407,7 +406,7 @@ namespace :harvest do
                     fieldPipNomEquivalent
                   }
                 }
-                
+
                 fieldArchiveDatePrecise {
                   value
                   date
@@ -461,7 +460,7 @@ namespace :harvest do
 
       response = request_data(uri, 0 + START_OFFSET)
       json_response = JSON.parse(response.body)
-      
+
       count_global = json_response["data"]["nodeQuery"]["count"]
       count = count_global.to_i - START_OFFSET * QUERY_LIMIT
 
@@ -470,14 +469,14 @@ namespace :harvest do
       max_i = (count.to_f / QUERY_LIMIT.to_f).ceil
 
       (1...max_i).each do |i|
-      begin
-        response = request_data(uri, START_OFFSET + (i * QUERY_LIMIT))
-        json_response = JSON.parse(response.body)
-      rescue JSON::ParserError # for 502 Bad Gateway response
-        sleep 60
-        retry
-      end
-        
+        begin
+          response = request_data(uri, START_OFFSET + (i * QUERY_LIMIT))
+          json_response = JSON.parse(response.body)
+        rescue JSON::ParserError # for 502 Bad Gateway response
+          sleep 60
+          retry
+        end
+
         puts_entities(json_response)
       end
 
@@ -490,11 +489,11 @@ namespace :harvest do
       request["Auth-Token"] = AUTHENTICATION_TOKEN
       request.body = JSON.dump(
         {
-        "query" => offset_query(offset)
+          "query" => offset_query(offset)
         }
       )
 
-      get_response(uri, request)      
+      get_response(uri, request)
     end
 
     def get_response(uri, request)
@@ -517,6 +516,5 @@ namespace :harvest do
         puts entity.to_xml(:root => "pm-entity").gsub("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n", "") if entity
       end
     end
-
   end
 end

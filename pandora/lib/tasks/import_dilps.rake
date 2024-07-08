@@ -1,5 +1,4 @@
 namespace :dilps do
-
   desc 'Import dilps database as institutional uploads database'
   task import_dilps_db: :environment do
     options = options_from_env
@@ -23,7 +22,7 @@ namespace :dilps do
     end
 
     if !error_messages.empty?
-      error_messages.each { |error_message| puts error_message }
+      error_messages.each{|error_message| puts error_message}
       abort
     end
 
@@ -31,7 +30,7 @@ namespace :dilps do
     @oldenburg_afrika = OldenburgAfrika.new
     @dilps_source_field_keys = ['artist', 'title', 'location', 'date', 'credits', 'rights_work', 'rights_reproduction', 'addition', 'annotation', 'genre', 'institution', 'isbn', 'keyword', 'material', 'size', 'technique']
 
-    doc = File.open(xml_path) { |f| Nokogiri::XML(f) }
+    doc = File.open(xml_path){|f| Nokogiri::XML(f)}
     doc.xpath("/root/row").each do |record|
       create_upload institutional_upload_database, record, images_path, image_tag
     end
@@ -97,7 +96,7 @@ namespace :dilps do
   def rights_work_field(record)
     if !(copyright = record.xpath("./copyright/text()")).empty?
       record.xpath("./copyright/text()").to_s
-    else 
+    else
       "???"
     end
   end
@@ -112,5 +111,4 @@ namespace :dilps do
     document_elements.reject!(&:empty?)
     document_elements.join(", ")
   end
-
 end

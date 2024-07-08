@@ -33,7 +33,7 @@ class I18nTest < ActiveSupport::TestCase
     I18n.locale = :de
     assert_equal "Willkommen, %_!", "Welcome, %_!".t
   end
-  
+
   test 'i18n translation file completeness' do
     base = YAML.load_file("#{Rails.root}/config/locales/en.yml")["en"]
     stack = []

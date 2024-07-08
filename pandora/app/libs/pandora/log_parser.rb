@@ -31,7 +31,7 @@ class Pandora::LogParser
       invalid = request['method'].blank?
 
       if invalid
-        @requests.delete(request['id']) 
+        @requests.delete(request['id'])
       end
     end
   end
@@ -53,33 +53,47 @@ class Pandora::LogParser
     def parse_line(line)
       regex = /^[A-Z], \[([^ ]+) #\d+\] ([A-Z ]{5}) -- : \[([a-f0-9\-]{36})\] (.*)$/
       parts = line.match(regex)
+
+      # check for new (from 2024-03 on) log format
+      unless parts
+
+        regex = /^\[([a-f0-9\-]{36})\] (.*)$/
+        parts = line.match(regex)
+
+        if parts
+          parts = parts.to_a
+          parts.insert 1, nil, 'INFO'
+        end
+      end
+
       unless parts
         binding.pry if line.match?(/Started/) && @options[:test_mode]
 
-        return nil 
+        return nil
       end
 
       ts, severity, id, payload = parts[1..-1]
       return nil if severity.strip != 'INFO'
 
-      @lines[id] ||= []
-      @lines[id] << line
-
       @requests[id] ||= {}
       @requests[id].reverse_merge!(
         'app' => 'pandora',
-        'id' => id,
-        'ts' => Time.parse(ts)
+        'id' => id
       )
 
-      regex = /^Started ([A-Z]+) ("[^ ]+) for ([0-9a-f:\.]+) at [0-9\-]{10} [0-9:]{8} [\+\-0-9]{5}/
+      if ts
+        @requests[id] ||= Time.parse(ts)
+      end
+
+      regex = /^Started ([A-Z]+) ("[^ ]+) for ([0-9a-f:\.]+) at ([0-9\-]{10} [0-9:]{8} [\+\-0-9]{5})/
       if parts = payload.match(regex)
-        verb, path, ip = parts[1..-1]
+        verb, path, ip, ts = parts[1..-1]
         path = path[1..-2]
         @requests[id].reverse_merge!(
           'method' => verb,
           'path' => path,
-          'ip' => ip
+          'ip' => ip,
+          'ts' => Time.parse(ts)
         )
       end
 

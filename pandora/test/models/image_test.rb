@@ -62,35 +62,35 @@ class ImageTest < ActiveSupport::TestCase
 
   test "should return the given string as rights representative for an upload record" do
     jdoe = Account.find_by! login: 'jdoe'
-    upload = create_upload('leonardo', { rights_work: 'I have some work & rights!' })
+    upload = create_upload('leonardo', {rights_work: 'I have some work & rights!'})
 
     assert upload.image.rights_representative == 'I have some work &amp; rights!'
   end
 
   test "should return the warburg rights representative for a warburg image" do
     jdoe = Account.find_by! login: 'jdoe'
-    upload = create_upload('leonardo', { rights_work: 'rights_work_warburg' })
+    upload = create_upload('leonardo', {rights_work: 'rights_work_warburg'})
 
     assert upload.image.rights_representative == 'The Warburg Institute, London'
   end
 
   test "should return the vgbk rights representative for a vgbk image" do
     jdoe = Account.find_by! login: 'jdoe'
-    upload = create_upload('leonardo', { rights_work: 'rights_work_vgbk' })
+    upload = create_upload('leonardo', {rights_work: 'rights_work_vgbk'})
 
     assert upload.image.rights_representative == 'VG Bild-Kunst'
   end
 
   test "should return the public domain rights representative translated for a public domain upload image" do
     jdoe = Account.find_by! login: 'jdoe'
-    upload = create_upload('leonardo', { rights_work: 'In the public domain' })
+    upload = create_upload('leonardo', {rights_work: 'In the public domain'})
 
     assert upload.image.rights_representative == 'In the public domain'.t
   end
 
   test "should return unknown representative translated for an unknown upload image" do
     jdoe = Account.find_by! login: 'jdoe'
-    upload = create_upload('leonardo', { rights_work: 'Unknown' })
+    upload = create_upload('leonardo', {rights_work: 'Unknown'})
 
     assert upload.image.rights_representative == 'Unknown'.t
   end

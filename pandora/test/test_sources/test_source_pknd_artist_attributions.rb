@@ -1,5 +1,4 @@
 class TestSourcePkndArtistAttributions < Indexing::SourceSuper
-
   def records
     document.xpath('//row')
   end
@@ -27,5 +26,4 @@ class TestSourcePkndArtistAttributions < Indexing::SourceSuper
   def location
     record.xpath('.//location/text()')
   end
-
 end

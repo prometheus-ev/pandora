@@ -20,7 +20,6 @@ class SourceTest < ActiveSupport::TestCase
 
     TestSource.index
     assert_equal 13, Source.find_by_name('test_source').record_count
-
   ensure
     if File.exist?('test/fixtures/data/test_source.xml.backup')
       FileUtils.cp 'test/fixtures/data/test_source.xml.backup', 'test/fixtures/data/test_source.xml'

@@ -1,5 +1,4 @@
 class Indexing::Sources::PassauDilps < Indexing::SourceSuper
-
   def records
     document.xpath('//row')
   end
@@ -35,7 +34,7 @@ class Indexing::Sources::PassauDilps < Indexing::SourceSuper
   def path
     return miro if miro?
 
-    "download.php?ref=#{record.xpath('.//Ressourcen-ID_s_/text()')}" 
+    "download.php?ref=#{record.xpath('.//Ressourcen-ID_s_/text()')}"
   end
 
   def date
@@ -56,7 +55,7 @@ class Indexing::Sources::PassauDilps < Indexing::SourceSuper
     super(d)
   end
 
-    # künstler
+  # künstler
   def artist
     record.xpath('.//Urheber/text()')
   end
@@ -72,9 +71,9 @@ class Indexing::Sources::PassauDilps < Indexing::SourceSuper
 
   # standort
   def location
-    (record.xpath('.//location/text()') + record.xpath('.//institution/text()') + record.xpath('.//Land/text()')).map { |location_term|
+    (record.xpath('.//location/text()') + record.xpath('.//institution/text()') + record.xpath('.//Land/text()')).map {|location_term|
       location_term.to_s.strip
-    }.delete_if { |location_term|
+    }.delete_if {|location_term|
       location_term.blank?
     }.join(", ")
   end
@@ -111,7 +110,7 @@ class Indexing::Sources::PassauDilps < Indexing::SourceSuper
   def addition
     record.xpath('.//Beschriftung/text()')
   end
-  
+
   def genre
     record.xpath('.//Urheber/text()')
   end
@@ -131,5 +130,4 @@ class Indexing::Sources::PassauDilps < Indexing::SourceSuper
   def rights_reproduction
     record.xpath('.//imagerights/text()')
   end
-
 end

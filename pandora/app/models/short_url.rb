@@ -1,5 +1,4 @@
 class ShortUrl < ApplicationRecord
-
   validates_presence_of   :url, :token
   validates_uniqueness_of :token, case_sensitive: true
 
@@ -42,11 +41,12 @@ class ShortUrl < ApplicationRecord
     def generate_token
       token, i = nil, 0
 
-      begin
-        token = Array.new(TOKEN_LENGTH) { TOKEN_CHARS.sample }.join
-      end while (i += 1) < MAX_TRIES && self.class.exists?(token: token)
+      loop do
+        token = Array.new(TOKEN_LENGTH){TOKEN_CHARS.sample}.join
+
+        break unless (i += 1) < MAX_TRIES && self.class.exists?(token: token)
+      end
 
       self.token = token
     end
-
 end

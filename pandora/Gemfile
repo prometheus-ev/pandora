@@ -8,8 +8,8 @@ end
 
 # Bundle edge Rails instead: gem 'rails', github: 'rails/rails'
 # https://rubygems.org/gems/rails/versions
-gem 'rails', '~> 7.0.4'
 gem 'bootsnap'
+gem 'rails', '~> 7.1.2'
 # Use mysql as the database for Active Record
 gem 'mysql2', '>= 0.5'
 # Use the Elasticsearch Ruby gem.
@@ -75,7 +75,7 @@ gem 'rinku' # auto_link replacement
 #
 # Encode/decode HTML entities
 gem 'htmlentities', '~> 4.3.4'
-gem 'nokogiri', '~> 1.11.0'
+gem 'nokogiri', '~> 1.15.3'
 # https://rubygems.org/gems/historical_dating
 gem 'historical_dating', git: 'https://github.com/wendig-ou/historical_dating', branch: 'master'
 
@@ -86,8 +86,10 @@ group :development, :test do
   gem 'pry'
   # Adds support for Capybara system testing and selenium driver
   gem 'capybara', '~> 3.29'
+  gem 'mry'
+  gem 'rubocop', require: false
+  gem 'ruby-prof'
   gem 'selenium-webdriver'
-  gem 'method_profiler'
 end
 
 group :development do
@@ -99,13 +101,12 @@ end
 group :test do
   # gem 'cucumber-rails', :require => false
   gem 'database_cleaner'
+  gem 'faraday-cookie_jar'
+  gem 'minitest-retry'
+  gem 'rubyzip'
+  gem 'simplecov', require: false
   gem 'vcr'
   gem 'webmock'
-  gem 'simplecov', require: false
-  gem 'rubyzip'
-  gem 'webdrivers'
-  gem 'minitest-retry'
-  gem 'faraday-cookie_jar'
 end
 
 group :tasks do

@@ -42,6 +42,10 @@ class TestSource < Indexing::SourceSuper
     record.xpath(".//date/text()")
   end
 
+  def date_range
+    super(date.to_s)
+  end
+
   def rights_work
     if is_record_id_a_rights_work_warburg_record_id?
       rights_work_warburg
@@ -55,6 +59,6 @@ class TestSource < Indexing::SourceSuper
   end
 
   def source_url
-    'https://nothing.nowhere.com/images/#{record_id}'
+    "https://nothing.nowhere.com/images/#{record_id}"
   end
 end

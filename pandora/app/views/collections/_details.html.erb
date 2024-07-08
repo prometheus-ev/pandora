@@ -17,9 +17,10 @@
         <% if @collection.collaborators.empty? %>
           <%= 'none'.t %>
         <% else %>
-          <% @collection.collaborators.each do |account| %>
-            <%= link_to_profile(account) %>
-          <% end %>
+          <% @collection.collaborators.each_with_index do |account, i| %><!--
+         --><%= i > 0 ? ', ' : '' %>
+            <%= link_to_profile(account) %><!--
+       --><% end %>
         <% end %>
       </td>
     </tr>
@@ -29,9 +30,10 @@
         <% if @collection.viewers.empty? %>
           <%= 'none'.t %>
         <% else %>
-          <% @collection.viewers.each do |account| %>
-            <%= link_to_profile(account) %>
-          <% end %>
+          <% @collection.viewers.each_with_index do |account, i| %><!--
+         --><%= i > 0 ? ', ' : '' %>
+            <%= link_to_profile(account) %><!--
+       --><% end %>
         <% end %>
       </td>
     </tr>
@@ -44,20 +46,15 @@
         <%= 'none'.t %>
       <% else %>
         <% @collection.keywords.each_with_index do |keyword, i| -%><!--
-     --><%= i > 0 ? ', ' : '' %>
-        <%= link_to(keyword.title,
-          action:
-            if @collection.owned_by?(current_user)
-              'index'
-            elsif @collection.shared_with?(current_user)
-              'shared'
-            else
-              'public'
-            end,
-          field: 'keywords',
-          value: keyword.title
-        ) %><!--
-   --><% end -%>
+       --><%= i > 0 ? ', ' : '' %>
+          <%= link_to(
+            keyword.t,
+            {
+              action: 'all',
+              field: 'keywords',
+              value: keyword.t
+            }) %><!--
+     --><% end -%>
       <% end %>
     </td>
   </tr>

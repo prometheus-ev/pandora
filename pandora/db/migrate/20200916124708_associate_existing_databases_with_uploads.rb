@@ -7,7 +7,7 @@ class AssociateExistingDatabasesWithUploads < ActiveRecord::Migration[5.2]
             upload.update(database: database)
           end
         end
-      end  
+      end
     end
   end
 

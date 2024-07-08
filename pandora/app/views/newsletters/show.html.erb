@@ -32,7 +32,12 @@
 <% for column in Email.display_columns -%>
   <tr>
     <th><%= column.human_name.tn(controller_name) %>:</th>
-    <td><%=h (value = @email.send(column.name)).is_a?(Array) ? value.join(', ') : value %></td>
+    <td>
+      <% v = @email.send(column.name) %>
+      <% v = v.to_fs if v.is_a?(ActiveSupport::TimeWithZone) %>
+      <% v = v.join(', ') if v.is_a?(Array) %>
+      <%=h v %>
+    </td>
   </tr>
 <% end -%>
   <tr>

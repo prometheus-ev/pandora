@@ -26,7 +26,7 @@ class Indexing::Sources::Trier < Indexing::SourceSuper
   end
 
   def artist_normalized
-    an = artist.map { |a|
+    an = artist.map {|a|
       a.strip
     }
     super(an)

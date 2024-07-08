@@ -19,5 +19,10 @@ class Pandora::Validation::UserName < ActiveModel::Validator
     unless record.login.length <= 30
       record.errors.add :login, :too_long
     end
+
+    stop_words = ['active', 'pending', 'expired', 'guest', 'email']
+    if stop_words.include?(record.login)
+      record.errors.add :login, :invalid
+    end
   end
 end

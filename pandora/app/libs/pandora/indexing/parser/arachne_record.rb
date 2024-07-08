@@ -3,18 +3,6 @@ class Pandora::Indexing::Parser::ArachneRecord < Pandora::Indexing::Parser::Reco
     record.xpath('.//data')
   end
 
-  def s_keyword
-    [record.xpath('.//wwwKunsthistorEinordnung/text()'), record.xpath('.//wwwBeschreibung/text()'), record.xpath('.//wwwMetasuche/text()')]
-  end
-
-  def s_credits
-    [record.xpath('.//wwwFotodaten/text()'), record.xpath('.//wwwLiteraturangaben/text()')]
-  end
-
-  def s_unspecified
-    [record.xpath('.//wwwKunsthistorEinordnung/text()'), record.xpath('.//wwwFunktionen/text()')]
-  end
-
   def path
     "Abbildungen/#{record.at_xpath('.//data/text()')}".gsub(/:/, '/')
   end
@@ -32,7 +20,9 @@ class Pandora::Indexing::Parser::ArachneRecord < Pandora::Indexing::Parser::Reco
   end
 
   def date_range
-    @date_parser.date_range(date.to_s)
+    return @date_range if @date_range
+
+    @date_range = @date_parser.date_range(date.to_s)
   end
 
   def location

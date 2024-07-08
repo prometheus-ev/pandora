@@ -33,7 +33,7 @@ class PowerPointTest < ActiveSupport::TestCase
     Upload.last.update_column :title, nil
     # should also work when credits are available (as non-array)
     Upload.last.update_column :credits, 'unknown'
-    
+
     collection.reload
 
     filename = Rails.root.join('tmp/presentation.pptx')

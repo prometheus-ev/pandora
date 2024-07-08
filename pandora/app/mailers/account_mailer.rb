@@ -11,7 +11,7 @@ class AccountMailer < ApplicationMailer
 
     @expires = ""
     if user.expires_at && !user.exempt_from_expiration?
-      if [Date, DateTime, Time].any? { |c| user.expires_at.is_a? c }
+      if [Date, DateTime, Time].any?{|c| user.expires_at.is_a? c}
         @expires = localize(user.expires_at, :format => :long)
       else
         @expires = user.expires_at.to_s
@@ -54,7 +54,7 @@ class AccountMailer < ApplicationMailer
 
     opts = {
       to: recipient.email,
-      subject: '[prometheus-Message] ' + localized_or_combined(locale) { 'Message from user %s' / user },
+      subject: '[prometheus-Message] ' + localized_or_combined(locale){'Message from user %s' / user},
     }
     opts[:reply_to] = user.email unless user.email.blank?
 
@@ -114,24 +114,24 @@ class AccountMailer < ApplicationMailer
 
     klass, locale = object.class, user.locale
 
-    @owner =  object.owner.fullname
-    @profile_url =  url_for(:controller => 'accounts', :action => 'show', :id => object.owner)
-    @type =  type = klass.controller_name
-    @object =  object.title
-    @object_url =  url_for(controller: type, id: object)
+    @owner = object.owner.fullname
+    @profile_url = url_for(:controller => 'accounts', :action => 'show', :id => object.owner)
+    @type = type = klass.controller_name
+    @object = object.title
+    @object_url = url_for(controller: type, id: object)
     @locale =  locale
     @action =  action
-    @what =  what
-    
+    @what = what
+
     opts = {
       to: user.email,
-      subject: "[prometheus-#{klass}] " + localized_or_combined(locale) { "#{action.to_s.capitalize} as #{what}".t },
+      subject: "[prometheus-#{klass}] " + localized_or_combined(locale){"#{action.to_s.capitalize} as #{what}".t},
     }
-    
+
     unless user.email.blank?
       opts[:reply_to] = user.email
     end
-    
+
     mail(opts)
   end
 
@@ -184,7 +184,7 @@ class AccountMailer < ApplicationMailer
       controller: 'signup',
       action: 'confirm_email_linkback',
       login: user.login,
-      timestamp: timestamp,
+      timestamp: timestamp.to_fs,
       token: token
     )
     short_url = ShortUrl.find_or_create_by(url: @link)
@@ -303,7 +303,7 @@ class AccountMailer < ApplicationMailer
 
     mail(
       to: user.email,
-      subject: '[prometheus-Account] ' + localized_or_combined(user.locale) { 'Your account expires!'.t }
+      subject: '[prometheus-Account] ' + localized_or_combined(user.locale){'Your account expires!'.t}
     )
   end
 
@@ -338,9 +338,9 @@ class AccountMailer < ApplicationMailer
     text = params[:text]
 
     @text = text
-    @recipients = recipients.map { |recipient|
+    @recipients = recipients.map do |recipient|
       [recipient, url_for(controller: 'accounts', action: 'show', id: recipient.login)]
-    }
+    end
 
     mail(
       to: user.email,
@@ -430,6 +430,36 @@ class AccountMailer < ApplicationMailer
     mail(
       to: ENV['PM_INFO_ADDRESS'],
       subject: 'User upload matches KLAPSCH filter'
+    )
+  end
+
+  def indexing_finished
+    to = params[:to]
+    file = params[:file]
+
+    @name = params[:name]
+
+    # The mail is likely sent from outside a request cycle, so no base url
+    # options are available
+    base = Addressable::URI.parse(ENV['PM_BASE_URL'])
+    @overview_url = url_for(
+      host: base.host,
+      port: base.port,
+      protocol: base.scheme,
+      locale: I18n.locale,
+      controller: 'indexing'
+    )
+
+    if file
+      file_content = File.read(file)
+      attachments['result.json'] = file_content
+      json = JSON.parse(file_content)
+      @log = json["log"].join("\n")
+    end
+
+    mail(
+      to: ENV['PM_INFO_ADDRESS'],
+      subject: "indexing '#{@name}' has finished"
     )
   end
 end

@@ -10,22 +10,14 @@ class Pandora::Indexing::Parser::BernRecord < Pandora::Indexing::Parser::Record
 
     image_id = record.xpath('.//Bilder/bild/text()').to_s
 
-    unless @paths_document
-      paths_file = File.open(Rails.configuration.x.dumps_path + "bern_paths.xml")
-      @paths_document = Nokogiri::XML(File.open(paths_file)) do |config|
-        config.noblanks
-      end
-    end
-
-    path = @paths_document.xpath("//root/row/bild[text()='#{image_id}']/../paths/path/size[text()='original']/../path/text()").to_s || ""
+    path = @mapping.xpath("//root/row/bild[text()='#{image_id}']/../paths/path/size[text()='original']/../path/text()").to_s || ""
 
     if path.blank?
       begin
         url = URI.parse(VERSIONS_URL % image_id)
-        result = Net::HTTP.start(url.host, url.port, { :open_timeout => 1, :read_timeout => 1 })
+        result = Net::HTTP.start(url.host, url.port, {:open_timeout => 1, :read_timeout => 1})
 
-        JSON.parse(result.body).each { |version|
-          printf '-'
+        JSON.parse(result.body).each {|version|
           if version == 'original'
             path = "#{version['link']}/#{image_id}.jpg"
           end
@@ -35,7 +27,7 @@ class Pandora::Indexing::Parser::BernRecord < Pandora::Indexing::Parser::Record
       end
     end
 
-    path.sub(/^(\/*)/,'')
+    path.sub(/^(\/*)/, '')
   end
 
   def artist
@@ -52,7 +44,7 @@ class Pandora::Indexing::Parser::BernRecord < Pandora::Indexing::Parser::Record
   def artist_normalized
     return @artist_normalized if @artist_normalized
 
-    an = record.xpath('.//Kuenstler/name/text()').map { |a|
+    an = record.xpath('.//Kuenstler/name/text()').map {|a|
       a.to_s.split(', ').reverse.join(' ')
     }
 

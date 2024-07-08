@@ -4,9 +4,7 @@ require 'mail'
 require 'resolv'
 
 module Util
-
   module Email
-
     extend self
 
     # Enhanced Mail System Status Codes
@@ -114,7 +112,7 @@ module Util
     # <http://lindsaar.net/2008/4/14/tip-5-cleaning-up-an-verifying-an-email-address-with-ruby-on-rails>
     # <http://lindsaar.net/2008/4/15/tip-6-validating-the-domain-of-an-email-address-with-ruby-on-rails>
     def valid?(address, relax = true)
-      raise_or_relax = lambda { |error| !relax and raise error.new(address) }
+      raise_or_relax = lambda{|error| !relax and raise error.new(address)}
 
       if parsed_address = parse(address) and valid_format?(parsed_address)
         valid_domain?(parsed_address.domain) or raise_or_relax[InvalidDomainError]
@@ -145,18 +143,18 @@ module Util
         ].include?(domain)
       end
 
-      Resolv::DNS.open { |dns|
+      Resolv::DNS.open do |dns|
         tries = 0
 
         [
           Resolv::DNS::Resource::IN::MX,
           Resolv::DNS::Resource::IN::A
-        ].inject(false) { |ok, type|
+        ].inject(false) do |ok, type|
           ok || begin
             dns.getresources(domain, type).any?
           rescue Errno::ECONNREFUSED
             false
-          rescue ArgumentError  # network timeout!?
+          rescue ArgumentError # network timeout!?
             # wrong number of arguments (0 for 1) in
             # resolv.rb, line 600: raise TimeoutError
 
@@ -167,16 +165,16 @@ module Util
             # better not blame this on the user...
             true
           end
-        }
-      }
+        end
+      end
     end
 
     def explain_status(status)
       klass, subject, detail = status.split('.').map(&:to_i)
       [STATUS_CODES[subject][detail], STATUS_CLASSES[klass], case klass
-        when 5 then false  # not retryable
-        when 4 then true   # retryable
-        else        nil    # don't care
+      when 5 then false  # not retryable
+      when 4 then true   # retryable
+      else        nil    # don't care
       end]
     end
 
@@ -186,6 +184,8 @@ module Util
 
     class EmailError < StandardError
       def initialize(address)
+        super
+
         @address = address
       end
 
@@ -209,7 +209,5 @@ module Util
         :invalid_domain
       end
     end
-
   end
-
 end

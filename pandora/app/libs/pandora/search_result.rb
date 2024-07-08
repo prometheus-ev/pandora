@@ -3,14 +3,13 @@ class Pandora::SearchResult
     @result = result
     @criteria = criteria
 
-    #min_year = Date.parse(result['fields']['date_range']['aggregations']['date_range_from_stats']['min_as_string']).year
-    #max_year = Date.parse(result['fields']['date_range']['aggregations']['date_range_to_stats']['max_as_string']).year
+    # min_year = Date.parse(result['fields']['date_range']['aggregations']['date_range_from_stats']['min_as_string']).year
+    # max_year = Date.parse(result['fields']['date_range']['aggregations']['date_range_to_stats']['max_as_string']).year
 
     if @criteria[:time] && @criteria['search_value']
       @date_range_from = @criteria['date']['from']
       @date_range_to = @criteria['date']['to']
     end
-
   end
 
   def result
@@ -157,6 +156,8 @@ class Pandora::SearchResult
       result = Hash.new
       indices_sorted.each do |key, value|
         value['source'].keywords.each do |keyword|
+          next if keyword.t == 'Upload'
+
           if result[keyword.t]
             result[keyword.t].push [key, value]
           else

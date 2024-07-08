@@ -7,9 +7,9 @@ class Indexing::Sources::Kgerlangen < Indexing::Sources::Parents::Erlangen
 
   # künstler
   def artist
-    (super + record.xpath('.//Weitere_Kuenstler/text()')).map { |a|
+    (super + record.xpath('.//Weitere_Kuenstler/text()')).map {|a|
       a.to_s.strip
-    }.delete_if { |a|
+    }.delete_if {|a|
       a.blank?
     }
   end

@@ -1,21 +1,20 @@
 class RequestToken < OauthToken
-
   attr_accessor :provided_oauth_verifier
 
   def authorize!(user)
     authorized? ? false : update(
-      :user          => user,
+      :user => user,
       :authorized_at => Time.now.utc,
-      :verifier      => generate_oauth_key(20)
+      :verifier => generate_oauth_key(20)
     )
   end
 
   def exchange!
-    !authorized? || verifier != provided_oauth_verifier ? false : RequestToken.transaction {
+    !authorized? || verifier != provided_oauth_verifier ? false : RequestToken.transaction do
       access_token = AccessToken.create(:user => user, :client_application => client_application)
       invalidate!
       access_token
-    }
+    end
   end
 
   def to_query
@@ -34,5 +33,4 @@ class RequestToken < OauthToken
       "#{redirect_url}#{sep}oauth_token=#{token}&oauth_verifier=#{verifier}"
     end
   end
-
 end

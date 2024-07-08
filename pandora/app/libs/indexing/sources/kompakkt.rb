@@ -7,7 +7,7 @@ class Indexing::Sources::Kompakkt < Indexing::SourceSuper
       results += r
     end
     results
-    
+
     @document = Indexing::JsonSource.new results
 
     results
@@ -82,5 +82,4 @@ class Indexing::Sources::Kompakkt < Indexing::SourceSuper
       )
       JSON.parse(response.body)
     end
-
 end

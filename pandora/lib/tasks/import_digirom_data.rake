@@ -1,7 +1,6 @@
 require "json"
 
 namespace :digirom do
-
   desc 'Import upload data from json'
   task import_upload_data_json: :environment do
     task_options = options_from_env
@@ -18,7 +17,6 @@ namespace :digirom do
     file.close
 
     File.open(mapping_file_path, "w") do |mapping_file| # YAML
-
       data.each do |datum|
         upload = Upload.new
         upload.owner_id = owner_id
@@ -54,7 +52,7 @@ namespace :digirom do
         upload.addition = datum["addition"]
 
         upload.approved_record = datum["approved_record"]
-        upload.public_record =  datum["public_record"]
+        upload.public_record = datum["public_record"]
 
         datum["keywords"].each do |keyword_hash|
           if !(keyword = Keyword.find_by(title: keyword_hash["title"]))
@@ -72,13 +70,13 @@ namespace :digirom do
             mapping_file.puts({"old_id" => datum["id"], "new_id" => upload.id, "old_pid" => datum["image_id"], "new_pid" => upload.pid, "inventory_no" => datum["inventory_no"]}.to_yaml)
 
             import_image_path = upload.path(Upload.pconfig[:tmp_upload_path]) # Why tmp?
-            export_image_path = !datum["inventory_no"].blank? ? 
+            export_image_path = !datum["inventory_no"].blank? ?
               original_image_folder + "/" + datum["inventory_no"] + "." + upload.filename_extension :
               original_image_folder + "/" + datum["image_id"] + "." + upload.filename_extension
 
             if File.file?(export_image_path)
               File.open(export_image_path, 'r') do |export_image|
-                File.open(import_image_path, 'w') {|import_image| import_image.write(export_image.read) }
+                File.open(import_image_path, 'w'){|import_image| import_image.write(export_image.read)}
               end
               upload.file_size = File.size?(import_image_path)
             end
@@ -108,7 +106,7 @@ namespace :digirom do
     # set parents for uploads
     mapping = {}
     YAML.load_documents(File.open mapping_file_path).each do |document|
-      mapping[document["old_id"]]= document["new_id"]
+      mapping[document["old_id"]] = document["new_id"]
     end
 
     data.each do |datum|
@@ -141,7 +139,7 @@ namespace :digirom do
 
     mapping = {}
     YAML.load_documents(File.open mapping_file_path).each do |document|
-      mapping[document["new_pid"]]= document["old_id"]
+      mapping[document["new_pid"]] = document["old_id"]
     end
 
     puts "#{missing_images.size} images are missing!"
@@ -151,5 +149,4 @@ namespace :digirom do
       puts mapping[missing_image]
     end
   end
-
 end

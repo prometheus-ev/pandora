@@ -46,6 +46,13 @@ module Pandora
     # Initialize configuration defaults for originally generated Rails version.
     config.load_defaults 7.0
 
+    # Please, add to the `ignore` list any other `lib` subdirectories that do
+    # not contain `.rb` files, or that should not be reloaded or eager loaded.
+    # Common ones are `templates`, `generators`, or `middleware`, for example.
+    config.autoload_lib(ignore: ['assets', 'tasks', 'core_ext'])
+
+    config.add_autoload_paths_to_load_path = true
+
     # Configuration for the application, engines, and railties goes here.
     #
     # These settings can be overridden in specific environments using the files
@@ -127,7 +134,7 @@ module Pandora
           # ActionController::UnknownFormat,
           # ActionDispatch::Http::MimeNegotiation::InvalidType
         ],
-        ignore_if: ->(env, exception) {
+        ignore_if: lambda do |env, exception|
           case exception
           when ActionController::BadRequest
             result = (
@@ -141,7 +148,7 @@ module Pandora
           else
             false
           end
-        }
+        end
         # ignore_cascade_pass: false
       }
     end
@@ -172,7 +179,7 @@ module Pandora
     @revision ||= begin
       if Rails.env.production?
         file = Rails.root.join '..', 'REVISION'
-        unless File.exists?(file)
+        unless File.exist?(file)
           raise Pandora::Exception, [
             "revision could not be determined,",
             "please make sure that #{file} exists"
@@ -189,7 +196,7 @@ module Pandora
     @branch ||= begin
       if Rails.env.production?
         file = Rails.root.join '..', 'BRANCH'
-        unless File.exists?(file)
+        unless File.exist?(file)
           raise Pandora::Exception, [
             "deployed branch could not be determined,",
             "please make sure that #{file} exists"
@@ -210,7 +217,6 @@ module Pandora
 
   def self.to_csv(data, headers = nil)
     CSV.generate do |csv|
-
       if data.first.is_a?(Hash)
         headers ||= data.first.keys
         csv << headers
@@ -261,5 +267,29 @@ module Pandora
     end
 
     stdout
+  end
+
+  def self.puts(*)
+    Kernel.puts(*) unless ENV['PM_SILENT'] == 'true'
+  end
+
+  def self.printf(*)
+    Kernel.printf(*) unless ENV['PM_SILENT'] == 'true'
+  end
+
+  def self.profile(&block)
+    if block_given?
+      RubyProf.start
+      yield
+    else
+      if @profiling
+        result = RubyProf.stop
+        printer = RubyProf::FlatPrinter.new(result)
+        printer.print(STDOUT)
+      else
+        @profiling = true
+        RubyProf.start
+      end
+    end
   end
 end

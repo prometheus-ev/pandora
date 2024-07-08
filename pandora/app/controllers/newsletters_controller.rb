@@ -1,8 +1,7 @@
 class NewslettersController < ApplicationController
-
   skip_before_action :login_required, only: [:archive, :webview]
 
-  def self.initialize_me!  # :nodoc:
+  def self.initialize_me! # :nodoc:
     control_access [:admin, :superadmin] => :ALL,
                    :DEFAULT => [:archive, :webview]
   end
@@ -200,7 +199,5 @@ class NewslettersController < ApplicationController
       "Newsletter #{msg}" / ERB::Util.html_escape(email)
     end
 
-
-  initialize_me!
-
+    initialize_me!
 end

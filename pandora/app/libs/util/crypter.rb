@@ -3,13 +3,11 @@ unless OpenSSL::Cipher.const_defined?(:CipherError)
 end
 
 module Util
-
   module Crypter
-
     extend self
 
-    def encrypt(*args)
-      Base64.encode64(crypt(:encrypt, *args))
+    def encrypt(...)
+      Base64.encode64(crypt(:encrypt, ...))
     end
 
     def decrypt(*args)
@@ -20,7 +18,7 @@ module Util
       # REWRITE: the library usage has changed
       # cipher = OpenSSL::Cipher::Cipher.new('aes-256-cbc')
       cipher = OpenSSL::Cipher.new('aes-256-cbc')
-      cipher.send(method)  # encrypt/decrypt
+      cipher.send(method) # encrypt/decrypt
 
       # REWRITE: we have to cut down the iv byte size since the new version of
       # openssl requires it.
@@ -38,7 +36,5 @@ module Util
     rescue OpenSSL::Cipher::CipherError
       # ???
     end
-
   end
-
 end

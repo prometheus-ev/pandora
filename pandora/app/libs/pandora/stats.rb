@@ -1,7 +1,8 @@
 class Pandora::Stats
   extend Forwardable
 
-  def_delegators(:@requests,
+  def_delegators(
+    :@requests,
     :[], :each, :select, :map, :first, :last, :count, :size, :reject, :to_a
   )
 
@@ -14,11 +15,20 @@ class Pandora::Stats
   end
 
   def self.load(filename)
-    new JSON.load(io_for filename)
+    requests = JSON.load(io_for filename).map do |r|
+      r.merge('ts' => Time.parse(r['ts']))
+    rescue StandardError => e
+      p e
+      r['ts'] = nil
+    end
+    requests = requests.select{|r| r['ts']}
+
+    new(requests)
   end
 
   def to_json
-    JSON.dump @requests
+    out = @requests.map{|r| r.merge('ts' => r['ts'].to_fs)}
+    JSON.dump out
   end
 
   def +(other)
@@ -121,7 +131,7 @@ class Pandora::Stats
 
   # we add this method to count 'download' clicks as they were counted in legacy
   def legacy_downloads
-    results =  @requests.select do |r|
+    results = @requests.select do |r|
       ['ImagesController', 'ImageController'].include?(r['controller']) &&
       ['show', 'small', 'medium', 'large', 'download'].include?(r['action'])
     end
@@ -205,16 +215,18 @@ class Pandora::Stats
   end
 
 
-  protected
+  class << self
+    protected
 
-    def self.io_for(filename)
-      r, w = IO.pipe
-      cmd = "zcat -f '#{filename}'"
-      pid = Process.spawn cmd, out: w
-      Thread.new do
-        Process.wait pid
-        w.close
+      def io_for(filename)
+        r, w = IO.pipe
+        cmd = "zcat -f '#{filename}'"
+        pid = Process.spawn cmd, out: w
+        Thread.new do
+          Process.wait pid
+          w.close
+        end
+        r
       end
-      r
-    end
+  end
 end

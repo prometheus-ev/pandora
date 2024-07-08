@@ -14,7 +14,7 @@ class Pandora::Indexing::Parser::BerlinSpsgRecord < Pandora::Indexing::Parser::R
   def artist_normalized
     return @artist_normalized if @artist_normalized
 
-    an = record.xpath('.//descriptiveMetadata/descriptionWrap/displayCreator/text()').map { |a|
+    an = record.xpath('.//descriptiveMetadata/descriptionWrap/displayCreator/text()').map {|a|
       a.to_s.strip
     }
 
@@ -36,12 +36,10 @@ class Pandora::Indexing::Parser::BerlinSpsgRecord < Pandora::Indexing::Parser::R
 
     if date == '31.9.1931'
       date = '30.9.1931'
-    elsif date == '1890-19421'
+    elsif ['1890-19421', '1890-19420'].include?(date)
       date = '1890-1942'
     elsif date == '1927-19435'
       date = '1927-1943'
-    elsif date == '1890-19420'
-      date = '1890-1942'
     end
 
     @date_range = @date_parser.date_range(date)

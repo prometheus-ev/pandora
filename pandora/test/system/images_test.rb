@@ -1,5 +1,5 @@
 require "application_system_test_case"
-Dir["./test/test_sources/*.rb"].each {|file| require file }
+Dir["./test/test_sources/*.rb"].each{|file| require file}
 
 class ImagesTest < ApplicationSystemTestCase
   test 'display rights reproduction' do
@@ -83,7 +83,8 @@ class ImagesTest < ApplicationSystemTestCase
     fill_in 'search_value_0', with: pid_1
     find('.search_query .submit_button').click
     assert_link 'The Warburg Institute, London', exact: true
-    assert_link('http://creativecommons.org/publicdomain/zero/1.0/',
+    assert_link(
+      'http://creativecommons.org/publicdomain/zero/1.0/',
       href: 'http://creativecommons.org/publicdomain/zero/1.0/'
     )
 
@@ -92,7 +93,8 @@ class ImagesTest < ApplicationSystemTestCase
     assert_link 'The Warburg Institute, London', exact: true
     assert_link 'GND 118559737', exact: true
     assert_link 'Lenbachhaus <München>', exact: true
-    assert_link('http://creativecommons.org/publicdomain/zero/1.0/',
+    assert_link(
+      'http://creativecommons.org/publicdomain/zero/1.0/',
       href: 'http://creativecommons.org/publicdomain/zero/1.0/'
     )
 
@@ -102,7 +104,8 @@ class ImagesTest < ApplicationSystemTestCase
     collection.images << image
     visit "/en/collections/#{collection.id}"
     all(:link, 'List view').first.click
-    assert_link('http://creativecommons.org/publicdomain/zero/1.0/',
+    assert_link(
+      'http://creativecommons.org/publicdomain/zero/1.0/',
       href: 'http://creativecommons.org/publicdomain/zero/1.0/'
     )
 

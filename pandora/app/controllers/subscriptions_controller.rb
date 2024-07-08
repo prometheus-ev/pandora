@@ -149,12 +149,11 @@ class SubscriptionsController < ApplicationController
           else
             account.update_attribute(:newsletter, false)
           end
-          
+
           return true
         end
       end
 
       false
     end
-
 end

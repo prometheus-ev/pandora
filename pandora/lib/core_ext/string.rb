@@ -1,5 +1,4 @@
 class String
-
   def enclose_by(prefix, suffix = prefix)
     empty? ? self : "#{prefix}#{self}#{suffix}"
   end
@@ -23,18 +22,18 @@ class String
     gsub!(/_id\z/, '')
     tr!('_', ' ')
 
-    gsub!(/\b\w/) { |s| s.upcase! }
+    gsub!(/\b\w/){|s| s.upcase!}
 
     self
   end
 
   def to_filename(ext = nil)
     ext = case ext
-      when nil        then ''
-      when /.*\/(.*)/ then '.' << $1
-      when /\./       then ext
-      when String     then '.' << ext
-      else raise TypeError, "String expected, got #{ext.class}"
+    when nil        then ''
+    when /.*\/(.*)/ then '.' << $1
+    when /\./       then ext
+    when String     then '.' << ext
+    else raise TypeError, "String expected, got #{ext.class}"
     end
 
     str = dup
@@ -45,7 +44,7 @@ class String
   end
 
   # XML escaped version of to_s
-  # REWRITE: this used to be a lot more difficult without utf-8 support and 
+  # REWRITE: this used to be a lot more difficult without utf-8 support and
   # additional libraries were needed. Now that we have it, we (probably) just
   # need to replace "'<>&
   # def to_xs

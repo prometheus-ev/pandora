@@ -5,7 +5,7 @@ class Pandora::Indexing::Parser::BerlinWinckelmann < Pandora::Indexing::Parser::
 
     super(
       source,
-      record_node_name: 'OBJECT',
+      record_node_name: "OBJECT",
       records_to_exclude: records_to_exclude)
   end
 end

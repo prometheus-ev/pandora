@@ -1,9 +1,10 @@
 class ImagesController < ApplicationController
-
   # skip_before_action :store_location, :only => [:vote, :small, :medium, :large, :download]
 
-  # this allows actions for open access sources; it does not check restrictions on non open access sources once dbuser is logged in
-  # for full functionality this method must be supplemented by a source check for dbusers before calling allowed actions
+  # this allows actions for open access sources; it does not check restrictions
+  # on non open access sources once dbuser is logged in
+  # for full functionality this method must be supplemented by a source check
+  # for dbusers before calling allowed actions
   allow_open_access [:show, :small, :medium, :large, :download], [:list] do
     i = params[:id] and i.is_a?(String) and i = Image.find_by_pid(i) and i.source
   end
@@ -15,10 +16,12 @@ class ImagesController < ApplicationController
   # is requested via ajax POST
   protect_from_forgery except: ['show']
 
-  def self.initialize_me!  # :nodoc:
-    control_access :superadmin => :ALL,
-                   :user       => [:vote, :comment, :display_fields],
-                   :DEFAULT    => [:list, :show, :publish, :small, :medium, :large, :custom, :download]
+  def self.initialize_me! # :nodoc:
+    control_access(
+      :superadmin => :ALL,
+      :user => [:vote, :comment, :display_fields],
+      :DEFAULT => [:list, :show, :publish, :small, :medium, :large, :custom, :download]
+    )
   end
 
   def list
@@ -40,8 +43,8 @@ class ImagesController < ApplicationController
 
     ids = Pandora::Elastic.new.image_ids(source.name, page: page, per_page: per_page)
     respond_to do |format|
-      format.json{ render json: ids }
-      format.xml{ render xml: ids }
+      format.json{render json: ids}
+      format.xml{render xml: ids}
     end
   end
 
@@ -54,25 +57,32 @@ class ImagesController < ApplicationController
         :doc => 'The source name, e.g "daumier" or "robertin"'
       },
       :page => {
-        :type    => 'positiveInteger',
+        :type => 'positiveInteger',
         :default => 1,
-        :doc     => 'Page to return.'
+        :doc => 'Page to return.'
       },
       :per_page => {
-        :type    => 'positiveInteger',
+        :type => 'positiveInteger',
         :default => 10,
-        :doc     => 'Number of results to return per page.'
+        :doc => 'Number of results to return per page.'
       },
     },
-    :returns => { :xml => { :root => 'images', :hints => { 'pid' => true } }, :json => {} }
+    :returns => {:xml => {:root => 'images', :hints => {'pid' => true}}, :json => {}}
   }
 
   def show
     @super_image = Pandora::SuperImage.find(params[:id])
+    @similarity = @super_image.elastic_record.dig('_source', 'image_vector')
+
+    if @similarity
+      @similar_images = Pandora::Elastic.new.image_vector_query(record_id: @super_image.pid)['hits']['hits'].drop(1)
+      @similarity = false if @similar_images.empty?
+    end
 
     @collections = Collection.
       allowed(current_user, :write).
       includes(:owner, :viewers, :collaborators)
+
 
     if params[:box_id]
       render plain: render_to_string(
@@ -96,6 +106,7 @@ class ImagesController < ApplicationController
       @location_fields = @super_image.location_fields
       @latest_location = @super_image.image.locations.order('updated_at DESC') if
         @super_image.image.locations # Only uploads!
+
       if !@super_image.upload.latitude.blank? && !@super_image.upload.longitude.blank?
         @lat = @super_image.upload.latitude
         @lng = @super_image.upload.longitude
@@ -131,6 +142,14 @@ class ImagesController < ApplicationController
             image_attributes.merge!({"#{field}": 'VG Bild-Kunst'})
           elsif field == 'record_object_id_count'
             image_attributes.merge!({"#{field}": value.to_s})
+          elsif field == 'location'
+            nested = @super_image.display_field('location_nested')
+
+            image_attributes['location'] = (
+              nested.present? ?
+              nested :
+              value.join(', ')
+            )
           else
             image_attributes.merge!({"#{field}": value.join(', ')})
           end
@@ -138,13 +157,17 @@ class ImagesController < ApplicationController
       end
 
       image_attributes.merge!(
-        {"link": url_for(safe_params(:format => 'html', locale: I18n.locale, :only_path => false))})
+        {"link": url_for(safe_params(:format => 'html', locale: I18n.locale, :only_path => false))}
+      )
       image_attributes.merge!(
-        {"status_as_of": @super_image.updated_at})
+        {"status_as_of": @super_image.updated_at}
+      )
       image_attributes.merge!(
-        {"descriptive_title": @super_image.image.descriptive_title})
+        {"descriptive_title": @super_image.image.descriptive_title}
+      )
       image_attributes.merge!(
-        {"source": image_source_attributes})
+        {"source": image_source_attributes}
+      )
     end
 
     respond_to do |format|
@@ -160,22 +183,22 @@ class ImagesController < ApplicationController
 
   api_method :show, :get => {
     :doc => "Get an image's metadata.",
-    :expects => { :id  => { :required => true, :doc => 'Image ID.' } },
-    :returns => { :xml => { :root => 'image', :hints => %w[pid artist title] }, :json => { :object => '{:source_id, :score, :checked_at, :votes, :pid, &lt;all display fields&gt;}' } }
+    :expects => {:id  => {:required => true, :doc => 'Image ID.'}},
+    :returns => {:xml => {:root => 'image', :hints => %w[pid artist title]}, :json => {:object => '{:source_id, :score, :checked_at, :votes, :pid, &lt;all display fields&gt;}'}}
   }
 
   def display_fields
     display_fields_translated = Image.display_fields_translated
 
-    respond_to { |format|
-      format.xml  { render :xml  => display_fields_translated.to_xml  }
-      format.json { render :json => display_fields_translated.to_json }
+    respond_to {|format|
+      format.xml{render :xml => display_fields_translated.to_xml}
+      format.json{render :json => display_fields_translated.to_json}
     }
   end
 
   api_method :display_fields, :get => {
     :doc => "Get image display fields and German translation.",
-    :returns => { :xml => { :root => 'display_fields' }, :json => {} }
+    :returns => {:xml => {:root => 'display_fields'}, :json => {}}
   }
 
   def publish
@@ -288,8 +311,8 @@ class ImagesController < ApplicationController
 
   api_method :small, :get => {
     :doc => "Get an image's binary representation in small size.",
-    :expects => { :id   => { :required => true, :doc => 'Image ID.' } },
-    :returns => { :blob => { :type => 'image' } }
+    :expects => {:id   => {:required => true, :doc => 'Image ID.'}},
+    :returns => {:blob => {:type => 'image'}}
   }
 
   def medium
@@ -299,8 +322,8 @@ class ImagesController < ApplicationController
 
   api_method :medium, :get => {
     :doc => "Get an image's binary representation in medium size.",
-    :expects => { :id   => { :required => true, :doc => 'Image ID.' } },
-    :returns => { :blob => { :type => 'image' } }
+    :expects => {:id   => {:required => true, :doc => 'Image ID.'}},
+    :returns => {:blob => {:type => 'image'}}
   }
 
   def large
@@ -311,8 +334,20 @@ class ImagesController < ApplicationController
 
   api_method :large, :get => {
     :doc => "Get an image's binary representation in large size.",
-    :expects => { :id   => { :required => true, :doc => 'Image ID.' } },
-    :returns => { :blob => { :type => 'image' } }
+    :expects => {:id   => {:required => true, :doc => 'Image ID.'}},
+    :returns => {:blob => {:type => 'image'}}
+  }
+
+  def original
+    si = Pandora::SuperImage.find(params[:id])
+
+    send_data si.image_data(:original), disposition: 'inline', content_type: 'image/jpeg'
+  end
+
+  api_method :original, :get => {
+    :doc => "Get an image's binary representation in original size.",
+    :expects => {:id   => {:required => true, :doc => 'Image ID.'}},
+    :returns => {:blob => {:type => 'image'}}
   }
 
   def custom
@@ -366,7 +401,7 @@ class ImagesController < ApplicationController
       @rateable = current_user.action_allowed?(:images, :vote)
       @rated    = current_user.rated_images.exists?(image.id)
 
-      @vote_url = { :action => 'vote', :id => image }
+      @vote_url = {:action => 'vote', :id => image}
     end
 
     def redirect_to_image(size)
@@ -394,7 +429,5 @@ class ImagesController < ApplicationController
       # permission_denied unless permit?(self.class.access_control(action_name))
     end
 
-
-  initialize_me!
-
+    initialize_me!
 end

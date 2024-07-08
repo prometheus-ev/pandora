@@ -1,6 +1,6 @@
 class Indexing::IndexFields
   # Custom mapping fields used in class IndexMappings.
-  # @see app/libs/indexing/index_mappings.rb 
+  # @see app/libs/indexing/index_mappings.rb
   def self.index_mapping
     index -
     ['record_id',
@@ -166,7 +166,7 @@ class Indexing::IndexFields
   def self.display_app
     display + ['database']
   end
-  
+
   def self.non_display
     ['artist_normalized',
      # 'artist' is used as display field.

@@ -1,6 +1,6 @@
 class Pandora::Indexing::Parser::MiroParser
   def initialize(source_name)
-    @miro_record_ids = Rails.configuration.x.indexing_warburg_and_miro_record_ids[:miro][source_name.to_sym]
+    @miro_record_ids = Rails.configuration.x.indexing_warburg_and_miro_record_ids[:miro][source_name.to_sym] || []
   end
 
   def miro?(record_id, source_name)

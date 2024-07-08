@@ -1,5 +1,4 @@
 module ControllerMethods
-
   # call-seq:
   #   controller.linkable_actions => anArray
   #
@@ -9,7 +8,6 @@ module ControllerMethods
   end
 
   module ClassMethods
-
     def action_symbols
       @action_symbols ||= action_methods.map(&:to_sym)
     end
@@ -35,18 +33,18 @@ module ControllerMethods
     def control_access(hash)
       @access_control, @allowed_actions, access = {}, Hash.new([]), Hash.new([])
 
-      hash.each { |roles, actions|
+      hash.each {|roles, actions|
         roles, actions = Array(roles), Array(actions)
 
         roles.map!(&:to_sym)
         actions.map!(&:to_sym)
         actions = action_symbols if actions.include?(:ALL)
 
-        actions.each { |action| access[action] |= roles }
-        roles.each { |role| @allowed_actions[role] |= actions }
+        actions.each{|action| access[action] |= roles}
+        roles.each{|role| @allowed_actions[role] |= actions}
       }
 
-      access.each { |action, roles|
+      access.each {|action, roles|
         @access_control[action] = roles.include?(:DEFAULT) ? 'true' : roles.join('|')
       }
 
@@ -79,12 +77,7 @@ module ControllerMethods
     def linkable_actions(*args)
       @linkable_actions ||= args
     end
-
   end
-
-  #############################################################################
-  private
-  #############################################################################
 
   # Callback to extend the receiving class with our ClassMethods.
   def self.included(base)
@@ -96,5 +89,4 @@ module ControllerMethods
     base.send :protected, *instance_methods
     # base.hide_action(*instance_methods)
   end
-
 end

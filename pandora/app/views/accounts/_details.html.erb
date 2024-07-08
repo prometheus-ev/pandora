@@ -97,7 +97,11 @@
     <% else %>
       <tr>
         <th><%= column.human_name.tn(controller_name) %></th>
-        <td><%=h @user.send(column.name) %></td>
+        <td>
+          <% v = @user.send(column.name) %>
+          <% v = v.to_fs if v.is_a?(ActiveSupport::TimeWithZone) %>
+          <%=h v %>
+        </td>
       </tr>
     <% end %>
   <% end -%>

@@ -1,8 +1,6 @@
 <% list_search_options = { :controller => 'sources', :action => open_access ? action_name : 'index' } -%>
 
-<% counts = (@sources_counts || {})[row.name] %>
-<% c = (counts ? counts['records'] : 0) %>
-<% record_count = pm_labelled_delimited_counter(c, '%s record', '%s records') %>
+<% record_count = pm_labelled_delimited_counter(sources_counts[row.name] ? sources_counts[row.name]['records'] : 0, '%s record', '%s records') %>
 
 <strong>
 <%= link_to(
@@ -15,7 +13,7 @@
 </strong>
 <% unless row.keywords.empty? -%>
   <%=
-    ("pertaining to <strong>%s</strong>" % [list_search_links_for(:keywords, row.keywords.map { |k| [k.t, k.t] }, list_search_options)]).html_safe
+    ("pertaining to <strong>%s</strong>" / [list_search_links_for(:keywords, row.keywords.map { |k| [k.t, k.t] }, list_search_options)]).html_safe
   %>
 <% end -%>
   <br />

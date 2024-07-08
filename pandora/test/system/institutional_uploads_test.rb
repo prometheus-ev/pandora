@@ -56,7 +56,6 @@ class InstitutionalUploadsTest < ApplicationSystemTestCase
     find('#institutional_uploads_database').select 'Prometheus, Köln'
 
     assert_text "Galette"
-
   end
 
   test 'read_institutional_upload' do
@@ -363,7 +362,7 @@ class InstitutionalUploadsTest < ApplicationSystemTestCase
 
 
     login_as 'jdoe'
-    
+
     # we want to check that the uploads aren't shown in the sidebar anymore
     within("div#boxes") do
       assert_no_css "a[href='/en/image/#{upload.pid}']"
@@ -436,7 +435,7 @@ class InstitutionalUploadsTest < ApplicationSystemTestCase
 
     prometheus = Institution.find_by(name: "prometheus")
     institutional_upload_source([], prometheus)
-    
+
     login_as 'superadmin'
     click_on "Administration"
 

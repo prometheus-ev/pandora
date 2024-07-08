@@ -6,10 +6,10 @@ class Pandora::Indexing::Parser::ArtistParser
   def normalize(artists)
     # In case it is a single artist.
     artists = artists.to_a
-    artists.map! { |a|
+    artists.map! {|a|
       a = a.to_s.encode(Encoding::UTF_8)
 
-      @artist_attributions.each { |artist_attribution|
+      @artist_attributions.each {|artist_attribution|
         a.delete_prefix!(artist_attribution)
         a.delete_suffix!(artist_attribution)
         a.strip!

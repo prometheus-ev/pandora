@@ -1,9 +1,8 @@
 require 'test_helper'
 
 class ElasticTest < ActiveSupport::TestCase
-  test "doesn't trigger elastic max nested query exception" do
-    skip "need to find solution, see #1529"
-
+  # skip: need to find solution, see #1529
+  test "doesn't trigger elastic max nested query exception @skip" do
     TestSource.index
     jdoe = Account.find_by!(login: 'jdoe')
 

@@ -1,24 +1,22 @@
 class Pandora::Indexing::Parser::FfmConedakorRecord < Pandora::Indexing::Parser::Record
   def record_id
-    [record.xpath('.//id/text()'), record.xpath('.//ancestor::work/id/text()')]
+    [record.xpath('./id/text()').to_s, object.xpath('./id/text()').to_s]
   end
 
   def record_object_id
-    if record.name == @node_name
-      if !record.xpath('./parts/part/id/text()').empty?
-        object_id = record.xpath('./parts/part/id/text()')
-      else
-        object_id = record.xpath('./id/text()')
-      end
+    if !record.xpath("./parts/part/id/text()").empty?
+      object_id = record.xpath("./parts/part/id/text()").to_s
     else
-      if !record.xpath('.//ancestor::work/parts/part/id/text()').empty?
-        object_id = record.xpath('.//ancestor::work/parts/part/id/text()')
-      else
-        object_id = record.xpath('.//ancestor::work/id/text()')
+      if object.xpath("./mediums/medium").length > 1
+        object_id = object.xpath("./id/text()").to_s
       end
     end
 
-    [name, Digest::SHA1.hexdigest((object_id).to_a.join('|'))].join('-')
+    if object_id.blank?
+      nil
+    else
+      [name, Digest::SHA1.hexdigest(object_id)].join("-")
+    end
   end
 
   def record_object_id_count
@@ -28,74 +26,85 @@ class Pandora::Indexing::Parser::FfmConedakorRecord < Pandora::Indexing::Parser:
   def path
     return @miro_parser.miro if @miro_parser.miro?(record_id, name)
 
-    "#{record.xpath('.//imagePath/text()')}".sub(/https:\/\/kor.uni-frankfurt.de\/media\/images\/icon\//, '')
+    "#{record.xpath('./imagePath/text()')}".sub(/https:\/\/kor.uni-frankfurt.de\/media\/images\/icon\//, '')
   end
 
   def artist
-    if (number = record.xpath('.//ancestor::work/creators').length) > 0
-      (1..(number.to_i)).map{ |index| 
-        datings = (dating = record.xpath(".//ancestor::work/creators[#{index}]/datings/dating[@event=\"Lebensdaten\"]/text()")).blank? ? record.xpath(".//ancestor::work/creators[#{index}]/datings/dating[@event=\"Geburtsjahr\"]/text()") : dating
+    if (number = object.xpath("./creators").length) > 0
+      (1..(number.to_i)).map do |index|
+        datings = if (dating = object.xpath("./creators[#{index}]/datings/dating[@event=\"Lebensdaten\"]/   text()")).blank?
+          object.xpath("./creators[#{index}]/datings/dating[@event=\"Geburtsjahr\"]/            text()")
+        else
+          dating
+        end
 
-        str = "#{record.xpath(".//ancestor::work/creators[#{index}]/title/text()")} (#{datings})" 
-       
-        if !(birthplace = record.xpath(".//ancestor::work/creators[#{index}]/birthPlace/title/text()")).empty?
-          str << " * #{birthplace}" 
-        end 
-        if !(placeOfDeath = record.xpath(".//ancestor::work/creators[#{index}]/placeOfDeath/title/text()")).empty?
-          str << " + #{placeOfDeath}" 
-        end 
-        if !(record.xpath(".//ancestor::work/creators[#{index}]/teachers/title/text()")).empty?
-          teachers = [record.xpath(".//ancestor::work/creators[#{index}]/teachers/title/text()")].join(" | ")
-          str << " | SchülerIn von #{teachers}" 
+        str = "#{object.xpath("./creators[#{index}]/title/text()")} (#{datings})"
+
+        if !(birthplace = object.xpath("./creators[#{index}]/birthPlace/title/text()")).empty?
+          str << " * #{birthplace}"
         end
-        if !(copy = record.xpath('.//ancestor::work/properties/property[@name="nach"]/text()') || record.xpath('.//ancestor::work/properties/property[@name="Kopie nach"]/text()') || record.xpath('.//ancestor::work/properties/property[@name="Nach"]/text()')).empty?
-        str << " | nach #{copy}" 
+
+        if !(placeOfDeath = object.xpath("./creators[#{index}]/placeOfDeath/title/text()")).empty?
+          str << " + #{placeOfDeath}"
         end
-      str
-      }
+
+        if !(object.xpath("./creators[#{index}]/teachers/title/text()")).empty?
+          teachers = [object.xpath("./creators[#{index}]/teachers/title/text()")].join(" | ")
+          str << " | SchülerIn von #{teachers}"
+        end
+
+        if !(copy = object.xpath('./properties/property[@name="nach"]/text()') ||
+            object.xpath('./properties/property[@name="Kopie nach"]/text()') ||
+            object.xpath('./properties/property[@name="Nach"]/text()')).empty?
+          str << " | nach #{copy}"
+        end
+
+        str
+      end
     end
   end
 
   def artist_normalized
     return @artist_normalized if @artist_normalized
 
-    an = record.xpath('.//ancestor::work/creators/title/text()').map { |a|
+    an = object.xpath('./creators/title/text()').map do |a|
       a.to_s.sub(/ \(.*/, '').split(', ').reverse.join(' ')
-    }
+    end
 
     @artist_normalized = @artist_parser.normalize(an)
   end
 
   def artist_information
-    record.xpath('.//ancestor::work/creators/comment/text()')
+    object.xpath('./creators/comment/text()')
   end
 
   def authority_files_artist
-    number = record.xpath('count(.//ancestor::work/creators)')
-    (1..(number.to_i)).map{ |index|
-      "Wikidata: #{record.xpath(".//ancestor::work/creators[#{index}]/fields/field[@name=\"wikidata_id\"]/text()")},https:\/\/www.wikidata.org\/wiki\/#{record.xpath(".//ancestor::work/creators[#{index}]/fields/field[@name=\"wikidata_id\"]/text()")}"
-    }
+    number = object.xpath('count(./creators)')
+    (1..(number.to_i)).map do |index|
+      "Wikidata: #{object.xpath("./creators[#{index}]/fields/field[@name=\"wikidata_id\"]/text()")},https:\/\/www.wikidata.org\/wiki\/#{object.xpath("./creators[#{index}]/fields/field[@name=\"wikidata_id\"]/text()")}"
+    end
   end
 
   def title
-    "#{record.xpath('.//ancestor::work/title/text()')} [#{record.xpath('.//ancestor::work/distinction/text()')} (#{record.xpath('.//ancestor::work/parts/part/title/text()')})], #{record.xpath('.//properties/property[@name="title"][1]/text()')}".gsub(/ \(\)/,'').gsub(/ \[\]/,'').gsub(/, \z/,'')
+    "#{object.xpath('./title/text()')} [#{object.xpath('./distinction/text()')} (#{object.xpath('./parts/part/title/text()')})], #{record.xpath('./properties/property[@name="title"][1]/text()')}".gsub(/ \(\)/, '').gsub(/ \[\]/, '').gsub(/, \z/, '')
   end
 
   def date
-    if (number = record.xpath('.//ancestor::work/datings/dating').length) > 0
-      (1..(number.to_i)).map{ |index| "#{record.xpath(".//ancestor::work/datings/dating[#{index}]/text()")} (#{record.xpath(".//ancestor::work/datings/dating[#{index}]/@event")})".gsub(/ \(Datierung\)/,'')  
+    if (number = object.xpath('./datings/dating').length) > 0
+      (1..(number.to_i)).map{|index|
+        "#{object.xpath("./datings/dating[#{index}]/text()")} (#{object.xpath("./datings/dating[#{index}]/@event")})".gsub(/ \(Datierung\)/, '')
       }.join(" | ")
     else
-      record.xpath('.//ancestor::work/parts/part/datings/dating/text()').to_a.join(" | ")
+      object.xpath('./parts/part/datings/dating/text()').to_a.join(" | ")
     end
   end
 
   def date_range
     return @date_range if @date_range
 
-    if !record.xpath(".//ancestor::work/datings/dating[1]").empty?
-      from = record.xpath(".//ancestor::work/datings/dating[1]/@from-day").to_s.to_i
-      to = record.xpath(".//ancestor::work/datings/dating[1]/@to-day").to_s.to_i
+    if !object.xpath("./datings/dating[1]").empty?
+      from = object.xpath("./datings/dating[1]/@from-day").to_s.to_i
+      to = object.xpath("./datings/dating[1]/@to-day").to_s.to_i
 
       from = Date.jd(from)
       to = Date.jd(to)
@@ -111,47 +120,60 @@ class Pandora::Indexing::Parser::FfmConedakorRecord < Pandora::Indexing::Parser:
   end
 
   def location
-    if !(record.xpath('.//ancestor::work/locatedIn') && record.xpath('.//ancestor::work/sites')).blank?
-     ort = (stadt = (record.xpath('.//ancestor::work/locatedIn/location/title/text()'))).blank? ? record.xpath('.//ancestor::work/locatedIn/distinction/text()') : stadt
-     location = ort.blank? ? record.xpath('.//ancestor::work/sites/site/title/text()') : ort
-    "#{location}, #{record.xpath('.//ancestor::work/locatedIn/title/text()')} (#{record.xpath('.//ancestor::work/locatedIn/comment/text()')})".gsub(/_{3,}/, '').gsub(/ \(\)/,'').gsub(/ \( \)/,'').gsub(/, \z/,'').gsub(/\A, /,'') || record.xpath('.//ancestor::work/properties/property[@name="Standort*"]/text()') || record.xpath('.//ancestor::work/properties/property[@name="Aufbewahrung*"]/text()') || record.xpath('.//ancestor::work/properties/property[@name="*Besitz*"]/text()') || record.xpath('.//ancestor::work/properties/property[@name="Befindet sich in"]/text()') || record.xpath('.//ancestor::work/properties/property[@name="Privatbesitz"]/text()')
+    if !(object.xpath('./locatedIn') && object.xpath('./sites')).blank?
+      ort = (stadt = (object.xpath('./locatedIn/location/title/text()'))).blank? ? object.xpath('./locatedIn/distinction/text()') : stadt
+
+      location = if ort.blank?
+        object.xpath('./sites/site/title/text()')
+      else
+        ort
+      end
+
+      "#{location}, #{object.xpath('./locatedIn/title/text()')} (#{object.xpath('./locatedIn/comment/text()')})".gsub(/_{3,}/, '').gsub(/ \(\)/, '').gsub(/ \( \)/, '').gsub(/, \z/, '').gsub(/\A, /, '') ||
+        object.xpath('./properties/property[@name="Standort*"]/text()') ||
+        object.xpath('./properties/property[@name="Aufbewahrung*"]/text()') ||
+        object.xpath('./properties/property[@name="*Besitz*"]/text()') ||
+        object.xpath('./properties/property[@name="Befindet sich in"]/text()') ||
+        object.xpath('./properties/property[@name="Privatbesitz"]/text()')
     else
-      record.xpath('.//ancestor::work/parts/part/location/text()')
+      object.xpath('./parts/part/location/text()')
     end
   end
 
   def material
-    record.xpath('.//ancestor::work/fields/field[@name="material"]/text()')
+    object.xpath('./fields/field[@name="material"]/text()')
   end
 
   def size
-    record.xpath('.//ancestor::work/fields/field[@name="dimensions"]/text()')
+    object.xpath('./fields/field[@name="dimensions"]/text()')
   end
 
   def portrayal
-    "#{record.xpath('.//ancestor::work/portrayal/title/text()')}, #{record.xpath('.//ancestor::work/portrayal/comment/text()')}".gsub(/, \z/,'')
+    "#{object.xpath('./portrayal/title/text()')}, #{object.xpath('./portrayal/comment/text()')}".gsub(/, \z/, '')
   end
 
   def commissioner
-    "#{record.xpath('.//ancestor::work/commissioner/title/text()')}, #{record.xpath('.//ancestor::work/commissioner/comment/text()')}".gsub(/, \z/,'')
+    "#{object.xpath('./commissioner/title/text()')}, #{object.xpath('./commissioner/comment/text()')}".gsub(/, \z/, '')
   end
 
   def genre
-    record.xpath('.//ancestor::work/subtype/text()')
+    object.xpath('./subtype/text()')
   end
 
   def credits
-     number = record.xpath('.//credits/credit').length
-    (1..(number.to_i)).map{ |index|
-      ["#{record.xpath(".//credits/credit[#{index}]/author/text()")}".split(', ').reverse.join(' '), "#{record.xpath(".//credits/credit[#{index}]/title/text()")} (#{record.xpath(".//sources/source[#{index}]/literature/distinction/text()")})", record.xpath(".//credits/credit[#{index}]/volume/text()"), "hrsg. von " + "#{record.xpath(".//credits/credit[#{index}]/editor/text()")}".split(', ').reverse.join(' '), "#{record.xpath(".//credits/credit[#{index}]/placeOfPublication/text()")}: #{record.xpath(".//credits/credit[#{index}]/publisher/text()")}".gsub(/: \z/,'').gsub(/\A: /,'') + " #{record.xpath(".//credits/credit[#{index}]/yearOfPublication/text()")}", record.xpath(".//credits/credit[#{index}]/comment/text()"), record.xpath(".//credits/credit[#{index}]/internalReferences/internalReference/text()")].reject(&:empty?).join(", ").gsub(/ hrsg. von ,/, '').gsub(/, hrsg. von \z/,'').gsub(/  /,'').gsub(/ \(\)/,'').gsub(/,\z/,'').gsub(/ *\z/,'').gsub(/ , /,', ') << ".".gsub(/..\z/, '.')
-    }
+    number = record.xpath('.//credits/credit').length
+
+    (1..(number.to_i)).map do |index|
+      ["#{record.xpath(".//credits/credit[#{index}]/author/text()")}".split(', ').reverse.join(' '), "#{record.xpath(".//credits/credit[#{index}]/title/text()")} (#{record.xpath(".//sources/source[#{index}]/literature/distinction/text()")})", record.xpath(".//credits/credit[#{index}]/volume/text()"), "hrsg. von " + "#{record.xpath(".//credits/credit[#{index}]/editor/text()")}".split(', ').reverse.join(' '), "#{record.xpath(".//credits/credit[#{index}]/placeOfPublication/text()")}: #{record.xpath(".//credits/credit[#{index}]/publisher/text()")}".gsub(/: \z/, '').gsub(/\A: /, '') + " #{record.xpath(".//credits/credit[#{index}]/yearOfPublication/text()")}", record.xpath(".//credits/credit[#{index}]/comment/text()"), record.xpath(".//credits/credit[#{index}]/internalReferences/internalReference/text()")].reject(&:empty?).join(", ").gsub(/ hrsg. von ,/, '').gsub(/, hrsg. von \z/, '').gsub(/  /, '').gsub(/ \(\)/, '').gsub(/,\z/, '').gsub(/ *\z/, '').gsub(/ , /, ', ') << ".".gsub(/..\z/, '.')
+    end
   end
 
-  def literature 
-    number = record.xpath('.//ancestor::work/illustrations').length
-    (1..(number.to_i)).map{ |index|
-      ["#{record.xpath(".//ancestor::work/illustrations[#{index}]/author/title/text()")}".split(', ').reverse.join(' '), "#{record.xpath(".//ancestor::work/illustrations[#{index}]/title/text()")} (#{record.xpath(".//ancestor::work/illustrations[#{index}]/distinction/text()")})", record.xpath(".//ancestor::work/illustrations[#{index}]/fields[1]/field[@name=\"Band\"]/text()"), "hrsg. von " + "#{record.xpath(".//ancestor::work/illustrations[#{index}]/publisher/title/text()")}".split(', ').reverse.join(' '), "#{record.xpath(".//ancestor::work/illustrations[#{index}]/publishedIn/title/text()")}: #{record.xpath(".//ancestor::work/illustrations[#{index}]/fields/field[@name=\"publisher\"]/text()")}".gsub(/: \z/,'').gsub(/\A: /,'') + " #{record.xpath(".//ancestor::work/illustrations[#{index}]/fields/field[@name=\"year_of_publication\"]/text()")}", record.xpath(".//ancestor::work/illustrations[#{index}]/comment/text()")].reject(&:empty?).join(", ").gsub(/ hrsg. von ,/, '').gsub(/, hrsg. von \z/,'').gsub(/  /,' ').gsub(/ \(\)/,'').gsub(/,\z/,'').gsub(/ *\z/,'') << ".".gsub(/..\z/, '.')
-    }
+  def literature
+    number = object.xpath('.//illustrations').length
+
+    (1..(number.to_i)).map do |index|
+      ["#{object.xpath("./illustrations[#{index}]/author/title/text()")}".split(', ').reverse.join(' '), "#{object.xpath("./illustrations[#{index}]/title/text()")} (#{object.xpath("./illustrations[#{index}]/distinction/text()")})", object.xpath("./illustrations[#{index}]/fields[1]/field[@name=\"Band\"]/text()"), "hrsg. von " + "#{object.xpath("./illustrations[#{index}]/publisher/title/text()")}".split(', ').reverse.join(' '), "#{object.xpath("./illustrations[#{index}]/publishedIn/title/text()")}: #{object.xpath("./illustrations[#{index}]/fields/field[@name=\"publisher\"]/text()")}".gsub(/: \z/, '').gsub(/\A: /, '') + " #{object.xpath("./illustrations[#{index}]/fields/field[@name=\"year_of_publication\"]/text()")}", object.xpath("./illustrations[#{index}]/comment/text()")].reject(&:empty?).join(", ").gsub(/ hrsg. von ,/, '').gsub(/, hrsg. von \z/, '').gsub(/  /, ' ').gsub(/ \(\)/, '').gsub(/,\z/, '').gsub(/ *\z/, '') << ".".gsub(/..\z/, '.')
+    end
   end
 
   def rights_work
@@ -175,69 +197,78 @@ class Pandora::Indexing::Parser::FfmConedakorRecord < Pandora::Indexing::Parser:
   end
 
   def keyword
-    record.xpath('.//ancestor::work/tags/tag/text()')
+    object.xpath('.//tags/tag/text()')
   end
 
   def comment
-    record.xpath('.//ancestor::work/comment/text()')
+    object.xpath('.//comment/text()')
   end
 
   def addition
-    record.xpath('.//ancestor::work/properties/property[@name="Zusatz"]/text()')
+    object.xpath('.//properties/property[@name="Zusatz"]/text()')
   end
 
   def origin
-    record.xpath('.//ancestor::work/properties/property[@name="Herkunft"]/text()')
+    object.xpath('.//properties/property[@name="Herkunft"]/text()')
   end
 
   def provenance
-    record.xpath('.//ancestor::work/properties/property[@name="Provenienz"]/text()')
+    object.xpath('.//properties/property[@name="Provenienz"]/text()')
   end
 
   def signature
-    record.xpath('.//ancestor::work/properties/property[@name="Sig*"]/text()')
+    object.xpath('.//properties/property[@name="Sig*"]/text()')
   end
-  
+
   def inventory_no
-    record.xpath('.//ancestor::work/properties/property[@name="Inv*"]/text()')
+    object.xpath('.//properties/property[@name="Inv*"]/text()')
   end
 
   def labeled
-    record.xpath('.//ancestor::work/properties/property[@name="Bez.*"]/text()') || record.xpath('.//ancestor::work/properties/property[@name="Bezeichn*"]/text()')
+    object.xpath('.//properties/property[@name="Bez.*"]/text()') ||
+      object.xpath('.//properties/property[@name="Bezeichn*"]/text()')
   end
 
   def annotation
-    record.xpath('.//ancestor::work/properties/property[@name="Anmerkung"]/text()')
+    object.xpath('.//properties/property[@name="Anmerkung"]/text()')
   end
 
   def origin_point
-    record.xpath('.//ancestor::work/properties/property[@name="Entstehung*"]/text()') || record.xpath('.//ancestor::work/properties/property[@name="Entstanden*"]/text()')
+    object.xpath('.//properties/property[@name="Entstehung*"]/text()') ||
+      object.xpath('.//properties/property[@name="Entstanden*"]/text()')
   end
 
   def inscription
-    record.xpath('.//ancestor::work/properties/property[@name="Inschrift"]/text()')
+    object.xpath('.//properties/property[@name="Inschrift"]/text()')
   end
 
   def text
-    if !(text = record.xpath('.//ancestor::work/properties/property[@name="Bibelstelle"]/text()')).empty?
+    if !(text = object.xpath('.//properties/property[@name="Bibelstelle"]/text()')).empty?
       "#{text} (Bibelstelle)"
     end
   end
- 
+
   def part_of
-    number = record.xpath('.//ancestor::work/parts/part/properties/property').length
+    number = object.xpath('.//parts/part/properties/property').length
     arr = []
-    arr << "#{record.xpath('.//ancestor::work/parts/part/title/text()')}"
-    arr << "#{record.xpath('.//ancestor::work/parts/part/datings/dating/text()')}"
-    arr << "#{record.xpath('.//ancestor::work/parts/part/location/text()')}"
-    arr << "#{record.xpath('.//ancestor::work/parts/part/distinction/text()')}"
-    arr << "#{record.xpath('.//ancestor::work/parts/part/fields/field[@name="google_maps"]/text()')}"
-    arr << (1..(number.to_i)).map{ |index| 
-    "#{record.xpath(".//ancestor::work/parts/part/properties/property[#{index}]/text()")} (#{record.xpath(".//ancestor::work/parts/part/properties/property[#{index}]/@name")})"}
-    arr << "#{record.xpath('.//ancestor::work/parts/part/fields/field[@name="material"]/text()')}"
-    arr << "#{record.xpath('.//ancestor::work/parts/part/fields/field[@name="dimensions"]/text()')}"
-    arr << "#{record.xpath('.//ancestor::work/parts/part/comment/text()')}"
-    arr << record.xpath('.//ancestor::work/parts/part/creators/text()').to_a.join(" | ")
+
+    arr << "#{object.xpath('.//parts/part/title/text()')}"
+    arr << "#{object.xpath('.//parts/part/datings/dating/text()')}"
+    arr << "#{object.xpath('.//parts/part/location/text()')}"
+    arr << "#{object.xpath('.//parts/part/distinction/text()')}"
+    arr << "#{object.xpath('.//parts/part/fields/field[@name="google_maps"]/text()')}"
+
+    arr << (1..(number.to_i)).map do |index|
+      a = object.xpath(".//parts/part/properties/property[#{index}]/text()")
+      b = object.xpath(".//parts/part/properties/property[#{index}]/@name")
+      "#{a} (#{b})"
+    end
+
+    arr << "#{object.xpath('.//parts/part/fields/field[@name="material"]/text()')}"
+    arr << "#{object.xpath('.//parts/part/fields/field[@name="dimensions"]/text()')}"
+    arr << "#{object.xpath('.//parts/part/comment/text()')}"
+    arr << object.xpath('.//parts/part/creators/text()').to_a.join(" | ")
+
     arr.flatten
   end
 end

@@ -19,7 +19,7 @@
     value={state.value}
   />
   <ul
-    style="min-width: {offsetWidth()}; overflowY: {overflowY()}"
+    style="min-width: {offsetWidth()}; overflow-y: {overflowY()}"
     class="bg-dark list-unstyled {state.suggestions.length == 0 ? '' : 'show'}"
     ontransitionend={event => setOverflow('auto')}
   >

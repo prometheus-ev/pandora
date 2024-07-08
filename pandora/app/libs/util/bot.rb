@@ -1,7 +1,5 @@
 module Util
-
   module Bot
-
     extend self
 
     BOT_RE = %r{
@@ -28,7 +26,5 @@ module Util
     def bot?(user_agent)
       !!(user_agent =~ BOT_RE)
     end
-
   end
-
 end

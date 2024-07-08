@@ -17,7 +17,7 @@ class AccountMailerTest < ActionMailer::TestCase
     assert_match /^http:\/\/localhost\//, link
 
     # grab the last 1200 characters from the rails log
-    log = File.read("#{Rails.root}/log/test.log")[-1200..-1]
+    log = File.read("#{Rails.root}/log/test.log").last(1200)
     assert_match /#{ShortUrl.last.token}/, log
   end
 

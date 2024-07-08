@@ -9,7 +9,7 @@ class NeighboursTest < ApplicationSystemTestCase
       click_on 'Search'
     end
     fill_in 'search_value_0', with: "stuhl"
-    
+
     find('.submit_button').click
     assert_equal('/en/searches', page.current_path)
 

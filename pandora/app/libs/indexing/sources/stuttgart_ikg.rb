@@ -1,5 +1,4 @@
 class Indexing::Sources::StuttgartIkg < Indexing::SourceSuper
-
   def records
     document.xpath('//Bild')
   end
@@ -22,7 +21,7 @@ class Indexing::Sources::StuttgartIkg < Indexing::SourceSuper
   end
 
   def artist_normalized
-    an = record.xpath('.//KünstlerIn/text()').map { |a|
+    an = record.xpath('.//KünstlerIn/text()').map {|a|
       a.to_s.split(', ').reverse.join(' ')
     }
     super(an)
@@ -87,7 +86,7 @@ class Indexing::Sources::StuttgartIkg < Indexing::SourceSuper
   end
 
   def rights_reproduction
-   record.xpath('.//copyright/text()')
+    record.xpath('.//copyright/text()')
   end
 
   # Bildvorlage
@@ -95,7 +94,7 @@ class Indexing::Sources::StuttgartIkg < Indexing::SourceSuper
     record.xpath('.//Darstellungsform/text()')
   end
 
-  def keyword 
+  def keyword
     record.xpath('.//Schlagworte/text()')
   end
 
@@ -103,7 +102,7 @@ class Indexing::Sources::StuttgartIkg < Indexing::SourceSuper
     record.xpath('.//Kommentar/text()')
   end
 
-  def topic 
+  def topic
     "#{record.xpath('.//Themenkomplex/text()')}, #{record.xpath('.//Thema/text()')}".gsub(/\A, /, '').gsub(/, \z/, '')
   end
 end

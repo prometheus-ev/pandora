@@ -1,7 +1,6 @@
 require 'test_helper'
 
 class AnnouncementTest < ActiveSupport::TestCase
-
   def setup
     @announcement = valid_announcement
 
@@ -86,5 +85,4 @@ class AnnouncementTest < ActiveSupport::TestCase
 
     assert announcements.size == 6, "Found less than the all announcements"
   end
-
 end

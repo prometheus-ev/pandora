@@ -4,7 +4,7 @@ class Pandora::Indexing::Parser::AmsterdamMuseum < Pandora::Indexing::Parser::Xm
 
     super(
       source,
-      object_node_name: 'record',
-      record_node_name: 'reproduction')
+      object_node_name: "record",
+      record_node_name: "reproduction")
   end
 end

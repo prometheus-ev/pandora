@@ -1,7 +1,6 @@
 require "application_system_test_case"
 
 class SubscriptionsTest < ApplicationSystemTestCase
-
   test 'unsubscribe from newsletter' do
     create_newsletter_user
 
@@ -64,5 +63,4 @@ class SubscriptionsTest < ApplicationSystemTestCase
       research_interest: 'unsubscribe from newsletter'
     )
   end
-
 end

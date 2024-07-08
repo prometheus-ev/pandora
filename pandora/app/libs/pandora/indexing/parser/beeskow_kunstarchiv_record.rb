@@ -14,7 +14,7 @@ class Pandora::Indexing::Parser::BeeskowKunstarchivRecord < Pandora::Indexing::P
   def artist_normalized
     return @artist_normalized if @artist_normalized
 
-    an = record.xpath('.//KünstlerIn/text()').map { |a|
+    an = record.xpath('.//KünstlerIn/text()').map {|a|
       a.to_s.split(', ').reverse.join(' ')
     }
 

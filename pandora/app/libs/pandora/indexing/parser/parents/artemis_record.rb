@@ -7,7 +7,6 @@ class Pandora::Indexing::Parser::Parents::ArtemisRecord < Pandora::Indexing::Par
     "?C=#{record.at_xpath('@nr')}".gsub(/M0*/, '')
   end
 
-  # künstler
   def artist
     record.xpath('.//kuenstler/text()')
   end
@@ -15,16 +14,16 @@ class Pandora::Indexing::Parser::Parents::ArtemisRecord < Pandora::Indexing::Par
   def artist_normalized
     return @artist_normalized if @artist_normalized
 
-    an = record.xpath('.//kuenstler/text()').map{ |a|
+    an = record.xpath('.//kuenstler/text()').map do |a|
       a.to_s.split(', ').reverse.join(' ')
-    }
+    end
 
     @artist_normalized = @artist_parser.normalize(an)
   end
 
-  # titel
   def title
     title_version = record.xpath('.//titel/@version/text()').to_a.join(" | ")
+
     if title_version.blank?
       record.xpath('.//titel/text()').to_a.join(" | ")
     else
@@ -32,7 +31,6 @@ class Pandora::Indexing::Parser::Parents::ArtemisRecord < Pandora::Indexing::Par
     end
   end
 
-  # datierung
   def date
     record.xpath('.//datierung/text()')
   end
@@ -41,32 +39,26 @@ class Pandora::Indexing::Parser::Parents::ArtemisRecord < Pandora::Indexing::Par
     @date_range ||= @date_parser.date_range(date.to_s)
   end
 
-  # groesse
   def size
     record.xpath('.//groesse/text()')
   end
 
-  # standort
   def location
     record.xpath('.//standort/text()')
   end
 
-  # institution
   def institution
     record.xpath('.//einrichtung/text()')
   end
 
-  # gattung
   def genre
     "#{record.xpath('.//gattung/text()')}, #{record.xpath('.//bildgattung/text()')}".gsub(/\A, /, '').gsub(/, \z/, '')
   end
 
-  # material
   def material
     "#{record.xpath('.//farbe/text()')}, #{record.xpath('.//traeger/text()')}".gsub(/\A, /, '').gsub(/, \z/, '')
   end
 
-  # abbildungsnachweis
   def credits
     record.xpath('.//nachweis/text()')
   end
@@ -77,7 +69,6 @@ class Pandora::Indexing::Parser::Parents::ArtemisRecord < Pandora::Indexing::Par
     end
   end
 
-  # Sachbegriff
   def keyword
     "#{record.xpath('.//bildgattung/text()')}, #{record.xpath('.//sachbegriff/text()')}".gsub(/\A, /, '').gsub(/, \z/, '')
   end
@@ -86,7 +77,6 @@ class Pandora::Indexing::Parser::Parents::ArtemisRecord < Pandora::Indexing::Par
     @artigo_parser.keywords(record_id)
   end
 
-  # Bemerkung
   def comment
     record.xpath('.//bemerkung/text()')
   end

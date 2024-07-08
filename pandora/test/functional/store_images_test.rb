@@ -31,14 +31,14 @@ class StoreImagesTest < ActionDispatch::IntegrationTest
 
     post '/en/collections/store', params: {
       "target_collection" => {"collection_id" => jdoes_private_collection.id},
-      "image"=>[pid_for(1)]
+      "image" => [pid_for(1)]
     }
     assert_redirected_to '/en/searches'
     follow_redirect!
 
     post '/en/collections/store', params: {
       "target_collection" => {"collection_id" => jdoes_private_collection.id},
-      "image"=>[pid_for(1)]
+      "image" => [pid_for(1)]
     }
     assert_redirected_to '/en/searches'
     follow_redirect!

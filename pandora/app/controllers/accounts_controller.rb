@@ -1,7 +1,7 @@
 class AccountsController < ApplicationController
   # the partial remote forms are using POST requests to the show action
   # when the cancel button is clicked ... obviously without the token
-  skip_before_action :verify_authenticity_token, only: ['show', 'login']
+  skip_before_action :verify_authenticity_token, only: ['show']
   skip_before_action :verify_account_signup_complete, only: ['show']
 
   def self.initialize_me!
@@ -11,11 +11,11 @@ class AccountsController < ApplicationController
 
     linkable_actions :create, :list, *Account::FILTERS
   end
-  
+
   api_method :show, :get => {
     :doc => "Get a user record.",
-    :expects => { :id => { :type => 'string', :required => true, :doc => 'The id of the user record.' } },
-    :returns => { :xml => { :root => 'user' }, :json => {} }
+    :expects => {:id => {:type => 'string', :required => true, :doc => 'The id of the user record.'}},
+    :returns => {:xml => {:root => 'user'}, :json => {}}
   }
 
   def index
@@ -57,7 +57,7 @@ class AccountsController < ApplicationController
         render xml: @user.to_xml(only: [:id, :firstname, :lastname, :email, :accepted_terms_of_use_revision])
       end
       format.json do
-         if params[:id]
+        if params[:id]
           @user = Account.find(params[:id])
         else
           @user = current_user
@@ -99,11 +99,11 @@ class AccountsController < ApplicationController
 
     # with this action, an admin creates an account, so we can assume he knows
     # what he is doing
-    @user.email_verified_at = Time.now
     @user.status = 'activated'
 
     if @user.save
       check_admin_institutions
+      @user.deliver_token(:email_confirmation)
 
       flash[:notice] = "Account '#{@user.login}' successfully created!"
       redirect_to action: 'show', id: @user.login
@@ -130,7 +130,7 @@ class AccountsController < ApplicationController
 
       recipients, invalid_or_not_found = [], []
 
-      Account.from_textarea(@to, true) { |user, to|
+      Account.from_textarea(@to, true) {|user, to|
         if user and user.email_verified? and user.active? and current_user.allowed?(user, :read)
           recipients << user
         else
@@ -148,11 +148,12 @@ class AccountsController < ApplicationController
         return
       end
 
-      recipients.each { |recipient|
+      recipients.each {|recipient|
         current_user.deliver(:usermail, recipient: recipient, text: @text)
       }
 
-      current_user.deliver(:usermail_response,
+      current_user.deliver(
+        :usermail_response,
         recipients: recipients,
         text: @text
       )
@@ -218,6 +219,10 @@ class AccountsController < ApplicationController
 
     @user.assign_attributes(account_params(@user))
 
+    # we set this manually because association-only changes don't trigger
+    # timestamp updates on has_many and has_and_belongs_to_many
+    @user.updated_at = Time.now
+
     if @user.save
       welcome_user = (
         @user.status == 'activated' &&
@@ -234,7 +239,7 @@ class AccountsController < ApplicationController
       redirect_to action: 'show', id: @user.login
     else
       set_mandatory_fields
-      
+
       render action: 'edit', status: 422
     end
   end
@@ -267,7 +272,7 @@ class AccountsController < ApplicationController
       required += Account::REQUIRED_UNLESS_VIA_INSTITUTION if @user.needs_research_interest?
       required += %w[password] if @user.send(:password_required?)
 
-      super required
+      super(required)
     end
 
     def set_expires_in_options(action)
@@ -289,7 +294,7 @@ class AccountsController < ApplicationController
       @expires_in_options << ['%d months' / 3, 3.months]
       @expires_in_options << ['%d months' / 6, 6.months]
 
-      [1, 2, 3].each { |count|
+      [1, 2, 3].each {|count|
         @expires_in_options << [pm_labelled_counter(count, '%d year', '%d years'), count.years]
       }
 
@@ -381,7 +386,7 @@ class AccountsController < ApplicationController
     end
 
     def set_collections_and_presentations
-      @public_collections   = @shared_collections   = false
+      @public_collections = @shared_collections = false
       # REWRITE: functionality removed
       # @public_presentations = @shared_presentations = false
 
@@ -452,7 +457,7 @@ class AccountsController < ApplicationController
       id = result.delete(:institution)
       if id.present?
         institution = Institution.find(id)
-        allowed = 
+        allowed =
           current_user.admin_or_superadmin? ||
           (
             current_user.useradmin? &&
@@ -479,7 +484,7 @@ class AccountsController < ApplicationController
       if [1.month, 1.week].include?(result[:expires_in].to_i)
         result[:mode] = 'guest'
       end
-      
+
       id = result[:institution_id]
       if id && id != Institution.prometheus.id.to_s
         result[:mode] = 'institution'
@@ -547,5 +552,4 @@ class AccountsController < ApplicationController
     def account_settings
       current_user.try(:account_settings) || {}
     end
-
 end

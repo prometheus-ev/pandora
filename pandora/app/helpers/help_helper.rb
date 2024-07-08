@@ -9,7 +9,7 @@ module HelpHelper
   end
 
   def link_for_prev_next(item)
-    { :action => item }
+    {:action => item}
   end
 
   def link_to_prev_next(item, direction, title)
@@ -18,6 +18,6 @@ module HelpHelper
 
   def screenshot(img, title = nil, html_options = {})
     title = "Screenshot#{': ' if title}#{title}"
-    image_tag(img, { :title => title, :class => 'screenshot' }.merge_html_options(html_options))
+    image_tag(img, {:title => title, :class => 'screenshot'}.merge_html_options(html_options))
   end
 end

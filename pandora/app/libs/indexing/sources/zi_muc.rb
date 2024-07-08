@@ -17,7 +17,7 @@ class Indexing::Sources::ZiMuc < Indexing::SourceSuper
   end
 
   def artist_normalized
-    an = record.xpath('.//kuenstler/text()').map { |a|
+    an = record.xpath('.//kuenstler/text()').map {|a|
       a.to_s.split(', ').reverse.join(' ')
     }
     super(an)

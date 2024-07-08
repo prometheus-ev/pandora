@@ -162,6 +162,866 @@ var __WEBPACK_AMD_DEFINE_RESULT__;/*! https://mths.be/base64 v1.0.0 by @mathias 
 
 /***/ }),
 
+/***/ 1:
+/***/ ((module) => {
+
+//
+// strftime
+// github.com/samsonjs/strftime
+// @_sjs
+//
+// Copyright 2010 - 2021 Sami Samhuri <sami@samhuri.net>
+//
+// MIT License
+// http://sjs.mit-license.org
+//
+
+; (function () {
+
+    var Locales = {
+        de_DE: {
+            identifier: 'de-DE',
+            days: ['Sonntag', 'Montag', 'Dienstag', 'Mittwoch', 'Donnerstag', 'Freitag', 'Samstag'],
+            shortDays: ['So', 'Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa'],
+            months: ['Januar', 'Februar', 'März', 'April', 'Mai', 'Juni', 'Juli', 'August', 'September', 'Oktober', 'November', 'Dezember'],
+            shortMonths: ['Jan', 'Feb', 'Mär', 'Apr', 'Mai', 'Jun', 'Jul', 'Aug', 'Sep', 'Okt', 'Nov', 'Dez'],
+            AM: 'AM',
+            PM: 'PM',
+            am: 'am',
+            pm: 'pm',
+            formats: {
+                c: '%a %d %b %Y %X %Z',
+                D: '%d.%m.%Y',
+                F: '%Y-%m-%d',
+                R: '%H:%M',
+                r: '%I:%M:%S %p',
+                T: '%H:%M:%S',
+                v: '%e-%b-%Y',
+                X: '%T',
+                x: '%D'
+            }
+        },
+
+        en_CA: {
+            identifier: 'en-CA',
+            days: ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'],
+            shortDays: ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'],
+            months: ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'],
+            shortMonths: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
+            ordinalSuffixes: [
+                'st', 'nd', 'rd', 'th', 'th', 'th', 'th', 'th', 'th', 'th',
+                'th', 'th', 'th', 'th', 'th', 'th', 'th', 'th', 'th', 'th',
+                'st', 'nd', 'rd', 'th', 'th', 'th', 'th', 'th', 'th', 'th',
+                'st'
+            ],
+            AM: 'AM',
+            PM: 'PM',
+            am: 'am',
+            pm: 'pm',
+            formats: {
+                c: '%a %d %b %Y %X %Z',
+                D: '%d/%m/%y',
+                F: '%Y-%m-%d',
+                R: '%H:%M',
+                r: '%I:%M:%S %p',
+                T: '%H:%M:%S',
+                v: '%e-%b-%Y',
+                X: '%r',
+                x: '%D'
+            }
+        },
+
+        en_US: {
+            identifier: 'en-US',
+            days: ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'],
+            shortDays: ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'],
+            months: ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'],
+            shortMonths: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
+            ordinalSuffixes: [
+                'st', 'nd', 'rd', 'th', 'th', 'th', 'th', 'th', 'th', 'th',
+                'th', 'th', 'th', 'th', 'th', 'th', 'th', 'th', 'th', 'th',
+                'st', 'nd', 'rd', 'th', 'th', 'th', 'th', 'th', 'th', 'th',
+                'st'
+            ],
+            AM: 'AM',
+            PM: 'PM',
+            am: 'am',
+            pm: 'pm',
+            formats: {
+                c: '%a %d %b %Y %X %Z',
+                D: '%m/%d/%y',
+                F: '%Y-%m-%d',
+                R: '%H:%M',
+                r: '%I:%M:%S %p',
+                T: '%H:%M:%S',
+                v: '%e-%b-%Y',
+                X: '%r',
+                x: '%D'
+            }
+        },
+
+        es_MX: {
+            identifier: 'es-MX',
+            days: ['domingo', 'lunes', 'martes', 'miércoles', 'jueves', 'viernes', 'sábado'],
+            shortDays: ['dom', 'lun', 'mar', 'mié', 'jue', 'vie', 'sáb'],
+            months: ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'],
+            shortMonths: ['ene', 'feb', 'mar', 'abr', 'may', 'jun', 'jul', 'ago', 'sep', 'oct', 'nov', 'dic'],
+            AM: 'AM',
+            PM: 'PM',
+            am: 'am',
+            pm: 'pm',
+            formats: {
+                c: '%a %d %b %Y %X %Z',
+                D: '%d/%m/%Y',
+                F: '%Y-%m-%d',
+                R: '%H:%M',
+                r: '%I:%M:%S %p',
+                T: '%H:%M:%S',
+                v: '%e-%b-%Y',
+                X: '%T',
+                x: '%D'
+            }
+        },
+
+        fr_FR: {
+            identifier: 'fr-FR',
+            days: ['dimanche', 'lundi', 'mardi', 'mercredi', 'jeudi', 'vendredi', 'samedi'],
+            shortDays: ['dim.', 'lun.', 'mar.', 'mer.', 'jeu.', 'ven.', 'sam.'],
+            months: ['janvier', 'février', 'mars', 'avril', 'mai', 'juin', 'juillet', 'août', 'septembre', 'octobre', 'novembre', 'décembre'],
+            shortMonths: ['janv.', 'févr.', 'mars', 'avril', 'mai', 'juin', 'juil.', 'août', 'sept.', 'oct.', 'nov.', 'déc.'],
+            AM: 'AM',
+            PM: 'PM',
+            am: 'am',
+            pm: 'pm',
+            formats: {
+                c: '%a %d %b %Y %X %Z',
+                D: '%d/%m/%Y',
+                F: '%Y-%m-%d',
+                R: '%H:%M',
+                r: '%I:%M:%S %p',
+                T: '%H:%M:%S',
+                v: '%e-%b-%Y',
+                X: '%T',
+                x: '%D'
+            }
+        },
+
+        it_IT: {
+            identifier: 'it-IT',
+            days: ['domenica', 'lunedì', 'martedì', 'mercoledì', 'giovedì', 'venerdì', 'sabato'],
+            shortDays: ['dom', 'lun', 'mar', 'mer', 'gio', 'ven', 'sab'],
+            months: ['gennaio', 'febbraio', 'marzo', 'aprile', 'maggio', 'giugno', 'luglio', 'agosto', 'settembre', 'ottobre', 'novembre', 'dicembre'],
+            shortMonths: ['gen', 'feb', 'mar', 'apr', 'mag', 'giu', 'lug', 'ago', 'set', 'ott', 'nov', 'dic'],
+            AM: 'AM',
+            PM: 'PM',
+            am: 'am',
+            pm: 'pm',
+            formats: {
+                c: '%a %d %b %Y %X %Z',
+                D: '%d/%m/%Y',
+                F: '%Y-%m-%d',
+                R: '%H:%M',
+                r: '%I:%M:%S %p',
+                T: '%H:%M:%S',
+                v: '%e-%b-%Y',
+                X: '%T',
+                x: '%D'
+            }
+        },
+
+        nl_NL: {
+            identifier: 'nl-NL',
+            days: ['zondag', 'maandag', 'dinsdag', 'woensdag', 'donderdag', 'vrijdag', 'zaterdag'],
+            shortDays: ['zo', 'ma', 'di', 'wo', 'do', 'vr', 'za'],
+            months: ['januari', 'februari', 'maart', 'april', 'mei', 'juni', 'juli', 'augustus', 'september', 'oktober', 'november', 'december'],
+            shortMonths: ['jan', 'feb', 'mrt', 'apr', 'mei', 'jun', 'jul', 'aug', 'sep', 'okt', 'nov', 'dec'],
+            AM: 'AM',
+            PM: 'PM',
+            am: 'am',
+            pm: 'pm',
+            formats: {
+                c: '%a %d %b %Y %X %Z',
+                D: '%d-%m-%y',
+                F: '%Y-%m-%d',
+                R: '%H:%M',
+                r: '%I:%M:%S %p',
+                T: '%H:%M:%S',
+                v: '%e-%b-%Y',
+                X: '%T',
+                x: '%D'
+            }
+        },
+
+        pt_BR: {
+            identifier: 'pt-BR',
+            days: ['domingo', 'segunda', 'terça', 'quarta', 'quinta', 'sexta', 'sábado'],
+            shortDays: ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'],
+            months: ['janeiro', 'fevereiro', 'março', 'abril', 'maio', 'junho', 'julho', 'agosto', 'setembro', 'outubro', 'novembro', 'dezembro'],
+            shortMonths: ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'],
+            AM: 'AM',
+            PM: 'PM',
+            am: 'am',
+            pm: 'pm',
+            formats: {
+                c: '%a %d %b %Y %X %Z',
+                D: '%d-%m-%Y',
+                F: '%Y-%m-%d',
+                R: '%H:%M',
+                r: '%I:%M:%S %p',
+                T: '%H:%M:%S',
+                v: '%e-%b-%Y',
+                X: '%T',
+                x: '%D'
+            }
+        },
+
+        ru_RU: {
+            identifier: 'ru-RU',
+            days: ['Воскресенье', 'Понедельник', 'Вторник', 'Среда', 'Четверг', 'Пятница', 'Суббота'],
+            shortDays: ['Вс', 'Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб'],
+            months: ['Январь', 'Февраль', 'Март', 'Апрель', 'Май', 'Июнь', 'Июль', 'Август', 'Сентябрь', 'Октябрь', 'Ноябрь', 'Декабрь'],
+            shortMonths: ['янв', 'фев', 'мар', 'апр', 'май', 'июн', 'июл', 'авг', 'сен', 'окт', 'ноя', 'дек'],
+            AM: 'AM',
+            PM: 'PM',
+            am: 'am',
+            pm: 'pm',
+            formats: {
+                c: '%a %d %b %Y %X',
+                D: '%d.%m.%y',
+                F: '%Y-%m-%d',
+                R: '%H:%M',
+                r: '%I:%M:%S %p',
+                T: '%H:%M:%S',
+                v: '%e-%b-%Y',
+                X: '%T',
+                x: '%D'
+            }
+        },
+
+        tr_TR: {
+            identifier: 'tr-TR',
+            days: ['Pazar', 'Pazartesi', 'Salı', 'Çarşamba', 'Perşembe', 'Cuma', 'Cumartesi'],
+            shortDays: ['Paz', 'Pzt', 'Sal', 'Çrş', 'Prş', 'Cum', 'Cts'],
+            months: ['Ocak', 'Şubat', 'Mart', 'Nisan', 'Mayıs', 'Haziran', 'Temmuz', 'Ağustos', 'Eylül', 'Ekim', 'Kasım', 'Aralık'],
+            shortMonths: ['Oca', 'Şub', 'Mar', 'Nis', 'May', 'Haz', 'Tem', 'Ağu', 'Eyl', 'Eki', 'Kas', 'Ara'],
+            AM: 'ÖÖ',
+            PM: 'ÖS',
+            am: 'ÖÖ',
+            pm: 'ÖS',
+            formats: {
+                c: '%a %d %b %Y %X %Z',
+                D: '%d-%m-%Y',
+                F: '%Y-%m-%d',
+                R: '%H:%M',
+                r: '%I:%M:%S %p',
+                T: '%H:%M:%S',
+                v: '%e-%b-%Y',
+                X: '%T',
+                x: '%D'
+            }
+        },
+
+        // By michaeljayt<michaeljayt@gmail.com>
+        // https://github.com/michaeljayt/strftime/commit/bcb4c12743811d51e568175aa7bff3fd2a77cef3
+        zh_CN: {
+            identifier: 'zh-CN',
+            days: ['星期日', '星期一', '星期二', '星期三', '星期四', '星期五', '星期六'],
+            shortDays: ['日', '一', '二', '三', '四', '五', '六'],
+            months: ['一月', '二月', '三月', '四月', '五月', '六月', '七月', '八月', '九月', '十月', '十一月', '十二月'],
+            shortMonths: ['一月', '二月', '三月', '四月', '五月', '六月', '七月', '八月', '九月', '十月', '十一月', '十二月'],
+            AM: '上午',
+            PM: '下午',
+            am: '上午',
+            pm: '下午',
+            formats: {
+                c: '%a %d %b %Y %X %Z',
+                D: '%d/%m/%y',
+                F: '%Y-%m-%d',
+                R: '%H:%M',
+                r: '%I:%M:%S %p',
+                T: '%H:%M:%S',
+                v: '%e-%b-%Y',
+                X: '%r',
+                x: '%D'
+            }
+        }
+    };
+
+    var DefaultLocale = Locales['en_US'],
+        defaultStrftime = new Strftime(DefaultLocale, 0, false),
+        isCommonJS = "object" !== 'undefined',
+        namespace;
+
+    // CommonJS / Node module
+    if (isCommonJS) {
+        namespace = module.exports = defaultStrftime;
+    }
+    // Browsers and other environments
+    else {
+        // Get the global object. Works in ES3, ES5, and ES5 strict mode.
+        namespace = (function () { return this || (1, eval)('this'); }());
+        namespace.strftime = defaultStrftime;
+    }
+
+    // Polyfill Date.now for old browsers.
+    if (typeof Date.now !== 'function') {
+        Date.now = function () {
+            return +new Date();
+        };
+    }
+
+    function Strftime(locale, customTimezoneOffset, useUtcTimezone) {
+        var _locale = locale || DefaultLocale,
+            _customTimezoneOffset = customTimezoneOffset || 0,
+            _useUtcBasedDate = useUtcTimezone || false,
+
+            // we store unix timestamp value here to not create new Date() each iteration (each millisecond)
+            // Date.now() is 2 times faster than new Date()
+            // while millisecond precise is enough here
+            // this could be very helpful when strftime triggered a lot of times one by one
+            _cachedDateTimestamp = 0,
+            _cachedDate;
+
+        function _strftime(format, date) {
+            var timestamp;
+
+            if (!date) {
+                var currentTimestamp = Date.now();
+                if (currentTimestamp > _cachedDateTimestamp) {
+                    _cachedDateTimestamp = currentTimestamp;
+                    _cachedDate = new Date(_cachedDateTimestamp);
+
+                    timestamp = _cachedDateTimestamp;
+
+                    if (_useUtcBasedDate) {
+                        // how to avoid duplication of date instantiation for utc here?
+                        // we tied to getTimezoneOffset of the current date
+                        _cachedDate = new Date(_cachedDateTimestamp + getTimestampToUtcOffsetFor(_cachedDate) + _customTimezoneOffset);
+                    }
+                }
+                else {
+                    timestamp = _cachedDateTimestamp;
+                }
+                date = _cachedDate;
+            }
+            else {
+                timestamp = date.getTime();
+
+                if (_useUtcBasedDate) {
+                    var utcOffset = getTimestampToUtcOffsetFor(date);
+                    date = new Date(timestamp + utcOffset + _customTimezoneOffset);
+                    // If we've crossed a DST boundary with this calculation we need to
+                    // adjust the new date accordingly or it will be off by an hour in UTC.
+                    if (getTimestampToUtcOffsetFor(date) !== utcOffset) {
+                        var newUTCOffset = getTimestampToUtcOffsetFor(date);
+                        date = new Date(timestamp + newUTCOffset + _customTimezoneOffset);
+                    }
+                }
+            }
+
+            return _processFormat(format, date, _locale, timestamp);
+        }
+
+        function _processFormat(format, date, locale, timestamp) {
+            var resultString = '',
+                padding = null,
+                isInScope = false,
+                length = format.length,
+                extendedTZ = false;
+
+            for (var i = 0; i < length; i++) {
+
+                var currentCharCode = format.charCodeAt(i);
+
+                if (isInScope === true) {
+                    // '-'
+                    if (currentCharCode === 45) {
+                        padding = '';
+                        continue;
+                    }
+                    // '_'
+                    else if (currentCharCode === 95) {
+                        padding = ' ';
+                        continue;
+                    }
+                    // '0'
+                    else if (currentCharCode === 48) {
+                        padding = '0';
+                        continue;
+                    }
+                    // ':'
+                    else if (currentCharCode === 58) {
+                        if (extendedTZ) {
+                            warn("[WARNING] detected use of unsupported %:: or %::: modifiers to strftime");
+                        }
+                        extendedTZ = true;
+                        continue;
+                    }
+
+                    switch (currentCharCode) {
+
+                        // Examples for new Date(0) in GMT
+
+                        // '%'
+                        // case '%':
+                        case 37:
+                            resultString += '%';
+                            break;
+
+                        // 'Thursday'
+                        // case 'A':
+                        case 65:
+                            resultString += locale.days[date.getDay()];
+                            break;
+
+                        // 'January'
+                        // case 'B':
+                        case 66:
+                            resultString += locale.months[date.getMonth()];
+                            break;
+
+                        // '19'
+                        // case 'C':
+                        case 67:
+                            resultString += padTill2(Math.floor(date.getFullYear() / 100), padding);
+                            break;
+
+                        // '01/01/70'
+                        // case 'D':
+                        case 68:
+                            resultString += _processFormat(locale.formats.D, date, locale, timestamp);
+                            break;
+
+                        // '1970-01-01'
+                        // case 'F':
+                        case 70:
+                            resultString += _processFormat(locale.formats.F, date, locale, timestamp);
+                            break;
+
+                        // '00'
+                        // case 'H':
+                        case 72:
+                            resultString += padTill2(date.getHours(), padding);
+                            break;
+
+                        // '12'
+                        // case 'I':
+                        case 73:
+                            resultString += padTill2(hours12(date.getHours()), padding);
+                            break;
+
+                        // '000'
+                        // case 'L':
+                        case 76:
+                            resultString += padTill3(Math.floor(timestamp % 1000));
+                            break;
+
+                        // '00'
+                        // case 'M':
+                        case 77:
+                            resultString += padTill2(date.getMinutes(), padding);
+                            break;
+
+                        // 'am'
+                        // case 'P':
+                        case 80:
+                            resultString += date.getHours() < 12 ? locale.am : locale.pm;
+                            break;
+
+                        // '00:00'
+                        // case 'R':
+                        case 82:
+                            resultString += _processFormat(locale.formats.R, date, locale, timestamp);
+                            break;
+
+                        // '00'
+                        // case 'S':
+                        case 83:
+                            resultString += padTill2(date.getSeconds(), padding);
+                            break;
+
+                        // '00:00:00'
+                        // case 'T':
+                        case 84:
+                            resultString += _processFormat(locale.formats.T, date, locale, timestamp);
+                            break;
+
+                        // '00'
+                        // case 'U':
+                        case 85:
+                            resultString += padTill2(weekNumber(date, 'sunday'), padding);
+                            break;
+
+                        // '00'
+                        // case 'W':
+                        case 87:
+                            resultString += padTill2(weekNumber(date, 'monday'), padding);
+                            break;
+
+                        // '16:00:00'
+                        // case 'X':
+                        case 88:
+                            resultString += _processFormat(locale.formats.X, date, locale, timestamp);
+                            break;
+
+                        // '1970'
+                        // case 'Y':
+                        case 89:
+                            resultString += date.getFullYear();
+                            break;
+
+                        // 'GMT'
+                        // case 'Z':
+                        case 90:
+                            if (_useUtcBasedDate && _customTimezoneOffset === 0) {
+                                resultString += "GMT";
+                            }
+                            else {
+                                var tzName = getTimezoneName(date);
+                                resultString += tzName || '';
+                            }
+                            break;
+
+                        // 'Thu'
+                        // case 'a':
+                        case 97:
+                            resultString += locale.shortDays[date.getDay()];
+                            break;
+
+                        // 'Jan'
+                        // case 'b':
+                        case 98:
+                            resultString += locale.shortMonths[date.getMonth()];
+                            break;
+
+                        // ''
+                        // case 'c':
+                        case 99:
+                            resultString += _processFormat(locale.formats.c, date, locale, timestamp);
+                            break;
+
+                        // '01'
+                        // case 'd':
+                        case 100:
+                            resultString += padTill2(date.getDate(), padding);
+                            break;
+
+                        // ' 1'
+                        // case 'e':
+                        case 101:
+                            resultString += padTill2(date.getDate(), padding == null ? ' ' : padding);
+                            break;
+
+                        // 'Jan'
+                        // case 'h':
+                        case 104:
+                            resultString += locale.shortMonths[date.getMonth()];
+                            break;
+
+                        // '000'
+                        // case 'j':
+                        case 106:
+                            var y = new Date(date.getFullYear(), 0, 1);
+                            var day = Math.ceil((date.getTime() - y.getTime()) / (1000 * 60 * 60 * 24));
+                            resultString += padTill3(day);
+                            break;
+
+                        // ' 0'
+                        // case 'k':
+                        case 107:
+                            resultString += padTill2(date.getHours(), padding == null ? ' ' : padding);
+                            break;
+
+                        // '12'
+                        // case 'l':
+                        case 108:
+                            resultString += padTill2(hours12(date.getHours()), padding == null ? ' ' : padding);
+                            break;
+
+                        // '01'
+                        // case 'm':
+                        case 109:
+                            resultString += padTill2(date.getMonth() + 1, padding);
+                            break;
+
+                        // '\n'
+                        // case 'n':
+                        case 110:
+                            resultString += '\n';
+                            break;
+
+                        // '1st'
+                        // case 'o':
+                        case 111:
+                            // Try to use an ordinal suffix from the locale, but fall back to using the old
+                            // function for compatibility with old locales that lack them.
+                            var day = date.getDate();
+                            if (locale.ordinalSuffixes) {
+                                resultString += String(day) + (locale.ordinalSuffixes[day - 1] || ordinal(day));
+                            }
+                            else {
+                                resultString += String(day) + ordinal(day);
+                            }
+                            break;
+
+                        // 'AM'
+                        // case 'p':
+                        case 112:
+                            resultString += date.getHours() < 12 ? locale.AM : locale.PM;
+                            break;
+
+                        // '12:00:00 AM'
+                        // case 'r':
+                        case 114:
+                            resultString += _processFormat(locale.formats.r, date, locale, timestamp);
+                            break;
+
+                        // '0'
+                        // case 's':
+                        case 115:
+                            resultString += Math.floor(timestamp / 1000);
+                            break;
+
+                        // '\t'
+                        // case 't':
+                        case 116:
+                            resultString += '\t';
+                            break;
+
+                        // '4'
+                        // case 'u':
+                        case 117:
+                            var day = date.getDay();
+                            resultString += day === 0 ? 7 : day;
+                            break; // 1 - 7, Monday is first day of the week
+
+                        // ' 1-Jan-1970'
+                        // case 'v':
+                        case 118:
+                            resultString += _processFormat(locale.formats.v, date, locale, timestamp);
+                            break;
+
+                        // '4'
+                        // case 'w':
+                        case 119:
+                            resultString += date.getDay();
+                            break; // 0 - 6, Sunday is first day of the week
+
+                        // '12/31/69'
+                        // case 'x':
+                        case 120:
+                            resultString += _processFormat(locale.formats.x, date, locale, timestamp);
+                            break;
+
+                        // '70'
+                        // case 'y':
+                        case 121:
+                            resultString += padTill2(date.getFullYear() % 100, padding);
+                            break;
+
+                        // '+0000'
+                        // case 'z':
+                        case 122:
+                            if (_useUtcBasedDate && _customTimezoneOffset === 0) {
+                                resultString += extendedTZ ? "+00:00" : "+0000";
+                            }
+                            else {
+                                var off;
+                                if (_customTimezoneOffset !== 0) {
+                                    off = _customTimezoneOffset / (60 * 1000);
+                                }
+                                else {
+                                    off = -date.getTimezoneOffset();
+                                }
+                                var sign = off < 0 ? '-' : '+';
+                                var sep = extendedTZ ? ':' : '';
+                                var hours = Math.floor(Math.abs(off / 60));
+                                var mins = Math.abs(off % 60);
+                                resultString += sign + padTill2(hours) + sep + padTill2(mins);
+                            }
+                            break;
+
+                        default:
+                            if (isInScope) {
+                                resultString += '%';
+                            }
+                            resultString += format[i];
+                            break;
+                    }
+
+                    padding = null;
+                    isInScope = false;
+                    continue;
+                }
+
+                // '%'
+                if (currentCharCode === 37) {
+                    isInScope = true;
+                    continue;
+                }
+
+                resultString += format[i];
+            }
+
+            return resultString;
+        }
+
+        var strftime = _strftime;
+
+        strftime.localize = function (locale) {
+            return new Strftime(locale || _locale, _customTimezoneOffset, _useUtcBasedDate);
+        };
+
+        strftime.localizeByIdentifier = function (localeIdentifier) {
+            var locale = Locales[localeIdentifier];
+            if (!locale) {
+                warn('[WARNING] No locale found with identifier "' + localeIdentifier + '".');
+                return strftime;
+            }
+            return strftime.localize(locale);
+        };
+
+        strftime.timezone = function (timezone) {
+            var customTimezoneOffset = _customTimezoneOffset;
+            var useUtcBasedDate = _useUtcBasedDate;
+
+            var timezoneType = typeof timezone;
+            if (timezoneType === 'number' || timezoneType === 'string') {
+                useUtcBasedDate = true;
+
+                // ISO 8601 format timezone string, [-+]HHMM
+                if (timezoneType === 'string') {
+                    var sign = timezone[0] === '-' ? -1 : 1,
+                        hours = parseInt(timezone.slice(1, 3), 10),
+                        minutes = parseInt(timezone.slice(3, 5), 10);
+
+                    customTimezoneOffset = sign * ((60 * hours) + minutes) * 60 * 1000;
+                    // in minutes: 420
+                }
+                else if (timezoneType === 'number') {
+                    customTimezoneOffset = timezone * 60 * 1000;
+                }
+            }
+
+            return new Strftime(_locale, customTimezoneOffset, useUtcBasedDate);
+        };
+
+        strftime.utc = function () {
+            return new Strftime(_locale, _customTimezoneOffset, true);
+        };
+
+        return strftime;
+    }
+
+    function padTill2(numberToPad, paddingChar) {
+        if (paddingChar === '' || numberToPad > 9) {
+            return '' + numberToPad;
+        }
+        if (paddingChar == null) {
+            paddingChar = '0';
+        }
+        return paddingChar + numberToPad;
+    }
+
+    function padTill3(numberToPad) {
+        if (numberToPad > 99) {
+            return numberToPad;
+        }
+        if (numberToPad > 9) {
+            return '0' + numberToPad;
+        }
+        return '00' + numberToPad;
+    }
+
+    function hours12(hour) {
+        if (hour === 0) {
+            return 12;
+        }
+        else if (hour > 12) {
+            return hour - 12;
+        }
+        return hour;
+    }
+
+    // firstWeekday: 'sunday' or 'monday', default is 'sunday'
+    //
+    // Pilfered & ported from Ruby's strftime implementation.
+    function weekNumber(date, firstWeekday) {
+        firstWeekday = firstWeekday || 'sunday';
+
+        // This works by shifting the weekday back by one day if we
+        // are treating Monday as the first day of the week.
+        var weekday = date.getDay();
+        if (firstWeekday === 'monday') {
+            if (weekday === 0) // Sunday
+                weekday = 6;
+            else
+                weekday--;
+        }
+
+        var firstDayOfYearUtc = Date.UTC(date.getFullYear(), 0, 1),
+            dateUtc = Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()),
+            yday = Math.floor((dateUtc - firstDayOfYearUtc) / 86400000),
+            weekNum = (yday + 7 - weekday) / 7;
+
+        return Math.floor(weekNum);
+    }
+
+    // Get the ordinal suffix for a number: st, nd, rd, or th
+    function ordinal(number) {
+        var i = number % 10;
+        var ii = number % 100;
+
+        if ((ii >= 11 && ii <= 13) || i === 0 || i >= 4) {
+            return 'th';
+        }
+        switch (i) {
+            case 1: return 'st';
+            case 2: return 'nd';
+            case 3: return 'rd';
+        }
+    }
+
+    function getTimestampToUtcOffsetFor(date) {
+        return (date.getTimezoneOffset() || 0) * 60000;
+    }
+
+    // Tries to get a short timezone name using Date.toLocaleString, falling back on the platform default
+    // using Date.toString if necessary.
+    function getTimezoneName(date, localeIdentifier) {
+        return getShortTimezoneName(date, localeIdentifier) || getDefaultTimezoneName(date);
+    }
+
+    // Unfortunately this returns GMT+2 when running with `TZ=Europe/Amsterdam node test.js` so it's not
+    // perfect.
+    function getShortTimezoneName(date, localeIdentifier) {
+        if (localeIdentifier == null) return null;
+
+        var tzString = date
+            .toLocaleString(localeIdentifier, { timeZoneName: 'short' })
+            .match(/\s([\w]+)$/);
+        return tzString && tzString[1];
+    }
+
+    // This varies by platform so it's not an ideal way to get the time zone name. On most platforms it's
+    // a short name but in Node v10+ and Chrome 66+ it's a long name now. Prefer getShortTimezoneName(date)
+    // where possible.
+    function getDefaultTimezoneName(date) {
+        var tzString = date.toString().match(/\(([\w\s]+)\)/);
+        return tzString && tzString[1];
+    }
+
+    function warn(message) {
+        if (typeof console !== 'undefined' && typeof console.warn == 'function') {
+            console.warn(message)
+        }
+    }
+
+}());
+
+
+/***/ }),
+
 /***/ 458:
 /***/ ((__unused_webpack_module, exports) => {
 
@@ -401,6 +1261,18 @@ var __WEBPACK_AMD_DEFINE_RESULT__;/*! https://mths.be/base64 v1.0.0 by @mathias 
 /******/ 	}
 /******/ 	
 /************************************************************************/
+/******/ 	/* webpack/runtime/compat get default export */
+/******/ 	(() => {
+/******/ 		// getDefaultExport function for compatibility with non-harmony modules
+/******/ 		__webpack_require__.n = (module) => {
+/******/ 			var getter = module && module.__esModule ?
+/******/ 				() => (module['default']) :
+/******/ 				() => (module);
+/******/ 			__webpack_require__.d(getter, { a: getter });
+/******/ 			return getter;
+/******/ 		};
+/******/ 	})();
+/******/ 	
 /******/ 	/* webpack/runtime/define property getters */
 /******/ 	(() => {
 /******/ 		// define getter functions for harmony exports
@@ -1593,6 +2465,14 @@ const request = (url, init = {}) => {
     init['headers']['X-CSRF-Token'] = csrfToken
   }
 
+  if (init['body']) {
+    if (init['headers']['content-type'] == 'application/json') {
+      if (!isString(init['body'])) {
+        init['body'] = JSON.stringify(init['body'])
+      }
+    }
+  }
+
   requests += 1
   const promise = fetch(url, init).then(r => r.json())
   bus.emit('loading-state-change', {count: requests})
@@ -1608,6 +2488,10 @@ const locale = () => {
   const url = document.location.href
   const m = url.match(/\/(en|de)\//)
   return !!m ? m[1] : 'de'
+}
+
+const isString = (value) => {
+  return typeof value == 'string' || value instanceof String
 }
 
 
@@ -4475,9 +5359,9 @@ function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _d
     return exports;
   }(),
   template: function template(_template, expressionTypes, bindingTypes, getComponent) {
-    return _template('<span expr42="expr42"> <a expr43="expr43" href="#">*</a></span><template expr44="expr44"></template><a expr45="expr45" href="#"><span expr46="expr46"> </span></a>', [{
-      redundantAttribute: 'expr42',
-      selector: '[expr42]',
+    return _template('<span expr70="expr70"> <a expr71="expr71" href="#">*</a></span><template expr72="expr72"></template><a expr73="expr73" href="#"><span expr74="expr74"> </span></a>', [{
+      redundantAttribute: 'expr70',
+      selector: '[expr70]',
       expressions: [{
         type: expressionTypes.TEXT,
         childNodeIndex: 0,
@@ -4492,8 +5376,8 @@ function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _d
         }
       }]
     }, {
-      redundantAttribute: 'expr43',
-      selector: '[expr43]',
+      redundantAttribute: 'expr71',
+      selector: '[expr71]',
       expressions: [{
         type: expressionTypes.EVENT,
         name: 'onclick',
@@ -4508,8 +5392,8 @@ function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _d
       evaluate: function evaluate(_scope) {
         return !_scope.state.revealed;
       },
-      redundantAttribute: 'expr44',
-      selector: '[expr44]',
+      redundantAttribute: 'expr72',
+      selector: '[expr72]',
       template: _template(' ', [{
         expressions: [{
           type: expressionTypes.TEXT,
@@ -4520,8 +5404,8 @@ function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _d
         }]
       }])
     }, {
-      redundantAttribute: 'expr45',
-      selector: '[expr45]',
+      redundantAttribute: 'expr73',
+      selector: '[expr73]',
       expressions: [{
         type: expressionTypes.EVENT,
         name: 'onclick',
@@ -4548,8 +5432,8 @@ function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _d
         }
       }]
     }, {
-      redundantAttribute: 'expr46',
-      selector: '[expr46]',
+      redundantAttribute: 'expr74',
+      selector: '[expr74]',
       expressions: [{
         type: expressionTypes.TEXT,
         childNodeIndex: 0,
@@ -4606,44 +5490,74 @@ const replacements = [
 ]
 
 const replace = () => {
-  for (const {node, m, replacement} of jobs) {
-    // split the text node apart
-    let after = node.splitText(m.index)
-    let before = node
-    let tmp = after.splitText(m[0].length)
-    let swap = after
-    after = tmp
+  for (const {type, node, m, replacement} of jobs) {
+    if (type == 'text') {
+      // split the text node apart
+      let after = node.splitText(m.index)
+      let before = node
+      let tmp = after.splitText(m[0].length)
+      let swap = after
+      after = tmp
 
-    // ... and replace the matched part
-    const widget = document.createElement('pm-ol')
-    widget.setAttribute('replacement', replacement)
-    widget.setAttribute('revealed', revealed())
-    swap.parentNode.replaceChild(widget, swap)
-    widget.append(swap)
+      // ... and replace the matched part
+      const widget = document.createElement('pm-ol')
+      widget.setAttribute('replacement', replacement)
+      widget.setAttribute('revealed', revealed())
+      swap.parentNode.replaceChild(widget, swap)
+      widget.append(swap)
 
-    mount(widget)
+      mount(widget)
+    }
+
+    if (type == 'title') {
+      const original = node.getAttribute('title')
+      node.setAttribute('title', replacement)
+
+      console.log(original, replacement)
+      const handler = () => {
+        const revealed = pageStorage['ol.revealed']
+
+        node.setAttribute('title', revealed ? original : replacement)
+      }
+
+      bus.addEventListener('ol.toggle', handler)
+      handler()
+    }
   }
 }
 
 const offensive_language_process = (node) => {
-  for (const r of replacements) {
-    const m = node.data.match(r.pattern)
-    if (m) {
-      jobs.push({node, m, replacement: r.replacement})
+  if (node.nodeType == Node.TEXT_NODE) {
+    for (const r of replacements) {
+      const m = node.data.match(r.pattern)
+      if (m) {
+        jobs.push({node, m, replacement: r.replacement, type: 'text'})
+      }
+    }
+  }
+
+  if (node.nodeType == Node.ELEMENT_NODE) {
+    const title = node.getAttribute('title')
+
+    if (title) {
+      for (const r of replacements) {
+        const m = title.match(r.pattern)
+        if (m) {
+          jobs.push({node, m, replacement: r.replacement, type: 'title'})
+        }
+      }
     }
   }
 }
 
 const idempotencyFilter = {
   acceptNode: (node) => {
-    // console.log(node, node.nodeType, Node.ELEMENT_NODE)
-
     if (node.nodeType == Node.ELEMENT_NODE) {
       if (node.tagName == 'PM-OL') {
         return NodeFilter.FILTER_REJECT
       }
 
-      return NodeFilter.FILTER_SKIP
+      return NodeFilter.FILTER_ACCEPT
     }
 
     return NodeFilter.FILTER_ACCEPT
@@ -5003,7 +5917,7 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
         type: expressionTypes.ATTRIBUTE,
         name: 'style',
         evaluate: function evaluate(_scope) {
-          return ['min-width: ', _scope.offsetWidth(), '; overflowY: ', _scope.overflowY()].join('');
+          return ['min-width: ', _scope.offsetWidth(), '; overflow-y: ', _scope.overflowY()].join('');
         }
       }, {
         type: expressionTypes.ATTRIBUTE,
@@ -5141,9 +6055,9 @@ function loading_indicator_createClass(Constructor, protoProps, staticProps) { i
     return exports;
   }(),
   template: function template(_template, expressionTypes, bindingTypes, getComponent) {
-    return _template('<div expr7="expr7"><div></div><div></div><div></div><div></div></div>', [{
-      redundantAttribute: 'expr7',
-      selector: '[expr7]',
+    return _template('<div expr14="expr14"><div></div><div></div><div></div><div></div></div>', [{
+      redundantAttribute: 'expr14',
+      selector: '[expr14]',
       expressions: [{
         type: expressionTypes.ATTRIBUTE,
         name: 'class',
@@ -5181,7 +6095,7 @@ function modal_createClass(Constructor, protoProps, staticProps) { if (protoProp
     return exports;
   }(),
   template: function template(_template, expressionTypes, bindingTypes, getComponent) {
-    return _template('<div expr15="expr15" class="backdrop"></div><div class="content"><slot expr16="expr16"></slot></div>', [{
+    return _template('<div expr51="expr51" class="backdrop"></div><div class="content"><slot expr52="expr52"></slot></div>', [{
       expressions: [{
         type: expressionTypes.ATTRIBUTE,
         name: 'class',
@@ -5190,8 +6104,8 @@ function modal_createClass(Constructor, protoProps, staticProps) { if (protoProp
         }
       }]
     }, {
-      redundantAttribute: 'expr15',
-      selector: '[expr15]',
+      redundantAttribute: 'expr51',
+      selector: '[expr51]',
       expressions: [{
         type: expressionTypes.EVENT,
         name: 'onclick',
@@ -5205,8 +6119,8 @@ function modal_createClass(Constructor, protoProps, staticProps) { if (protoProp
       type: bindingTypes.SLOT,
       attributes: [],
       name: 'default',
-      redundantAttribute: 'expr16',
-      selector: '[expr16]'
+      redundantAttribute: 'expr52',
+      selector: '[expr52]'
     }]);
   },
   name: 'pm-modal'
@@ -5274,7 +6188,7 @@ function ol_modal_createClass(Constructor, protoProps, staticProps) { if (protoP
     return exports;
   }(),
   template: function template(_template, expressionTypes, bindingTypes, getComponent) {
-    return _template('<div expr18="expr18" is="pm-modal"></div>', [{
+    return _template('<div expr53="expr53" is="pm-modal"></div>', [{
       type: bindingTypes.TAG,
       getComponent: getComponent,
       evaluate: function evaluate(_scope) {
@@ -5282,10 +6196,10 @@ function ol_modal_createClass(Constructor, protoProps, staticProps) { if (protoP
       },
       slots: [{
         id: 'default',
-        html: '<div class="d-flex flex-column justify-content-between p-4 border-box"><p expr19="expr19"> </p><div class="d-flex justify-content-end"><button expr20="expr20" class="ms-2 p-1"> </button><template expr21="expr21"></template><template expr24="expr24"></template></div></div>',
+        html: '<div class="d-flex flex-column justify-content-between p-4 border-box"><p expr54="expr54"> </p><div class="d-flex justify-content-end"><button expr55="expr55" class="ms-2 p-1"> </button><template expr56="expr56"></template><template expr59="expr59"></template></div></div>',
         bindings: [{
-          redundantAttribute: 'expr19',
-          selector: '[expr19]',
+          redundantAttribute: 'expr54',
+          selector: '[expr54]',
           expressions: [{
             type: expressionTypes.TEXT,
             childNodeIndex: 0,
@@ -5294,8 +6208,8 @@ function ol_modal_createClass(Constructor, protoProps, staticProps) { if (protoP
             }
           }]
         }, {
-          redundantAttribute: 'expr20',
-          selector: '[expr20]',
+          redundantAttribute: 'expr55',
+          selector: '[expr55]',
           expressions: [{
             type: expressionTypes.TEXT,
             childNodeIndex: 0,
@@ -5316,11 +6230,11 @@ function ol_modal_createClass(Constructor, protoProps, staticProps) { if (protoP
           evaluate: function evaluate(_scope) {
             return !_scope.state.current;
           },
-          redundantAttribute: 'expr21',
-          selector: '[expr21]',
-          template: _template('<button expr22="expr22" class="ms-2 p-1"> </button><button expr23="expr23" class="ms-2 p-1"> </button>', [{
-            redundantAttribute: 'expr22',
-            selector: '[expr22]',
+          redundantAttribute: 'expr56',
+          selector: '[expr56]',
+          template: _template('<button expr57="expr57" class="ms-2 p-1"> </button><button expr58="expr58" class="ms-2 p-1"> </button>', [{
+            redundantAttribute: 'expr57',
+            selector: '[expr57]',
             expressions: [{
               type: expressionTypes.TEXT,
               childNodeIndex: 0,
@@ -5337,8 +6251,8 @@ function ol_modal_createClass(Constructor, protoProps, staticProps) { if (protoP
               }
             }]
           }, {
-            redundantAttribute: 'expr23',
-            selector: '[expr23]',
+            redundantAttribute: 'expr58',
+            selector: '[expr58]',
             expressions: [{
               type: expressionTypes.TEXT,
               childNodeIndex: 0,
@@ -5360,11 +6274,11 @@ function ol_modal_createClass(Constructor, protoProps, staticProps) { if (protoP
           evaluate: function evaluate(_scope) {
             return _scope.state.current;
           },
-          redundantAttribute: 'expr24',
-          selector: '[expr24]',
-          template: _template('<button expr25="expr25" class="ms-2 p-1"> </button><button expr26="expr26" class="ms-2 p-1"> </button>', [{
-            redundantAttribute: 'expr25',
-            selector: '[expr25]',
+          redundantAttribute: 'expr59',
+          selector: '[expr59]',
+          template: _template('<button expr60="expr60" class="ms-2 p-1"> </button><button expr61="expr61" class="ms-2 p-1"> </button>', [{
+            redundantAttribute: 'expr60',
+            selector: '[expr60]',
             expressions: [{
               type: expressionTypes.TEXT,
               childNodeIndex: 0,
@@ -5381,8 +6295,8 @@ function ol_modal_createClass(Constructor, protoProps, staticProps) { if (protoP
               }
             }]
           }, {
-            redundantAttribute: 'expr26',
-            selector: '[expr26]',
+            redundantAttribute: 'expr61',
+            selector: '[expr61]',
             expressions: [{
               type: expressionTypes.TEXT,
               childNodeIndex: 0,
@@ -5416,8 +6330,8 @@ function ol_modal_createClass(Constructor, protoProps, staticProps) { if (protoP
           };
         }
       }],
-      redundantAttribute: 'expr18',
-      selector: '[expr18]'
+      redundantAttribute: 'expr53',
+      selector: '[expr53]'
     }]);
   },
   name: 'pm-ol-modal'
@@ -5436,7 +6350,6 @@ function size_indicator_createClass(Constructor, protoProps, staticProps) { if (
       key: "onBeforeMount",
       value: function onBeforeMount(props, state) {
         var limit = 560.0;
-        console.log(props);
         state.refWidth = parseInt(props.refWidth, 10);
         state.refHeight = parseInt(props.refHeight, 10);
         state.artWidth = parseInt(props.artWidth, 10);
@@ -5534,16 +6447,16 @@ function size_indicator_createClass(Constructor, protoProps, staticProps) { if (
     return exports;
   }(),
   template: function template(_template, expressionTypes, bindingTypes, getComponent) {
-    return _template('<div expr8="expr8" class="d-flex py-4 pe-4"></div><template expr14="expr14"></template>', [{
+    return _template('<div expr7="expr7" class="d-flex py-4 pe-4"></div><template expr13="expr13"></template>', [{
       type: bindingTypes.IF,
       evaluate: function evaluate(_scope) {
         return _scope.enabled();
       },
-      redundantAttribute: 'expr8',
-      selector: '[expr8]',
-      template: _template('<div expr9="expr9" class="ref d-flex justify-content-stretch"><div expr10="expr10" class="align-self-center"> </div><svg xmlns="http://www.w3.org/2000/svg" class="me-2" width="20px" viewBox="0 0 20 150"><defs><marker id="triangle" viewBox="0 0 10 10" refX="1" refY="5" markerUnits="strokeWidth" markerWidth="10" markerHeight="10" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#aaaaaa"/></marker></defs><line x1="10" y1="5" x2="10" y2="145" stroke="white" stroke-width="0.5" marker-start="url(#triangle)" marker-end="url(#triangle)"/></svg><img src="/images/image/size_indicator.png"/></div><div class="ms-4"><div expr11="expr11" class="artwork d-flex justify-content-center align-items-center mb-2"></div><div expr12="expr12"> </div><div expr13="expr13" class="text-muted"> </div></div>', [{
-        redundantAttribute: 'expr9',
-        selector: '[expr9]',
+      redundantAttribute: 'expr7',
+      selector: '[expr7]',
+      template: _template('<div expr8="expr8" class="ref d-flex justify-content-stretch"><div expr9="expr9" class="align-self-center"> </div><svg xmlns="http://www.w3.org/2000/svg" class="me-2" width="20px" viewBox="0 0 20 150"><defs><marker id="triangle" viewBox="0 0 10 10" refX="1" refY="5" markerUnits="strokeWidth" markerWidth="10" markerHeight="10" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#aaaaaa"/></marker></defs><line x1="10" y1="5" x2="10" y2="145" stroke="white" stroke-width="0.5" marker-start="url(#triangle)" marker-end="url(#triangle)"/></svg><img src="/images/image/size_indicator.png"/></div><div class="ms-4"><div expr10="expr10" class="artwork d-flex justify-content-center align-items-center mb-2"></div><div expr11="expr11"> </div><div expr12="expr12" class="text-muted"> </div></div>', [{
+        redundantAttribute: 'expr8',
+        selector: '[expr8]',
         expressions: [{
           type: expressionTypes.ATTRIBUTE,
           name: 'style',
@@ -5552,18 +6465,18 @@ function size_indicator_createClass(Constructor, protoProps, staticProps) { if (
           }
         }]
       }, {
-        redundantAttribute: 'expr10',
-        selector: '[expr10]',
+        redundantAttribute: 'expr9',
+        selector: '[expr9]',
         expressions: [{
           type: expressionTypes.TEXT,
           childNodeIndex: 0,
           evaluate: function evaluate(_scope) {
-            return [_scope.state.refHeight, 'cm'].join('');
+            return [_scope.state.refHeight, ' cm'].join('');
           }
         }]
       }, {
-        redundantAttribute: 'expr11',
-        selector: '[expr11]',
+        redundantAttribute: 'expr10',
+        selector: '[expr10]',
         expressions: [{
           type: expressionTypes.ATTRIBUTE,
           name: 'style',
@@ -5572,8 +6485,8 @@ function size_indicator_createClass(Constructor, protoProps, staticProps) { if (
           }
         }]
       }, {
-        redundantAttribute: 'expr12',
-        selector: '[expr12]',
+        redundantAttribute: 'expr11',
+        selector: '[expr11]',
         expressions: [{
           type: expressionTypes.TEXT,
           childNodeIndex: 0,
@@ -5582,8 +6495,8 @@ function size_indicator_createClass(Constructor, protoProps, staticProps) { if (
           }
         }]
       }, {
-        redundantAttribute: 'expr13',
-        selector: '[expr13]',
+        redundantAttribute: 'expr12',
+        selector: '[expr12]',
         expressions: [{
           type: expressionTypes.TEXT,
           childNodeIndex: 0,
@@ -5597,8 +6510,8 @@ function size_indicator_createClass(Constructor, protoProps, staticProps) { if (
       evaluate: function evaluate(_scope) {
         return !_scope.enabled();
       },
-      redundantAttribute: 'expr14',
-      selector: '[expr14]',
+      redundantAttribute: 'expr13',
+      selector: '[expr13]',
       template: _template(' ', [{
         expressions: [{
           type: expressionTypes.TEXT,
@@ -5642,7 +6555,8 @@ function wd_modal_createClass(Constructor, protoProps, staticProps) { if (protoP
     }, {
       key: "launch",
       value: function launch(event) {
-        console.log(event);
+        // console.log(event)
+
         this.update(_objectSpread({
           open: true
         }, event.data));
@@ -5656,7 +6570,8 @@ function wd_modal_createClass(Constructor, protoProps, staticProps) { if (protoP
         });
         var url = "/en/wikidata?term=".concat(term);
         return request(url).then(function (data) {
-          console.log(data);
+          // console.log(data)
+
           var results = [];
           var _iterator = wd_modal_createForOfIteratorHelper(data.search),
             _step;
@@ -5754,7 +6669,7 @@ function wd_modal_createClass(Constructor, protoProps, staticProps) { if (protoP
     return exports;
   }(),
   template: function template(_template, expressionTypes, bindingTypes, getComponent) {
-    return _template('<div expr35="expr35" is="pm-modal"></div>', [{
+    return _template('<div expr15="expr15" is="pm-modal"></div>', [{
       expressions: [{
         type: expressionTypes.EVENT,
         name: 'onkeydown',
@@ -5772,10 +6687,10 @@ function wd_modal_createClass(Constructor, protoProps, staticProps) { if (protoP
       },
       slots: [{
         id: 'default',
-        html: '<div expr36="expr36" class="d-flex flex-column justify-content-between p-4 border-box"> <div class="d-flex"><pm-live-search expr37="expr37" class="mt-3 my-3" name="wikidata_id"></pm-live-search><pm-loading-indicator expr38="expr38"></pm-loading-indicator></div><div class="d-flex justify-content-end"><button expr39="expr39" class="ms-2 p-1"> </button><button expr40="expr40" class="ms-2 p-1"> </button><button expr41="expr41" class="ms-2 p-1"> </button></div></div>',
+        html: '<div expr16="expr16" class="d-flex flex-column justify-content-between p-4 border-box"> <div class="d-flex"><pm-live-search expr17="expr17" class="mt-3 my-3" name="wikidata_id"></pm-live-search><pm-loading-indicator expr18="expr18"></pm-loading-indicator></div><div class="d-flex justify-content-end"><button expr19="expr19" class="ms-2 p-1"> </button><button expr20="expr20" class="ms-2 p-1"> </button><button expr21="expr21" class="ms-2 p-1"> </button></div></div>',
         bindings: [{
-          redundantAttribute: 'expr36',
-          selector: '[expr36]',
+          redundantAttribute: 'expr16',
+          selector: '[expr16]',
           expressions: [{
             type: expressionTypes.TEXT,
             childNodeIndex: 0,
@@ -5788,8 +6703,8 @@ function wd_modal_createClass(Constructor, protoProps, staticProps) { if (protoP
           evaluate: function evaluate(_scope) {
             return _scope.state.open;
           },
-          redundantAttribute: 'expr37',
-          selector: '[expr37]',
+          redundantAttribute: 'expr17',
+          selector: '[expr17]',
           template: _template(null, [{
             type: bindingTypes.TAG,
             getComponent: getComponent,
@@ -5837,11 +6752,11 @@ function wd_modal_createClass(Constructor, protoProps, staticProps) { if (protoP
           },
           slots: [],
           attributes: [],
-          redundantAttribute: 'expr38',
-          selector: '[expr38]'
+          redundantAttribute: 'expr18',
+          selector: '[expr18]'
         }, {
-          redundantAttribute: 'expr39',
-          selector: '[expr39]',
+          redundantAttribute: 'expr19',
+          selector: '[expr19]',
           expressions: [{
             type: expressionTypes.TEXT,
             childNodeIndex: 0,
@@ -5858,8 +6773,8 @@ function wd_modal_createClass(Constructor, protoProps, staticProps) { if (protoP
             }
           }]
         }, {
-          redundantAttribute: 'expr40',
-          selector: '[expr40]',
+          redundantAttribute: 'expr20',
+          selector: '[expr20]',
           expressions: [{
             type: expressionTypes.TEXT,
             childNodeIndex: 0,
@@ -5876,8 +6791,8 @@ function wd_modal_createClass(Constructor, protoProps, staticProps) { if (protoP
             }
           }]
         }, {
-          redundantAttribute: 'expr41',
-          selector: '[expr41]',
+          redundantAttribute: 'expr21',
+          selector: '[expr21]',
           expressions: [{
             type: expressionTypes.TEXT,
             childNodeIndex: 0,
@@ -5910,8 +6825,8 @@ function wd_modal_createClass(Constructor, protoProps, staticProps) { if (protoP
           };
         }
       }],
-      redundantAttribute: 'expr35',
-      selector: '[expr35]'
+      redundantAttribute: 'expr15',
+      selector: '[expr15]'
     }]);
   },
   name: 'pm-wd-modal'
@@ -5964,7 +6879,7 @@ function wikidata_widget_createClass(Constructor, protoProps, staticProps) { if 
     return exports;
   }(),
   template: function template(_template, expressionTypes, bindingTypes, getComponent) {
-    return _template('<template expr27="expr27"></template>', [{
+    return _template('<template expr62="expr62"></template>', [{
       expressions: [{
         type: expressionTypes.ATTRIBUTE,
         name: 'class',
@@ -5977,18 +6892,18 @@ function wikidata_widget_createClass(Constructor, protoProps, staticProps) { if 
       evaluate: function evaluate(_scope) {
         return !_scope.state.editing;
       },
-      redundantAttribute: 'expr27',
-      selector: '[expr27]',
-      template: _template('<template expr28="expr28"></template><template expr33="expr33"></template>', [{
+      redundantAttribute: 'expr62',
+      selector: '[expr62]',
+      template: _template('<template expr63="expr63"></template><template expr68="expr68"></template>', [{
         type: bindingTypes.IF,
         evaluate: function evaluate(_scope) {
           return _scope.state.value;
         },
-        redundantAttribute: 'expr28',
-        selector: '[expr28]',
-        template: _template('<a expr29="expr29"> </a>\n      (<a expr30="expr30" target="_blank" rel="noopener">Wikidata\n        <img src="/images/icon/arrow-up-right-from-square-solid.png"/></a>)\n      <a expr31="expr31" href="#"></a>', [{
-          redundantAttribute: 'expr29',
-          selector: '[expr29]',
+        redundantAttribute: 'expr63',
+        selector: '[expr63]',
+        template: _template('<a expr64="expr64"> </a>\n      (<a expr65="expr65" target="_blank" rel="noopener">Wikidata\n        <img src="/images/icon/arrow-up-right-from-square-solid.png"/></a>)\n      <a expr66="expr66" href="#"></a>', [{
+          redundantAttribute: 'expr64',
+          selector: '[expr64]',
           expressions: [{
             type: expressionTypes.TEXT,
             childNodeIndex: 0,
@@ -6009,8 +6924,8 @@ function wikidata_widget_createClass(Constructor, protoProps, staticProps) { if 
             }
           }]
         }, {
-          redundantAttribute: 'expr30',
-          selector: '[expr30]',
+          redundantAttribute: 'expr65',
+          selector: '[expr65]',
           expressions: [{
             type: expressionTypes.ATTRIBUTE,
             name: 'href',
@@ -6029,9 +6944,9 @@ function wikidata_widget_createClass(Constructor, protoProps, staticProps) { if 
           evaluate: function evaluate(_scope) {
             return _scope.props.allowEdit == 'true';
           },
-          redundantAttribute: 'expr31',
-          selector: '[expr31]',
-          template: _template('<img expr32="expr32" src="/images/icon/edit.gif"/>', [{
+          redundantAttribute: 'expr66',
+          selector: '[expr66]',
+          template: _template('<img expr67="expr67" src="/images/icon/edit.gif"/>', [{
             expressions: [{
               type: expressionTypes.EVENT,
               name: 'onclick',
@@ -6052,8 +6967,8 @@ function wikidata_widget_createClass(Constructor, protoProps, staticProps) { if 
             evaluate: function evaluate(_scope) {
               return _scope.state.value;
             },
-            redundantAttribute: 'expr32',
-            selector: '[expr32]',
+            redundantAttribute: 'expr67',
+            selector: '[expr67]',
             template: _template(null, [])
           }])
         }])
@@ -6062,15 +6977,15 @@ function wikidata_widget_createClass(Constructor, protoProps, staticProps) { if 
         evaluate: function evaluate(_scope) {
           return !_scope.state.value;
         },
-        redundantAttribute: 'expr33',
-        selector: '[expr33]',
-        template: _template('<a expr34="expr34" href="#"></a>', [{
+        redundantAttribute: 'expr68',
+        selector: '[expr68]',
+        template: _template('<a expr69="expr69" href="#"></a>', [{
           type: bindingTypes.IF,
           evaluate: function evaluate(_scope) {
             return _scope.props.allowEdit == 'true';
           },
-          redundantAttribute: 'expr34',
-          selector: '[expr34]',
+          redundantAttribute: 'expr69',
+          selector: '[expr69]',
           template: _template(' <img class="d-inline-block ms-1" src="/images/icon/edit.gif"/>', [{
             expressions: [{
               type: expressionTypes.TEXT,
@@ -6100,6 +7015,614 @@ function wikidata_widget_createClass(Constructor, protoProps, staticProps) { if 
   },
   name: 'wikidata-widget'
 });
+// EXTERNAL MODULE: ./node_modules/strftime/strftime.js
+var strftime = __webpack_require__(1);
+var strftime_default = /*#__PURE__*/__webpack_require__.n(strftime);
+;// CONCATENATED MODULE: ./app/assets/js/components/indexing/result_modal.riot
+function result_modal_classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+function result_modal_defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
+function result_modal_createClass(Constructor, protoProps, staticProps) { if (protoProps) result_modal_defineProperties(Constructor.prototype, protoProps); if (staticProps) result_modal_defineProperties(Constructor, staticProps); Object.defineProperty(Constructor, "prototype", { writable: false }); return Constructor; }
+/* harmony default export */ const result_modal = ({
+  css: null,
+  exports: /*#__PURE__*/function () {
+    function exports() {
+      result_modal_classCallCheck(this, exports);
+    }
+    result_modal_createClass(exports, [{
+      key: "onBeforeMount",
+      value: function onBeforeMount() {
+        this.launch = this.launch.bind(this);
+        this.state = {
+          open: false
+        };
+        this.on('i.modal', this.launch);
+      }
+    }, {
+      key: "launch",
+      value: function launch(event) {
+        this.update({
+          open: true,
+          toggle: event.data.toggle,
+          current: event.data.current,
+          data: event.data.result
+        });
+      }
+    }, {
+      key: "toggle",
+      value: function toggle(reveal, event) {
+        if (event) {
+          event.preventDefault();
+        }
+        this.state.toggle(reveal);
+        this.close();
+      }
+    }, {
+      key: "toggleAll",
+      value: function toggleAll(reveal, event) {
+        if (event) {
+          event.preventDefault();
+        }
+        this.bus.emit('i.toggle', {
+          reveal: reveal
+        });
+        this.close();
+      }
+    }, {
+      key: "close",
+      value: function close(event) {
+        if (event) {
+          event.preventDefault();
+        }
+        this.update({
+          open: false
+        });
+      }
+    }]);
+    return exports;
+  }(),
+  template: function template(_template, expressionTypes, bindingTypes, getComponent) {
+    return _template('<div expr75="expr75" is="pm-modal"></div>', [{
+      type: bindingTypes.TAG,
+      getComponent: getComponent,
+      evaluate: function evaluate(_scope) {
+        return 'pm-modal';
+      },
+      slots: [{
+        id: 'default',
+        html: '<pre expr76="expr76"> </pre>',
+        bindings: [{
+          redundantAttribute: 'expr76',
+          selector: '[expr76]',
+          expressions: [{
+            type: expressionTypes.TEXT,
+            childNodeIndex: 0,
+            evaluate: function evaluate(_scope) {
+              return [JSON.stringify(_scope.state.data, null, 2)].join('');
+            }
+          }]
+        }]
+      }],
+      attributes: [{
+        type: expressionTypes.ATTRIBUTE,
+        name: 'open',
+        evaluate: function evaluate(_scope) {
+          return _scope.state.open;
+        }
+      }, {
+        type: expressionTypes.ATTRIBUTE,
+        name: 'close',
+        evaluate: function evaluate(_scope) {
+          return function () {
+            return _scope.close();
+          };
+        }
+      }],
+      redundantAttribute: 'expr75',
+      selector: '[expr75]'
+    }]);
+  },
+  name: 'ir-modal'
+});
+;// CONCATENATED MODULE: ./app/assets/js/components/indexing_page.riot
+var indexing_page_class;
+function indexing_page_createForOfIteratorHelper(o, allowArrayLike) { var it = typeof Symbol !== "undefined" && o[Symbol.iterator] || o["@@iterator"]; if (!it) { if (Array.isArray(o) || (it = indexing_page_unsupportedIterableToArray(o)) || allowArrayLike && o && typeof o.length === "number") { if (it) o = it; var i = 0; var F = function F() {}; return { s: F, n: function n() { if (i >= o.length) return { done: true }; return { done: false, value: o[i++] }; }, e: function e(_e) { throw _e; }, f: F }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); } var normalCompletion = true, didErr = false, err; return { s: function s() { it = it.call(o); }, n: function n() { var step = it.next(); normalCompletion = step.done; return step; }, e: function e(_e2) { didErr = true; err = _e2; }, f: function f() { try { if (!normalCompletion && it["return"] != null) it["return"](); } finally { if (didErr) throw err; } } }; }
+function indexing_page_unsupportedIterableToArray(o, minLen) { if (!o) return; if (typeof o === "string") return indexing_page_arrayLikeToArray(o, minLen); var n = Object.prototype.toString.call(o).slice(8, -1); if (n === "Object" && o.constructor) n = o.constructor.name; if (n === "Map" || n === "Set") return Array.from(o); if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return indexing_page_arrayLikeToArray(o, minLen); }
+function indexing_page_arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len = arr.length; for (var i = 0, arr2 = new Array(len); i < len; i++) { arr2[i] = arr[i]; } return arr2; }
+function indexing_page_classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+function indexing_page_defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
+function indexing_page_createClass(Constructor, protoProps, staticProps) { if (protoProps) indexing_page_defineProperties(Constructor.prototype, protoProps); if (staticProps) indexing_page_defineProperties(Constructor, staticProps); Object.defineProperty(Constructor, "prototype", { writable: false }); return Constructor; }
+function indexing_page_defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
+
+
+
+var tmpResults = [];
+/* harmony default export */ const indexing_page = ({
+  css: null,
+  exports: (indexing_page_class = /*#__PURE__*/function () {
+    function exports() {
+      indexing_page_classCallCheck(this, exports);
+      this.locale = locale;
+      this.fetchSamples = this.fetchSamples.bind(this);
+    }
+    indexing_page_createClass(exports, [{
+      key: "onBeforeMount",
+      value: function onBeforeMount(props, state) {
+        var _this = this;
+        state['imageUrls'] = {};
+        request('/api/json/source/list?per_page=max').then(function (data) {
+          // console.log(data)
+          _this.update({
+            sources: data
+          });
+        });
+        request('/api/json/indexing/results').then(function (data) {
+          // console.log(data)
+          _this.update({
+            results: data
+          });
+        });
+        request('/api/json/indexing/counts').then(function (data) {
+          // console.log(data)
+          _this.update({
+            counts: data
+          });
+        });
+        this.fetchSamples();
+      }
+    }, {
+      key: "fetchSamples",
+      value: function fetchSamples() {
+        var _this2 = this;
+        var page = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 1;
+        var params = ['search_field[0]=all', 'search_value[0]=*', 'sample=1', 'sample_size=5', 'per_page=max', "page=".concat(page)].join('&');
+        return request("/api/json/search/advanced_search?".concat(params)).then(function (data) {
+          // console.log(data)
+
+          tmpResults = tmpResults.concat(data);
+          if (data.length > 0) {
+            _this2.fetchSamples(page + 1);
+          } else {
+            // console.log(tmpResults, 'XXX')
+            var samples = {};
+            var _iterator = indexing_page_createForOfIteratorHelper(tmpResults),
+              _step;
+            try {
+              for (_iterator.s(); !(_step = _iterator.n()).done;) {
+                var sample = _step.value;
+                var name = sample.pid.split('-')[0];
+                samples[name] = samples[name] || [];
+                samples[name].push(sample);
+              }
+            } catch (err) {
+              _iterator.e(err);
+            } finally {
+              _iterator.f();
+            }
+            var _params = ["pids=".concat(tmpResults.map(function (s) {
+              return s.pid;
+            }).join(','))].join('&');
+            var p = {
+              pids: tmpResults.map(function (s) {
+                return s.pid;
+              })
+            };
+            request("/api/json/indexing/image_urls", {
+              method: 'POST',
+              body: p
+            }).then(function (data) {
+              // console.log(data)
+
+              _this2.update({
+                imageUrls: data
+              });
+            });
+            tmpResults = [];
+            _this2.update({
+              samples: samples
+            });
+          }
+        });
+      }
+    }, {
+      key: "openResult",
+      value: function openResult(source, result, event) {
+        event.preventDefault();
+        this.bus.emit('i.modal', {
+          source: source,
+          result: result
+        });
+      }
+    }, {
+      key: "resultsFor",
+      value: function resultsFor(name) {
+        var results = this.state['results'] || {};
+        return results[name] || [];
+      }
+    }, {
+      key: "countsFor",
+      value: function countsFor(name) {
+        var counts = this.state['counts'] || {};
+        return counts[name];
+      }
+    }, {
+      key: "samplesFor",
+      value: function samplesFor(name) {
+        var samples = this.state['samples'] || {};
+        return samples[name];
+      }
+    }, {
+      key: "countClassesFor",
+      value: function countClassesFor(source) {
+        var counts = this.countsFor(source.name);
+        if (!counts) return 'error';
+        if (counts['records'] != source.record_count) return 'warn';
+        return '';
+      }
+    }, {
+      key: "formatCounts",
+      value: function formatCounts(counts) {
+        if (!counts) return 'no index';
+        return "records: ".concat(counts['records'], ", objects: ").concat(counts['objects']);
+      }
+    }, {
+      key: "formatTs",
+      value: function formatTs(ts) {
+        var date = new Date(ts * 1000);
+        return strftime_default()('%Y-%m-%d %H:%H:%S', date);
+      }
+    }, {
+      key: "formatOa",
+      value: function formatOa(value) {
+        var map = {
+          'Open access': 'yes',
+          'Non-Open access': 'no'
+        };
+        return map[value] || value;
+      }
+    }, {
+      key: "formatKind",
+      value: function formatKind(value) {
+        return value.split(' ')[0].toLowerCase();
+      }
+    }, {
+      key: "loaded",
+      value: function loaded() {
+        return !!this.state['sources'] && !!this.state['results'] && !!this.state['counts'] && !!this.state['imageUrls'] && !!this.state['samples'];
+      }
+    }]);
+    return exports;
+  }(), indexing_page_defineProperty(indexing_page_class, "components", {
+    'ir-modal': result_modal
+  }), indexing_page_class),
+  template: function template(_template, expressionTypes, bindingTypes, getComponent) {
+    return _template('<div expr23="expr23" is="pm-loading-indicator"></div><h1 expr24="expr24"> </h1><h2 expr25="expr25"> </h2><table expr26="expr26"></table><div expr50="expr50" is="ir-modal"></div>', [{
+      expressions: [{
+        type: expressionTypes.ATTRIBUTE,
+        name: 'class',
+        evaluate: function evaluate(_scope) {
+          return 'm-5';
+        }
+      }]
+    }, {
+      type: bindingTypes.TAG,
+      getComponent: getComponent,
+      evaluate: function evaluate(_scope) {
+        return 'pm-loading-indicator';
+      },
+      slots: [],
+      attributes: [],
+      redundantAttribute: 'expr23',
+      selector: '[expr23]'
+    }, {
+      redundantAttribute: 'expr24',
+      selector: '[expr24]',
+      expressions: [{
+        type: expressionTypes.TEXT,
+        childNodeIndex: 0,
+        evaluate: function evaluate(_scope) {
+          return _scope.t('pages.indexing_status');
+        }
+      }]
+    }, {
+      redundantAttribute: 'expr25',
+      selector: '[expr25]',
+      expressions: [{
+        type: expressionTypes.TEXT,
+        childNodeIndex: 0,
+        evaluate: function evaluate(_scope) {
+          return _scope.t('Sources');
+        }
+      }]
+    }, {
+      type: bindingTypes.IF,
+      evaluate: function evaluate(_scope) {
+        return _scope.loaded();
+      },
+      redundantAttribute: 'expr26',
+      selector: '[expr26]',
+      template: _template('<thead><tr><th expr27="expr27" colspan="4" class="text-center border-bottom pe-0"> </th><th expr28="expr28" colspan="1" class="text-center border-bottom pe-0"> </th><th expr29="expr29" colspan="1" class="text-center border-bottom pe-0"> </th><th expr30="expr30" colspan="1" class="text-center border-bottom pe-0"> </th></tr><tr><th expr31="expr31"> </th><th expr32="expr32"> </th><th expr33="expr33"> </th><th expr34="expr34" class="text-end pe-0"> </th><th expr35="expr35" class="ps-1"> </th><th expr36="expr36"> </th><th expr37="expr37"> </th></tr></thead><tbody><tr expr38="expr38"></tr></tbody>', [{
+        redundantAttribute: 'expr27',
+        selector: '[expr27]',
+        expressions: [{
+          type: expressionTypes.TEXT,
+          childNodeIndex: 0,
+          evaluate: function evaluate(_scope) {
+            return _scope.cap(_scope.t('activerecord.models.source.one'));
+          }
+        }]
+      }, {
+        redundantAttribute: 'expr28',
+        selector: '[expr28]',
+        expressions: [{
+          type: expressionTypes.TEXT,
+          childNodeIndex: 0,
+          evaluate: function evaluate(_scope) {
+            return _scope.cap(_scope.t('elasticsearch'));
+          }
+        }]
+      }, {
+        redundantAttribute: 'expr29',
+        selector: '[expr29]',
+        expressions: [{
+          type: expressionTypes.TEXT,
+          childNodeIndex: 0,
+          evaluate: function evaluate(_scope) {
+            return _scope.cap(_scope.t('indexer'));
+          }
+        }]
+      }, {
+        redundantAttribute: 'expr30',
+        selector: '[expr30]',
+        expressions: [{
+          type: expressionTypes.TEXT,
+          childNodeIndex: 0,
+          evaluate: function evaluate(_scope) {
+            return _scope.cap(_scope.t('rack_images'));
+          }
+        }]
+      }, {
+        redundantAttribute: 'expr31',
+        selector: '[expr31]',
+        expressions: [{
+          type: expressionTypes.TEXT,
+          childNodeIndex: 0,
+          evaluate: function evaluate(_scope) {
+            return _scope.cap(_scope.t('activerecord.attributes.source.name'));
+          }
+        }]
+      }, {
+        redundantAttribute: 'expr32',
+        selector: '[expr32]',
+        expressions: [{
+          type: expressionTypes.TEXT,
+          childNodeIndex: 0,
+          evaluate: function evaluate(_scope) {
+            return _scope.cap(_scope.t('activerecord.attributes.source.kind'));
+          }
+        }]
+      }, {
+        redundantAttribute: 'expr33',
+        selector: '[expr33]',
+        expressions: [{
+          type: expressionTypes.TEXT,
+          childNodeIndex: 0,
+          evaluate: function evaluate(_scope) {
+            return _scope.cap(_scope.t('activerecord.attributes.source.open_access'));
+          }
+        }]
+      }, {
+        redundantAttribute: 'expr34',
+        selector: '[expr34]',
+        expressions: [{
+          type: expressionTypes.TEXT,
+          childNodeIndex: 0,
+          evaluate: function evaluate(_scope) {
+            return _scope.cap(_scope.t('activerecord.attributes.source.record_count'));
+          }
+        }]
+      }, {
+        redundantAttribute: 'expr35',
+        selector: '[expr35]',
+        expressions: [{
+          type: expressionTypes.TEXT,
+          childNodeIndex: 0,
+          evaluate: function evaluate(_scope) {
+            return _scope.cap(_scope.t('activerecord.attributes.source.counts'));
+          }
+        }]
+      }, {
+        redundantAttribute: 'expr36',
+        selector: '[expr36]',
+        expressions: [{
+          type: expressionTypes.TEXT,
+          childNodeIndex: 0,
+          evaluate: function evaluate(_scope) {
+            return _scope.cap(_scope.t('activerecord.attributes.source.indexings'));
+          }
+        }]
+      }, {
+        redundantAttribute: 'expr37',
+        selector: '[expr37]',
+        expressions: [{
+          type: expressionTypes.TEXT,
+          childNodeIndex: 0,
+          evaluate: function evaluate(_scope) {
+            return _scope.cap(_scope.t('activerecord.attributes.source.samples'));
+          }
+        }]
+      }, {
+        type: bindingTypes.EACH,
+        getKey: null,
+        condition: null,
+        template: _template('<td><a expr39="expr39" target="_blank"> </a></td><td expr40="expr40"> </td><td expr41="expr41"> </td><td expr42="expr42" class="text-end pe-0"> </td><td class="ps-1"><div expr43="expr43"><template expr44="expr44"></template><template expr46="expr46"></template></div></td><td class="text-nowrap"><div expr47="expr47" class="result"></div></td><td><div class="samples"><img expr49="expr49"/></div></td>', [{
+          redundantAttribute: 'expr39',
+          selector: '[expr39]',
+          expressions: [{
+            type: expressionTypes.TEXT,
+            childNodeIndex: 0,
+            evaluate: function evaluate(_scope) {
+              return _scope.source.name;
+            }
+          }, {
+            type: expressionTypes.ATTRIBUTE,
+            name: 'href',
+            evaluate: function evaluate(_scope) {
+              return ['/', _scope.locale(), '/sources/', _scope.source.name].join('');
+            }
+          }]
+        }, {
+          redundantAttribute: 'expr40',
+          selector: '[expr40]',
+          expressions: [{
+            type: expressionTypes.TEXT,
+            childNodeIndex: 0,
+            evaluate: function evaluate(_scope) {
+              return _scope.formatKind(_scope.source.kind);
+            }
+          }]
+        }, {
+          redundantAttribute: 'expr41',
+          selector: '[expr41]',
+          expressions: [{
+            type: expressionTypes.TEXT,
+            childNodeIndex: 0,
+            evaluate: function evaluate(_scope) {
+              return _scope.formatOa(_scope.source.open_access);
+            }
+          }]
+        }, {
+          redundantAttribute: 'expr42',
+          selector: '[expr42]',
+          expressions: [{
+            type: expressionTypes.TEXT,
+            childNodeIndex: 0,
+            evaluate: function evaluate(_scope) {
+              return [_scope.source.record_count].join('');
+            }
+          }]
+        }, {
+          redundantAttribute: 'expr43',
+          selector: '[expr43]',
+          expressions: [{
+            type: expressionTypes.ATTRIBUTE,
+            name: 'class',
+            evaluate: function evaluate(_scope) {
+              return ['elastic-counts text-nowrap ', _scope.countClassesFor(_scope.source)].join('');
+            }
+          }]
+        }, {
+          type: bindingTypes.IF,
+          evaluate: function evaluate(_scope) {
+            return _scope.countsFor(_scope.source.name);
+          },
+          redundantAttribute: 'expr44',
+          selector: '[expr44]',
+          template: _template('\n              records:\n              <a expr45="expr45" target="_blank"> </a> ', [{
+            expressions: [{
+              type: expressionTypes.TEXT,
+              childNodeIndex: 2,
+              evaluate: function evaluate(_scope) {
+                return [',\n              objects: ', _scope.countsFor(_scope.source.name)['objects']].join('');
+              }
+            }]
+          }, {
+            redundantAttribute: 'expr45',
+            selector: '[expr45]',
+            expressions: [{
+              type: expressionTypes.TEXT,
+              childNodeIndex: 0,
+              evaluate: function evaluate(_scope) {
+                return _scope.countsFor(_scope.source.name)['records'];
+              }
+            }, {
+              type: expressionTypes.ATTRIBUTE,
+              name: 'href',
+              evaluate: function evaluate(_scope) {
+                return ['/', _scope.locale(), '/searches/advanced?indices[', _scope.source.name, ']=true&search_field[]=all&search_value[]=*'].join('');
+              }
+            }]
+          }])
+        }, {
+          type: bindingTypes.IF,
+          evaluate: function evaluate(_scope) {
+            return !_scope.countsFor(_scope.source.name);
+          },
+          redundantAttribute: 'expr46',
+          selector: '[expr46]',
+          template: _template('\n              no index\n            ', [])
+        }, {
+          type: bindingTypes.EACH,
+          getKey: null,
+          condition: null,
+          template: _template('<a expr48="expr48" href="#"> </a>', [{
+            redundantAttribute: 'expr48',
+            selector: '[expr48]',
+            expressions: [{
+              type: expressionTypes.TEXT,
+              childNodeIndex: 0,
+              evaluate: function evaluate(_scope) {
+                return [_scope.formatTs(_scope.result.started_at)].join('');
+              }
+            }, {
+              type: expressionTypes.EVENT,
+              name: 'onclick',
+              evaluate: function evaluate(_scope) {
+                return function (event) {
+                  return _scope.openResult(_scope.source, _scope.result, event);
+                };
+              }
+            }]
+          }]),
+          redundantAttribute: 'expr47',
+          selector: '[expr47]',
+          itemName: 'result',
+          indexName: null,
+          evaluate: function evaluate(_scope) {
+            return _scope.resultsFor(_scope.source.name);
+          }
+        }, {
+          type: bindingTypes.EACH,
+          getKey: null,
+          condition: null,
+          template: _template(null, [{
+            expressions: [{
+              type: expressionTypes.ATTRIBUTE,
+              name: 'src',
+              evaluate: function evaluate(_scope) {
+                return _scope.state.imageUrls[_scope.sample.pid];
+              }
+            }]
+          }]),
+          redundantAttribute: 'expr49',
+          selector: '[expr49]',
+          itemName: 'sample',
+          indexName: null,
+          evaluate: function evaluate(_scope) {
+            return _scope.samplesFor(_scope.source.name);
+          }
+        }]),
+        redundantAttribute: 'expr38',
+        selector: '[expr38]',
+        itemName: 'source',
+        indexName: null,
+        evaluate: function evaluate(_scope) {
+          return _scope.state.sources;
+        }
+      }])
+    }, {
+      type: bindingTypes.TAG,
+      getComponent: getComponent,
+      evaluate: function evaluate(_scope) {
+        return 'ir-modal';
+      },
+      slots: [],
+      attributes: [],
+      redundantAttribute: 'expr50',
+      selector: '[expr50]'
+    }]);
+  },
+  name: 'indexing-page'
+});
 ;// CONCATENATED MODULE: ./app/assets/app.js
 
 
@@ -6109,6 +7632,7 @@ function wikidata_widget_createClass(Constructor, protoProps, staticProps) { if 
 
 
 // import Confirm from './js/components/confirm.riot'
+
 
 
 
@@ -6129,6 +7653,7 @@ register('pm-ol-modal', ol_modal)
 register('pm-size-indicator', size_indicator)
 register('pm-wd-modal', wd_modal)
 register('pm-wikidata-widget', wikidata_widget)
+register('pm-indexing-page', indexing_page)
 
 lib_i18n().then((data) => {
   mount('[is]')
@@ -6139,7 +7664,8 @@ lib_i18n().then((data) => {
     '.description-field',
     '.keyword-field',
     '.keywords-field',
-    '.keyword_artigo-field'
+    '.keyword_artigo-field',
+    'div.image'
   ]
   setup(olClasses.join(', '))
   console.log('offensive language component initialized')

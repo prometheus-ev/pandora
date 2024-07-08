@@ -245,7 +245,7 @@ class CollectionsControllerTest < ActionDispatch::IntegrationTest
     priv = Collection.find_by! title: "John's private collection"
     upload = Upload.first
     pid = Upload.first.image.pid
-    
+
     login_as 'jdoe'
 
     post store_collections_path(id: priv.id), params: {image: pid}

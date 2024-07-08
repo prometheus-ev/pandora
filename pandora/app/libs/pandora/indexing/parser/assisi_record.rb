@@ -7,14 +7,6 @@ class Pandora::Indexing::Parser::AssisiRecord < Pandora::Indexing::Parser::Recor
     record.at_xpath('.//bildnr/text()')
   end
 
-  def s_title
-    [record.xpath('.//bildtitel/text()'), record.xpath('.//untertitel/text()')]
-  end
-
-  def s_location
-    [record.xpath('.//ort1/text()'), record.xpath('.//ort2/text()'), record.xpath('.//ort3/text()'), record.xpath('.//Aufbewahrungsort/text()')]
-  end
-
   def artist
     ["#{record.xpath('.//Kuenstler/text()')}".gsub(/\Anull\z/, "").gsub(/ .\)/, "")]
   end

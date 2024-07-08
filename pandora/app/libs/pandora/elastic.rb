@@ -19,13 +19,13 @@ class Pandora::Elastic
     end
 
     if distance == 'euc'
-      #euclidean
+      # euclidean
       score_fn = "doc['image_vector'].size() == 0 ? 0 : 1 / (l2norm(params.vector,'image_vector') + 1.0)"
     elsif distance == 'cos'
-      #cosine
+      # cosine
       score_fn = "doc['image_vector'].size() == 0 ? 0 : cosineSimilarity(params.vector, 'image_vector') + 1.0"
     elsif distance == 'man'
-      #manhattan
+      # manhattan
       score_fn = "doc['image_vector'].size() == 0 ? 0 : 1 / (l1norm(params.vector,'image_vector') + 1.0)"
     end
 
@@ -38,7 +38,7 @@ class Pandora::Elastic
         "script_score": {
           "query": {
             "query_string": {
-                "query": query
+              "query": query
             }
           },
           "script": {
@@ -80,6 +80,12 @@ class Pandora::Elastic
     data
   end
 
+  def explain(index, id, query = {}, from = 0, size = 10)
+    data = request 'GET', "/#{index}/_explain/#{id}", {}, {}, query
+    require_ok!
+    data
+  end
+
   # https://www.elastic.co/guide/en/elasticsearch/reference/current/search-multi-search.html
   def msearch(msearches)
     body = msearches.map{|m| JSON.dump(m)}.join("\n")
@@ -89,18 +95,20 @@ class Pandora::Elastic
   end
 
   def scan(name, per_page = 1000)
-    data = request 'GET', "/#{name}/_search", {
-      scroll: '1m',
+    data = request("GET", "/#{name}/_search", {
+      scroll: "10m",
       size: per_page
-    }
+    })
     require_ok!
     data
   end
 
   def continue(scroll_id)
-    data = request 'GET', '/_search/scroll', {scroll: '1m'}, {}, {
-      'scroll_id' => scroll_id
-    }
+    data = request("GET", "/_search/scroll", {
+      scroll: "10m"
+    }, {}, {
+      scroll_id: scroll_id
+    })
     require_ok!
     data
   end
@@ -191,7 +199,7 @@ class Pandora::Elastic
   def date_aggregation
     {
       date_count: {
-        value_count: { "field": "date.raw" }
+        value_count: {"field": "date.raw"}
       },
       date_range_from_stats: {
         stats: {
@@ -262,6 +270,22 @@ class Pandora::Elastic
         }
       }
     }
+  end
+
+  def comment_count_aggregation_search(indices)
+    comment_count_aggregation = {
+      comment_count: {
+        cardinality: {
+          field: 'comment_count.raw'
+        }
+      }
+    }
+    query = {
+      size: 0,
+      aggs: comment_count_aggregation
+    }
+
+    search(indices, query)
   end
 
   def record_object_id_aggregations(sort)
@@ -335,6 +359,14 @@ class Pandora::Elastic
     indices.sort_by{|index| index[:name]}
   end
 
+  def count(alias_name)
+    if alias_exists?(alias_name)
+      counts[alias_name]["records"]
+    else
+      0
+    end
+  end
+
   def counts
     # construct a mapping from index name to alias name
     raw_aliases = request 'GET', "/_alias/_all"
@@ -404,7 +436,7 @@ class Pandora::Elastic
       _source: false,
       size: options[:per_page]
       # TODO: why has skip been used?
-      #skip: skip(options[:page], options[:per_page])
+      # skip: skip(options[:page], options[:per_page])
     }
 
     data['hits']['hits'].map do |h|
@@ -431,7 +463,7 @@ class Pandora::Elastic
         }
       }
     }
-    request 'GET', "/_mget", { '_source': 'true' }, {}, rdata
+    request 'GET', "/_mget", {'_source': 'true'}, {}, rdata
   end
 
   def by_object_ids(ids, size = nil, options = {})
@@ -439,7 +471,7 @@ class Pandora::Elastic
       query: {
         bool: {
           filter: [
-            { terms: { 'record_object_id.raw': ids }}
+            {terms: {'record_object_id.raw': ids}}
           ]
         }
       }
@@ -492,16 +524,37 @@ class Pandora::Elastic
   end
 
   def bulk_commit(refresh: false)
-    return if @bulk_backlog.nil? || @bulk_backlog.empty?
+    errors = []
+    updated_records = 0
+
+    return updated_records if @bulk_backlog.nil? || @bulk_backlog.empty?
 
     body = @bulk_backlog.map{|d| d.to_json}.join("\n")
     @bulk_backlog = []
 
     params = (refresh ? {refresh: true} : nil)
     response = request "POST", "/_bulk", params, {}, "#{body}\n"
-    updated_records = response['items'].select do |item|
-      item.dig('index', 'result') == 'updated'
+
+    updated_records = if response["items"]
+      response['items'].select do |item|
+        if error = item.dig('index', 'error')
+          errors << error
+        end
+        item.dig('index', 'result') == 'updated'
+      end
+    else
+      0
     end
+
+    unless errors.empty?
+      Pandora.puts
+      Pandora.puts errors
+      raise(Pandora::Exception,
+            "#{errors.size} indexing #{'error'.pluralize(errors)} occured, " \
+            "see log above. Please fix.",
+            [""])
+    end
+
     require_ok!
     updated_records.count
   end
@@ -515,6 +568,10 @@ class Pandora::Elastic
 
   def index_exists?(name)
     !!indices.find{|i| i['index'] == name}
+  end
+
+  def alias_exists?(name)
+    aliases.include?(name)
   end
 
   # https://www.elastic.co/guide/en/elasticsearch/reference/8.6/docs-get.html#docs-get-api-example
@@ -558,7 +615,7 @@ class Pandora::Elastic
 
   def ensure_index(alias_name, settings = Indexing::IndexSettings.read, mappings = Indexing::IndexMappings.read)
     return alias_name if aliases.include?(alias_name)
-    
+
     destroy_index("#{alias_name}*")
     data = request 'PUT', "/#{alias_name}_1", {}, {}, {
       'settings' => settings,
@@ -577,6 +634,10 @@ class Pandora::Elastic
     data
   end
 
+  def destroy_alias(name)
+    request 'DELETE', "/_all/_alias/#{name}"
+  end
+
   def destroy_index(index_name)
     result = request 'DELETE', "/#{index_name}"
     require_ok!
@@ -589,10 +650,6 @@ class Pandora::Elastic
     result
   end
 
-  def destroy_alias(alias_name)
-    destroy_index "#{alias_name}*"
-  end
-
   def destroy_record(record_id, raise_errors: true)
     alias_name = record_id.split('-').first
     result = request 'DELETE', "/#{alias_name}/_doc/#{record_id}"
@@ -603,10 +660,6 @@ class Pandora::Elastic
   def create_alias(index_name, alias_name)
     request 'PUT', "/#{index_name}/_aliases/#{alias_name}"
     require_ok!
-  end
-
-  def destroy_alias(name)
-    request 'DELETE', "/_all/_alias/#{name}"
   end
 
   def add_alias_to(index_name:)
@@ -622,10 +675,10 @@ class Pandora::Elastic
     end
 
     actions << {
-        add: {
-          index: index_name, alias: alias_name
-        }
+      add: {
+        index: index_name, alias: alias_name
       }
+    }
 
     data = request 'POST', "/_aliases", {}, {}, {
       actions: actions
@@ -652,8 +705,29 @@ class Pandora::Elastic
     data
   end
 
+  def open_index(name)
+    data = request 'POST', "/#{name}/_open"
+    require_ok!
+    data
+  end
+
+  def close_index(name)
+    data = request 'POST', "/#{name}/_close"
+    require_ok!
+    data
+  end
+
   def settings(name)
     data = request 'GET', "/#{name}/_settings"
+    require_ok!
+    data
+  end
+
+  def update_settings(name, settings = nil)
+    settings ||= Indexing::IndexSettings.read
+    settings['index'].delete 'number_of_shards'
+
+    data = request 'PUT', "/#{name}/_settings", {}, {}, settings
     require_ok!
     data
   end
@@ -717,6 +791,9 @@ class Pandora::Elastic
     data = request 'GET', "/#{alias_name}*"
     require_ok!
 
+    # Filter indices to remove e.g. dresden_hfbk from the alias dresden, see #1821.
+    data = data.select{|k, _| k.match?(/^#{alias_name}_\d+$/)}
+
     unless data.keys.empty?
       data.keys.each do |index_name|
         if !index_has_alias?(index_name: index_name, alias_name: alias_name) &&
@@ -732,11 +809,11 @@ class Pandora::Elastic
       end
 
       if dry
-        puts
-        puts "Set parameter 'dry' to true in order to not delete any indices, e.g.:"
-        puts
-        puts "  cleanup_backups_of('robertin', true)"
-        puts
+        Pandora.puts
+        Pandora.puts "Set parameter 'dry' to true in order to not delete any indices, e.g.:"
+        Pandora.puts
+        Pandora.puts "  cleanup_backups_of('robertin', true)"
+        Pandora.puts
       end
     end
 
@@ -748,18 +825,60 @@ class Pandora::Elastic
     require_ok!
   end
 
+  # iterates all docs within the given indices
+  # @param indices Array<String> the list of indices
+  # @yield [record] passes a record to the block
+  # @return [nil]
+  def with_records(indices, &block)
+    indices_joined = indices.join(", ")
+    current = scan(indices_joined, 100)
+    scroll_id = current['_scroll_id']
+    total = current['hits']['total']['value']
+    counter = 0
+    Pandora.puts "#{indices_joined}: processing a total of #{total} records..."
+
+    while total > counter
+      hits = current['hits']['hits']
+
+      hits.each{|h| yield h}
+
+      counter += hits.size
+
+      current = continue(scroll_id)
+    end
+
+    nil
+  end
+
   def refresh
     request 'POST', '/_refresh'
+  end
+
+  def refresh_alias(alias_name)
+    request "POST", "/#{alias_name}/_refresh"
   end
 
   def skip(page = 1, per_page = 10)
     (page - 1) * per_page
   end
 
-  def require_ok!
-    if @response && (@response.status < 200 || @response.status > 299)
+  def require_ok!(opts = {})
+    unless response_ok?(opts)
       raise Pandora::Exception, "elastic request failed: #{@response.body}"
     end
+  end
+
+  def response_ok?(opts)
+    opts.reverse_merge!(pass: [200..299])
+
+    return false if !@response
+
+    opts[:pass].each do |c|
+      return true if c == @response.status
+      return true if c.is_a?(Range) && c.cover?(@response.status)
+    end
+
+    return false
   end
 
   def index_upload(super_image)
@@ -786,7 +905,7 @@ class Pandora::Elastic
       return
     end
 
-    # skipping image vectors for now since we don't have them for uploads and 
+    # skipping image vectors for now since we don't have them for uploads and
     # we'd need a way to generate them one by one
 
     create_index_record(alias_name, attrs['record_id'], attrs)
@@ -901,10 +1020,10 @@ class Pandora::Elastic
 
       records_created += 1
 
-      printf "\rRecords created: #{records_created} | updated: 0 (indexed in total: #{records_created}) | excluded: 0" unless Rails.env.test?
+      Pandora.printf "\rRecords created: #{records_created} | updated: 0 (indexed in total: #{records_created}) | excluded: 0" unless Rails.env.test?
     end
 
-    puts
+    Pandora.puts
 
     tmp_file.close
 
@@ -914,8 +1033,15 @@ class Pandora::Elastic
     cmd = "mkdir -p #{ENV['PM_IMAGES_DIR']}/#{alias_name}/original/"
     system(cmd)
 
-    cmd = "rsync -avu --delete --files-from=#{tmp_file.path} #{ENV['PM_IMAGES_DIR']}/upload/original/ #{ENV['PM_IMAGES_DIR']}/#{alias_name}/original/"
-    system(cmd)
+    cmd = [
+      'rsync', '-avu',
+      '--delete',
+      '--quiet',
+      "--files-from=#{tmp_file.path}",
+      "#{ENV['PM_IMAGES_DIR']}/upload/original/",
+      "#{ENV['PM_IMAGES_DIR']}/#{alias_name}/original/"
+    ]
+    system(*cmd)
 
     # TODO is_time_searchable could be set to true if we force a date for uploads.
     Source.find_and_update_or_create_by(name: source.name,
@@ -965,6 +1091,7 @@ class Pandora::Elastic
       rescue Timeout::Error
         retries += 1
         raise if retries > 1
+
         retry
       end
 
@@ -979,8 +1106,8 @@ class Pandora::Elastic
       @client ||= begin
         http_client = HTTPClient.new
         # Necessary for index packs loading with mapping update.
-        #http_client.send_timeout = 480
-        #http_client.receive_timeout = 480
+        # http_client.send_timeout = 480
+        # http_client.receive_timeout = 480
         http_client
       end
     end

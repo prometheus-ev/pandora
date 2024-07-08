@@ -17,13 +17,13 @@ class Indexing::Sources::Parents::Dilps < Indexing::SourceSuper
 
   # künstler
   def artist
-    (record.xpath('.//name1/text()') + record.xpath('.//name2/text()')).map { |artist|
+    (record.xpath('.//name1/text()') + record.xpath('.//name2/text()')).map {|artist|
       artist.to_s.gsub(/\A; /, '').gsub(/; \z/, '')
     }
   end
 
   def artist_normalized
-    an = artist.map { |a|
+    an = artist.map {|a|
       a.to_s.split(', ').reverse.join(' ')
     }
     super(an)
@@ -31,7 +31,7 @@ class Indexing::Sources::Parents::Dilps < Indexing::SourceSuper
 
   # titel
   def title
-    record.xpath('.//title/text()').map { |title|
+    record.xpath('.//title/text()').map {|title|
       title = title.to_s
       title.slice!("[]")
       title
@@ -40,9 +40,9 @@ class Indexing::Sources::Parents::Dilps < Indexing::SourceSuper
 
   # standort
   def location
-    (record.xpath('.//location/text()') + record.xpath('.//institution/text()')).map { |location_term|
+    (record.xpath('.//location/text()') + record.xpath('.//institution/text()')).map {|location_term|
       location_term.to_s.strip
-    }.delete_if { |location_term|
+    }.delete_if {|location_term|
       location_term.blank?
     }.join(", ")
   end

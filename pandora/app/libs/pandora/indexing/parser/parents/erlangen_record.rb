@@ -7,10 +7,6 @@ class Pandora::Indexing::Parser::Parents::ErlangenRecord < Pandora::Indexing::Pa
     "#{record.at_xpath('.//Kennung/text()')}.jpg"
   end
 
-  def s_keyword
-    [record.xpath('.//Gattung/text()'), record.xpath('.//Material/text()')]
-  end
-
   def artist
     record.xpath('.//Kuenstler/text()')
   end

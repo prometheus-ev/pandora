@@ -1,6 +1,5 @@
 class Indexing::Sources::Smk < Indexing::SourceSuper
-
-  # language of data: danish; 
+  # language of data: danish;
   # only in some cases exist translations (some artwork titles, artist names, etc.)
   # using language parameter (lang=en) for api art requests returns incomplete datasets (compared to default [dk])
 
@@ -96,7 +95,7 @@ class Indexing::Sources::Smk < Indexing::SourceSuper
 
   def record_object_id
     if !record.xpath('./part-of/part-of').empty?
-      # smk records have a n:m relation between records (parts | part-of); 
+      # smk records have a n:m relation between records (parts | part-of);
       # prometheus records only have 1:n relation between record_object and record
       # we reduce n:m relation to 1:n relation by unequivocally choosing one part as object_record
       [name, Digest::SHA1.hexdigest(record.xpath('./part-of/part-of/text()').to_a.map(&:to_s).sort.first)].join('-')
@@ -116,18 +115,18 @@ class Indexing::Sources::Smk < Indexing::SourceSuper
 
   def artist
     if !record.xpath('./production/production/creator').empty? # artist data from person repo
-      record.xpath('./production/production/creator').map{ |creator|
-        creator.xpath('./items/item').map{ |item|
+      record.xpath('./production/production/creator').map{|creator|
+        creator.xpath('./items/item').map{|item|
           [item.xpath('./name/text()').to_s, artist_date(
-            item.xpath('./birth-date-prec/birth-date-prec/text()').to_a.join(" | "), 
+            item.xpath('./birth-date-prec/birth-date-prec/text()').to_a.join(" | "),
             item.xpath('./death-date-prec/death-date-prec/text()').to_a.join(" | ")
-            )].join(" ")
+          )].join(" ")
         }.to_a.join('; ')
       }.to_a.join(' | ')
     else # artist data from art repo
-      record.xpath('./production/production').map{ |production|
+      record.xpath('./production/production').map{|production|
         [production.xpath('./craftsman/text()').to_s, artist_date(
-          production.xpath('./creator-date-of-birth/text()').to_a.join(" | "), 
+          production.xpath('./creator-date-of-birth/text()').to_a.join(" | "),
           production.xpath('./creator-date-of-death/text()').to_a.join(" | ")
         )].join(" ")
       }.to_a.join(' | ')
@@ -137,11 +136,11 @@ class Indexing::Sources::Smk < Indexing::SourceSuper
   # artist name has to be: FIRSTNAMES LASTNAME
   def artist_normalized
     if !record.xpath('./production/production/creator').empty? # artist data from person repo
-      an = record.xpath('./production/production/creator/items/item/name/text()').map { |a|
+      an = record.xpath('./production/production/creator/items/item/name/text()').map {|a|
         a.to_s.split(', ').reverse.join(' ')
       }
     else # artist data from art repo
-      an = record.xpath('./production/production/craftsman/text()').map { |a|
+      an = record.xpath('./production/production/craftsman/text()').map {|a|
         a.to_s.split(', ').reverse.join(' ')
       }
     end
@@ -154,7 +153,7 @@ class Indexing::Sources::Smk < Indexing::SourceSuper
   end
 
   # only images in public domain, cf. def records
-  def rights_reproduction 
+  def rights_reproduction
     CREATIVE_COMMONS_0_LINE
   end
 
@@ -181,15 +180,17 @@ class Indexing::Sources::Smk < Indexing::SourceSuper
   end
 
   def acquisition
-    [acquisition_date(record.xpath('./acquisition-date/text()').to_s, 
+    [
+      acquisition_date(
+        record.xpath('./acquisition-date/text()').to_s,
         record.xpath('./acquisition-date-precision/text()').to_s
-      ), 
+      ),
       record.xpath('./acquisition-document-description/text()').to_s
     ].reject(&:blank?).join(" | ")
   end
 
   # object-name not in fields list
-  def classification 
+  def classification
     record.xpath('./object-name/object-name/name/text()').to_a.join(" | ")
   end
 
@@ -198,7 +199,7 @@ class Indexing::Sources::Smk < Indexing::SourceSuper
   end
 
   def date
-    record.xpath('./production-date/production-date').map { |date|
+    record.xpath('./production-date/production-date').map {|date|
       production_date(date.xpath('./start/text()').to_s, date.xpath('./end/text()').to_s)
     }.to_a.join(' | ')
   end
@@ -209,21 +210,22 @@ class Indexing::Sources::Smk < Indexing::SourceSuper
     super(d)
   end
 
-  def literature 
+  def literature
     record.xpath('./notes/note/text()').to_a.join(" | ")
   end
 
   def text
-    [record.xpath('./object-history-note/object-history-note/text()').to_a.join(" | "),
-      record.xpath('./labels/label/text/text() | 
-        ./labels/label/source/text() | 
-        ./labels/label/date/text()').to_a.join(" | ")
+    [
+      record.xpath('./object-history-note/object-history-note/text()').to_a.join(" | "),
+      record.xpath(
+        './labels/label/text/text() | ./labels/label/source/text() | ./labels/label/date/text()'
+      ).to_a.join(" | ")
     ].reject(&:empty?).join(' | ')
   end
 
   def size
-    record.xpath('./dimensions/dimension').map { |dimension|
-      dimension.xpath('./type/text()').to_s + ": " + dimension.xpath('./value/text()').to_s + dimension.xpath('./unit/text()').to_s + 
+    record.xpath('./dimensions/dimension').map {|dimension|
+      dimension.xpath('./type/text()').to_s + ": " + dimension.xpath('./value/text()').to_s + dimension.xpath('./unit/text()').to_s +
         " (" + dimension.xpath('./part/text()').to_s + ")"
     }.to_a.join(', ')
   end
@@ -233,7 +235,7 @@ class Indexing::Sources::Smk < Indexing::SourceSuper
   end
 
   # NEW display field
-  def exhibition 
+  def exhibition
     record.xpath('./exhibitions/exhibition/exhibition/text()').to_a.join(' | ')
   end
 
@@ -242,13 +244,14 @@ class Indexing::Sources::Smk < Indexing::SourceSuper
   end
 
   def credits
-    [SMK_LOCATION, department
-      ].reject(&:empty?).join(", ")
+    [SMK_LOCATION, department].reject(&:empty?).join(", ")
   end
 
   def location
-    [SMK_LOCATION, record.xpath('./current-location-name/text()').to_s
-      ].reject(&:empty?).join(", ")
+    [
+      SMK_LOCATION,
+      record.xpath('./current-location-name/text()').to_s
+    ].reject(&:empty?).join(", ")
   end
 
   # NEW display field
@@ -256,48 +259,48 @@ class Indexing::Sources::Smk < Indexing::SourceSuper
     record.xpath('./collection/collection/text()').to_a.join(' | ')
   end
 
+
   private
 
-  def artist_date(birth_date, death_date)
-    if !birth_date.empty? && !death_date.empty?
-      "(" + birth_date.split('-')[0] + " - " + death_date.split('-')[0] + ")"
-    elsif !birth_date.empty?
-      "(*" + birth_date.split('-')[0] + ")"
-    elsif !death_date.empty?
-      "(\u2020" + death_date.split('-')[0] + ")"
-    end
-  end
-
-  def acquisition_date(acquisition_date_precision, acquisition_date)
-    if !acquisition_date_precision.blank?
-      if acquisition_date_precision.index('-')
-        acquisition_date_precision.split('-')[0]
-      else
-        acquisition_date_precision
-      end
-    elsif !acquisition_date.blank?
-      if acquisition_date.index('-')
-        acquisition_date.split('-')[0]
-      else
-        acquisition_date
+    def artist_date(birth_date, death_date)
+      if !birth_date.empty? && !death_date.empty?
+        "(" + birth_date.split('-')[0] + " - " + death_date.split('-')[0] + ")"
+      elsif !birth_date.empty?
+        "(*" + birth_date.split('-')[0] + ")"
+      elsif !death_date.empty?
+        "(\u2020" + death_date.split('-')[0] + ")"
       end
     end
-  end
 
-  def production_date(start_date, end_date)
-    if !start_date.empty? && !end_date.empty?
-      start_year = start_date.split('-')[0]
-      end_year = end_date.split('-')[0]
-      if start_year == end_year
-        start_year
-      else
-      start_year + " - " + end_year
+    def acquisition_date(acquisition_date_precision, acquisition_date)
+      if !acquisition_date_precision.blank?
+        if acquisition_date_precision.index('-')
+          acquisition_date_precision.split('-')[0]
+        else
+          acquisition_date_precision
+        end
+      elsif !acquisition_date.blank?
+        if acquisition_date.index('-')
+          acquisition_date.split('-')[0]
+        else
+          acquisition_date
+        end
       end
-    elsif !start_date.empty?
-      start_date.split('-')[0]
-    elsif !end_date.empty?
-      end_date.split('-')[0]
     end
-  end
 
+    def production_date(start_date, end_date)
+      if !start_date.empty? && !end_date.empty?
+        start_year = start_date.split('-')[0]
+        end_year = end_date.split('-')[0]
+        if start_year == end_year
+          start_year
+        else
+          start_year + " - " + end_year
+        end
+      elsif !start_date.empty?
+        start_date.split('-')[0]
+      elsif !end_date.empty?
+        end_date.split('-')[0]
+      end
+    end
 end

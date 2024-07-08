@@ -1,5 +1,4 @@
 class Indexing::Sources::ZuerichZhdk < Indexing::SourceSuper
-
   def records
     document.xpath('.//metadata')
   end
@@ -19,11 +18,11 @@ class Indexing::Sources::ZuerichZhdk < Indexing::SourceSuper
   def _label(str, field = nil)
     number = record.xpath('count(.//metadatum)')
     (1..(number.to_i)).map{|index|
-      if "#{record.xpath(".//metadatum[#{index}]/meta-key-id/text()")}" == str 
+      if "#{record.xpath(".//metadatum[#{index}]/meta-key-id/text()")}" == str
         if field
           "#{record.xpath(".//metadatum[#{index}]/values/value/#{field}/text()")}"
         else
-         "#{record.xpath(".//metadatum[#{index}]/value/text()")}"
+          "#{record.xpath(".//metadatum[#{index}]/value/text()")}"
         end
       end
     }
@@ -53,11 +52,10 @@ class Indexing::Sources::ZuerichZhdk < Indexing::SourceSuper
 
   def keyword
     record.xpath(".//metadatum/values/value/term/text()").map{|keyword|
-    keyword.to_s.gsub(/Alle Rechte vorbehalten/, '')
-    }.delete_if { |keyword|
+      keyword.to_s.gsub(/Alle Rechte vorbehalten/, '')
+    }.delete_if {|keyword|
       keyword.blank?
     }.join(", ")
-
   end
 
   def credits
@@ -65,7 +63,7 @@ class Indexing::Sources::ZuerichZhdk < Indexing::SourceSuper
   end
 
   def rights_reproduction
-    "Gemeinfrei" 
+    "Gemeinfrei"
   end
 
   def rights_work

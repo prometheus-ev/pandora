@@ -29,9 +29,11 @@ class RackImages
       o_r.read
     end
     stderr = unless options[:stderr]
-      e_w.close 
+      e_w.close
       e_r.read
     end
+    o_r.close if o_r
+    e_r.close if e_r
     [status, stdout, stderr]
   end
 end

@@ -14,7 +14,8 @@ class ShortUrlsController < ApplicationController
     if @short_url
       redirect_to @short_url.url, status: :moved_permanently
     else
-      flash[:error] = (@token.nil? ?
+      flash[:error] = (
+        @token.nil? ?
         "No token was given".t :
         "The link with token '%s' couldn't be found" / @token
       )

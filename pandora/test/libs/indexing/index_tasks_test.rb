@@ -89,7 +89,7 @@ class IndexTasksTest < ActiveSupport::TestCase
 
     tasks.revert('test_source')
     assert_equal 'test_source_1', elastic.index_name_from(alias_name: 'test_source')
-    assert elastic.indices.find{|i| i['index'] == 'test_source_1'}
-    assert elastic.indices.find{|i| i['index'] == 'test_source_2'}
+    assert(elastic.indices.find{|i| i['index'] == 'test_source_1'})
+    assert(elastic.indices.find{|i| i['index'] == 'test_source_2'})
   end
 end

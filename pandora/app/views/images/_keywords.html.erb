@@ -1,7 +1,7 @@
 <% if super_image.upload? %>
   <% super_image.keywords.each.with_index do |str, i| %><!--
  --><%= i == 0 ? '' : ', ' %><!--
- --><%= link_to str, all_uploads_path(field: 'keywords', value: str) %><!--
+ --><%= link_to str, uploads_path(field: 'keywords', value: str) %><!--
 --><% end %>
 <% else %>
   <% super_image.keywords.each.with_index do |str, i| %><!--

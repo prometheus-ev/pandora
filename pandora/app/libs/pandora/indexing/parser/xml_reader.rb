@@ -5,19 +5,16 @@
 # https://ruby-doc.org/core-3.0.3/Enumerator.html
 # https://ruby-doc.org/core-3.0.3/Enumerable.html
 class Pandora::Indexing::Parser::XmlReader < Pandora::Indexing::Parser
-  def initialize(
-    source,
-    filenames: nil,
-    record_node_name:,
-    record_node_query: nil,
-    object_node_name: nil,
-    namespaces: false,
-    namespace_uri: nil,
-    records_to_exclude: [])
+  def initialize(source,
+                 record_node_name:,
+                 record_node_query: nil,
+                 object_node_name: nil,
+                 namespaces: false,
+                 namespace_uri: nil,
+                 records_to_exclude: [])
 
     super(source)
 
-    @filenames = filenames || default_filenames
     @record_node_name = record_node_name
     @object_node_name = object_node_name
     @record_node_query = record_node_query
@@ -26,7 +23,7 @@ class Pandora::Indexing::Parser::XmlReader < Pandora::Indexing::Parser
     @records_to_exclude = records_to_exclude
   end
 
-  attr_writer :filename
+  attr_accessor :filename
 
   def preprocess
     if has_objects?
@@ -62,11 +59,11 @@ class Pandora::Indexing::Parser::XmlReader < Pandora::Indexing::Parser
 
         @record_count += 1
 
-        printf "#{@source[:name]}: #{@object_count} objects with #{@record_count} records preprocessed".ljust(60) + "\r"
+        Pandora.printf "#{@source[:name]}: #{@object_count} objects with #{@record_count} records preprocessed".ljust(60) + "\r"
       end
     end
 
-    puts
+    Pandora.puts
   end
 
   def to_enum
@@ -105,11 +102,12 @@ class Pandora::Indexing::Parser::XmlReader < Pandora::Indexing::Parser
     if @record_node_query
       enumerator = enumerator.select do |node|
         if @record_node_name == node.name
-          doc = Nokogiri::XML(node.outer_xml, nil)
+          doc = Nokogiri::XML(node.outer_xml, nil, node.encoding)
 
           if @namespaces
             doc.collect_namespaces.each do |prefix, href|
               next if prefix == 'xmlns'
+
               doc.root.add_namespace(prefix.split(':').last, href)
             end
           else
@@ -124,81 +122,104 @@ class Pandora::Indexing::Parser::XmlReader < Pandora::Indexing::Parser
     enumerator.count - @records_to_exclude.size
   end
 
+
   protected
 
-  def default_filenames
-    directory = "#{ENV['PM_DUMPS_DIR']}#{self.class.name.demodulize.underscore}"
-    filename = "#{directory}.xml"
+    def read
+      enumerator = reader
 
-    if File.exist?(filename) 
-      [filename]
-    elsif File.directory?(directory)
-      children = Dir["#{directory}/*"]
-      puts "#{@source[:name]}: #{children.count} dump files"
-      children
-    end
-  end
-
-  def read
-    enumerator = reader.lazy
-
-    # Filter irrelevant xml content.
-    enumerator = enumerator.select do |node|
-      (@object_node_name == node.name || @record_node_name == node.name) &&
-      (!@namespace_uri || node.namespace_uri == @namespace_uri) &&
-      (node.node_type == Nokogiri::XML::Reader::TYPE_ELEMENT)
-    end
-
-    enumerator = enumerator.map do |node|
-      doc = Nokogiri::XML(node.outer_xml, nil)
-
-      if @namespaces
-        # Since we ripped the node text from the enclosing document without
-        # context information, we need to collect and add the xml namespaces.
-        doc.collect_namespaces.each do |prefix, href|
-          next if prefix == 'xmlns'
-          doc.root.add_namespace(prefix.split(':').last, href)
-        end
-      else
-        doc.remove_namespaces!
+      # Filter irrelevant xml content.
+      enumerator = enumerator.select do |node|
+        (@object_node_name == node.name || @record_node_name == node.name) &&
+        (!@namespace_uri || node.namespace_uri == @namespace_uri) &&
+        (node.node_type == Nokogiri::XML::Reader::TYPE_ELEMENT)
       end
 
-      doc
-    end
+      enumerator = enumerator.map do |node|
+        # See #1775.
+        doc = Nokogiri::XML(node.outer_xml, nil, "UTF-8")
 
-    if @record_node_query
-      enumerator = enumerator.select do |doc|
-        doc_root_name = doc.root.name
-        doc_root_name = "#{doc.root.namespace.prefix}:#{doc.root.name}" if @namespaces
+        if @namespaces
+          # Since we ripped the node text from the enclosing document without
+          # context information, we need to collect and add the xml namespaces.
+          doc.collect_namespaces.each do |prefix, href|
+            next if prefix == 'xmlns'
 
-        if @record_node_name == doc_root_name
-          doc.root.xpath(@record_node_query)
+            doc.root.add_namespace(prefix.split(':').last, href)
+          end
+        else
+          doc.remove_namespaces!
+        end
+
+        doc
+      end
+
+      if @record_node_query
+        enumerator = enumerator.select do |doc|
+          if @namespaces && doc.root.namespace.prefix
+            doc_root_name = "#{doc.root.namespace.prefix}:#{doc.root.name}"
+          else
+            doc_root_name = doc.root.name
+          end
+
+          if @record_node_name == doc_root_name
+            doc.root.xpath(@record_node_query)
+          elsif @object_node_name == doc_root_name
+            true
+          end
         end
       end
+
+      enumerator
     end
 
-    enumerator
-  end
 
   private
 
-  def reader
-    io = File.open(@filename)
-    encoding = Nokogiri::XML(IO.readlines(io)[0]).encoding
-    Nokogiri::XML::Reader.from_io(io, nil, encoding)
-  end
+    def reader
+      filenames.to_enum.lazy.flat_map do |filename|
+        @batch = File.basename(filename)
 
-  def new_record(record)
-    @record_class_name.constantize.new(
-      name: @source[:name],
-      record: record,
-      object: @object,
-      record_object_id_count: @record_object_id_count,
-      artist_parser: @artist_parser,
-      date_parser: @date_parser,
-      vgbk_parser: @vgbk_parser,
-      warburg_parser: @warburg_parser,
-      artigo_parser: @artigo_parser,
-      miro_parser: @miro_parser)
-  end
+        io = File.open(filename)
+        encoding = Nokogiri::XML(IO.readlines(io)[0]).encoding
+        ngr = Nokogiri::XML::Reader.from_io(io, nil, encoding)
+
+        ngr.lazy
+      end
+    end
+
+    def reader_for(filename)
+      io = File.open(filename)
+      encoding = Nokogiri::XML(IO.readlines(io)[0]).encoding
+      Nokogiri::XML::Reader.from_io(io, nil, encoding)
+    end
+
+    def new_record(record)
+      @record_class_name.constantize.new(
+        name: @source[:name],
+        record: record,
+        object: @object,
+        record_object_id_count: @record_object_id_count,
+        parser: {artist_parser: @artist_parser,
+                 date_parser: @date_parser,
+                 vgbk_parser: @vgbk_parser,
+                 warburg_parser: @warburg_parser,
+                 artigo_parser: @artigo_parser,
+                 miro_parser: @miro_parser},
+        mapping: @mapping
+      )
+    end
+
+    def filenames
+      directory = "#{ENV['PM_DUMPS_DIR']}#{self.class.name.demodulize.underscore}"
+      filename = "#{directory}.xml"
+
+      if File.exist?(filename)
+        [filename]
+      elsif File.directory?(directory)
+        children = Dir["#{directory}/*"]
+        Pandora.puts "#{@source[:name]}: #{children.count} dump files"
+        children
+      end
+    end
 end

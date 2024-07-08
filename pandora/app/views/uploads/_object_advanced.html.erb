@@ -1,7 +1,7 @@
 <table>
   <tr>
     <th><label for="upload_addition"><%= 'Addition'.t %></label></th>
-    <td><%= f.text_field :addition, options_for_field(:addition) %></td>
+    <td><%= f.text_area :addition, options_for_field(:addition, :rows => 3) %></td>
   </tr>
   <tr>
     <th><label for="upload_annotation"><%= 'Annotation'.t %></label></th>
@@ -14,7 +14,7 @@
       </label>
     </th>
     <td>
-      <%= f.text_field :discoveryplace, options_for_field(:discoveryplace, :style => @upload.discoveryplace.blank? ? '' : 'width: 327px;') %>
+      <%= f.text_area :discoveryplace, options_for_field(:discoveryplace, :rows => 3, :style => @upload.discoveryplace.blank? ? '' : 'width: 327px;') %>
       <%= link_to_google_maps(@upload.discoveryplace) unless @upload.discoveryplace.blank? %>
     </td>
     <td>
@@ -35,7 +35,7 @@
   </tr>
   <tr>
     <th><label for="upload_origin"><%= 'Origin'.t %></label></th>
-    <td><%= f.text_field :origin, options_for_field(:origin) %></td>
+    <td><%= f.text_area :origin, options_for_field(:origin, :rows => 3) %></td>
   </tr>
   <tr>
     <th><label for="upload_other_persons"><%= 'Other Persons'.t %></label></th>

@@ -3,16 +3,16 @@ module ProfileHelper
     values = values_for_settings(form, key)
 
     form.select(key, case options
-      when Array
-        options.reject { |k, v| !values.include?(k) || v.blank? }.map(&:reverse)
-      when Hash
-        options.slice(*values).reject { |_, v| v.blank? }.invert.sort
-      when Symbol
-        send(options, values)
-      when NilClass
-        block_given? ? yield(values) : values.map { |v| [v.humanize.t, v] }
-      else
-        options
+    when Array
+      options.reject{|k, v| !values.include?(k) || v.blank?}.map(&:reverse)
+    when Hash
+      options.slice(*values).reject{|_, v| v.blank?}.invert.sort
+    when Symbol
+      send(options, values)
+    when NilClass
+      block_given? ? yield(values) : values.map{|v| [v.humanize.t, v]}
+    else
+      options
     end)
   end
 

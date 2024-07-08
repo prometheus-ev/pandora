@@ -2,7 +2,13 @@
 <%= hidden_field_tag :type, @type %>
   <fieldset>
     <% if @type == 'institution' -%>
-      <legend><strong><%= 'Obtain license'.t %> / <%= 'Change institution'.t %></strong></legend>
+      <legend>
+        <strong>
+          <%= @user.expired? ? 'Extend account'.t : 'Obtain license'.t %>
+          /
+          <%= 'Change institution'.t %>
+        </strong>
+      </legend>
       <%= render :partial => 'license_institution', :locals => { :f => f } %>
     <% elsif @type == 'paid' -%>
       <legend><strong><%= 'Obtain license'.t %></strong></legend>

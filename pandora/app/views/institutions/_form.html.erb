@@ -80,7 +80,12 @@
   </tr>
   <tr>
     <th><label for="institution_country" ><%= 'Country'.t %></label></th>
-    <td><%= f.country_select :country, PRIORITY_COUNTRIES, {}, options_for_field(:country) %></td>
+    <td>
+      <%= f.country_select(
+        :country,
+        {priority_countries: PRIORITY_COUNTRIES},
+        options_for_field(:country)) %>
+    </td>
   </tr>
   <tr>
     <th><label for="institution_email" ><%= 'E-mail'.t %></label></th>

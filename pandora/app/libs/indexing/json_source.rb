@@ -1,7 +1,7 @@
 class Indexing::JsonSource
   def initialize(document)
     @document = document
-    @errors =  []
+    @errors = []
 
     begin
       @records = Array.wrap(JSON.parse(document))

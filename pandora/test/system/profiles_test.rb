@@ -3,7 +3,7 @@ require "application_system_test_case"
 class ProfilesTest < ApplicationSystemTestCase
   test 'show my profile' do
     login_as 'jdoe'
-    
+
     within '#header' do
       click_on 'John Doe'
     end
@@ -36,7 +36,6 @@ class ProfilesTest < ApplicationSystemTestCase
     fill_in 'E-mail', with: 'jdee@prometheus-bildarchiv.de'
     submit
 
-    binding.pry if ActionMailer::Base.deliveries.size == 0
     assert_equal 1, ActionMailer::Base.deliveries.size
     assert_text 'successfully updated'
 
@@ -133,13 +132,13 @@ class ProfilesTest < ApplicationSystemTestCase
     # assert_field 'per_page', with: '40'
 
     click_on 'Log out'
-    
-    login_as 'jdoe' 
+
+    login_as 'jdoe'
     # after new login, German website version is displayed since German was set as
-    # the default language in the user's account settings 
+    # the default language in the user's account settings
     assert_text 'Eigene Bildsammlungen suchen'
 
-    # see https://prometheus-srv1.uni-koeln.de/redmine/issues/773
+    # see #773
     # assert_match /\/de\//, current_url
   end
 
@@ -311,7 +310,7 @@ class ProfilesTest < ApplicationSystemTestCase
     assert_text 'successfully updated'
     research_interest_check_email = ActionMailer::Base.deliveries[0]
     assert research_interest_check_email.to == [ENV['PM_INFO_ADDRESS']]
-    assert_match  /\[pandora-ResearchInterestCheck\]/, research_interest_check_email.subject
+    assert_match /\[pandora-ResearchInterestCheck\]/, research_interest_check_email.subject
     assert_match /Please check if the research interest is valid/, research_interest_check_email.body.to_s
   end
 

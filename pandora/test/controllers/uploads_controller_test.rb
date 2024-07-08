@@ -39,7 +39,7 @@ class SourcesControllerTest < ActionDispatch::IntegrationTest
     assert_match /successfully updated/, flash[:notice]
 
     # the image should only be kept in the private collection
-    # see https://redmine.prometheus-srv.uni-koeln.de/issues/796#note-36
+    # see #796#note-36
     assert_includes priv.reload.images, upload.image
     assert_not_includes pub.reload.images, upload.image
     assert_not_includes collab.reload.images, upload.image
@@ -48,7 +48,7 @@ class SourcesControllerTest < ActionDispatch::IntegrationTest
   test "approving an upload doesn't remove it from private collections" do
     priv = Collection.find_by! title: "John's private collection"
 
-    # see https://redmine.prometheus-srv.uni-koeln.de/issues/1087#note-12
+    # see #1087#note-12
     priv.update_column :public_access, ''
 
     upload = Upload.first

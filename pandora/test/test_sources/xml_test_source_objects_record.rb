@@ -18,11 +18,13 @@ class XmlTestSourceObjectsRecord < Pandora::Indexing::Parser::Record
   end
 
   def artist_normalized
-    an = record.xpath('./KünstlerIn/text()').map { |a|
-      a.to_s.split(', ').reverse.join(' ')
-    }
+    return @artist_normalized if @artist_normalized
 
-    @artist_parser.normalize(an)
+    an = record.xpath('./KünstlerIn/text()').map do |a|
+      a.to_s.split(', ').reverse.join(' ')
+    end
+
+    @artist_normalized = @artist_parser.normalize(an)
   end
 
   def title

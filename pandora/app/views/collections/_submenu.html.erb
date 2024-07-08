@@ -1,6 +1,10 @@
-<%= submenu_link_to 'Own'.t, action: 'index' %>
-<%= submenu_link_to 'Shared by you'.t, action: 'sharing' %>
-<%= submenu_link_to 'Shared with you'.t, action: 'shared' %>
+<% unless current_user.ipuser? %>
+  <%= submenu_link_to 'Own'.t, action: 'index' %>
+  <%= submenu_link_to 'Shared by you'.t, action: 'sharing' %>
+  <%= submenu_link_to 'Shared with you'.t, action: 'shared' %>
+<% end %>
 <%= submenu_link_to 'Public'.t, action: 'public' %>
-<%= submenu_link_to 'All'.t, action: 'all' %>
-<%= link_to(create_button('Create a new collection'.t, :plus), action: 'new') %>
+<% unless current_user.ipuser? %>
+  <%= submenu_link_to 'All'.t, action: 'all' %>
+  <%= link_to(create_button('Create a new collection'.t, :plus), action: 'new') %>
+<% end %>

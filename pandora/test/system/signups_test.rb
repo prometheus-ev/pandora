@@ -190,86 +190,82 @@ class SignupsTest < ApplicationSystemTestCase
 
   # brittle because the paypal sandbox isn't always responding in time and/or is
   # sometimes changed (button labels, headers etc.)
-  if ENV['PM_BRITTLE'] == 'true'
-    test 'signup via paypal and login' do
-      visit '/'
+  test 'signup via paypal and login @brittle' do
+    visit '/'
 
-      click_on 'Sign up'
+    click_on 'Sign up'
 
-      choose 'Single license for 30 EUR per year'
-      fill_in 'User name', with: 'hmustermann'
-      fill_in 'E-mail', with: 'hmustermann@example.com'
-      fill_in 'Password', with: 'hmustermann'
-      fill_in 'Confirm password', with: 'hmustermann'
-      fill_in 'First name', with: 'Hans'
-      fill_in 'Last name', with: 'Mustermann'
-      check 'Subscribe to our newsletter?'
-      check 'I read the terms of use carefully and agree'
-      answer_brain_buster
-      submit
-      assert_text "Research interest can't be blank"
+    choose 'Single license for 30 EUR per year'
+    fill_in 'User name', with: 'hmustermann'
+    fill_in 'E-mail', with: 'hmustermann@example.com'
+    fill_in 'Password', with: 'hmustermann'
+    fill_in 'Confirm password', with: 'hmustermann'
+    fill_in 'First name', with: 'Hans'
+    fill_in 'Last name', with: 'Mustermann'
+    check 'Subscribe to our newsletter?'
+    check 'I read the terms of use carefully and agree'
+    answer_brain_buster
+    submit
+    assert_text "Research interest can't be blank"
 
-      fill_in 'Research/education interest and context', with: 'employed at DFK Paris'
-      submit
+    fill_in 'Research/education interest and context', with: 'employed at DFK Paris'
+    submit
 
-      email_confirmation_request = ActionMailer::Base.deliveries[0]
-      link = link_from_email(email_confirmation_request)
-      visit link
+    email_confirmation_request = ActionMailer::Base.deliveries[0]
+    link = link_from_email(email_confirmation_request)
+    visit link
 
-      assert_equal("Single license", find('h1.page_title').text)
+    assert_equal("Single license", find('h1.page_title').text)
 
-      choose 'user_mode_paypal'
-      submit
+    choose 'user_mode_paypal'
+    submit
 
-      # paypal is slow
-      using_wait_time 20 do
+    # paypal is slow
+    using_wait_time 20 do
+      # wait until cookie banner faded in
+      sleep 2
+      # click to accept cookies, in order to avoid cookie banner lying over back to merchant button, see below
+      find("#acceptAllButton").click
 
-        # wait until cookie banner faded in
-        sleep 2
-        # click to accept cookies, in order to avoid cookie banner lying over back to merchant button, see below
-        find("#acceptAllButton").click
+      fill_in 'login_email', with: ENV['PM_PAYPAL_BUYER_ID']
+      click_on 'Next'
+      fill_in 'login_password', with: ENV['PM_PAYPAL_BUYER_PASSWORD']
+      click_on 'Login'
+      find('#payment-submit-btn').click
+      # find('[data-test-id=continueButton]').click
 
-        fill_in 'login_email', with: ENV['PM_PAYPAL_BUYER_ID']
-        click_on 'Next'
-        fill_in 'login_password', with: ENV['PM_PAYPAL_BUYER_PASSWORD']
-        click_on 'Login'
-        find('#payment-submit-btn').click
-        # find('[data-test-id=continueButton]').click
-
-        # cookie banner lies over button
-        # Selenium::WebDriver::Error::ElementClickInterceptedError: element click intercepted:
-        # Element <input track-submit="" type="submit" value="Zurück zum Händler" id="merchantReturnBtn"
-        # class="btn btn-secondary full submit receipt ng-binding ng-scope" ng-click="returnToMerchant()" pa-marked="1">
-        # is not clickable at point (688, 811). Other element would receive the click:
-        # <p class="gdprCookieBanner_content gdprCookieBanner_content-custom">...</p>
-        find("[data-testid='donepage-return-to-merchant-button'] a").click
-      end
-
-      # back in pandora
-
-      # we are also slow
-      using_wait_time 10 do
-        # Simulate paypal IPN callback. This can't be tested since its a
-        # back-channel request which paypal can't send to localhost:47001
-        pt = PaymentTransaction.first
-        # simulating transaction params
-        assert pt.confirm(
-          txn_id: '12345',
-          payment_status: 'Completed',
-          mc_gross: 30,
-          mc_currency: 'EUR',
-          business: ENV['PM_PAYPAL_SELLER_ID']
-        )
-        pt.complete
-        assert_text 'Your payment was successful'
-      end
-
-      click_on 'Enjoy working with prometheus'
-      submit
-
-      assert_text 'Advanced search'
+      # cookie banner lies over button
+      # Selenium::WebDriver::Error::ElementClickInterceptedError: element click intercepted:
+      # Element <input track-submit="" type="submit" value="Zurück zum Händler" id="merchantReturnBtn"
+      # class="btn btn-secondary full submit receipt ng-binding ng-scope" ng-click="returnToMerchant()" pa-marked="1">
+      # is not clickable at point (688, 811). Other element would receive the click:
+      # <p class="gdprCookieBanner_content gdprCookieBanner_content-custom">...</p>
+      find("[data-testid='donepage-return-to-merchant-button'] a").click
     end
 
+    # back in pandora
+
+    # we are also slow
+    using_wait_time 10 do
+      # Simulate paypal IPN callback. This can't be tested since its a
+      # back-channel request which paypal can't send to localhost:47001
+      pt = PaymentTransaction.first
+      # simulating transaction params
+      assert pt.confirm(
+        txn_id: '12345',
+        payment_status: 'Completed',
+        mc_gross: 30,
+        mc_currency: 'EUR',
+        business: ENV['PM_PAYPAL_SELLER_ID']
+      )
+      pt.complete
+      assert_text 'Your payment was successful'
+    end
+
+    click_on 'Enjoy working with prometheus'
+    submit
+
+    assert_text 'Advanced search'
   end
 
   test "start (but don't complete) paypal signup, then try invoice (see #391)" do
@@ -489,6 +485,42 @@ class SignupsTest < ApplicationSystemTestCase
     assert_text 'Welcome, John Doe'
   end
 
+  test 'Obtain a free license through an institution then change institution but keep the same institution' do
+    nowhere = Institution.find_by! name: 'nowhere'
+    jdoe = Account.find_by! login: 'jdoe'
+    jdoe.update_columns expires_at: 2.weeks.ago, research_interest: 'n.a.'
+
+    login_as 'jdoe'
+    assert_text 'Your account has expired'
+    click_on 'Obtain a free license through your institution'
+    select 'Nowhere, Nowhere University'
+    submit 'Proceed'
+
+    assert_text 'Local administrators'
+    assert_link 'Jean Dupont', href: /mailto/
+
+    login_as 'jdupont'
+    click_on 'Administration'
+    click_on 'John Doe'
+    click_on 'Edit'
+    select '1 week', from: 'Expiration'
+    submit
+    assert_text 'successfully updated'
+
+    login_as 'jdoe'
+    within '#statusbar' do
+      click_on 'John Doe'
+    end
+    click_on 'Obtain a new license or change your institution...'
+    assert_text 'Your account is valid until'
+    submit 'Proceed'
+
+    within '#statusbar' do
+      click_on 'John Doe'
+    end
+    assert_text 'Your account is valid until'
+  end
+
   test 'change institution after account expiry (and approve with local admin)' do
     nowhere = Institution.find_by! name: 'nowhere'
     jdoe = Account.find_by! login: 'jdoe'
@@ -499,7 +531,7 @@ class SignupsTest < ApplicationSystemTestCase
     click_on 'Obtain a free license through your institution'
     select 'Nowhere, Nowhere University'
     submit 'Proceed'
-    
+
     assert_text 'Local administrators'
     assert_link 'Jean Dupont', href: /mailto/
 
@@ -518,75 +550,72 @@ class SignupsTest < ApplicationSystemTestCase
 
   # brittle because the paypal sandbox isn't always responding in time and/or is
   # sometimes changed (button labels, headers etc.)
-  if ENV['PM_BRITTLE'] == 'true'
-    test 'signup with paypal after account expiry' do
-      jdoe = Account.find_by! login: 'jdoe'
-      jdoe.update_columns expires_at: 2.weeks.ago, research_interest: 'n.a.'
+  test 'signup with paypal after account expiry @brittle' do
+    jdoe = Account.find_by! login: 'jdoe'
+    jdoe.update_columns expires_at: 2.weeks.ago, research_interest: 'n.a.'
 
-      login_as 'jdoe'
-      assert_text 'Your account has expired'
-      choose 'user_mode_paypal'
-      fill_in 'Research/education interest and context', with: 'employed at DFK Paris'
-      submit
+    login_as 'jdoe'
+    assert_text 'Your account has expired'
+    choose 'user_mode_paypal'
+    fill_in 'Research/education interest and context', with: 'employed at DFK Paris'
+    submit
 
-      # we go through the entire process because the user receives a different
-      # set of emails here
-      # paypal is slow
-      using_wait_time 20 do
+    # we go through the entire process because the user receives a different
+    # set of emails here
+    # paypal is slow
+    using_wait_time 20 do
+      # wait until cookie banner faded in
+      sleep 2
+      # click to accept cookies, in order to avoid cookie banner lying over back to merchant button, see below
+      find("#acceptAllButton").click
 
-         # wait until cookie banner faded in
-        sleep 2
-        # click to accept cookies, in order to avoid cookie banner lying over back to merchant button, see below
-        find("#acceptAllButton").click
+      # click_on 'English'
+      # this has changed
+      assert_text 'Pay with PayPal'
+      sleep 3
 
-        # click_on 'English'
-        # this has changed
-        assert_text 'Pay with PayPal'
-        sleep 3
+      fill_in 'login_email', with: ENV['PM_PAYPAL_BUYER_ID']
+      click_on 'Next'
+      fill_in 'login_password', with: ENV['PM_PAYPAL_BUYER_PASSWORD']
+      click_on 'Log In'
 
-        fill_in 'login_email', with: ENV['PM_PAYPAL_BUYER_ID']
-        click_on 'Next'
-        fill_in 'login_password', with: ENV['PM_PAYPAL_BUYER_PASSWORD']
-        click_on 'Log In'
+      find('[data-test-id=continueButton]').click
 
-        find('[data-test-id=continueButton]').click
-
-        # cookie banner lies over button
-        # Selenium::WebDriver::Error::ElementClickInterceptedError: element click intercepted:
-        # Element <input track-submit="" type="submit" value="Zurück zum Händler" id="merchantReturnBtn"
-        # class="btn btn-secondary full submit receipt ng-binding ng-scope" ng-click="returnToMerchant()" pa-marked="1">
-        # is not clickable at point (688, 811). Other element would receive the click:
-        # <p class="gdprCookieBanner_content gdprCookieBanner_content-custom">...</p>
-        find('#merchantReturnBtn').click
-      end
-
-
-      # we are slow
-      using_wait_time 10 do
-        # Simulate paypal IPN callback. This should can't be tested since its a
-        # back-channel request which paypal can't send to localhost:47001
-        pt = PaymentTransaction.first
-        # simulating transaction params
-        assert pt.confirm(
-          txn_id: '12345',
-          payment_status: 'Completed',
-          mc_gross: 30,
-          mc_currency: 'EUR',
-          business: ENV['PM_PAYPAL_SELLER_ID']
-        )
-        pt.complete
-
-        mails = ApplicationMailer.deliveries
-
-        assert_equal 1, mails.count
-
-        assert_match /continue using the prometheus image archive/, mails.first.body.to_s
-      end
-
-      sleep 5 # to wait for the auto-refresh to kick in
-      login_as 'jdoe'
-      assert_text 'Welcome'
+      # cookie banner lies over button
+      # Selenium::WebDriver::Error::ElementClickInterceptedError: element click intercepted:
+      # Element <input track-submit="" type="submit" value="Zurück zum Händler" id="merchantReturnBtn"
+      # class="btn btn-secondary full submit receipt ng-binding ng-scope" ng-click="returnToMerchant()" pa-marked="1">
+      # is not clickable at point (688, 811). Other element would receive the click:
+      # <p class="gdprCookieBanner_content gdprCookieBanner_content-custom">...</p>
+      find('#merchantReturnBtn').click
     end
+
+
+    # we are slow
+    using_wait_time 10 do
+      # Simulate paypal IPN callback. This should can't be tested since its a
+      # back-channel request which paypal can't send to localhost:47001
+      pt = PaymentTransaction.first
+      # simulating transaction params
+      assert pt.confirm(
+        txn_id: '12345',
+        payment_status: 'Completed',
+        mc_gross: 30,
+        mc_currency: 'EUR',
+        business: ENV['PM_PAYPAL_SELLER_ID']
+      )
+      pt.complete
+
+      mails = ApplicationMailer.deliveries
+
+      assert_equal 1, mails.count
+
+      assert_match /continue using the prometheus image archive/, mails.first.body.to_s
+    end
+
+    sleep 5 # to wait for the auto-refresh to kick in
+    login_as 'jdoe'
+    assert_text 'Welcome'
   end
 
   test 'reset my password' do
@@ -618,7 +647,7 @@ class SignupsTest < ApplicationSystemTestCase
     visit link
 
     assert_text 'Please enter a new password.'
-    assert_no_text 'CDATA' #479
+    assert_no_text 'CDATA' # #479
     fill_in 'Password', with: 'wrong-pass'
     fill_in 'Confirm password', with: 'wrong-pass'
     find('.submit_button').click

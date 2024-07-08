@@ -1,10 +1,9 @@
 class OauthClientsController < ApplicationController
-
   def self.model_name
     'client_application'
   end
 
-  def self.initialize_me!  # :nodoc:
+  def self.initialize_me! # :nodoc:
     control_access [:admin, :superadmin] => :ALL,
                    [:user, :useradmin, :dbadmin] => :index
   end
@@ -45,7 +44,6 @@ class OauthClientsController < ApplicationController
     # view compatibility
     set_mandatory_fields ['name', 'homepage']
   end
-
 
   def edit
     @client_application = ClientApplication.find(params[:id])

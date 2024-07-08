@@ -11,50 +11,45 @@ class Pandora::Indexing::Parser::AmsterdamMuseumRecord < Pandora::Indexing::Pars
 
   def record_object_id_count
     count = object.xpath('./reproduction/reproduction.identifier_URL/text()').size
-    
+
     if count > 1
       count
     end
   end
 
   def path
-    "#{record.at_xpath('./reproduction.identifier_URL/text()')}".downcase.gsub(/..\\..\\dat\\collectie\\images\\/, '').gsub('\\', '/').gsub(' ', '%20').sub(/^(\/*)/,'')
+    "#{record.at_xpath('./reproduction.identifier_URL/text()')}".downcase.gsub(/..\\..\\dat\\collectie\\images\\/, '').gsub('\\', '/').gsub(' ', '%20').sub(/^(\/*)/, '')
   end
 
-  # künstler
   def artist
     number = object.xpath('./maker').length
-    (1..(number.to_i)).map{ |index| "#{object.xpath("./maker[#{index}]/creator/text()")} (#{object.xpath("./maker[#{index}]/creator.qualifier/text()")} #{object.xpath("./maker[#{index}]/creator.date_of_birth/text()")} - #{object.xpath("./maker[#{index}]/creator.date_of_death/text()")}, #{object.xpath("./maker[#{index}]/creator.role/text()")})".gsub(/\( - /, '').gsub(/, \)/, ')').gsub(/\( /, '(').gsub(/\( - \)/, '').gsub(/\( - , /, '(')}
+    (1..(number.to_i)).map{|index| "#{object.xpath("./maker[#{index}]/creator/text()")} (#{object.xpath("./maker[#{index}]/creator.qualifier/text()")} #{object.xpath("./maker[#{index}]/creator.date_of_birth/text()")} - #{object.xpath("./maker[#{index}]/creator.date_of_death/text()")}, #{object.xpath("./maker[#{index}]/creator.role/text()")})".gsub(/\( - /, '').gsub(/, \)/, ')').gsub(/\( /, '(').gsub(/\( - \)/, '').gsub(/\( - , /, '(')}
   end
 
   def artist_normalized
     return @artist_normalized if @artist_normalized
 
-    an = object.xpath('./maker/creator/text()').map { |a|
+    an = object.xpath('./maker/creator/text()').map {|a|
       a.to_s.gsub(/ \(.*/, '').split(', ').reverse.join(' ')
     }
 
     @artist_normalized = @artist_parser.normalize(an)
   end
 
-  # titel
   def title
     "#{object.xpath('./title/text()')} (#{object.xpath('./title.translation/text()')})".gsub(/ \(\)/, '')
   end
 
-  # datierung
   def date
     @date ||= begin
       start_date = "#{object.xpath('./production.date.start[1]/text()')}".strip
       end_date = "#{object.xpath('./production.date.end[1]/text()')}".strip
-      
+
       @date = if (start_date.blank? || start_date == '0000') && (end_date.blank? || end_date == '0000')
         nil
       elsif start_date.blank? || start_date == '0000'
         end_date
-      elsif end_date.blank? || end_date == '0000'
-        start_date
-      elsif start_date == end_date
+      elsif end_date.blank? || end_date == '0000' || start_date == end_date
         start_date
       else
         if start_date.to_i > end_date.to_i
@@ -81,7 +76,6 @@ class Pandora::Indexing::Parser::AmsterdamMuseumRecord < Pandora::Indexing::Pars
     end
   end
 
-  # standort
   def location
     object.xpath('./credit_line/text()')
   end
@@ -90,7 +84,6 @@ class Pandora::Indexing::Parser::AmsterdamMuseumRecord < Pandora::Indexing::Pars
     object.xpath('./production.place/text()')
   end
 
-  # material
   def material
     object.xpath('./material/text()')
   end
@@ -105,7 +98,7 @@ class Pandora::Indexing::Parser::AmsterdamMuseumRecord < Pandora::Indexing::Pars
 
   def size
     number = object.xpath('./dimension').length
-    (1..(number.to_i)).map{ |index| "#{object.xpath("./dimension[#{index}]/dimension.type/text()")} #{object.xpath("./dimension[#{index}]/dimension.part/text()")}: #{object.xpath("./dimension[#{index}]/dimension.value/text()")} #{object.xpath("./dimension[#{index}]/dimension.unit/text()")}".gsub(/ : /,': ')}
+    (1..(number.to_i)).map{|index| "#{object.xpath("./dimension[#{index}]/dimension.type/text()")} #{object.xpath("./dimension[#{index}]/dimension.part/text()")}: #{object.xpath("./dimension[#{index}]/dimension.value/text()")} #{object.xpath("./dimension[#{index}]/dimension.unit/text()")}".gsub(/ : /, ': ')}
   end
 
   def credits
@@ -124,7 +117,7 @@ class Pandora::Indexing::Parser::AmsterdamMuseumRecord < Pandora::Indexing::Pars
 
   def literature
     number = object.xpath('count(./documentation)')
-    (1..(number.to_i)).map { |index|
+    (1..(number.to_i)).map {|index|
       "#{object.xpath("./documentation[#{index}]/documentation.author/text()")}: #{object.xpath("./documentation[#{index}]/documentation.title/text()")} #{object.xpath("./documentation[#{index}]/documentation.sortyear/text()")}. #{object.xpath("./documentation[#{index}]/documentation.page_reference/text()")}.".gsub(/\A: /, '').gsub(/ \./, '').gsub(/ \.\z/, '')
     }
   end

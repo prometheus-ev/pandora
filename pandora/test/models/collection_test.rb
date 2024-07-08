@@ -100,7 +100,7 @@ class CollectionTest < ActiveSupport::TestCase
   #   ], results
 
   #   results = Collection.expired.pluck(:title)
-  #   assert_same_elements ["John Expired's public collection",], results    
+  #   assert_same_elements ["John Expired's public collection",], results
   # end
 
   test 'insertion order' do
@@ -135,7 +135,7 @@ class CollectionTest < ActiveSupport::TestCase
     pub = Collection.find_by!(title: "John's public collection")
     collab = Collection.find_by!(title: "John's collaboration collection")
 
-    #collab.update meta_image: true
+    # collab.update meta_image: true
 
     pids = [
       Pandora::SuperImage.pid_for('test_source', 1),

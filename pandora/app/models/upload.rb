@@ -1,5 +1,4 @@
 class Upload < ApplicationRecord
-
   include Util::Config
 
   belongs_to :database, class_name: 'Source', foreign_key: 'database_id', optional: true
@@ -8,7 +7,7 @@ class Upload < ApplicationRecord
 
   has_many :children, :class_name => 'Upload', :foreign_key => 'parent_id'
   has_many :keyword_upload, dependent: :destroy
-  has_many :keywords, -> {distinct.order('title ASC')}, through: :keyword_upload
+  has_many :keywords, ->{distinct.order('title ASC')}, through: :keyword_upload
 
   validates_presence_of :file, :on => :create
   validates_presence_of :title
@@ -36,6 +35,7 @@ class Upload < ApplicationRecord
 
   before_validation :extract_file_info, on: :create
   after_save :persist_file
+  after_commit :latitude_longitude, on: :create
   after_create :ensure_image
   after_validation :auto_approve
   after_validation :prepare_unapproval_handling
@@ -109,11 +109,20 @@ class Upload < ApplicationRecord
         references(:keywords).
         where("keywords.#{column_name} LIKE ?", "%#{value}%")
     when 'database'
-      includes(:database).references(:database)
-        .where('sources.title LIKE ?', "%#{value}%")
-        .or(
-          includes(:database).references(:database)
-            .where('sources.owner_type': 'Account', 'sources.owner_id': Account.where('firstname LIKE :value OR lastname LIKE :value', value: "%#{value}%" )))
+      accounts = Account.where(
+        'firstname LIKE :value OR lastname LIKE :value',
+        value: "%#{value}%"
+      )
+
+      includes(:database).references(:database).
+        where('sources.title LIKE ?', "%#{value}%").
+        or(
+          includes(:database).references(:database).
+          where(
+            'sources.owner_type': 'Account',
+            'sources.owner_id': accounts
+          )
+        )
     else
       raise Pandora::Exception, "unknown search criteria for Upload: #{column}"
     end
@@ -211,6 +220,9 @@ class Upload < ApplicationRecord
     super_image.remove_index_doc
   end
 
+  def latitude_longitude
+    update_columns latitude: image.latitude, longitude: image.longitude
+  end
 
   private
 
@@ -249,7 +261,7 @@ class Upload < ApplicationRecord
         RackImages::Resizer.new.drop('upload', pid)
 
         FileUtils.mkpath(base_path) unless File.exist?(base_path)
-        File.open(path, "wb") {|f| f.write(@file.read) }
+        File.open(path, "wb"){|f| f.write(@file.read)}
         @file = nil
       end
     end
@@ -268,7 +280,7 @@ class Upload < ApplicationRecord
       )
 
       if self.image.save
-        self.update_columns image_id: pid, latitude: image.latitude, longitude: image.longitude
+        self.update_columns image_id: pid
       else
         raise StandardError, "the associated image could not be created, upload #{self.id} is dangling!"
       end
@@ -299,5 +311,4 @@ class Upload < ApplicationRecord
         end
       end
     end
-
 end

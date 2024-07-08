@@ -1,7 +1,5 @@
 module MoreHelpers
-
   module ButtonHelper
-
     def create_button(text, button_type, options = {})
       button = '<div class="'
       button << 'autosubmit ' if options[:autosubmit] && !options[:disabled]
@@ -41,7 +39,7 @@ module MoreHelpers
     end
 
     def submit_button(text = nil, options = {}, button_type = nil)
-      float, cancel, cancel_text = [:float, :cancel, :cancel_text].map { |key| options.delete(key) }
+      float, cancel, cancel_text = [:float, :cancel, :cancel_text].map{|key| options.delete(key)}
 
       text        ||= 'Submit'.t
       cancel_text ||= 'Cancel'.t
@@ -90,5 +88,4 @@ module MoreHelpers
       end
     end
   end
-
 end

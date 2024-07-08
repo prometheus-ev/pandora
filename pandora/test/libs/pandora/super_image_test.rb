@@ -86,8 +86,8 @@ class SuperImageTest < ActiveSupport::TestCase
       a = Pandora::SuperImage.new(pid)
       b = Pandora::SuperImage.new(pid)
 
-      t1 = Thread.new { a.image }
-      t2 = Thread.new { b.image }
+      t1 = Thread.new{a.image}
+      t2 = Thread.new{b.image}
 
       t1.join
       t2.join

@@ -1,11 +1,7 @@
 class CollectionsController < ApplicationController
-
-  # include Util::Resourceful::Controller
-
-  # skip_before_action :store_location, :only => [:store, :remove]
-
   def self.initialize_me!
-    control_access [:user] => :ALL
+    control_access [:user] => :ALL,
+                   [:ipuser] => [:show, :public]
 
     linkable_actions :create, :index, :shared, :public
   end
@@ -14,31 +10,31 @@ class CollectionsController < ApplicationController
 
   def self.list_returns
     {
-      :xml => { :root => 'collections', :hints => { 'collection' => true } },
-      :json => { :object => '[{&lt;collection fields&gt;},...]' }
+      :xml => {:root => 'collections', :hints => {'collection' => true}},
+      :json => {:object => '[{&lt;collection fields&gt;},...]'}
     }
   end
 
   def self.list_expects
     {
       :page => {
-        :type    => 'positiveInteger',
+        :type => 'positiveInteger',
         :default => 1,
-        :doc     => 'Number of page to return.'
+        :doc => 'Number of page to return.'
       },
       :order => {
-        :select  => CollectionSettings.values_for(:list_order),
+        :select => CollectionSettings.values_for(:list_order),
         :default => CollectionSettings.default_for(:list_order),
-        :doc     => 'Attribute to sort collections by.'
+        :doc => 'Attribute to sort collections by.'
       },
       :direction => {
-        :select  => CollectionSettings.values_for(:list_direction),
+        :select => CollectionSettings.values_for(:list_direction),
         :default => CollectionSettings.default_for(:list_direction),
-        :doc     => 'Direction to sort collections in.'
+        :doc => 'Direction to sort collections in.'
       },
       :field => {
         :select => Collection.search_columns.map(&:name),
-        :doc    => 'Search field.'
+        :doc => 'Search field.'
       },
       :value => {
         :doc => 'Query term.'
@@ -83,8 +79,8 @@ class CollectionsController < ApplicationController
         @page = page
         @per_page = per_page
       end
-      format.xml {render xml: items.pageit(page, per_page)}
-      format.json {render json: items.pageit(page, per_page)}
+      format.xml{render xml: items.pageit(page, per_page)}
+      format.json{render json: items.pageit(page, per_page)}
     end
   end
 
@@ -93,21 +89,6 @@ class CollectionsController < ApplicationController
     :expects => list_expects,
     :returns => list_returns
   }
-
-  # def own_all
-  #   @collections = records.allowed(current_user, :write)
-
-  #   respond_to do |format|
-  #     format.xml {render xml: @collections}
-  #     format.json {render json: @collections}
-  #   end
-  # end
-
-  # api_method :own_all, :get => {
-  #   :doc => 'Get the list of all your collections.',
-  #   :expects => {},
-  #   :returns => list_returns
-  # }
 
   def sharing
     items = records.sharing(current_user)
@@ -146,8 +127,8 @@ class CollectionsController < ApplicationController
         @page = page
         @per_page = per_page
       end
-      format.xml {render xml: items.pageit(page, per_page)}
-      format.json {render json: items.pageit(page, per_page)}
+      format.xml{render xml: items.pageit(page, per_page)}
+      format.json{render json: items.pageit(page, per_page)}
     end
   end
 
@@ -176,8 +157,8 @@ class CollectionsController < ApplicationController
         @page = page
         @per_page = per_page
       end
-      format.xml {render xml: items.pageit(page, per_page)}
-      format.json {render json: items.pageit(page, per_page)}
+      format.xml{render xml: items.pageit(page, per_page)}
+      format.json{render json: items.pageit(page, per_page)}
     end
   end
 
@@ -195,7 +176,8 @@ class CollectionsController < ApplicationController
       return
     end
 
-    @images = @collection.images_pandora_collection(current_user,
+    @images = @collection.images_pandora_collection(
+      current_user,
       search_column: search_column,
       search_value: search_value,
       sort_column: sort_column,
@@ -245,22 +227,22 @@ class CollectionsController < ApplicationController
 
           redirect_to params[:back_to] || collection_path(@collection)
         end
-        format.xml { render xml: @collection }
-        format.json { render json: @collection }
+        format.xml{render xml: @collection}
+        format.json{render json: @collection}
       end
     else
       respond_to do |format|
-        format.html { render action: 'new', status: 422 }
-        format.xml { render xml: @collection.errors, status: 406 }
-        format.json { render json: @collection.errors, status: 406 }
+        format.html{render action: 'new', status: 422}
+        format.xml{render xml: @collection.errors, status: 406}
+        format.json{render json: @collection.errors, status: 406}
       end
     end
   end
 
   api_method :create, :post => {
     :doc => "Create a collection.",
-    :expects => { :collection => { :type => 'string', :required => true, :doc => 'Nested parameter that must contain collection[title]. Images are included as nested parameter collection[images] with an array of image pids as value.' } },
-    :returns => { :xml => { :root => 'collection' }, :json => {} }
+    :expects => {:collection => {:type => 'string', :required => true, :doc => 'Nested parameter that must contain collection[title]. Images are included as nested parameter collection[images] with an array of image pids as value.'}},
+    :returns => {:xml => {:root => 'collection'}, :json => {}}
   }
 
   def edit
@@ -314,15 +296,15 @@ class CollectionsController < ApplicationController
         flash[:notice] = "Collection '%s' successfully deleted!".t / @collection.title
         redirect_to action: 'index'
       end
-      format.xml  { render :xml => @collection.to_xml }
-      format.json { render :json => @collection.to_json }
+      format.xml{render :xml => @collection.to_xml}
+      format.json{render :json => @collection.to_json}
     end
   end
 
   api_method :delete, :post => {
     :doc => "Delete a collection.",
-    :expects => { :id => { :type => 'string', :required => true, :doc => 'The id of the collection.' } },
-    :returns => { :xml => { :root => 'collection' }, :json => {} }
+    :expects => {:id => {:type => 'string', :required => true, :doc => 'The id of the collection.'}},
+    :returns => {:xml => {:root => 'collection'}, :json => {}}
   }
 
   # api compatibility
@@ -344,15 +326,15 @@ class CollectionsController < ApplicationController
     )
 
     respond_to do |format|
-      format.xml {render xml: {number_of_pages: @results.number_of_pages}}
-      format.json {render json: {number_of_pages: @results.number_of_pages}}
+      format.xml{render xml: {number_of_pages: @results.number_of_pages}}
+      format.json{render json: {number_of_pages: @results.number_of_pages}}
     end
   end
 
   api_method :number_of_pages, :get => {
     :doc => "Get number of pages for collections.",
-    :expects => { :type  => { :required => true, :doc => 'Collection type, either own, shared or public.' } },
-    :returns => { :xml => { :root => 'number_of_pages' }, :json => { :object => "{:number_of_pages}" } }
+    :expects => {:type => {:required => true, :doc => 'Collection type, either own, shared or public.'}},
+    :returns => {:xml => {:root => 'number_of_pages'}, :json => {:object => "{:number_of_pages}"}}
   }
 
   def shared_owners_fullname
@@ -362,7 +344,7 @@ class CollectionsController < ApplicationController
   api_method :shared_owners_fullname, :get => {
     :doc => 'Get the list of the owners fullname from collections that have been shared with you.',
     :expects => list_expects,
-    :returns => { :xml => { :root => 'fullnames' }, :json => { :object => '[{"fullname":&lt;fullname&gt;, "id":&lt;id&gt;},...]' } }
+    :returns => {:xml => {:root => 'fullnames'}, :json => {:object => '[{"fullname":&lt;fullname&gt;, "id":&lt;id&gt;},...]'}}
   }
 
   def public_owners_fullname
@@ -372,16 +354,16 @@ class CollectionsController < ApplicationController
   api_method :public_owners_fullname, :get => {
     :doc => 'Get the list of the owners fullname from public collections.',
     :expects => list_expects,
-    :returns => { :xml => { :root => 'fullnames' }, :json => { :object => '[{"fullname":&lt;fullname&gt;, "id":&lt;id&gt;},...]' } }
+    :returns => {:xml => {:root => 'fullnames'}, :json => {:object => '[{"fullname":&lt;fullname&gt;, "id":&lt;id&gt;},...]'}}
   }
 
   def writable
     @collections = records.allowed(current_user, :write).to_a
 
-    respond_to { |format|
-      format.xml  { render xml: @collections.to_xml }
-      format.json {
-        @collections.map!{ |collection|
+    respond_to do |format|
+      format.xml{render xml: @collections.to_xml}
+      format.json do
+        @collections.map! do |collection|
           type = if collection.owned_by?(current_user)
             "own"
           elsif collection.shared_with?(current_user)
@@ -396,16 +378,16 @@ class CollectionsController < ApplicationController
             title: collection.title,
             type: type
           }
-        }
+        end
 
         render json: @collections.to_json
-      }
-    }
+      end
+    end
   end
 
   api_method :writable, :get => {
     :doc => 'Get the list of current user\'s writable collections.',
-    :returns => { :xml => { :root => 'fullnames' }, :json => { :object => '[{"id":&lt;id&gt;, "title":&lt;title&gt;},...]' } }
+    :returns => {:xml => {:root => 'fullnames'}, :json => {:object => '[{"id":&lt;id&gt;, "title":&lt;title&gt;},...]'}}
   }
 
   def store
@@ -460,11 +442,10 @@ class CollectionsController < ApplicationController
             link = helpers.link_to(@collection.title, @collection)
 
             if doubles.size == 1
-              push_flash(:notice,
-                "Image is already in collection '%s'." / link
-              )
+              push_flash(:notice, "Image is already in collection '%s'." / link)
             else
-              push_flash(:notice,
+              push_flash(
+                :notice,
                 "%d images are already in collection '%s'." / [uniques.size, link]
               )
             end
@@ -474,11 +455,13 @@ class CollectionsController < ApplicationController
             link = helpers.link_to(@collection.title, @collection)
 
             if uniques.size == 1
-              push_flash(:notice,
+              push_flash(
+                :notice,
                 "Image successfully stored in collection '%s'." / link
               )
             else
-              push_flash(:notice,
+              push_flash(
+                :notice,
                 "%d images successfully stored in collection '%s'." / [uniques.size, link]
               )
             end
@@ -487,9 +470,9 @@ class CollectionsController < ApplicationController
           redirect_back fallback_location: searches_path
         end
 
-        store_result = { :collection => { :store => true } }
-        format.xml  { render :xml => store_result.to_xml }
-        format.json { render :json => store_result.to_json }
+        store_result = {:collection => {:store => true}}
+        format.xml{render :xml => store_result.to_xml}
+        format.json{render :json => store_result.to_json}
       end
     else
       flash[:warning] = "Couldn't add the images to the collection".t
@@ -500,10 +483,10 @@ class CollectionsController < ApplicationController
   api_method :store, :post => {
     :doc => "Store images in a collection.",
     :expects => {
-      :collection => { :type => 'string', :required => true, :doc => 'Nested parameter that must contain collection[collection_id].' },
-      :image => { :type => 'array', :required => true, :doc => 'Images are included as an array of image pids.' }
+      :collection => {:type => 'string', :required => true, :doc => 'Nested parameter that must contain collection[collection_id].'},
+      :image => {:type => 'array', :required => true, :doc => 'Images are included as an array of image pids.'}
     },
-    :returns => { :xml => { :root => 'collection' }, :json => {} }
+    :returns => {:xml => {:root => 'collection'}, :json => {}}
   }
 
   def remove
@@ -530,18 +513,18 @@ class CollectionsController < ApplicationController
         flash[:notice] = 'Image successfully removed from collection'.t
         redirect_to action: 'show', id: @collection.id
       end
-      format.xml  { render xml: store_result.to_xml }
-      format.json { render json: store_result.to_json }
+      format.xml{render xml: store_result.to_xml}
+      format.json{render json: store_result.to_json}
     end
   end
 
   api_method :remove, :post => {
     :doc => "Remove an image from a collection.",
     :expects => {
-      :id => { :type => 'string', :required => true, :doc => 'The id of the collection.' },
-      :image => { :type => 'array', :required => true, :doc => 'The pid of the image.' }
+      :id => {:type => 'string', :required => true, :doc => 'The id of the collection.'},
+      :image => {:type => 'array', :required => true, :doc => 'The pid of the image.'}
     },
-    :returns => { :xml => { :root => 'collection' }, :json => {} }
+    :returns => {:xml => {:root => 'collection'}, :json => {}}
   }
 
   def download
@@ -585,7 +568,8 @@ class CollectionsController < ApplicationController
       )
     end
 
-    send_data(@zip.generate,
+    send_data(
+      @zip.generate,
       filename: @collection.filename('zip'),
       content_type: 'application/zip',
       disposition: 'attachment'
@@ -596,7 +580,8 @@ class CollectionsController < ApplicationController
   def images
     @collection = Collection.allowed(current_user, :read).find(params[:id])
 
-    @images = @collection.images_pandora_collection(current_user,
+    @images = @collection.images_pandora_collection(
+      current_user,
       search_column: search_column,
       search_value: search_value,
       sort_column: sort_column,
@@ -612,7 +597,7 @@ class CollectionsController < ApplicationController
       format.json do
         data = @collection.attributes.merge(
           "number_of_pages" => @images.number_of_pages,
-          "images" => @images.items.map{ |result|
+          "images" => @images.items.map{|result|
             # TODO Since the field transformation is done at multiple places, find a common place in the future.
             result.image.attributes.merge(
               "artist" => result.artist.is_a?(Array) ? result.artist.join(" | ") : result.artist,
@@ -632,32 +617,32 @@ class CollectionsController < ApplicationController
   api_method :images, :get => {
     :doc => "Get the list of a collection's images.",
     :expects => {
-      :id  => {
+      :id => {
         :required => true, :doc => 'Collection ID.'
       },
       :per_page => {
-        :type    => 'positiveInteger',
+        :type => 'positiveInteger',
         :default => CollectionSettings.default_for(:per_page),
-        :doc     => 'Number images per page to return.'
+        :doc => 'Number images per page to return.'
       },
       :page => {
-        :type    => 'positiveInteger',
+        :type => 'positiveInteger',
         :default => 1,
-        :doc     => 'Number of page to return.'
+        :doc => 'Number of page to return.'
       },
       :order => {
-        :select  => [:insertion_order, :artist, :title, :location, :credits],
+        :select => [:insertion_order, :artist, :title, :location, :credits],
         :default => :insertion_order,
-        :doc     => 'Attribute to sort collections by.'
+        :doc => 'Attribute to sort collections by.'
       },
       :direction => {
-        :select  => CollectionSettings.values_for(:list_direction),
+        :select => CollectionSettings.values_for(:list_direction),
         :default => CollectionSettings.default_for(:list_direction),
-        :doc     => 'Direction to sort collections in.'
+        :doc => 'Direction to sort collections in.'
       }
     },
     returns: {
-      xml: {root: 'images', hints: { 'image' => true } },
+      xml: {root: 'images', hints: {'image' => true}},
       json: {object: "{:id, :title, :notes, :forked_at, :owner_id, :thumbnail_id, :public_access, :created_at, :updated_at, :references, :description, :links, images: [{:pid, :artist, :title, :location, :date, :credits, :source_id, :collection_id, :votes, :image_id, :score, :checked_at}]}"}
     }
   }
@@ -718,8 +703,8 @@ class CollectionsController < ApplicationController
       end
 
       respond_to do |format|
-        format.xml  { render xml: @results }
-        format.json { render json: @results }
+        format.xml{render xml: @results}
+        format.json{render json: @results}
       end
     end
 
@@ -776,7 +761,5 @@ class CollectionsController < ApplicationController
       current_user.try(:collection_settings) || {}
     end
 
-
-  initialize_me!
-
+    initialize_me!
 end

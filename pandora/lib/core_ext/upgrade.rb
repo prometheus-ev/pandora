@@ -12,23 +12,22 @@ class String
 
   def /(something)
     case something
-      when Integer
-        self.t.gsub('%d', something.to_s)
-      when Array
-        self.t % something
-        # self.gsub('%_', '%s') % something
-      when Proc
-        self.t.gsub(/\%\(([^\)]+)\)\%/) do |m|
-          something.call(m.gsub(/\%\(|\)\%/, ''))
-        end
-      when String then self.t.gsub('%s', something)
-      when Symbol then self.t.gsub('%s', something.to_s)
-      when Account, Email, Collection, Announcement
-        self.t.gsub('%s', something.to_s)
-      when ClientApplication, Source
-        self.t.gsub('%s', something.name)
-      else
-        raise "unhandled operand '#{something}' which is a #{something.class.name}"
+    when Integer
+      self.t.gsub('%d', something.to_s)
+    when Array
+      self.t % something
+    # self.gsub('%_', '%s') % something
+    when Proc
+      self.t.gsub(/\%\(([^\)]+)\)\%/) do |m|
+        something.call(m.gsub(/\%\(|\)\%/, ''))
+      end
+    when String then self.t.gsub('%s', something)
+    when Symbol, Account, Email, Collection, Announcement
+      self.t.gsub('%s', something.to_s)
+    when ClientApplication, Source
+      self.t.gsub('%s', something.name)
+    else
+      raise "unhandled operand '#{something}' which is a #{something.class.name}"
     end.html_safe
   end
 
@@ -57,7 +56,7 @@ end
 class Date
   def loc(format)
     strftime(format)
-  end  
+  end
 end
 
 module Locale

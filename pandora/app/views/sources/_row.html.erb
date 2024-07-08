@@ -13,12 +13,12 @@
       </span>
     </div>
     <div class="description-line">
-    <% unless row.description.blank? -%>
-      <%= truncated(row.description, open_access ? :first_line : 140, :simple_format => true) %>
+    <% if (desc = row.description_translated).present? -%>
+      <%= truncated(row.description_translated, open_access ? :first_line : 140, :simple_format => true) %>
     <% end -%>
     </div>
     <div class="summary-line">
-      <%= render(:partial => 'sources/row_details', :locals => { :row => row, :open_access => open_access }) %>
+      <%= render(partial: "sources/row_details", locals: {row: row, open_access: open_access, sources_counts: sources_counts}) %>
     </div>
     <%= render(:partial => "shared/source/sample", :locals => { :images => row.sample }) if (row.open_access? || current_user && (!current_user.dbuser? || current_user == row.dbuser)) %>
   </td>

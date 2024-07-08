@@ -33,9 +33,10 @@ class Pandora::Indexing::FieldProcessor
       when 'path'
         process_path(value)
       # Do not process the following fields.
-      when 'is_main_record', 'date_range', 'rating_count', 'rating_average', 'comment_count', 'user_comments', 'record_object_id_count'
-        value
-      when 'artist_nested', 'title_nested', 'location_nested', 'credits_nested', 'rights_reproduction_nested', 'person_nested', 'authority_files'
+      when 'is_main_record', 'date_range', 'rating_count', 'rating_average',
+           'comment_count', 'user_comments', 'record_object_id_count',
+           'artist_nested', 'title_nested', 'location_nested', 'credits_nested',
+           'rights_reproduction_nested', 'person_nested', 'authority_files'
         value
       else
         process_node_set(value)
@@ -77,14 +78,14 @@ class Pandora::Indexing::FieldProcessor
       node_set_array = [node_set.to_s]
     end
 
-    node_set_array.map! { |node|
+    node_set_array.map! {|node|
       node = node.to_s
       node = node.strip
       # Always remove empty brackets with any leading whitespace character
       node = node.gsub(/\s*\(\)/, "")
     }
 
-    node_set_array.delete_if { |node|
+    node_set_array.delete_if {|node|
       node.blank?
     }
   end

@@ -58,7 +58,7 @@
       }
 
       launch(event) {
-        console.log(event)
+        // console.log(event)
 
         this.update({
           open: true,
@@ -71,7 +71,7 @@
         const url = `/en/wikidata?term=${term}`
 
         return request(url).then(data => {
-          console.log(data)
+          // console.log(data)
 
           const results = []
           for (const r of data.search) {

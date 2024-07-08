@@ -1,5 +1,4 @@
 class Pandora::ImagesDir
-
   def initialize
     yaml_file = "#{ENV['PM_ORIGINALS_YML_DIR']}/originals.yml"
 
@@ -24,6 +23,7 @@ class Pandora::ImagesDir
     Dir["#{ENV['PM_ORIGINALS_DIR']}/*"].each do |source|
       name = File.basename(source)
       next if name == 'upload'
+
       us = @upstream_urls[name]
       system "mkdir #{ENV['PM_IMAGES_DIR']}/#{name}"
 
@@ -39,10 +39,9 @@ class Pandora::ImagesDir
     source_dir = "#{ENV['PM_IMAGES_DIR']}/" + source_name
 
     if @upstream_urls[source_name]
-      Rails.logger.info 'Deleting upstream images of source ' + source_name + '.'
+      Pandora.puts 'Deleting upstream images of source ' + source_name + '.'
 
       system "rm -rf #{source_dir}/*"
     end
   end
-
 end

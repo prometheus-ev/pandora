@@ -69,7 +69,7 @@ class PowerPointRequestTest < ActionDispatch::IntegrationTest
 
   test 'logged in as admin, private collection' do
     login_as 'jnadie'
-    
+
     collection = Collection.find_by! title: "John's private collection"
     get "/en/powerpoint/collection/#{collection.id}"
     assert_redirected_to /\/en\/login/

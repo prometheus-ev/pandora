@@ -1,5 +1,4 @@
 class RateLimit < ApplicationRecord
-
   LIMIT = 2000
   INTERVAL = 1.hour
   FORMAT = '%Y-%m-%dT%H'
@@ -28,7 +27,7 @@ class RateLimit < ApplicationRecord
   end
 
   def inc!
-    self.class.transaction { increment!(:count) }
+    self.class.transaction{increment!(:count)}
   end
 
   def limit
@@ -61,10 +60,10 @@ class RateLimit < ApplicationRecord
 
   def headers
     return {
-      'X-RateLimit-Limit'     => limit,
+      'X-RateLimit-Limit' => limit,
       'X-RateLimit-Remaining' => remaining,
-      'X-RateLimit-Reset'     => reset,
-      'Retry-After'           => retry_after
+      'X-RateLimit-Reset' => reset,
+      'Retry-After' => retry_after
     }
   end
 
@@ -76,5 +75,4 @@ class RateLimit < ApplicationRecord
       'retry_after' => retry_after
     }
   end
-
 end

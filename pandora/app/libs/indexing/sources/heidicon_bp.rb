@@ -10,6 +10,4 @@ class Indexing::Sources::HeidiconBp < Indexing::Sources::Parents::Heidicon
   def external_references
     ""
   end
-
-
 end

@@ -1,5 +1,4 @@
 namespace :import do
-  
   desc "import json data as announcements"
   task :import_announcements, [:path] => :environment do |t, args|
     annoncements_collection = JSON.parse(File.read(args[:path]))
@@ -7,5 +6,4 @@ namespace :import do
       Announcement.create!(announcement_hash)
     end
   end
-
 end

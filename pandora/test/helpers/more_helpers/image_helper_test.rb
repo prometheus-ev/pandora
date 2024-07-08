@@ -1,7 +1,6 @@
 require 'test_helper'
 
-class ImageHelperTest  < ActiveSupport::TestCase
-
+class ImageHelperTest < ActiveSupport::TestCase
   include MoreHelpers::ImageHelper
 
   test 'hover_over_image_title' do

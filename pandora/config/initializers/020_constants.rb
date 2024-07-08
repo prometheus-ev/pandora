@@ -2,7 +2,7 @@
 
 AUTHORS = [
   ['Lisa Dieckmann',    'lisa.dieckmann@uni-koeln.de',         nil,                 [nil, nil]],
-  ['Jörg Koch',         'joerg.koch@uni-koeln.de',             nil,                 [Date.new(2013, 1), Date.new(2017,  2)], [Date.new(2019, 1), nil]],
+  ['Jörg Koch',         'joerg.koch@uni-koeln.de',             nil,                 [Date.new(2013, 1), Date.new(2017, 2)], [Date.new(2019, 1), nil]],
   ['Sven Peter',        'sven.peter@uni-koeln.de',             nil,                 [Date.new(2017, 9), nil]],
   ['Moritz Schepp',     'schepp@wendig.io',                    'https://wendig.io', [Date.new(2018, 3), nil]]
 ].freeze
@@ -12,11 +12,11 @@ FORMER_AUTHORS = [
   ['Lars Baehren',      '', nil, [Date.new(2012, 4), Date.new(2013,  1)]],
   ['Sebastian Beßler',  '', nil, [Date.new(2009, 7), Date.new(2010,  8)]],
   ['Thomas Bodo Block', '', nil, [Date.new(2007, 2), Date.new(2009,  3)]],
-  ['Arne Eilermann',    '', nil, [Date.new(2008, 12), Date.new(2012,  1)], [Date.new(2013,  6), Date.new(2018, 2)]],
+  ['Arne Eilermann',    '', nil, [Date.new(2008, 12), Date.new(2012, 1)], [Date.new(2013, 6), Date.new(2018, 2)]],
   ['Jens Wille',        '', nil, [nil, Date.new(2013,  1)]]
 ].freeze
 
-LOCALES = { 'en' => 'en-US', 'de' => 'de-DE' }.freeze
+LOCALES = {'en' => 'en-US', 'de' => 'de-DE'}.freeze
 
 
 # Legacy settings, these just apply some cosmetic changes to some of the env
@@ -25,7 +25,7 @@ LOCALES = { 'en' => 'en-US', 'de' => 'de-DE' }.freeze
 DEFAULT_LANGUAGE     = ENV['PM_DEFAULT_LOCALE']
 DEFAULT_LOCALE       = LOCALES[DEFAULT_LANGUAGE]
 ORDERED_LOCALES      = LOCALES.keys.sort
-ALTERNATE_LOCALES    = Hash.new { |h, k| h[k] = ORDERED_LOCALES - [k] }
+ALTERNATE_LOCALES    = Hash.new{|h, k| h[k] = ORDERED_LOCALES - [k]}
 TRANSLATES_LANGUAGES = ALTERNATE_LOCALES[DEFAULT_LANGUAGE].freeze
 ORDERED_LANGUAGES    = [DEFAULT_LANGUAGE, *TRANSLATES_LANGUAGES].freeze
 

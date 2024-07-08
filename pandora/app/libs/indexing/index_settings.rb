@@ -10,10 +10,10 @@ module Indexing::IndexSettings
     index = {}
 
     unless update
-      index.merge!( {
+      index.merge!({
         number_of_shards: 1,
         number_of_replicas: 0
-      } )
+      })
     end
 
     index.merge!({
@@ -98,7 +98,7 @@ module Indexing::IndexSettings
           },
           artist_normalized_indexing_analyzer: {
             type: "custom",
-            char_filter: [ "html", "replace_punctuation" ],
+            char_filter: ["html", "replace_punctuation"],
             tokenizer: "keyword",
             filter: [
               "elision",
@@ -108,7 +108,7 @@ module Indexing::IndexSettings
           },
           artist_normalized_search_analyzer: {
             type: "custom",
-            char_filter: [ "html", "replace_punctuation" ],
+            char_filter: ["html", "replace_punctuation"],
             tokenizer: "keyword",
             filter: [
               "elision",
@@ -121,14 +121,15 @@ module Indexing::IndexSettings
         normalizer: {
           sort_normalizer: {
             type: 'custom',
-            char_filter: ['prepend_z_before_non_alpha_only_chars_for_sorting', 'remove_non_alpha_chars_for_sorting'],
+            char_filter: ['prepend_z_before_non_alpha_only_chars_for_sorting',
+                          'remove_non_alpha_chars_for_sorting'],
             filter: [
               # Not sure if we need the elision filter here. Causes problems with e.g. the title of record:
               #
               # ingrid-c6137694906279ee15194b0d91d587c03f19dc3a
               # title: 12 | c'11 | cKs
               #
-              #'elision',
+              # 'elision',
               'lowercase',
               'asciifolding'
             ]
@@ -137,6 +138,6 @@ module Indexing::IndexSettings
       }
     })
 
-    { index: index }
+    {index: index}
   end
 end

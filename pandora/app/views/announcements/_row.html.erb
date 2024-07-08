@@ -26,9 +26,9 @@
       </strong>
       <%= vbar %>
     <% end -%>
-    <%= 'Start'.t %>: <%= row.starts_at %>
+    <%= 'Start'.t %>: <%= row.starts_at.to_fs %>
     <%= vbar %>
-    <%= 'End'.t %>: <%= row.ends_at %>
+    <%= 'End'.t %>: <%= row.ends_at.to_fs %>
     <% if @is_admin -%>
       <%= vbar %>
       <%= 'Last updated'.t %> <%= distance_of_time_ago_in_words_tag(row.updated_at) %>

@@ -1,0 +1,56 @@
+<ir-modal>
+  <div
+    is="pm-modal"
+    open={state.open}
+    close={() => close()}
+  >
+    <pre>
+      {JSON.stringify(state.data, null, 2)}
+    </pre>
+  </div>
+
+  <script>
+    // import {locale} from '../lib/util.js'
+
+    export default class {
+      onBeforeMount() {
+        this.launch = this.launch.bind(this)
+
+        this.state = {
+          open: false
+        }
+
+        this.on('i.modal', this.launch)
+      }
+
+      launch(event) {
+        this.update({
+          open: true,
+          toggle: event.data.toggle,
+          current: event.data.current,
+          data: event.data.result
+        })
+      }
+
+      toggle(reveal, event) {
+        if (event) {event.preventDefault()}
+
+        this.state.toggle(reveal)
+        this.close()
+      }
+
+      toggleAll(reveal, event) {
+        if (event) {event.preventDefault()}
+
+        this.bus.emit('i.toggle', {reveal})
+        this.close()
+      }
+
+      close(event) {
+        if (event) {event.preventDefault()}
+
+        this.update({open: false})
+      }
+    }
+  </script>
+</ir-modal>

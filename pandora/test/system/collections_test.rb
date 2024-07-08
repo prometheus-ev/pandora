@@ -11,12 +11,12 @@ class CollectionsTest < ApplicationSystemTestCase
 
     click_on 'Collections'
 
-    # check https://redmine.prometheus-srv.uni-koeln.de/issues/1138
+    # check #1138
     select 'Keywords', from: 'field'
     fill_in 'value', with: 'fotografie'
     find('.submit_button', text: 'Search').click
     assert_text "John's private collection", count: 1
-    
+
     select 'Title', from: 'field'
     fill_in 'value', with: 'collaboration'
     find('.submit_button', text: 'Search').click
@@ -30,12 +30,23 @@ class CollectionsTest < ApplicationSystemTestCase
 
     all(:field, name: 'order').first.select 'Owner'
     # no error is good
+
+    # search for keywords should include both languages
+    Keyword.find_by!(title: 'welthauptstadt der fotografie').update(
+      title: 'world capital of photography',
+      title_de: 'welthauptstadt der fotografie'
+    )
+    select 'Keywords', from: 'field'
+    fill_in 'value', with: 'welthauptstadt'
+    find('.submit_button', text: 'Search').click
+
+    assert_text "John's private collection"
   end
 
   test 'create a collection' do
     mrossi = Account.find_by!(login: 'mrossi')
     mrossi.update locale: 'de'
-    
+
     login_as 'jdoe'
 
     click_on 'Collections'
@@ -51,14 +62,14 @@ class CollectionsTest < ApplicationSystemTestCase
     fill_in 'Collaborators', with: 'jdoe'
     assert_no_css '.suggestions' # => no results, so the menu isn't rendered
 
-    fill_in 'Collaborators', with: 'mrossi'
+    fill_in 'Collaborators', with: "mrossi\njdupont"
     assert_css '.suggestions'
     # make sure the suggest is closed and doesn't cover the submit button (!)
     find("body").native.send_keys :escape
     submit
 
     # assert that the notification mail is sent in mrossi's locale
-    mail = ActionMailer::Base.deliveries.first
+    mail = ActionMailer::Base.deliveries[1]
     assert_match /text\/plain/, mail.content_type
     assert_match /Sie wurden als Mitarbeiter/, mail.body.to_s
 
@@ -71,7 +82,7 @@ class CollectionsTest < ApplicationSystemTestCase
     assert_text '2 link'
     assert_text '2 references'
 
-    find('#details-section .expand').click
+    open_section 'details'
 
     within '#details-section' do
       assert_text 'You'
@@ -84,6 +95,18 @@ class CollectionsTest < ApplicationSystemTestCase
     visit "/en/collections/#{collection.id}/edit"
     assert_field 'Links', with: "https://example.com\nhttps://wendig.io"
     assert_field 'References', with: "Some\nthing"
+
+    # test keyword and collaborator rendering (see #1852)
+    tree = Keyword.find_by! title: 'tree'
+    tree.update title: nil, title_de: 'Baum'
+    visit "/en/collections/#{collection.id}"
+    open_section 'details'
+    assert_text 'Mario Rossi, Jean Dupont'
+    assert_text 'Baum'
+    # and the links should work
+    click_on 'Baum'
+    assert_field 'value', with: 'Baum'
+    assert_no_text "John's collaboration collection"
   end
 
   test 'shared collections' do
@@ -239,13 +262,13 @@ class CollectionsTest < ApplicationSystemTestCase
     results = all('.list_row').first.find('input[type=checkbox]').click
 
     find('div.store_image').click
-    #debugger
+    # debugger
     assert_text "This image of your database is not available to public collections until approval of the prometheus office."
     # select("John's public collection")
     # assert_text 'Unapproved uploads cannot be added to publicly visible collections'
     # assert !Collection.find_by(title: 'Johņ\'s public collection').images.include?(Upload.find_by(title: 'A upload'))
   end
-  
+
   test 'remove image from collaboration collection' do
     collection = Collection.find_by!(title: "John's private collection")
     collection.images << Upload.first.image
@@ -253,7 +276,7 @@ class CollectionsTest < ApplicationSystemTestCase
     mrossi = Account.find_by! login: 'mrossi'
     collection.collaborators << mrossi
     collection.update_column :public_access, 'write'
-    
+
     login_as 'mrossi'
     click_on 'Collections'
     click_on 'Shared with you'
@@ -262,18 +285,18 @@ class CollectionsTest < ApplicationSystemTestCase
       click_on "Delete image from collection"
     end
     assert_text 'Image successfully removed from collection'
-    
+
     collection.images << Upload.first.image
     click_on 'Shared with you'
   end
-  
+
   test 'remove image from shared collection' do
     collection = Collection.find_by!(title: "John's private collection")
     collection.images << Upload.first.image
     Upload.first.update_column :approved_record, true
     mrossi = Account.find_by! login: 'mrossi'
     collection.update_column :public_access, 'write'
-    
+
     login_as 'mrossi'
     click_on 'Collections'
     click_on 'Public'
@@ -346,7 +369,7 @@ class CollectionsTest < ApplicationSystemTestCase
     fill_in 'Viewers', with: 'mrossi', wait: 5
     fill_in 'Collaborators', with: 'mrossi'
     submit
-    
+
     # should have generated notification to mrossi
     mail = ActionMailer::Base.deliveries.first
     assert_match /Added as collaborator/, mail.subject
@@ -387,9 +410,9 @@ class CollectionsTest < ApplicationSystemTestCase
     click_submenu 'Shared with you'
     assert_text "John's private collection"
     assert_text 'Writable'
-    
+
     logout
-    
+
     login_as 'jdoe'
     click_on 'Collections'
     within 'tr.list_row', text: /John's private collection/ do
@@ -399,7 +422,7 @@ class CollectionsTest < ApplicationSystemTestCase
     open_section 'details'
     fill_in 'Collaborators', with: ''
     submit
-    
+
     # should have generated notification to mrossi
     mail = ActionMailer::Base.deliveries[1]
     assert_match /Removed as collaborator/, mail.subject
@@ -576,6 +599,9 @@ class CollectionsTest < ApplicationSystemTestCase
     priv.update(
       keyword_list: "gold\nsilver"
     )
+    priv.update(
+      keywords: priv.keywords + [Keyword.new(title_de: "silber")]
+    )
 
     pub = Collection.find_by!(title: "John's public collection")
     pub.update(
@@ -599,14 +625,25 @@ class CollectionsTest < ApplicationSystemTestCase
     assert_text "John's public collection"
     assert_no_text "John's collaboration collection"
 
+    click_on 'Collections'
+    click_on 'silber'
+    assert_text "John's private collection"
+
     click_on 'Public'
     click_on 'gold'
     assert_text 'Search public collections'
     assert_no_text "John's private collection"
     assert_text "John's public collection"
     assert_no_text "John's collaboration collection"
+
+    click_on "John's public collection"
+    open_section 'details'
+    click_on 'gold'
+    assert_text 'Search all collections'
+    assert_text "John's private collection"
+    assert_text "John's public collection"
   end
-  
+
   test 'non-existing pages' do
     collection = Collection.find_by!(title: "John's private collection")
     collection.images << Upload.first.image
@@ -664,5 +701,63 @@ class CollectionsTest < ApplicationSystemTestCase
     assert_text "John's collaboration collection"
     assert_text "John's public collection"
     assert_no_text "John's private collection"
+  end
+
+  test 'public collections (readable) should be visible to ip users' do
+    collection = Collection.find_by!(title: "John's public collection")
+    upload = Upload.first
+    collection.images << upload.image
+
+    visit "/en/collections/#{collection.id}"
+    assert_text 'Please log in first'
+
+    # also return-to should work
+    within '#campus_login_wrap' do
+      submit
+    end
+    check 'I read the terms of use carefully and agree!'
+    submit
+
+    assert_text "John's public collection"
+    assert_text '0 Images' # upload not approved
+
+    upload.update approved_record: true
+    reload_page
+
+    assert_text '1 Image'
+  end
+
+  test 'public collections (writable) should be visible to ip users' do
+    collection = Collection.find_by!(title: "John's collaboration collection")
+    upload = Upload.first
+    collection.images << upload.image
+
+    visit "/en/collections/#{collection.id}"
+    assert_text 'Please log in first'
+
+    # also return-to should work
+    within '#campus_login_wrap' do
+      submit
+    end
+    check 'I read the terms of use carefully and agree!'
+    submit
+
+    assert_text "John's collaboration collection"
+    assert_text '0 Images' # upload not approved
+
+    upload.update approved_record: true
+    reload_page
+
+    assert_text '1 Image'
+
+    assert_no_link 'Edit'
+    visit "/en/collections/#{collection.id}/edit"
+    assert_text "You don't have privileges to access this collections page"
+
+    back
+    click_on 'Public'
+    assert_text "John Expired's public collection"
+    assert_text "John's collaboration collection"
+    assert_text "John's public collection"
   end
 end

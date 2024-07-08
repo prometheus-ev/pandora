@@ -17,7 +17,7 @@ class Pandora::Query
 
     # limit indices to open sources for this user
     if @user.dbuser?
-      @criteria[:indices] = { @user.open_sources.first.name => true }
+      @criteria[:indices] = {@user.open_sources.first.name => true}
     end
 
     search_result = []
@@ -69,11 +69,6 @@ class Pandora::Query
       end
     end
 
-    #if (@criteria['search_value'] && (@criteria['search_value']['0'] != @criteria['previous_search_value']))
-    #  date_from = ""
-    #  date_to = ""
-    #end
-
     # Sort field @criteria
     if @criteria[:time]
       sort_field = "date"
@@ -82,22 +77,22 @@ class Pandora::Query
     end
 
     # If it is a pur asterisk search, do not sort by relevance but by asterisk search field.
-    asterisk_search_values = search_values_text.select{ |key, value|
+    asterisk_search_values = search_values_text.select do |key, value|
       value == '*'
-    }
-    non_asterisk_search_values = search_values_text.select{ |key, value|
+    end
+    non_asterisk_search_values = search_values_text.select do |key, value|
       value != '*' && !value.blank?
-    }
+    end
 
     # If there are asterisk search values and non-asterisk search value, remove asterisk search values.
     if asterisk_search_values.size > 0 && non_asterisk_search_values.size > 0
-      search_values_text.transform_values! { |value|
+      search_values_text.transform_values! do |value|
         if value == '*'
           value = ''
         else
           value
         end
-      }
+      end
 
       asterisk_search_values = {}
 
@@ -108,7 +103,7 @@ class Pandora::Query
     if asterisk_search_values.size > 1
       kept_first = false
 
-      search_values_text.update(search_values_text) { |key, value|
+      search_values_text.update(search_values_text) do |key, value|
         if value == '*' && kept_first == false
           kept_first = true
           asterisk_search_values = {key => value}
@@ -118,7 +113,7 @@ class Pandora::Query
         else
           value
         end
-      }
+      end
 
       flash[:warning] = "Please use the '*' search in one search field only. The first one has been used for this search.".t
     end
@@ -163,8 +158,8 @@ class Pandora::Query
     if sort_field == "date" && @criteria[:time]
       sort = [{
         "date_range_from" => {
-           numeric_type: 'date',
-           order: sort_order
+          numeric_type: 'date',
+          order: sort_order
         }
       }]
     elsif sort_field == "relevance"
@@ -210,7 +205,7 @@ class Pandora::Query
     query_must_not = []
     query_should = []
 
-    search_fields_selected.each { |position, search_field|
+    search_fields_selected.each do |position, search_field|
       unless search_values_text[position].blank?
         # @todo Check if all these exceptions can just be escaped.
         # The following reserved characters can only be used as described by the Query string syntax:
@@ -309,7 +304,7 @@ class Pandora::Query
             # https://www.elastic.co/guide/en/elasticsearch/reference/current/query-dsl-query-string-query.html#_ranges
             search_value = "[" + (rating_average_rounded.to_f - 0.5).to_s + " TO " + (rating_average_rounded.to_f + 0.4).to_s + "]"
           elsif search_field == "rating_count"
-            search_value = search_value.to_i.to_s
+            search_value = "rating_count:#{search_value}"
           end
 
           # Other field search
@@ -317,17 +312,18 @@ class Pandora::Query
           query_string = {
             query: search_value,
             default_operator: "AND",
-            #auto_generate_synonyms_phrase_query: false,
+            # auto_generate_synonyms_phrase_query: false,
             analyze_wildcard: true,
-            fields: Indexing::IndexFields.search_mapping(field: search_field)
+            fields: Indexing::IndexFields.search_mapping(field: search_field),
+            type: "cross_fields"
           }
 
           # https://www.elastic.co/guide/en/elasticsearch/reference/current/query-dsl-multi-match-query.html#operator-min
           # https://www.elastic.co/guide/en/elasticsearch/reference/current/query-dsl-multi-match-query.html#type-cross-fields
           if search_field == 'all'
-            #query_string.merge!({
+            # query_string.merge!({
             #  type: "cross_fields"
-            #})
+            # })
           end
 
           # Default query string settings.
@@ -356,7 +352,7 @@ class Pandora::Query
           query_should.push(query_hash)
         end
       end
-    }
+    end
 
     # Date from/to validations.
     if @criteria[:time]
@@ -453,7 +449,7 @@ class Pandora::Query
     # Select checked indices only (all with a value of true)
     # checked_indices = indices.select { |key, value| value[:checked] }.keys
     # if @index.client.indices.exists index: checked_indices
-    if !search_values.all? { |value| value.blank? } && !indices.empty?
+    if !search_values.all?{|value| value.blank?} && !indices.empty?
       query_bool = {
         # https://www.elastic.co/guide/en/elasticsearch/guide/current/combining-filters.html
         must: query_must,
@@ -466,13 +462,13 @@ class Pandora::Query
       # #1584: Unfortunately, if searching for a detail of a non-main-record, the result is not shown
       # with this filter. Disable for now.
       # Collapse seems the right feature to use.
-      #filter << elastic.is_main_record_filter
+      # filter << elastic.is_main_record_filter
 
       if @criteria[:objects]
         filter << elastic.record_object_id_count_filter
-        #query.merge!(elastic.record_object_id_aggregations(sort))
+        # query.merge!(elastic.record_object_id_aggregations(sort))
         # https://www.elastic.co/guide/en/elasticsearch/reference/current/collapse-search-results.html
-        #query.merge!({
+        # query.merge!({
         #  collapse: {
         #    field: 'record_object_id.raw',
         #    inner_hits: {
@@ -480,9 +476,9 @@ class Pandora::Query
         #      size: 10
         #    }
         #  }
-        #})
-        #page_from = 0
-        #page_size = 0
+        # })
+        # page_from = 0
+        # page_size = 0
       end
 
       # Merge filter into bool query.
@@ -491,7 +487,7 @@ class Pandora::Query
       query.merge!(
         # https://www.elastic.co/guide/en/elasticsearch/guide/current/query-time-boosting.html
         # https://www.elastic.co/guide/en/elasticsearch/reference/current/search-request-body.html#request-body-search-index-boost
-        #indices_boost: Rails.configuration.x.athene_search_indices[:boost],
+        # indices_boost: Rails.configuration.x.athene_search_indices[:boost],
         # https://www.elastic.co/guide/en/elasticsearch/reference/current/query-dsl-bool-query.html
         query: {
           bool: query_bool
@@ -543,7 +539,7 @@ class Pandora::Query
       search_result = elastic.search indices, query
     end
     # end
-    
+
     object_ids = []
     aspects = {}
 
@@ -673,24 +669,29 @@ class Pandora::Query
 
   private
 
-  def indices_available
-    counts_hash = elastic.counts
+    def indices_available
+      counts_hash = elastic.counts
 
-    counts_hash.delete('total')
-    Source.pluck(:name) & counts_hash.select{|k, v| v && v['records'] && v['records'] > 0}.keys
-  end
-
-  def out_indices
-    out_indices = {}
-    source_lookup = Source.includes(:institution, :keywords).map{|s| [s.name, s]}.to_h
-
-    indices_available.each do |i|
-      out_indices[i] = {
-        'checked' => !@criteria[:indices] || !!@criteria[:indices][i],
-        'source' => source_lookup[i]
-      }
+      counts_hash.delete('total')
+      Source.pluck(:name) & counts_hash.select{|k, v| v && v['records'] && v['records'] > 0}.keys
     end
 
-    out_indices
-  end
+    def out_indices
+      out_indices = {}
+      source_lookup = Source.
+        where.
+        not(kind: "User database").
+        includes(:institution, :keywords).
+        map{|s| [s.name, s]}.
+        to_h
+
+      indices_available.each do |i|
+        out_indices[i] = {
+          'checked' => !@criteria[:indices] || !!@criteria[:indices][i],
+          'source' => source_lookup[i]
+        }
+      end
+
+      out_indices
+    end
 end

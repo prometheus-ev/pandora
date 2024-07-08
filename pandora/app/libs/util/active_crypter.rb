@@ -1,9 +1,6 @@
 module Util
-
   module ActiveCrypter
-
     module ClassMethods
-
       def encrypts(*fields)
         options = fields.extract_options!
 
@@ -23,7 +20,7 @@ module Util
           iv = :salt
         end
 
-        fields.each { |field|
+        fields.each do |field|
           class_eval <<-EOS, __FILE__, __LINE__ + 1
             def #{field}                                       # def secret
               decrypt(self[:#{field}], #{iv}, #{key})          #   decrypt(self[:secret], key, OAUTH_SECRET)
@@ -33,20 +30,18 @@ module Util
               self[:#{field}] = encrypt(value, #{iv}, #{key})  #   self[:secret] = encrypt(value, key, OAUTH_SECRET)
             end                                                # end
           EOS
-        }
+        end
       end
-
     end
 
-    ###########################################################################
-    private
-    ###########################################################################
 
-    def self.included(base)
-      base.extend(ClassMethods)
-      base.send :include, Util::Crypter
+    class << self
+      private
+
+        def included(base)
+          base.extend(ClassMethods)
+          base.send :include, Util::Crypter
+        end
     end
-
   end
-
 end

@@ -2,7 +2,7 @@
 
 # General configuration
 
-RUBY_VERSION=3.0.3
+RUBY_VERSION=3.2.2
 ELASTICSEARCH_VERSION=7.17.1
 
 function debian_basics {
@@ -11,7 +11,8 @@ function debian_basics {
     build-essential libxml2-dev libxslt-dev libssl-dev git-core \
     libreadline-dev zlib1g-dev mariadb-server default-libmysqlclient-dev \
     libmagickwand-dev libmagic-dev libpq-dev apt-transport-https curl htop \
-    default-jre net-tools chromium-driver imagemagick pwgen zip idn ffmpeg
+    default-jre net-tools chromium-driver imagemagick pwgen zip idn ffmpeg zst \
+    libyaml-dev
 
   # https://www.elastic.co/guide/en/elasticsearch/reference/current/vm-max-map-count.html
   echo vm.max_map_count=262144 > /etc/sysctl.d/vm_max_map_count.conf
@@ -45,7 +46,7 @@ function debian_basics {
   sed -i -E "/^#\s*?cluster.initial_master_nodes:.*$/a cluster.initial_master_nodes: [\"node-1\"]" development/config/elasticsearch.yml
   sed -i -E "/^#\s*?action.destructive_requires_name:.*$/a action.destructive_requires_name: false" development/config/elasticsearch.yml
   sed -i -E "/^#\s.*configuring-stack-security.html.*$/a xpack.security.enabled: false" development/config/elasticsearch.yml
-  chown -R elasticsearch. development
+  chown -R elasticsearch: development
 
   cp -a development test
   echo -e '-Xms1g\n-Xmx1g' > test/config/jvm.options.d/memory.options
@@ -53,7 +54,7 @@ function debian_basics {
   sed -i -E "/^#\s*?http.port:.*$/a http.port: 9201" test/config/elasticsearch.yml
   sed -i -E "s/^\s*?transport.port:.*$/transport.port: 9350-9400/" test/config/elasticsearch.yml
   sed -i -E "s/^\s*?discovery.seed_hosts:.*$/discovery.seed_hosts: [\"0.0.0.0:9350\"]/" test/config/elasticsearch.yml
-  chown -R elasticsearch. test
+  chown -R elasticsearch: test
 
   cp /vagrant/deploy/elasticsearch-development.service /etc/systemd/system/
   cp /vagrant/deploy/elasticsearch-test.service /etc/systemd/system/

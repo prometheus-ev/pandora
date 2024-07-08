@@ -2,6 +2,7 @@ class Pandora::Indexing::Parser::BeeskowKunstarchiv < Pandora::Indexing::Parser:
   def initialize(source)
     super(
       source,
-      record_node_name: 'row')
+      record_node_name: "row"
+    )
   end
 end

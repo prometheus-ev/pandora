@@ -1,6 +1,5 @@
 module ActionDispatch
   class Request
-
     ### auth
 
     # TODO: use Rails' mechanism for this
@@ -9,7 +8,7 @@ module ActionDispatch
     def auth_header
       return @auth_header if defined?(@auth_header)
 
-      auth_header = AUTH_HEADERS.find { |header| env.include?(header) }
+      auth_header = AUTH_HEADERS.find{|header| env.include?(header)}
       @auth_header = auth_header && env[auth_header]
     end
 
@@ -40,6 +39,5 @@ module ActionDispatch
     def basic_auth
       Base64.decode64(auth_credentials).split(':', 2) if basic_auth?
     end
-
   end
 end

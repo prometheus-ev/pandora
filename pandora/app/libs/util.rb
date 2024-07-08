@@ -1,3 +1,2 @@
 module Util
-  
 end

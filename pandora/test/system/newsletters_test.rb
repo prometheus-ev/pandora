@@ -64,7 +64,7 @@ class NewslettersTest < ApplicationSystemTestCase
     within_admin_section 'Newsletter' do
       click_on 'Create'
     end
-    
+
     click_on 'Create a new newsletter'
     assert_text "Create newsletter '#{Time.now.year} / 01'"
 
@@ -292,7 +292,7 @@ class NewslettersTest < ApplicationSystemTestCase
     within_admin_section 'Newsletter' do
       click_on 'Create'
     end
-    
+
     click_on 'Create a new newsletter'
     assert_text "Create newsletter '#{Time.now.year} / 01'"
 

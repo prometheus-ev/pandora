@@ -12,9 +12,9 @@ module UpgradeHelper
     if object = options.delete(:object)
       objects = [object].flatten
     else
-      objects = params.collect {|object_name| instance_variable_get("@#{object_name}") }.compact
+      objects = params.collect{|object_name| instance_variable_get("@#{object_name}")}.compact
     end
-    count   = objects.inject(0) {|sum, object| sum + object.errors.count }
+    count = objects.inject(0){|sum, object| sum + object.errors.count}
     unless count.zero?
       html = {}
       [:id, :class].each do |key|
@@ -25,12 +25,12 @@ module UpgradeHelper
           html[key] = 'errorExplanation'
         end
       end
-      
+
       options[:object_name] ||= params.first
       options[:header_message] ||= I18n.t('errors.template.header', count: count, model: options[:object_name])
       options[:message] ||= I18n.t('errors.template.body')
 
-      error_messages = objects.sum([]) {|object| object.errors.full_messages.map {|msg| content_tag(:li, msg) } }.join
+      error_messages = objects.sum([]){|object| object.errors.full_messages.map{|msg| content_tag(:li, msg)}}.join
 
       contents = ''
       contents << content_tag(options[:header_tag] || :h2, options[:header_message]) unless options[:header_message].blank?
@@ -116,8 +116,15 @@ module UpgradeHelper
     I18n.localize time, **opts
   end
 
-  def link_to_image_tag(image)
-    link_to({ controller: 'images', action: 'show', id: image.pid },
+  def link_to_image_tag(image, collection: nil)
+    url_opts = {
+      controller: 'images',
+      action: 'show',
+      id: image.pid,
+      collection_id: collection ? collection.id : nil
+    }
+
+    link_to(url_opts,
             title: image.title) do
       image_tag(image.image_url,
                 id: image.pid,
@@ -156,7 +163,7 @@ module UpgradeHelper
           str << link_to_links(arr[i])
         end
       end
-      
+
       str
     end
 

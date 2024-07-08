@@ -4,6 +4,6 @@ class Pandora::Indexing::Parser::Assisi < Pandora::Indexing::Parser::XmlReader
 
     super(
       source,
-      record_node_name: 'dokument')
+      record_node_name: "dokument")
   end
 end

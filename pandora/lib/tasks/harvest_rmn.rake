@@ -97,7 +97,7 @@ namespace :harvest do
                 raise
               end
 
-              File.open("#{dir}/#{file}","w") do |f|
+              File.open("#{dir}/#{file}", "w") do |f|
                 f.write(response.body)
               end
 

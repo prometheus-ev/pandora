@@ -3,12 +3,13 @@ class SearchesController < ApplicationController
 
   helper_method :search_params, :db_group_column, :db_sort_column
 
-  ###############################################################################
   def self.initialize_me!
-    control_access [:superadmin, :user] => :ALL,
+    control_access(
+      [:superadmin, :user] => :ALL,
       [:admin, :useradmin, :dbadmin] => :ALL,
       [:ipuser] => [:index, :advanced, :hits],
       [:dbuser] => [:index, :hits]
+    )
 
     allow_open_access [:index], [:hits] do
       s = (params[:s] || [params[:index]]) and s.is_a?(Array) and s.size == 1 and Source.find_by_name(s)
@@ -16,7 +17,6 @@ class SearchesController < ApplicationController
 
     linkable_actions :index, :advanced
   end
-  ###############################################################################
 
   def index
     if search_params[:mode] == 'similar'
@@ -65,8 +65,8 @@ class SearchesController < ApplicationController
 
     respond_to do |format|
       format.html do
-         @db_group = search_params["db_group"]
-         @expand_list = params["expand_list"]
+        @db_group = search_params["db_group"]
+        @expand_list = params["expand_list"]
       end
       format.json do
         render :json => api_data(@search), :layout => false
@@ -93,11 +93,11 @@ class SearchesController < ApplicationController
       count: @search.total
     }
 
-    respond_to { |format|
-      format.html { render text: '%d hits' / @search.total }
-      format.xml  { render xml: @data.to_xml(root: 'hits') }
-      format.json { render json: @data }
-      format.all  { render plain: @search.total }
+    respond_to {|format|
+      format.html{render text: '%d hits' / @search.total}
+      format.xml{render xml: @data.to_xml(root: 'hits')}
+      format.json{render json: @data}
+      format.all{render plain: @search.total}
     }
   end
 
@@ -120,19 +120,19 @@ class SearchesController < ApplicationController
   def self.common_expects
     {
       :page => {
-        :type    => 'positiveInteger',
+        :type => 'positiveInteger',
         :default => 1,
-        :doc     => 'Number of page to return.'
+        :doc => 'Number of page to return.'
       },
       :per_page => {
-        :type    => 'positiveInteger',
+        :type => 'positiveInteger',
         :default => pconfig[:results_per_page].first,
-        :doc     => 'Number of results to display per page.'
+        :doc => 'Number of results to display per page.'
       },
       :order => {
-        :select  => sort_fields,
+        :select => sort_fields,
         :default => sort_fields.first,
-        :doc     => 'Field to sort results by.'
+        :doc => 'Field to sort results by.'
       }
     }
   end
@@ -141,12 +141,12 @@ class SearchesController < ApplicationController
     {
       :term => {
         :required => true,
-        :doc      => 'Query term.'
+        :doc => 'Query term.'
       },
       :field => {
-        :select  => search_fields,
+        :select => search_fields,
         :default => search_fields.first,
-        :doc     => 'Search field.'
+        :doc => 'Search field.'
       }
     }
   end
@@ -154,10 +154,10 @@ class SearchesController < ApplicationController
   def self.search_returns
     {
       :xml => {
-        :root  => 'search',
+        :root => 'search',
         :hints => {
-          'query'          => false,
-          'count'          => false,
+          'query' => false,
+          'count' => false,
           'results/result' => true
         }
       },
@@ -180,25 +180,25 @@ class SearchesController < ApplicationController
     :doc => 'Perform an "advanced" search.',
     :expects => common_expects.merge(
       'v[]' => {
-        :required  => true,
+        :required => true,
         :repeating => true,
-        :doc       => 'Query term.'
+        :doc => 'Query term.'
       },
       'f[]' => {
-        :required  => true,
+        :required => true,
         :repeating => true,
-        :doc       => 'Search field.',
-        :select    => search_fields
+        :doc => 'Search field.',
+        :select => search_fields
       },
       'o[]' => {
         :repeating => true,
-        :doc       => 'Search operator.',
-        :select    => pconfig[:operators]
+        :doc => 'Search operator.',
+        :select => pconfig[:operators]
       },
       's[]' => {
         :repeating => true,
-        :doc       => 'Sources to search.',
-        :select    => Source.active_names
+        :doc => 'Sources to search.',
+        :select => Source.active_names
       }
     ),
     :returns => search_returns
@@ -207,8 +207,8 @@ class SearchesController < ApplicationController
   api_method :hits, :get => {
     :doc => 'Number of hits a "simple" search would yield.',
     :expects => simple_expects,
-    :returns => { :xml   => { :root => 'hits', :hints => %w[query count] },
-                  :json  => {} }
+    :returns => {:xml => {:root => 'hits', :hints => %w[query count]},
+                 :json => {}}
   }
 
 
@@ -217,11 +217,11 @@ class SearchesController < ApplicationController
     def default_per_page
       try_setting(:per_page, :search)
     end
-    
+
     def zoom_default
       !search_settings[:zoom].nil? ? search_settings[:zoom] : true
     end
-    
+
     def search_settings
       current_user.try(:search_settings) || {}
     end
@@ -347,7 +347,5 @@ class SearchesController < ApplicationController
       params[:sample_size] || 1
     end
 
-  ###############################################################################
-  initialize_me!
-  ###############################################################################
+    initialize_me!
 end

@@ -1,6 +1,5 @@
 class ChangeCollectionBoxesParams < ActiveRecord::Migration[5.2]
   def change
-
     reversible do |dir|
       dir.up do
         # change params name for CollectionBox after refactoring
@@ -21,6 +20,5 @@ class ChangeCollectionBoxesParams < ActiveRecord::Migration[5.2]
         SQL
       end
     end
-
   end
 end

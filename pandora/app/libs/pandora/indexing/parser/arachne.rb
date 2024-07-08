@@ -4,7 +4,6 @@ class Pandora::Indexing::Parser::Arachne < Pandora::Indexing::Parser::XmlReader
 
     super(
       source,
-      record_node_name: 'row'
-    )
+      record_node_name: "row")
   end
 end
